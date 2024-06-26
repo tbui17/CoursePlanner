@@ -1,4 +1,8 @@
-﻿namespace CoursePlanner
+﻿using System;
+using Microsoft.Maui.Accessibility;
+using Microsoft.Maui.Controls;
+
+namespace CoursePlanner
 {
     public partial class MainPage : ContentPage
     {
