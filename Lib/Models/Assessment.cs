@@ -1,6 +1,6 @@
 ﻿namespace Lib.Models;
 
-public class Assessment
+public abstract class Assessment
 {
     public int Id { get; set; }
     public Course? Course { get; set; }
