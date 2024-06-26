@@ -11,5 +11,6 @@ public class User
     public string Email { get; set; } = string.Empty;
 
     public ICollection<TermCourse> TermCourses { get; set; } = [];
-    public ICollection<AssessmentCourse> AssessmentCourses { get; set; } = [];
+    public ICollection<PerformanceAssessmentCourse> AssessmentCourses { get; set; } = [];
+    public ICollection<ObjectiveAssessmentCourse> ObjectiveAssessmentCourses { get; set; } = [];
 }
