@@ -1,6 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
-using Microsoft.Maui.Controls.Hosting;
-using Microsoft.Maui.Hosting;
+﻿using CommunityToolkit.Maui;
+using Lib;
+using Microsoft.Extensions.Logging;
+using ViewModels;
 
 namespace CoursePlanner
 {
@@ -10,17 +11,26 @@ namespace CoursePlanner
         {
             var builder = MauiApp.CreateBuilder();
             builder
-                .UseMauiApp<App>()
-                .ConfigureFonts(fonts =>
-                {
-                    fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
-                    fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
-                });
-            
-            
+               .UseMauiApp<App>()
+               .UseMauiCommunityToolkit()
+               .ConfigureFonts
+                (
+                    fonts =>
+                    {
+                        fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
+                        fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+                    }
+                );
+
+            var services = builder.Services;
+            Configs.ConfigBackendServices(services);
+            services.AddSingleton<MainPage>();
+            services.AddSingleton<NewPage1>();
+            services.AddSingleton<MainViewModel>();
+
 
 #if DEBUG
-    		builder.Logging.AddDebug();
+            builder.Logging.AddDebug();
 #endif
 
             return builder.Build();

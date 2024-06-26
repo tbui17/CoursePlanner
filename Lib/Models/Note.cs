@@ -3,9 +3,19 @@
 public class Note
 {
     public int Id { get; set; }
-    public int CourseId { get; set; }
-    public int UserId { get; set; }
-    public User User { get; set; } = null!;
-    public Course Course { get; set; } = null!;
     public string Value { get; set; } = string.Empty;
+    
+    public int CourseId { get; set; }
+    
+    public Course Course { get; set; } = null!;
+
+
+    public static Note From(Course course)
+    {
+        return new Note
+        {
+            CourseId = course.Id,
+            Value = string.Empty,
+        };
+    }
 }
