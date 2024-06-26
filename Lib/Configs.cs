@@ -1,12 +1,14 @@
-﻿using System.ComponentModel.Design;
+﻿using Lib.Models;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Lib;
 
 public class Configs
 {
 
-    public static IServiceContainer ConfigBackendServices(IServiceContainer b)
+    public static IServiceCollection ConfigBackendServices(IServiceCollection b)
     {
+        b.AddDbContextFactory<LocalDbCtx>();
         return b;
     }
 }
