@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using static Lib.Utils.TestDataFactory;
 
 namespace Lib.Models;
 
@@ -132,92 +133,13 @@ public class DbCtx : DbContext
 
             for (var i = 1; i <= 12; i++)
             {
-                objectiveAssessments.Add
-                (
-                    new ObjectiveAssessment
-                    {
-                        Id = i,
-                        Name = $"Objective Assessment {i}",
-                        Start = new DateTime(2023, 10, 15),
-                        End = new DateTime(2023, 10, 15)
-                    }
-                );
-
-                performanceAssessments.Add
-                (
-                    new PerformanceAssessment
-                    {
-                        Id = i,
-                        Name = $"Performance Assessment {i}",
-                        Start = new DateTime(2023, 12, 1),
-                        End = new DateTime(2023, 12, 15)
-                    }
-                );
-
-                objectiveAssessmentCourses.Add
-                (
-                    new ObjectiveAssessmentCourse
-                    {
-                        Id = i,
-                        AssessmentId = i,
-                        CourseId = i,
-                        StudentId = (i % 2) + 1,
-                        NotifyStart = true,
-                        NotifyEnd = true
-                    }
-                );
-
-                performanceAssessmentCourses.Add
-                (
-                    new PerformanceAssessmentCourse
-                    {
-                        Id = i,
-                        AssessmentId = i,
-                        CourseId = i,
-                        StudentId = (i % 2) + 1,
-                        NotifyStart = true,
-                        NotifyEnd = true
-                    }
-                );
-
-                courses.Add
-                (
-                    new Course
-                    {
-                        Id = i,
-                        InstructorId = (i % 3) + 3,
-                        PerformanceAssessmentId = i,
-                        ObjectiveAssessmentId = i,
-                        Name = $"Course {i}",
-                        Start = new DateTime(2023, 9, 1),
-                        End = new DateTime(2023, 12, 31)
-                    }
-                );
-
-                notes.Add
-                (
-                    new Note
-                    {
-                        Id = i,
-                        CourseId = i,
-                        UserId = (i % 2) + 1,
-                        Value = $"This is a note for Course {i}."
-                    }
-                );
-
-                termCourses.Add
-                (
-                    new TermCourse
-                    {
-                        Id = i,
-                        TermId = (i % 4) + 1,
-                        CourseId = i,
-                        StudentId = (i % 2) + 1,
-                        Status = Status.PlanToTake,
-                        NotifyStart = true,
-                        NotifyEnd = true
-                    }
-                );
+                objectiveAssessments.Add(CreateObjectiveAssessment(i));
+                performanceAssessments.Add(CreatePerformanceAssessment(i));
+                objectiveAssessmentCourses.Add(CreateObjectiveAssessmentCourse(i));
+                performanceAssessmentCourses.Add(CreatePerformanceAssessmentCourse(i));
+                courses.Add(CreateCourse(i));
+                notes.Add(CreateNote(i));
+                termCourses.Add(CreateTermCourse(i));
             }
 
 
