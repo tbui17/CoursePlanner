@@ -1,7 +1,9 @@
 ﻿using CommunityToolkit.Maui;
+using CommunityToolkit.Maui.Markup;
+using CoursePlanner.ViewModels;
 using Lib;
+using static CoursePlanner.Utils.MauiProviderExtensions;
 using Microsoft.Extensions.Logging;
-using ViewModels;
 
 namespace CoursePlanner
 {
@@ -13,6 +15,7 @@ namespace CoursePlanner
             builder
                .UseMauiApp<App>()
                .UseMauiCommunityToolkit()
+               .UseMauiCommunityToolkitMarkup()
                .ConfigureFonts
                 (
                     fonts =>
@@ -23,10 +26,16 @@ namespace CoursePlanner
                 );
 
             var services = builder.Services;
-            Configs.ConfigBackendServices(services);
-            services.AddSingleton<MainPage>();
-            services.AddSingleton<NewPage1>();
-            services.AddSingleton<MainViewModel>();
+            Configs
+               .ConfigBackendServices(services)
+               .AddTransientWithShellRoute<MainPage, MainViewModel>()
+               .AddSingleton<AppShellViewModel>()
+               .AddSingletonWithShellRoute<DetailedTermPage, DetailedTermViewModel>()
+               .AddTransientWithShellRoute<EditTermPage, EditTermViewModel>()
+               .AddTransientWithShellRoute<DetailedCoursePage, DetailedCourseViewModel>()
+               .AddTransientWithShellRoute<EditCoursePage, EditCourseViewModel>()
+                
+                ;
 
 
 #if DEBUG

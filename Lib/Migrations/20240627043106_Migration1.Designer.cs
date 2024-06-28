@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Lib.Migrations
 {
     [DbContext(typeof(LocalDbCtx))]
-    [Migration("20240626202326_Migration1")]
+    [Migration("20240627043106_Migration1")]
     partial class Migration1
     {
         /// <inheritdoc />
@@ -2762,9 +2762,6 @@ namespace Lib.Migrations
                     b.Property<DateTime>("Start")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("INTEGER");
-
                     b.HasKey("Id");
 
                     b.ToTable("Terms");
@@ -2775,32 +2772,28 @@ namespace Lib.Migrations
                             Id = 1,
                             End = new DateTime(2023, 12, 31, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Term 1",
-                            Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            UserId = 1
+                            Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = 2,
                             End = new DateTime(2024, 5, 31, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Term 2",
-                            Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            UserId = 1
+                            Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = 3,
                             End = new DateTime(2023, 12, 31, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Term 3",
-                            Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            UserId = 2
+                            Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = 4,
                             End = new DateTime(2024, 5, 31, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Term 4",
-                            Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            UserId = 2
+                            Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         });
                 });
 
