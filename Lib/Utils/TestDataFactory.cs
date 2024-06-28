@@ -115,7 +115,6 @@ public class TestDataFactory
             new Term
             {
                 Id = 1,
-                UserId = 1,
                 Name = "Term 1",
                 Start = new DateTime(2023, 9, 1),
                 End = new DateTime(2023, 12, 31)
@@ -123,7 +122,6 @@ public class TestDataFactory
             new Term
             {
                 Id = 2,
-                UserId = 1,
                 Name = "Term 2",
                 Start = new DateTime(2024, 1, 1),
                 End = new DateTime(2024, 5, 31)
@@ -131,7 +129,6 @@ public class TestDataFactory
             new Term
             {
                 Id = 3,
-                UserId = 2,
                 Name = "Term 3",
                 Start = new DateTime(2023, 9, 1),
                 End = new DateTime(2023, 12, 31)
@@ -139,7 +136,6 @@ public class TestDataFactory
             new Term
             {
                 Id = 4,
-                UserId = 2,
                 Name = "Term 4",
                 Start = new DateTime(2024, 1, 1),
                 End = new DateTime(2024, 5, 31)

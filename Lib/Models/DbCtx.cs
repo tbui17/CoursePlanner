@@ -16,10 +16,7 @@ public class DbCtx : DbContext
     {
         b
            .UseSqlite("Data Source=db.sqlite")
-           .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
-           .EnableDetailedErrors()
-           .EnableSensitiveDataLogging()
-           .LogTo(Console.WriteLine);
+           .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -27,7 +24,7 @@ public class DbCtx : DbContext
         SeedData(modelBuilder);
     }
 
-    private void SeedData(ModelBuilder b)
+    private static void SeedData(ModelBuilder b)
     {
         var (terms, instructors, courses, notes, assessments) = CreateData();
 

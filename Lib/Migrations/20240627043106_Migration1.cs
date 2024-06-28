@@ -34,7 +34,6 @@ namespace Lib.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    UserId = table.Column<int>(type: "INTEGER", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     Start = table.Column<DateTime>(type: "TEXT", nullable: false),
                     End = table.Column<DateTime>(type: "TEXT", nullable: false)
@@ -132,13 +131,13 @@ namespace Lib.Migrations
 
             migrationBuilder.InsertData(
                 table: "Terms",
-                columns: new[] { "Id", "End", "Name", "Start", "UserId" },
+                columns: new[] { "Id", "End", "Name", "Start" },
                 values: new object[,]
                 {
-                    { 1, new DateTime(2023, 12, 31, 0, 0, 0, 0, DateTimeKind.Unspecified), "Term 1", new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 1 },
-                    { 2, new DateTime(2024, 5, 31, 0, 0, 0, 0, DateTimeKind.Unspecified), "Term 2", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 1 },
-                    { 3, new DateTime(2023, 12, 31, 0, 0, 0, 0, DateTimeKind.Unspecified), "Term 3", new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 2 },
-                    { 4, new DateTime(2024, 5, 31, 0, 0, 0, 0, DateTimeKind.Unspecified), "Term 4", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 2 }
+                    { 1, new DateTime(2023, 12, 31, 0, 0, 0, 0, DateTimeKind.Unspecified), "Term 1", new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 2, new DateTime(2024, 5, 31, 0, 0, 0, 0, DateTimeKind.Unspecified), "Term 2", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 3, new DateTime(2023, 12, 31, 0, 0, 0, 0, DateTimeKind.Unspecified), "Term 3", new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 4, new DateTime(2024, 5, 31, 0, 0, 0, 0, DateTimeKind.Unspecified), "Term 4", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) }
                 });
 
             migrationBuilder.InsertData(

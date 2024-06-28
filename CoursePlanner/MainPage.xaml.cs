@@ -1,28 +1,27 @@
-﻿using ViewModels;
+﻿using CoursePlanner.ViewModels;
 
 namespace CoursePlanner;
 
 public partial class MainPage : ContentPage
 {
-    int count = 0;
     public MainViewModel Model { get; set; }
 
     public MainPage(MainViewModel model)
     {
         Model = model;
+        model.ShowWindowRequested += OnShowWindow;
         InitializeComponent();
         BindingContext = this;
     }
 
-    private void OnCounterClicked(object sender, EventArgs e)
+    protected override async void OnAppearing()
     {
-        count++;
+        base.OnAppearing();
+        await Model.GetTermsAsync();
+    }
 
-        if (count == 1)
-            CounterBtn.Text = $"Clicked {count} time";
-        else
-            CounterBtn.Text = $"Clicked {count} times";
-
-        SemanticScreenReader.Announce(CounterBtn.Text);
+    private void OnShowWindow(MainViewModel mainViewModel)
+    {
+        DisplayAlert("abc", "abc", "abc");
     }
 }
