@@ -1866,6 +1866,10 @@ namespace Lib.Migrations
                     b.Property<int>("CourseId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Value")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -1881,864 +1885,1008 @@ namespace Lib.Migrations
                         {
                             Id = 1,
                             CourseId = 1,
+                            Name = "",
                             Value = "ID: 1, Index: 1"
                         },
                         new
                         {
                             Id = 2,
                             CourseId = 1,
+                            Name = "",
                             Value = "ID: 2, Index: 2"
                         },
                         new
                         {
                             Id = 3,
                             CourseId = 1,
+                            Name = "",
                             Value = "ID: 3, Index: 3"
                         },
                         new
                         {
                             Id = 4,
                             CourseId = 1,
+                            Name = "",
                             Value = "ID: 4, Index: 4"
                         },
                         new
                         {
                             Id = 5,
                             CourseId = 1,
+                            Name = "",
                             Value = "ID: 5, Index: 5"
                         },
                         new
                         {
                             Id = 6,
                             CourseId = 1,
+                            Name = "",
                             Value = "ID: 6, Index: 6"
                         },
                         new
                         {
                             Id = 7,
                             CourseId = 2,
+                            Name = "",
                             Value = "ID: 7, Index: 1"
                         },
                         new
                         {
                             Id = 8,
                             CourseId = 2,
+                            Name = "",
                             Value = "ID: 8, Index: 2"
                         },
                         new
                         {
                             Id = 9,
                             CourseId = 2,
+                            Name = "",
                             Value = "ID: 9, Index: 3"
                         },
                         new
                         {
                             Id = 10,
                             CourseId = 2,
+                            Name = "",
                             Value = "ID: 10, Index: 4"
                         },
                         new
                         {
                             Id = 11,
                             CourseId = 2,
+                            Name = "",
                             Value = "ID: 11, Index: 5"
                         },
                         new
                         {
                             Id = 12,
                             CourseId = 2,
+                            Name = "",
                             Value = "ID: 12, Index: 6"
                         },
                         new
                         {
                             Id = 13,
                             CourseId = 3,
+                            Name = "",
                             Value = "ID: 13, Index: 1"
                         },
                         new
                         {
                             Id = 14,
                             CourseId = 3,
+                            Name = "",
                             Value = "ID: 14, Index: 2"
                         },
                         new
                         {
                             Id = 15,
                             CourseId = 3,
+                            Name = "",
                             Value = "ID: 15, Index: 3"
                         },
                         new
                         {
                             Id = 16,
                             CourseId = 3,
+                            Name = "",
                             Value = "ID: 16, Index: 4"
                         },
                         new
                         {
                             Id = 17,
                             CourseId = 3,
+                            Name = "",
                             Value = "ID: 17, Index: 5"
                         },
                         new
                         {
                             Id = 18,
                             CourseId = 3,
+                            Name = "",
                             Value = "ID: 18, Index: 6"
                         },
                         new
                         {
                             Id = 19,
                             CourseId = 4,
+                            Name = "",
                             Value = "ID: 19, Index: 1"
                         },
                         new
                         {
                             Id = 20,
                             CourseId = 4,
+                            Name = "",
                             Value = "ID: 20, Index: 2"
                         },
                         new
                         {
                             Id = 21,
                             CourseId = 4,
+                            Name = "",
                             Value = "ID: 21, Index: 3"
                         },
                         new
                         {
                             Id = 22,
                             CourseId = 4,
+                            Name = "",
                             Value = "ID: 22, Index: 4"
                         },
                         new
                         {
                             Id = 23,
                             CourseId = 4,
+                            Name = "",
                             Value = "ID: 23, Index: 5"
                         },
                         new
                         {
                             Id = 24,
                             CourseId = 4,
+                            Name = "",
                             Value = "ID: 24, Index: 6"
                         },
                         new
                         {
                             Id = 25,
                             CourseId = 5,
+                            Name = "",
                             Value = "ID: 25, Index: 1"
                         },
                         new
                         {
                             Id = 26,
                             CourseId = 5,
+                            Name = "",
                             Value = "ID: 26, Index: 2"
                         },
                         new
                         {
                             Id = 27,
                             CourseId = 5,
+                            Name = "",
                             Value = "ID: 27, Index: 3"
                         },
                         new
                         {
                             Id = 28,
                             CourseId = 5,
+                            Name = "",
                             Value = "ID: 28, Index: 4"
                         },
                         new
                         {
                             Id = 29,
                             CourseId = 5,
+                            Name = "",
                             Value = "ID: 29, Index: 5"
                         },
                         new
                         {
                             Id = 30,
                             CourseId = 5,
+                            Name = "",
                             Value = "ID: 30, Index: 6"
                         },
                         new
                         {
                             Id = 31,
                             CourseId = 6,
+                            Name = "",
                             Value = "ID: 31, Index: 1"
                         },
                         new
                         {
                             Id = 32,
                             CourseId = 6,
+                            Name = "",
                             Value = "ID: 32, Index: 2"
                         },
                         new
                         {
                             Id = 33,
                             CourseId = 6,
+                            Name = "",
                             Value = "ID: 33, Index: 3"
                         },
                         new
                         {
                             Id = 34,
                             CourseId = 6,
+                            Name = "",
                             Value = "ID: 34, Index: 4"
                         },
                         new
                         {
                             Id = 35,
                             CourseId = 6,
+                            Name = "",
                             Value = "ID: 35, Index: 5"
                         },
                         new
                         {
                             Id = 36,
                             CourseId = 6,
+                            Name = "",
                             Value = "ID: 36, Index: 6"
                         },
                         new
                         {
                             Id = 37,
                             CourseId = 7,
+                            Name = "",
                             Value = "ID: 37, Index: 1"
                         },
                         new
                         {
                             Id = 38,
                             CourseId = 7,
+                            Name = "",
                             Value = "ID: 38, Index: 2"
                         },
                         new
                         {
                             Id = 39,
                             CourseId = 7,
+                            Name = "",
                             Value = "ID: 39, Index: 3"
                         },
                         new
                         {
                             Id = 40,
                             CourseId = 7,
+                            Name = "",
                             Value = "ID: 40, Index: 4"
                         },
                         new
                         {
                             Id = 41,
                             CourseId = 7,
+                            Name = "",
                             Value = "ID: 41, Index: 5"
                         },
                         new
                         {
                             Id = 42,
                             CourseId = 7,
+                            Name = "",
                             Value = "ID: 42, Index: 6"
                         },
                         new
                         {
                             Id = 43,
                             CourseId = 8,
+                            Name = "",
                             Value = "ID: 43, Index: 1"
                         },
                         new
                         {
                             Id = 44,
                             CourseId = 8,
+                            Name = "",
                             Value = "ID: 44, Index: 2"
                         },
                         new
                         {
                             Id = 45,
                             CourseId = 8,
+                            Name = "",
                             Value = "ID: 45, Index: 3"
                         },
                         new
                         {
                             Id = 46,
                             CourseId = 8,
+                            Name = "",
                             Value = "ID: 46, Index: 4"
                         },
                         new
                         {
                             Id = 47,
                             CourseId = 8,
+                            Name = "",
                             Value = "ID: 47, Index: 5"
                         },
                         new
                         {
                             Id = 48,
                             CourseId = 8,
+                            Name = "",
                             Value = "ID: 48, Index: 6"
                         },
                         new
                         {
                             Id = 49,
                             CourseId = 9,
+                            Name = "",
                             Value = "ID: 49, Index: 1"
                         },
                         new
                         {
                             Id = 50,
                             CourseId = 9,
+                            Name = "",
                             Value = "ID: 50, Index: 2"
                         },
                         new
                         {
                             Id = 51,
                             CourseId = 9,
+                            Name = "",
                             Value = "ID: 51, Index: 3"
                         },
                         new
                         {
                             Id = 52,
                             CourseId = 9,
+                            Name = "",
                             Value = "ID: 52, Index: 4"
                         },
                         new
                         {
                             Id = 53,
                             CourseId = 9,
+                            Name = "",
                             Value = "ID: 53, Index: 5"
                         },
                         new
                         {
                             Id = 54,
                             CourseId = 9,
+                            Name = "",
                             Value = "ID: 54, Index: 6"
                         },
                         new
                         {
                             Id = 55,
                             CourseId = 10,
+                            Name = "",
                             Value = "ID: 55, Index: 1"
                         },
                         new
                         {
                             Id = 56,
                             CourseId = 10,
+                            Name = "",
                             Value = "ID: 56, Index: 2"
                         },
                         new
                         {
                             Id = 57,
                             CourseId = 10,
+                            Name = "",
                             Value = "ID: 57, Index: 3"
                         },
                         new
                         {
                             Id = 58,
                             CourseId = 10,
+                            Name = "",
                             Value = "ID: 58, Index: 4"
                         },
                         new
                         {
                             Id = 59,
                             CourseId = 10,
+                            Name = "",
                             Value = "ID: 59, Index: 5"
                         },
                         new
                         {
                             Id = 60,
                             CourseId = 10,
+                            Name = "",
                             Value = "ID: 60, Index: 6"
                         },
                         new
                         {
                             Id = 61,
                             CourseId = 11,
+                            Name = "",
                             Value = "ID: 61, Index: 1"
                         },
                         new
                         {
                             Id = 62,
                             CourseId = 11,
+                            Name = "",
                             Value = "ID: 62, Index: 2"
                         },
                         new
                         {
                             Id = 63,
                             CourseId = 11,
+                            Name = "",
                             Value = "ID: 63, Index: 3"
                         },
                         new
                         {
                             Id = 64,
                             CourseId = 11,
+                            Name = "",
                             Value = "ID: 64, Index: 4"
                         },
                         new
                         {
                             Id = 65,
                             CourseId = 11,
+                            Name = "",
                             Value = "ID: 65, Index: 5"
                         },
                         new
                         {
                             Id = 66,
                             CourseId = 11,
+                            Name = "",
                             Value = "ID: 66, Index: 6"
                         },
                         new
                         {
                             Id = 67,
                             CourseId = 12,
+                            Name = "",
                             Value = "ID: 67, Index: 1"
                         },
                         new
                         {
                             Id = 68,
                             CourseId = 12,
+                            Name = "",
                             Value = "ID: 68, Index: 2"
                         },
                         new
                         {
                             Id = 69,
                             CourseId = 12,
+                            Name = "",
                             Value = "ID: 69, Index: 3"
                         },
                         new
                         {
                             Id = 70,
                             CourseId = 12,
+                            Name = "",
                             Value = "ID: 70, Index: 4"
                         },
                         new
                         {
                             Id = 71,
                             CourseId = 12,
+                            Name = "",
                             Value = "ID: 71, Index: 5"
                         },
                         new
                         {
                             Id = 72,
                             CourseId = 12,
+                            Name = "",
                             Value = "ID: 72, Index: 6"
                         },
                         new
                         {
                             Id = 73,
                             CourseId = 13,
+                            Name = "",
                             Value = "ID: 73, Index: 1"
                         },
                         new
                         {
                             Id = 74,
                             CourseId = 13,
+                            Name = "",
                             Value = "ID: 74, Index: 2"
                         },
                         new
                         {
                             Id = 75,
                             CourseId = 13,
+                            Name = "",
                             Value = "ID: 75, Index: 3"
                         },
                         new
                         {
                             Id = 76,
                             CourseId = 13,
+                            Name = "",
                             Value = "ID: 76, Index: 4"
                         },
                         new
                         {
                             Id = 77,
                             CourseId = 13,
+                            Name = "",
                             Value = "ID: 77, Index: 5"
                         },
                         new
                         {
                             Id = 78,
                             CourseId = 13,
+                            Name = "",
                             Value = "ID: 78, Index: 6"
                         },
                         new
                         {
                             Id = 79,
                             CourseId = 14,
+                            Name = "",
                             Value = "ID: 79, Index: 1"
                         },
                         new
                         {
                             Id = 80,
                             CourseId = 14,
+                            Name = "",
                             Value = "ID: 80, Index: 2"
                         },
                         new
                         {
                             Id = 81,
                             CourseId = 14,
+                            Name = "",
                             Value = "ID: 81, Index: 3"
                         },
                         new
                         {
                             Id = 82,
                             CourseId = 14,
+                            Name = "",
                             Value = "ID: 82, Index: 4"
                         },
                         new
                         {
                             Id = 83,
                             CourseId = 14,
+                            Name = "",
                             Value = "ID: 83, Index: 5"
                         },
                         new
                         {
                             Id = 84,
                             CourseId = 14,
+                            Name = "",
                             Value = "ID: 84, Index: 6"
                         },
                         new
                         {
                             Id = 85,
                             CourseId = 15,
+                            Name = "",
                             Value = "ID: 85, Index: 1"
                         },
                         new
                         {
                             Id = 86,
                             CourseId = 15,
+                            Name = "",
                             Value = "ID: 86, Index: 2"
                         },
                         new
                         {
                             Id = 87,
                             CourseId = 15,
+                            Name = "",
                             Value = "ID: 87, Index: 3"
                         },
                         new
                         {
                             Id = 88,
                             CourseId = 15,
+                            Name = "",
                             Value = "ID: 88, Index: 4"
                         },
                         new
                         {
                             Id = 89,
                             CourseId = 15,
+                            Name = "",
                             Value = "ID: 89, Index: 5"
                         },
                         new
                         {
                             Id = 90,
                             CourseId = 15,
+                            Name = "",
                             Value = "ID: 90, Index: 6"
                         },
                         new
                         {
                             Id = 91,
                             CourseId = 16,
+                            Name = "",
                             Value = "ID: 91, Index: 1"
                         },
                         new
                         {
                             Id = 92,
                             CourseId = 16,
+                            Name = "",
                             Value = "ID: 92, Index: 2"
                         },
                         new
                         {
                             Id = 93,
                             CourseId = 16,
+                            Name = "",
                             Value = "ID: 93, Index: 3"
                         },
                         new
                         {
                             Id = 94,
                             CourseId = 16,
+                            Name = "",
                             Value = "ID: 94, Index: 4"
                         },
                         new
                         {
                             Id = 95,
                             CourseId = 16,
+                            Name = "",
                             Value = "ID: 95, Index: 5"
                         },
                         new
                         {
                             Id = 96,
                             CourseId = 16,
+                            Name = "",
                             Value = "ID: 96, Index: 6"
                         },
                         new
                         {
                             Id = 97,
                             CourseId = 17,
+                            Name = "",
                             Value = "ID: 97, Index: 1"
                         },
                         new
                         {
                             Id = 98,
                             CourseId = 17,
+                            Name = "",
                             Value = "ID: 98, Index: 2"
                         },
                         new
                         {
                             Id = 99,
                             CourseId = 17,
+                            Name = "",
                             Value = "ID: 99, Index: 3"
                         },
                         new
                         {
                             Id = 100,
                             CourseId = 17,
+                            Name = "",
                             Value = "ID: 100, Index: 4"
                         },
                         new
                         {
                             Id = 101,
                             CourseId = 17,
+                            Name = "",
                             Value = "ID: 101, Index: 5"
                         },
                         new
                         {
                             Id = 102,
                             CourseId = 17,
+                            Name = "",
                             Value = "ID: 102, Index: 6"
                         },
                         new
                         {
                             Id = 103,
                             CourseId = 18,
+                            Name = "",
                             Value = "ID: 103, Index: 1"
                         },
                         new
                         {
                             Id = 104,
                             CourseId = 18,
+                            Name = "",
                             Value = "ID: 104, Index: 2"
                         },
                         new
                         {
                             Id = 105,
                             CourseId = 18,
+                            Name = "",
                             Value = "ID: 105, Index: 3"
                         },
                         new
                         {
                             Id = 106,
                             CourseId = 18,
+                            Name = "",
                             Value = "ID: 106, Index: 4"
                         },
                         new
                         {
                             Id = 107,
                             CourseId = 18,
+                            Name = "",
                             Value = "ID: 107, Index: 5"
                         },
                         new
                         {
                             Id = 108,
                             CourseId = 18,
+                            Name = "",
                             Value = "ID: 108, Index: 6"
                         },
                         new
                         {
                             Id = 109,
                             CourseId = 19,
+                            Name = "",
                             Value = "ID: 109, Index: 1"
                         },
                         new
                         {
                             Id = 110,
                             CourseId = 19,
+                            Name = "",
                             Value = "ID: 110, Index: 2"
                         },
                         new
                         {
                             Id = 111,
                             CourseId = 19,
+                            Name = "",
                             Value = "ID: 111, Index: 3"
                         },
                         new
                         {
                             Id = 112,
                             CourseId = 19,
+                            Name = "",
                             Value = "ID: 112, Index: 4"
                         },
                         new
                         {
                             Id = 113,
                             CourseId = 19,
+                            Name = "",
                             Value = "ID: 113, Index: 5"
                         },
                         new
                         {
                             Id = 114,
                             CourseId = 19,
+                            Name = "",
                             Value = "ID: 114, Index: 6"
                         },
                         new
                         {
                             Id = 115,
                             CourseId = 20,
+                            Name = "",
                             Value = "ID: 115, Index: 1"
                         },
                         new
                         {
                             Id = 116,
                             CourseId = 20,
+                            Name = "",
                             Value = "ID: 116, Index: 2"
                         },
                         new
                         {
                             Id = 117,
                             CourseId = 20,
+                            Name = "",
                             Value = "ID: 117, Index: 3"
                         },
                         new
                         {
                             Id = 118,
                             CourseId = 20,
+                            Name = "",
                             Value = "ID: 118, Index: 4"
                         },
                         new
                         {
                             Id = 119,
                             CourseId = 20,
+                            Name = "",
                             Value = "ID: 119, Index: 5"
                         },
                         new
                         {
                             Id = 120,
                             CourseId = 20,
+                            Name = "",
                             Value = "ID: 120, Index: 6"
                         },
                         new
                         {
                             Id = 121,
                             CourseId = 21,
+                            Name = "",
                             Value = "ID: 121, Index: 1"
                         },
                         new
                         {
                             Id = 122,
                             CourseId = 21,
+                            Name = "",
                             Value = "ID: 122, Index: 2"
                         },
                         new
                         {
                             Id = 123,
                             CourseId = 21,
+                            Name = "",
                             Value = "ID: 123, Index: 3"
                         },
                         new
                         {
                             Id = 124,
                             CourseId = 21,
+                            Name = "",
                             Value = "ID: 124, Index: 4"
                         },
                         new
                         {
                             Id = 125,
                             CourseId = 21,
+                            Name = "",
                             Value = "ID: 125, Index: 5"
                         },
                         new
                         {
                             Id = 126,
                             CourseId = 21,
+                            Name = "",
                             Value = "ID: 126, Index: 6"
                         },
                         new
                         {
                             Id = 127,
                             CourseId = 22,
+                            Name = "",
                             Value = "ID: 127, Index: 1"
                         },
                         new
                         {
                             Id = 128,
                             CourseId = 22,
+                            Name = "",
                             Value = "ID: 128, Index: 2"
                         },
                         new
                         {
                             Id = 129,
                             CourseId = 22,
+                            Name = "",
                             Value = "ID: 129, Index: 3"
                         },
                         new
                         {
                             Id = 130,
                             CourseId = 22,
+                            Name = "",
                             Value = "ID: 130, Index: 4"
                         },
                         new
                         {
                             Id = 131,
                             CourseId = 22,
+                            Name = "",
                             Value = "ID: 131, Index: 5"
                         },
                         new
                         {
                             Id = 132,
                             CourseId = 22,
+                            Name = "",
                             Value = "ID: 132, Index: 6"
                         },
                         new
                         {
                             Id = 133,
                             CourseId = 23,
+                            Name = "",
                             Value = "ID: 133, Index: 1"
                         },
                         new
                         {
                             Id = 134,
                             CourseId = 23,
+                            Name = "",
                             Value = "ID: 134, Index: 2"
                         },
                         new
                         {
                             Id = 135,
                             CourseId = 23,
+                            Name = "",
                             Value = "ID: 135, Index: 3"
                         },
                         new
                         {
                             Id = 136,
                             CourseId = 23,
+                            Name = "",
                             Value = "ID: 136, Index: 4"
                         },
                         new
                         {
                             Id = 137,
                             CourseId = 23,
+                            Name = "",
                             Value = "ID: 137, Index: 5"
                         },
                         new
                         {
                             Id = 138,
                             CourseId = 23,
+                            Name = "",
                             Value = "ID: 138, Index: 6"
                         },
                         new
                         {
                             Id = 139,
                             CourseId = 24,
+                            Name = "",
                             Value = "ID: 139, Index: 1"
                         },
                         new
                         {
                             Id = 140,
                             CourseId = 24,
+                            Name = "",
                             Value = "ID: 140, Index: 2"
                         },
                         new
                         {
                             Id = 141,
                             CourseId = 24,
+                            Name = "",
                             Value = "ID: 141, Index: 3"
                         },
                         new
                         {
                             Id = 142,
                             CourseId = 24,
+                            Name = "",
                             Value = "ID: 142, Index: 4"
                         },
                         new
                         {
                             Id = 143,
                             CourseId = 24,
+                            Name = "",
                             Value = "ID: 143, Index: 5"
                         },
                         new
                         {
                             Id = 144,
                             CourseId = 24,
+                            Name = "",
                             Value = "ID: 144, Index: 6"
                         });
                 });
@@ -2823,7 +2971,7 @@ namespace Lib.Migrations
             modelBuilder.Entity("Lib.Models.Note", b =>
                 {
                     b.HasOne("Lib.Models.Course", "Course")
-                        .WithMany()
+                        .WithMany("Notes")
                         .HasForeignKey("CourseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -2834,6 +2982,8 @@ namespace Lib.Migrations
             modelBuilder.Entity("Lib.Models.Course", b =>
                 {
                     b.Navigation("Assessments");
+
+                    b.Navigation("Notes");
                 });
 
             modelBuilder.Entity("Lib.Models.Instructor", b =>

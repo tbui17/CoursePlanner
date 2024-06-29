@@ -1,10 +1,162 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 
-<ContentPage
-    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:models="clr-namespace:Lib.Models;assembly=Lib"
+    xmlns:viewModels="clr-namespace:CoursePlanner.ViewModels"
+    xmlns:controls="clr-namespace:CoursePlanner.Controls"
+    x:DataType="viewModels:DetailedCourseViewModel"
+
     x:Class="CoursePlanner.DetailedCoursePage" >
     <ContentPage.Content>
-        
+
+
+        <ScrollView>
+            <VerticalStackLayout Spacing="50" >
+
+                <Label Style="{StaticResource TitleLabel}" Text="Detailed Course" />
+
+                <VerticalStackLayout Spacing="25" >
+                    <Label Style="{StaticResource Subheading}" Text="Fields" />
+
+                    <controls:FieldContainer>
+                        <HorizontalStackLayout>
+                            <Label Text="Name:" />
+                            <Label Text="{Binding Course.Name}" />
+                        </HorizontalStackLayout>
+                        
+                        <HorizontalStackLayout>
+                            <Label Text="Start:" />
+                            <Label Text="{Binding Course.Start, Converter={StaticResource dateConverter}}" />
+                        </HorizontalStackLayout>
+
+                        <HorizontalStackLayout>
+                            <Label Text="End:" />
+                            <Label Text="{Binding Course.End, Converter={StaticResource dateConverter}}" />
+                        </HorizontalStackLayout>
+
+                        <HorizontalStackLayout>
+                            <Label Text="Notifications:" />
+                            <Label Text="{Binding Course.ShouldNotify}" />
+                        </HorizontalStackLayout>
+                    </controls:FieldContainer>
+
+
+                    <Button Text="Edit" Command="{Binding EditCommand}" />
+                </VerticalStackLayout>
+
+
+                <VerticalStackLayout Spacing="10" >
+                    <HorizontalStackLayout Spacing="5">
+                        <Label Text="Instructor:" Style="{StaticResource FieldLabel}" VerticalOptions="Center" />
+                        <Picker ItemsSource="{Binding Instructors}" SelectedItem="{Binding SelectedInstructor}" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+
+                    <HorizontalStackLayout Spacing="5" >
+                        <Button Text="Add" Command="{Binding AddInstructorCommand}" />
+                        <Button Text="Edit" Command="{Binding RemoveInstructorCommand}" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+
+                <Label Text="Assessments" Style="{StaticResource Subheading}" />
+
+                <CollectionView ItemsSource="{Binding Assessments}" SelectionMode="Single"
+                    SelectedItem="{Binding SelectedAssessment}" >
+
+
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
+                    </CollectionView.ItemsLayout>
+
+
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:Assessment" >
+                            <Border>
+                                <controls:FieldContainer>
+                                    <HorizontalStackLayout>
+                                        <Label Text="Name:" />
+                                        <Label Text="{Binding Name}" />
+                                    </HorizontalStackLayout>
+
+                                    <HorizontalStackLayout>
+                                        <Label Text="Start Date:" />
+                                        <Label Text="{Binding Start, Converter={StaticResource dateConverter}}" />
+                                    </HorizontalStackLayout>
+                                    <HorizontalStackLayout>
+                                        <Label Text="End Date:" />
+                                        <Label Text="{Binding End, Converter={StaticResource dateConverter}}" />
+                                    </HorizontalStackLayout>
+
+                                    <HorizontalStackLayout>
+                                        <Label Text="Notifications" />
+                                        <Label Text="{Binding ShouldNotify}" />
+                                    </HorizontalStackLayout>
+                                </controls:FieldContainer>
+
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+
+                <FlexLayout Style="{StaticResource ButtonContainer}" >
+                    <FlexLayout.Resources>
+                        <Style TargetType="Button" BasedOn="{StaticResource ButtonStyle}" >
+                            <Setter Property="MinimumWidthRequest" Value="75" />
+
+                        </Style>
+                    </FlexLayout.Resources>
+                    <Button Text="Add" Command="{Binding AddAssessmentCommand}" />
+                    <Button Text="Details" Command="{Binding DetailedAssessmentCommand}" />
+                    <Button Text="Delete" Command="{Binding DeleteCourseCommand}" />
+
+                </FlexLayout>
+
+                <Label Text="Notes" Style="{StaticResource Subheading}" />
+
+
+                <CollectionView ItemsSource="{Binding Notes}" SelectionMode="Single"
+                    SelectedItem="{Binding SelectedNote}" >
+                
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
+                    </CollectionView.ItemsLayout>
+                
+                
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:Note" >
+                            <Border>
+                                <controls:FieldContainer>
+                                    <HorizontalStackLayout>
+                                        <Label Text="Name:" />
+                                        <Label Text="{Binding Name}" />
+                                    </HorizontalStackLayout>
+                                    <HorizontalStackLayout>
+                                        <Label Text="Text:" />
+                                        <Label Text="{Binding Value}" />
+                                    </HorizontalStackLayout>
+                                </controls:FieldContainer>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+
+                <FlexLayout Style="{StaticResource ButtonContainer}" >
+                    <FlexLayout.Resources>
+                        <Style TargetType="Button" BasedOn="{StaticResource ButtonStyle}" >
+                            <Setter Property="MinimumWidthRequest" Value="75" />
+                        </Style>
+                    </FlexLayout.Resources>
+                    <Button Text="Add" Command="{Binding AddNoteCommand}" />
+                    <Button Text="Details" Command="{Binding DetailedNoteCommand}" />
+                    <Button Text="Delete" Command="{Binding DetailedCourseCommand}" />
+                    <Button Text="Share" Command="{Binding ShareCommand}" />
+                </FlexLayout>
+
+
+            </VerticalStackLayout>
+
+        </ScrollView>
     </ContentPage.Content>
 </ContentPage>

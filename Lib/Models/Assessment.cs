@@ -1,6 +1,6 @@
 ﻿namespace Lib.Models;
 
-public class Assessment
+public class Assessment : INotification
 {
     public int Id { get; set; }
     public AssessmentType Type { get; set; } = AssessmentType.Performance;

@@ -1,99 +1,52 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 
-<ContentPage
-    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:CoursePlanner"
-    xmlns:models="clr-namespace:Lib.Models;assembly=Lib"
-    x:DataType="local:MainPage"
-    x:Class="CoursePlanner.MainPage" >
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:local="clr-namespace:CoursePlanner"
+    xmlns:models="clr-namespace:Lib.Models;assembly=Lib" x:DataType="local:MainPage" x:Class="CoursePlanner.MainPage" >
 
-
-    <ContentPage.Resources>
-
-
-        <Style
-            x:Key="LabelRightMarginStyle"
-            TargetType="Label"
-            BasedOn="{StaticResource FieldLabelStyle}" >
-            <Setter
-                Property="Margin"
-                Value="0,0,5,0" />
-
-
-        </Style>
-
-
-    </ContentPage.Resources>
 
     <ScrollView>
 
-        <VerticalStackLayout
-            Spacing="10"
-            Margin="10" >
+        <VerticalStackLayout Spacing="10" Margin="10" >
 
-            <Label
-                HorizontalOptions="Center"
-                Style="{StaticResource TitleStyle}"
-                Text="Terms" />
+            <Label HorizontalOptions="Center" Style="{StaticResource TitleLabel}" Text="Terms" />
 
-            <CollectionView
-                HorizontalOptions="Center"
-                ItemsSource="{Binding Model.Terms}"
-                SelectionMode="Single"
+            <CollectionView HorizontalOptions="Center" ItemsSource="{Binding Model.Terms}" SelectionMode="Single"
                 SelectedItem="{Binding Model.SelectedTerm}" >
 
                 <CollectionView.ItemsLayout>
-                    <LinearItemsLayout
-                        Orientation="Vertical"
-                        ItemSpacing="5" />
+                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="5" />
                 </CollectionView.ItemsLayout>
 
                 <CollectionView.ItemTemplate>
-                    <DataTemplate
-                        x:DataType="models:Term" >
-                        <Border
-                            Padding="25,10"
-                            HorizontalOptions="FillAndExpand"
-                            VerticalOptions="Center" >
-
-                            <VerticalStackLayout>
-                                <Label
-                                    Margin="0,10"
-                                    Style="{StaticResource FieldLabelStyle}"
-                                    HorizontalOptions="Center"
-                                    Text="{Binding Name}" />
-                                <VerticalStackLayout
-                                    Spacing="5"
-                                    HorizontalOptions="Center" >
-
-                                    <HorizontalStackLayout>
-                                        <Label
-                                            Style="{StaticResource LabelRightMarginStyle}"
-                                            Text="Start Date:" />
-                                        <Label
-                                            Text="{Binding Start, Converter={StaticResource dateConverter}}" />
-                                    </HorizontalStackLayout>
-                                    <HorizontalStackLayout>
-                                        <Label
-                                            Style="{StaticResource LabelRightMarginStyle}"
-                                            Text="End Date:" />
-                                        <Label
-                                            Text="{Binding End, Converter={StaticResource dateConverter}}" />
-                                    </HorizontalStackLayout>
-                                    <HorizontalStackLayout>
-                                        <Label
-                                            Text="Courses:"
-                                            Style="{StaticResource LabelRightMarginStyle}" />
-                                        <Label
-                                            Text="{Binding Courses, Converter={StaticResource courseListToStringConverter}}"
-                                            LineBreakMode="CharacterWrap"
-                                            MaximumWidthRequest="100" />
+                    <DataTemplate x:DataType="models:Term" >
+                        <Border Padding="25,10" HorizontalOptions="FillAndExpand" VerticalOptions="Center" >
 
 
-                                    </HorizontalStackLayout>
-                                </VerticalStackLayout>
+                            <VerticalStackLayout Spacing="5" HorizontalOptions="Start" >
+
+
+                                <HorizontalStackLayout>
+                                    <Label Style="{StaticResource LabelRightMargin}" Text="Name:" />
+                                    <Label Style="{StaticResource FieldLabel}" Text="{Binding Name}" />
+                                </HorizontalStackLayout>
+
+                                <HorizontalStackLayout>
+                                    <Label Style="{StaticResource LabelRightMargin}" Text="Start Date:" />
+                                    <Label Text="{Binding Start, Converter={StaticResource dateConverter}}" />
+                                </HorizontalStackLayout>
+                                <HorizontalStackLayout>
+                                    <Label Style="{StaticResource LabelRightMargin}" Text="End Date:" />
+                                    <Label Text="{Binding End, Converter={StaticResource dateConverter}}" />
+                                </HorizontalStackLayout>
+                                <HorizontalStackLayout>
+                                    <Label Text="Courses:" Style="{StaticResource LabelRightMargin}" />
+                                    <Label
+                                        Text="{Binding Courses, Converter={StaticResource courseListToStringConverter}}"
+                                        LineBreakMode="CharacterWrap" MaximumWidthRequest="100" />
+                                </HorizontalStackLayout>
                             </VerticalStackLayout>
+
                         </Border>
 
                     </DataTemplate>
@@ -101,29 +54,16 @@
             </CollectionView>
 
 
-            <FlexLayout
-                
-                Style="{StaticResource FlexButtonContainerStyle}"
-                >
+            <FlexLayout Style="{StaticResource ButtonContainer}" >
                 <FlexLayout.Resources>
-                    <Style
-                        TargetType="Button"
-                        BasedOn="{StaticResource ButtonStyle}" >
-                        <Setter
-                            Property="MinimumWidthRequest"
-                            Value="75" />
+                    <Style TargetType="Button" BasedOn="{StaticResource ButtonStyle}" >
+                        <Setter Property="MinimumWidthRequest" Value="75" />
 
                     </Style>
                 </FlexLayout.Resources>
-                <Button
-                    Text="Add"
-                    Command="{Binding Model.AddTermCommand}" />
-                <Button
-                    Text="Details"
-                    Command="{Binding Model.DetailedTermCommand}" />
-                <Button
-                    Text="Delete"
-                    Command="{Binding Model.DeleteTermCommand}" />
+                <Button Text="Add" Command="{Binding Model.AddTermCommand}" />
+                <Button Text="Details" Command="{Binding Model.DetailedTermCommand}" />
+                <Button Text="Delete" Command="{Binding Model.DeleteTermCommand}" />
 
             </FlexLayout>
         </VerticalStackLayout>

@@ -11,6 +11,7 @@ public class CourseListToStringConverter : IValueConverter
         {
             throw new ArgumentException("Unexpected value type.");
         }
+
         return string.Join(", ", courses.Select(x => x.Name));
     }
 

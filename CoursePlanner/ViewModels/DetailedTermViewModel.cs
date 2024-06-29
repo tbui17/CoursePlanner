@@ -1,18 +1,23 @@
 ﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CoursePlanner.Services;
 using Lib.Models;
 using Lib.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace CoursePlanner.ViewModels;
 
-public partial class DetailedTermViewModel(IDbContextFactory<LocalDbCtx> factory, AppShellViewModel appShell)
-    : ObservableObject, IQueryAttributable
+[QueryProperty(nameof(Id), nameof(Id))]
+public partial class DetailedTermViewModel(IDbContextFactory<LocalDbCtx> factory, AppService appShell)
+    : ObservableObject
 {
+    [ObservableProperty]
+    private int _id;
+
     [NotifyPropertyChangedFor(nameof(Courses))]
     [ObservableProperty]
-    private Term _term;
+    private Term _term = new();
 
     [ObservableProperty]
     private Course? _selectedCourse;
@@ -20,65 +25,47 @@ public partial class DetailedTermViewModel(IDbContextFactory<LocalDbCtx> factory
 
     public ObservableCollection<Course> Courses => Term.Courses.ToObservableCollection();
 
-    public async void ApplyQueryAttributes(IDictionary<string, object> query)
-    {
-        if (!query.TryGet<int>("termId", out var id)) return;
-        await Init(id);
-    }
 
     public async Task Init(int id)
     {
         await using var db = await factory.CreateDbContextAsync();
         var res = await db
-           .Terms
-           .Include(x => x.Courses)
-           .ThenInclude(x => x.Instructor)
-           .FirstAsync(x => x.Id == id);
+               .Terms
+               .Include(x => x.Courses)
+               .ThenInclude(x => x.Instructor)
+               .FirstOrDefaultAsync(x => x.Id == id) ??
+            new();
         Term = res;
     }
 
     public async Task RefreshAsync()
     {
-        await Init(Term.Id);
+        await Init(Id);
     }
 
     [RelayCommand]
     public async Task EditTermAsync()
     {
-        var term = Term;
-
-
-        await AppShell.GoToAsync<EditTermPage>(new Dictionary<string, object>
-            {
-                ["Id"] = term.Id,
-                ["Name"] = term.Name,
-                ["Start"] = term.Start,
-                ["End"] = term.End
-            }
-        );
+        await appShell.GoToEditTermPageAsync(Id);
     }
 
 
     [RelayCommand]
     public async Task BackAsync()
     {
-        await appShell.GoToMainPageAsync();
+        await appShell.PopAsync();
     }
 
     [RelayCommand]
     public async Task AddCourseAsync()
     {
-        
-        var name = await AppShell.DisplayNamePromptAsync();
-
+        var name = await appShell.DisplayNamePromptAsync();
         if (name is null)
         {
             return;
         }
-        
         var course = Course.From(Term);
         course.Name = name;
-
         await using var db = await factory.CreateDbContextAsync();
         db.Courses.Add(course);
         await db.SaveChangesAsync();

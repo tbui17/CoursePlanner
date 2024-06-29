@@ -21,9 +21,9 @@ namespace CoursePlanner
                 db.Database.EnsureDeleted();
                 db.Database.Migrate();
             }
+
             InitializeComponent();
-           
-            
+
 
             MainPage = new AppShell();
         }

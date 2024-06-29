@@ -1,15 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using CoursePlanner.ViewModels;
 
 namespace CoursePlanner;
 
 public partial class EditCoursePage : ContentPage
 {
-    public EditCoursePage()
+    public EditCourseViewModel Model { get; set; }
+
+    public EditCoursePage(EditCourseViewModel model)
     {
+        Model = model;
         InitializeComponent();
+        HideSoftInputOnTapped = true;
+    }
+    
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+        await Model.RefreshAsync();
     }
 }
