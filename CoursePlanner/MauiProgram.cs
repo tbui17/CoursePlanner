@@ -1,9 +1,11 @@
 ﻿using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Markup;
+using CoursePlanner.Services;
+
 using CoursePlanner.ViewModels;
 using Lib;
-using static CoursePlanner.Utils.MauiProviderExtensions;
 using Microsoft.Extensions.Logging;
+using Plugin.LocalNotification;
 
 namespace CoursePlanner
 {
@@ -16,6 +18,7 @@ namespace CoursePlanner
                .UseMauiApp<App>()
                .UseMauiCommunityToolkit()
                .UseMauiCommunityToolkitMarkup()
+               .UseLocalNotification()
                .ConfigureFonts
                 (
                     fonts =>
@@ -26,16 +29,20 @@ namespace CoursePlanner
                 );
 
             var services = builder.Services;
+
+
             Configs
                .ConfigBackendServices(services)
-               .AddTransientWithShellRoute<MainPage, MainViewModel>()
-               .AddSingleton<AppShellViewModel>()
-               .AddSingletonWithShellRoute<DetailedTermPage, DetailedTermViewModel>()
-               .AddTransientWithShellRoute<EditTermPage, EditTermViewModel>()
-               .AddTransientWithShellRoute<DetailedCoursePage, DetailedCourseViewModel>()
-               .AddTransientWithShellRoute<EditCoursePage, EditCourseViewModel>()
-                
-                ;
+               .AddSingleton<AppService>()
+               .AddTransient<MainPage, MainViewModel>()
+               .AddTransient<DetailedTermPage, DetailedTermViewModel>()
+               .AddTransient<EditTermPage, EditTermViewModel>()
+               .AddTransient<DetailedCoursePage, DetailedCourseViewModel>()
+               .AddTransient<EditCoursePage, EditCourseViewModel>()
+               .AddTransient<InstructorFormPage, InstructorFormViewModel>()
+               .AddTransient<EditNotePage, EditNoteViewModel>()
+               .AddTransient<EditAssessmentPage, EditAssessmentViewModel>();
+
 
 
 #if DEBUG

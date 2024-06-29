@@ -1,15 +1,17 @@
-﻿using CoursePlanner.ViewModels;
+﻿using CoursePlanner.Services;
+using CoursePlanner.ViewModels;
 
 namespace CoursePlanner;
 
 public partial class MainPage : ContentPage
 {
     public MainViewModel Model { get; set; }
+    public AppService ShellModel { get; set; }
 
-    public MainPage(MainViewModel model)
+    public MainPage(MainViewModel model, AppService shellModel)
     {
         Model = model;
-        model.ShowWindowRequested += OnShowWindow;
+        ShellModel = shellModel;
         InitializeComponent();
         BindingContext = this;
     }
@@ -17,11 +19,6 @@ public partial class MainPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        await Model.GetTermsAsync();
-    }
-
-    private void OnShowWindow(MainViewModel mainViewModel)
-    {
-        DisplayAlert("abc", "abc", "abc");
+        await Model.Init();
     }
 }

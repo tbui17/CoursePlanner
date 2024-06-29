@@ -1,12 +1,12 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Lib.Utils;
+using CoursePlanner.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace CoursePlanner.ViewModels;
 
-public partial class EditTermViewModel(ILocalDbCtxFactory factory, AppShellViewModel appShell)
-    : ObservableObject, IQueryAttributable
+public partial class EditTermViewModel(ILocalDbCtxFactory factory, AppService appShell)
+    : ObservableObject
 {
     [ObservableProperty]
     private int _id;
@@ -40,14 +40,26 @@ public partial class EditTermViewModel(ILocalDbCtxFactory factory, AppShellViewM
     [RelayCommand]
     public async Task BackAsync()
     {
-        await appShell.GoBackToDetailedTermPageAsync();
+        await appShell.PopAsync();
     }
 
-    public void ApplyQueryAttributes(IDictionary<string, object> query)
+    public async Task Init(int termId)
     {
-        Id = query.Get<int>("Id");
-        Name = query.Get<string>("Name");
-        Start = query.Get<DateTime>("Start");
-        End = query.Get<DateTime>("End");
+        await using var db = await factory.CreateDbContextAsync();
+
+        var term = await db
+               .Terms
+               .FirstOrDefaultAsync(x => x.Id == termId) ??
+            new();
+
+        Id = term.Id;
+        Name = term.Name;
+        Start = term.Start;
+        End = term.End;
+    }
+    
+    public async Task RefreshAsync()
+    {
+        await Init(Id);
     }
 }

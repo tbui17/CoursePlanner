@@ -10,13 +10,13 @@ public static class MauiProviderExtensions
     {
         return services.AddSingletonWithShellRoute<TView, TViewModel>(typeof(TView).Name);
     }
-    
+
     public static IServiceCollection AddTransientWithShellRoute<TView, TViewModel>(this IServiceCollection services)
         where TView : NavigableElement where TViewModel : class, INotifyPropertyChanged
     {
         return services.AddTransientWithShellRoute<TView, TViewModel>(typeof(TView).Name);
     }
-    
+
     public static IServiceCollection AddScopedWithShellRoute<TView, TViewModel>(this IServiceCollection services)
         where TView : NavigableElement where TViewModel : class, INotifyPropertyChanged
     {

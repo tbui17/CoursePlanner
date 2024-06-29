@@ -1,6 +1,6 @@
 ﻿namespace Lib.Models;
 
-public class Course
+public class Course : INotification
 {
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
@@ -20,6 +20,8 @@ public class Course
     public Instructor? Instructor { get; set; }
     
     public ICollection<Assessment> Assessments { get; set; } = [];
+    
+    public ICollection<Note> Notes { get; set; } = [];
 
     public static Course From(Term term)
     {

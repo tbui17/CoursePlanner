@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CoursePlanner.Services;
 using Lib.Models;
 using Lib.Utils;
 using Microsoft.EntityFrameworkCore;
@@ -8,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CoursePlanner.ViewModels;
 
-public partial class MainViewModel(IDbContextFactory<LocalDbCtx> factory, AppShellViewModel appShell) : ObservableObject
+public partial class MainViewModel(IDbContextFactory<LocalDbCtx> factory, AppService appShell) : ObservableObject
 {
     [ObservableProperty]
     private ObservableCollection<Term> _terms = [];
@@ -16,27 +17,20 @@ public partial class MainViewModel(IDbContextFactory<LocalDbCtx> factory, AppShe
     [ObservableProperty]
     private Term? _selectedTerm;
 
-
-    public async Task GetTermsAsync()
+    public async Task Init()
     {
         await using var db = await factory.CreateDbContextAsync();
         Terms = await db
-           .Terms.Include(x => x.Courses)
+           .Terms
+           .Include(x => x.Courses)
            .ToListAsync()
            .ToObservableCollectionAsync();
     }
 
-    public async Task Init()
-    {
-        await GetTermsAsync();
-    }
-
-    public event Action<MainViewModel>? ShowWindowRequested;
-
     [RelayCommand]
     public async Task AddTermAsync()
     {
-        var name = await AppShell.DisplayNamePromptAsync();
+        var name = await appShell.DisplayNamePromptAsync();
         if (name is null)
         {
             return;
@@ -57,9 +51,6 @@ public partial class MainViewModel(IDbContextFactory<LocalDbCtx> factory, AppShe
         }
 
         await appShell.GoToDetailedTermPageAsync(SelectedTerm.Id);
-
-
-
     }
 
     public bool CanExecuteTermCommand() => SelectedTerm is not null;
@@ -79,12 +70,4 @@ public partial class MainViewModel(IDbContextFactory<LocalDbCtx> factory, AppShe
            .ExecuteDeleteAsync();
         await Init();
     }
-
-    [RelayCommand]
-    public void ShowWindow()
-    {
-        ShowWindowRequested?.Invoke(this);
-    }
-    
-    
 }

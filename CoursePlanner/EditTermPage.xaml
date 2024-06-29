@@ -1,18 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:coursePlanner="clr-namespace:CoursePlanner"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:coursePlanner="clr-namespace:CoursePlanner"
     xmlns:viewModels="clr-namespace:CoursePlanner.ViewModels"
-
+    
     x:Class="CoursePlanner.EditTermPage"
+    x:DataType="viewModels:EditTermViewModel" Title="Edit Term" >
 
-    x:DataType="viewModels:EditTermViewModel"
-    Title="Edit Term" >
-
-    <Shell.BackButtonBehavior>
-        <BackButtonBehavior Command="{Binding BackCommand}" />
-    </Shell.BackButtonBehavior>
 
     <VerticalStackLayout>
 
@@ -26,36 +20,15 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Label
-                Grid.Row="0"
-                Grid.Column="0"
-                Text="Name:" />
-            <Entry
-                Grid.Row="0"
-                Grid.Column="1"
-                Text="{Binding Name}" />
-            <Label
-                Grid.Row="1"
-                Grid.Column="0"
-                Text="Start:" />
-            <DatePicker
-                Grid.Row="1"
-                Grid.Column="1"
-                Date="{Binding Start}" />
-            <Label
-                Grid.Row="2"
-                Grid.Column="0"
-                Text="End:" />
-            <DatePicker
-                Grid.Row="2"
-                Grid.Column="1"
-                Date="{Binding End}" />
+            <Label Grid.Row="0" Grid.Column="0" Text="Name:" />
+            <Entry Grid.Row="0" Grid.Column="1" Text="{Binding Name}" />
+            <Label Grid.Row="1" Grid.Column="0" Text="Start:" />
+            <DatePicker Grid.Row="1" Grid.Column="1" Date="{Binding Start}" />
+            <Label Grid.Row="2" Grid.Column="0" Text="End:" />
+            <DatePicker Grid.Row="2" Grid.Column="1" Date="{Binding End}" />
         </Grid>
 
-        <Button
-            Text="Save"
-            Command="{Binding SaveCommand}"
-            HorizontalOptions="End" />
+        <Button Text="Save" Command="{Binding SaveCommand}" HorizontalOptions="End" />
 
 
     </VerticalStackLayout>

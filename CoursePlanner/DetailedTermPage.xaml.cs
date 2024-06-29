@@ -2,19 +2,22 @@
 
 namespace CoursePlanner;
 
-public partial class DetailedTermPage : ContentPage
+public partial class DetailedTermPage
 {
-    
     public DetailedTermViewModel Model { get; set; }
 
     public DetailedTermPage(DetailedTermViewModel model)
     {
         Model = model;
         InitializeComponent();
-        BindingContext = this;
-        
-
+        HideSoftInputOnTapped = true;
+        BindingContext = model;
     }
-
-  
+    
+    
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+        await Model.RefreshAsync();
+    }
 }
