@@ -54,7 +54,7 @@
 
                     <HorizontalStackLayout Spacing="5" >
                         <Button Text="Add" Command="{Binding AddInstructorCommand}" />
-                        <Button Text="Edit" Command="{Binding RemoveInstructorCommand}" />
+                        <Button Text="Edit" Command="{Binding EditInstructorCommand}" />
                     </HorizontalStackLayout>
                 </VerticalStackLayout>
 
@@ -150,7 +150,7 @@
                     </FlexLayout.Resources>
                     <Button Text="Add" Command="{Binding AddNoteCommand}" />
                     <Button Text="Details" Command="{Binding DetailedNoteCommand}" />
-                    <Button Text="Delete" Command="{Binding DetailedCourseCommand}" />
+                    <Button Text="Delete" Command="{Binding DeleteNoteCommand}" />
                     <Button Text="Share" Command="{Binding ShareCommand}" />
                 </FlexLayout>
 

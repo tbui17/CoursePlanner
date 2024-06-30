@@ -9,6 +9,7 @@ public class AppService
     private readonly IServiceProvider _provider;
     private readonly ILocalDbCtxFactory _factory;
     private readonly NotificationService _notificationService;
+    // ReSharper disable once NotAccessedField.Local
     private readonly Timer _notificationJob;
 
     public AppService(IServiceProvider provider, ILocalDbCtxFactory factory, NotificationService notificationService)
@@ -28,6 +29,11 @@ public class AppService
         );
 
     private async void NotifyTask(object? _) => await Notify();
+
+    public async Task ShareAsync(ShareTextRequest request)
+    {
+        await Share.RequestAsync(request);
+    }
 
 
     private async Task Notify()

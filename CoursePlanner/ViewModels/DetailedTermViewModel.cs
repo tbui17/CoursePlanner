@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CoursePlanner.ViewModels;
 
-[QueryProperty(nameof(Id), nameof(Id))]
+
 public partial class DetailedTermViewModel(IDbContextFactory<LocalDbCtx> factory, AppService appShell)
     : ObservableObject
 {
