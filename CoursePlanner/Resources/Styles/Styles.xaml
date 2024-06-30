@@ -230,7 +230,8 @@
     <Style TargetType="Label" x:Key="FieldLabel" BasedOn="{StaticResource BaseLabel}" >
         <Setter Property="FontAttributes" Value="Bold" />
     </Style>
-
+    
+   
     <Style TargetType="Label" x:Key="TitleLabel" BasedOn="{StaticResource BaseLabel}" >
         <Setter Property="FontAttributes" Value="Bold" />
         <Setter Property="FontSize" Value="Title" />
@@ -533,9 +534,18 @@
             Value="{AppThemeBinding Light={StaticResource Gray950}, Dark={StaticResource Gray200}}" />
     </Style>
 
-    <Style TargetType="VerticalStackLayout" >
+    
+        
+    <Style TargetType="HorizontalStackLayout" x:Key="DefaultHorizontalStack" >
         <Setter Property="Spacing" Value="5" />
     </Style>
+    
+    
+    <Style TargetType="VerticalStackLayout" x:Key="DefaultVerticalStack" >
+        <Setter Property="Spacing" Value="5" />
+    </Style>
+    
+    <Style TargetType="VerticalStackLayout" BasedOn="{StaticResource DefaultVerticalStack}" />
 
     <Style x:Key="ButtonContainer" TargetType="FlexLayout" >
         <Setter Property="JustifyContent" Value="SpaceBetween" />

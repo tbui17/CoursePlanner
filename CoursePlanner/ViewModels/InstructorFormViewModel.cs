@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CoursePlanner.ViewModels;
 
-public abstract partial class InstructorFormViewModel(ILocalDbCtxFactory factory, AppService appShell)
+public partial class InstructorFormViewModel(ILocalDbCtxFactory factory, AppService appShell)
     : ObservableObject
 {
     [ObservableProperty]
