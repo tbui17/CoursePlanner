@@ -6,7 +6,7 @@
     xmlns:viewModels="clr-namespace:CoursePlanner.ViewModels"
     xmlns:controls="clr-namespace:CoursePlanner.Controls"
     x:DataType="viewModels:DetailedTermViewModel"
-    Title="Detailed Term"
+    Title="Term Details"
     x:Class="CoursePlanner.DetailedTermPage" >
 
 
@@ -39,55 +39,56 @@
 
                 <Label Style="{StaticResource Subheading}" Text="Courses" />
 
-                <ScrollView Orientation="Both" >
+                <Border Style="{StaticResource CollectionBorder}">
+                    <ScrollView Orientation="Both" >
 
-                    <CollectionView x:Name="CoursesView" ItemsSource="{Binding Courses}" SelectionMode="Single"
-                        SelectedItem="{Binding SelectedCourse}" >
+                        <CollectionView x:Name="CoursesView" ItemsSource="{Binding Courses}" SelectionMode="Single"
+                            SelectedItem="{Binding SelectedCourse}" >
 
-                        <CollectionView.Resources>
-                            <Style TargetType="Label" >
-                                <Setter Property="HorizontalOptions" Value="Center" />
+                            <CollectionView.Resources>
+                                <Style TargetType="Label" >
+                                    <Setter Property="HorizontalOptions" Value="Center" />
 
-                            </Style>
-                        </CollectionView.Resources>
-
-
-                        <CollectionView.ItemsLayout>
-                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
-                        </CollectionView.ItemsLayout>
-
-                        <CollectionView.Header>
-                            <Grid ColumnDefinitions="100,100,100,100,100,100" ColumnSpacing="10" >
-                                <Label Text="Name" Grid.Column="0" />
-                                <Label Text="Instructor" Grid.Column="1" />
-                                <Label Text="Start" Grid.Column="2" />
-                                <Label Text="End" Grid.Column="3" />
-                                <Label Text="Notifications" Grid.Column="4" />
-                                <Label Text="Status " Grid.Column="5" />
-                            </Grid>
-                        </CollectionView.Header>
+                                </Style>
+                            </CollectionView.Resources>
 
 
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate x:DataType="models:Course" >
-                                <Border>
-                                    <Grid ColumnDefinitions="100,100,100,100,100,100" ColumnSpacing="10" >
-                                        <Label Text="{Binding Name}" Grid.Column="0" />
-                                        <Label Text="{Binding Instructor.Name, FallbackValue=''}" Grid.Column="1" />
-                                        <Label Text="{Binding Start, Converter={StaticResource DateConverter}}"
-                                            Grid.Column="2" />
-                                        <Label Text="{Binding End, Converter={StaticResource DateConverter}}"
-                                            Grid.Column="3" />
-                                        <Label Text="{Binding ShouldNotify}" Grid.Column="4" />
-                                        <Label Text="{Binding Status}" Grid.Column="5" />
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
+                            <CollectionView.ItemsLayout>
+                                <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
+                            </CollectionView.ItemsLayout>
+
+                            <CollectionView.Header>
+                                <Grid ColumnDefinitions="100,100,100,100,100,100" ColumnSpacing="10" >
+                                    <Label Text="Name" Grid.Column="0" />
+                                    <Label Text="Instructor" Grid.Column="1" />
+                                    <Label Text="Start" Grid.Column="2" />
+                                    <Label Text="End" Grid.Column="3" />
+                                    <Label Text="Notifications" Grid.Column="4" />
+                                    <Label Text="Status " Grid.Column="5" />
+                                </Grid>
+                            </CollectionView.Header>
 
 
-                </ScrollView>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="models:Course" >
+                                    <Border>
+                                        <Grid ColumnDefinitions="100,100,100,100,100,100" ColumnSpacing="10" >
+                                            <Label Text="{Binding Name}" Grid.Column="0" />
+                                            <Label Text="{Binding Instructor.Name, FallbackValue=''}" Grid.Column="1" />
+                                            <Label Text="{Binding Start, Converter={StaticResource DateConverter}}"
+                                                Grid.Column="2" />
+                                            <Label Text="{Binding End, Converter={StaticResource DateConverter}}"
+                                                Grid.Column="3" />
+                                            <Label Text="{Binding ShouldNotify}" Grid.Column="4" />
+                                            <Label Text="{Binding Status}" Grid.Column="5" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+
+
+                    </ScrollView></Border>
 
 
                 <controls:ButtonContainer HorizontalOptions="Center" >
