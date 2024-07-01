@@ -17,9 +17,10 @@
 
     <Style TargetType="Border" >
         <Setter Property="Stroke"
-            Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray500}}" />
+            Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
         <Setter Property="StrokeShape" Value="Rectangle" />
         <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="Padding" Value="10,10,10,10" />
     </Style>
 
     <Style TargetType="BoxView" >
@@ -185,26 +186,6 @@
         </Setter>
     </Style>
 
-    <Style TargetType="Label" >
-        <Setter Property="TextColor"
-            Value="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}" />
-        <Setter Property="BackgroundColor" Value="Transparent" />
-        <Setter Property="FontFamily" Value="OpenSansRegular" />
-        <Setter Property="FontSize" Value="14" />
-        <Setter Property="VisualStateManager.VisualStateGroups" >
-            <VisualStateGroupList>
-                <VisualStateGroup x:Name="CommonStates" >
-                    <VisualState x:Name="Normal" />
-                    <VisualState x:Name="Disabled" >
-                        <VisualState.Setters>
-                            <Setter Property="TextColor"
-                                Value="{AppThemeBinding Light={StaticResource Gray300}, Dark={StaticResource Gray600}}" />
-                        </VisualState.Setters>
-                    </VisualState>
-                </VisualStateGroup>
-            </VisualStateGroupList>
-        </Setter>
-    </Style>
 
     <Style TargetType="Label" x:Key="BaseLabel" >
         <Setter Property="TextColor"
@@ -227,12 +208,15 @@
         </Setter>
     </Style>
 
+    <Style TargetType="Label" BasedOn="{StaticResource BaseLabel}" />
+
+
     <Style TargetType="Label" x:Key="FieldLabel" BasedOn="{StaticResource BaseLabel}" >
         <Setter Property="FontAttributes" Value="Bold" />
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>
-    
-   
+
+
     <Style TargetType="Label" x:Key="TitleLabel" BasedOn="{StaticResource BaseLabel}" >
         <Setter Property="FontAttributes" Value="Bold" />
         <Setter Property="FontSize" Value="Title" />
@@ -494,24 +478,24 @@
     </Style>
 
     <Style TargetType="Shell" ApplyToDerivedTypes="True" >
-        <Setter Property="Shell.BackgroundColor"
+        <Setter Property="BackgroundColor"
             Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource OffBlack}}" />
-        <Setter Property="Shell.ForegroundColor"
+        <Setter Property="ForegroundColor"
             Value="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource SecondaryDarkText}}" />
-        <Setter Property="Shell.TitleColor"
+        <Setter Property="TitleColor"
             Value="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource SecondaryDarkText}}" />
-        <Setter Property="Shell.DisabledColor"
+        <Setter Property="DisabledColor"
             Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray950}}" />
-        <Setter Property="Shell.UnselectedColor"
+        <Setter Property="UnselectedColor"
             Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray200}}" />
-        <Setter Property="Shell.NavBarHasShadow" Value="False" />
-        <Setter Property="Shell.TabBarBackgroundColor"
+        <Setter Property="NavBarHasShadow" Value="False" />
+        <Setter Property="TabBarBackgroundColor"
             Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Black}}" />
-        <Setter Property="Shell.TabBarForegroundColor"
+        <Setter Property="TabBarForegroundColor"
             Value="{AppThemeBinding Light={StaticResource Magenta}, Dark={StaticResource White}}" />
-        <Setter Property="Shell.TabBarTitleColor"
+        <Setter Property="TabBarTitleColor"
             Value="{AppThemeBinding Light={StaticResource Magenta}, Dark={StaticResource White}}" />
-        <Setter Property="Shell.TabBarUnselectedColor"
+        <Setter Property="TabBarUnselectedColor"
             Value="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray200}}" />
     </Style>
 
@@ -535,17 +519,16 @@
             Value="{AppThemeBinding Light={StaticResource Gray950}, Dark={StaticResource Gray200}}" />
     </Style>
 
-    
-        
+
     <Style TargetType="HorizontalStackLayout" x:Key="DefaultHorizontalStack" >
         <Setter Property="Spacing" Value="5" />
     </Style>
-    
-    
+
+
     <Style TargetType="VerticalStackLayout" x:Key="DefaultVerticalStack" >
         <Setter Property="Spacing" Value="5" />
     </Style>
-    
+
     <Style TargetType="VerticalStackLayout" BasedOn="{StaticResource DefaultVerticalStack}" />
 
     <Style x:Key="ButtonContainer" TargetType="FlexLayout" >
@@ -566,11 +549,22 @@
 
     <Style x:Key="Subheading" TargetType="Label" BasedOn="{StaticResource SubHeadline}" >
         <Setter Property="FontAttributes" Value="Bold" />
-        <Setter Property="HorizontalOptions" Value="Start"/>
+        <Setter Property="HorizontalOptions" Value="Start" />
     </Style>
-    
-    <Style TargetType="CollectionView">
+
+    <Style TargetType="CollectionView" >
         <Setter Property="EmptyView" Value="No items." />
+    </Style>
+
+    <Style TargetType="ScrollView" x:Key="CollectionScrollView" >
+        <Setter Property="HeightRequest" Value="300" />
+    </Style>
+
+
+    <Style TargetType="Border" x:Key="CollectionBorder" >
+        <Setter Property="Stroke" Value="{StaticResource Tertiary}" />
+        <Setter Property="StrokeThickness" Value="2" />
+        <Setter Property="Padding" Value="0" />
     </Style>
 
 

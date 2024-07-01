@@ -12,44 +12,47 @@
 
         <VerticalStackLayout Spacing="10" Margin="10" >
 
-            <CollectionView ItemsSource="{Binding Model.Terms}" SelectionMode="Single"
-                SelectedItem="{Binding Model.SelectedTerm}" >
+            <Border Style="{StaticResource CollectionBorder}">
+                <ScrollView Style="{StaticResource CollectionScrollView}" >
+                    <CollectionView ItemsSource="{Binding Model.Terms}" SelectionMode="Single"
+                        SelectedItem="{Binding Model.SelectedTerm}" >
 
-                <CollectionView.ItemsLayout>
-                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="5" />
-                </CollectionView.ItemsLayout>
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="5" />
+                        </CollectionView.ItemsLayout>
 
-                <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="models:Term" >
-                        <Border>
-                            <controls:FieldContainer>
-                                <HorizontalStackLayout>
-                                    <Label Text="Name:" />
-                                    <Label Text="{Binding Name}" />
-                                </HorizontalStackLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:Term" >
+                                <Border>
+                                    <controls:FieldContainer>
+                                        <HorizontalStackLayout>
+                                            <Label Text="Name:" />
+                                            <Label Text="{Binding Name}" />
+                                        </HorizontalStackLayout>
 
-                                <HorizontalStackLayout>
-                                    <Label Text="Start Date:" />
-                                    <Label Text="{Binding Start, Converter={StaticResource DateConverter}}" />
-                                </HorizontalStackLayout>
-                                <HorizontalStackLayout>
-                                    <Label Text="End Date:" />
-                                    <Label Text="{Binding End, Converter={StaticResource DateConverter}}" />
-                                </HorizontalStackLayout>
-                                <HorizontalStackLayout>
-                                    <Label Text="Courses:" />
+                                        <HorizontalStackLayout>
+                                            <Label Text="Start Date:" />
+                                            <Label Text="{Binding Start, Converter={StaticResource DateConverter}}" />
+                                        </HorizontalStackLayout>
+                                        <HorizontalStackLayout>
+                                            <Label Text="End Date:" />
+                                            <Label Text="{Binding End, Converter={StaticResource DateConverter}}" />
+                                        </HorizontalStackLayout>
+                                        <HorizontalStackLayout>
+                                            <Label Text="Courses:" />
 
-                                    <Label
-                                        Text="{Binding Courses, Converter={StaticResource CourseListToStringConverter}}"
-                                        MaximumWidthRequest="200"
-                                        LineBreakMode="TailTruncation"/>
-                                </HorizontalStackLayout>
-                            </controls:FieldContainer>
-                        </Border>
+                                            <Label
+                                                Text="{Binding Courses, Converter={StaticResource CourseListToStringConverter}}"
+                                                MaximumWidthRequest="200"
+                                                LineBreakMode="TailTruncation" />
+                                        </HorizontalStackLayout>
+                                    </controls:FieldContainer>
+                                </Border>
 
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </ScrollView></Border>
 
 
             <FlexLayout Style="{StaticResource ButtonContainer}" >
