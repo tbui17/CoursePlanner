@@ -1,5 +1,4 @@
 ﻿using System.Net.Mail;
-using System.Text.RegularExpressions;
 using Lib.Exceptions;
 using Lib.Utils;
 using Microsoft.EntityFrameworkCore;
