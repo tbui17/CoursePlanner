@@ -1,4 +1,6 @@
-﻿using Lib.Services;
+﻿using Lib.Exceptions;
+using Lib.Models;
+using Lib.Services;
 using Microsoft.EntityFrameworkCore;
 using Plugin.LocalNotification;
 
@@ -9,6 +11,7 @@ public class AppService
     private readonly IServiceProvider _provider;
     private readonly ILocalDbCtxFactory _factory;
     private readonly NotificationService _notificationService;
+
     // ReSharper disable once NotAccessedField.Local
     private readonly Timer _notificationJob;
 
@@ -140,6 +143,9 @@ public class AppService
     {
         var page = Resolve<InstructorFormPage>();
 
+
+        page.Model.Title = "Add Instructor";
+
         page.Model.InstructorPersistence = async instructor =>
         {
             if (instructor.Validate() is { } e)
@@ -148,6 +154,11 @@ public class AppService
             }
 
             await using var db = await _factory.CreateDbContextAsync();
+
+            if (await ValidateNoDuplicateEmail(db, instructor.Email) is { } exc)
+            {
+                return exc;
+            }
 
             db.Instructors.Add(instructor);
             await db.SaveChangesAsync();
@@ -162,6 +173,9 @@ public class AppService
     {
         var page = Resolve<InstructorFormPage>();
 
+        page.Model.Title = "Edit Instructor";
+        page.Model.Id = instructorId;
+
         page.Model.InstructorPersistence = async instructor =>
         {
             if (instructor.Validate() is { } e)
@@ -169,7 +183,13 @@ public class AppService
                 return e;
             }
 
+
             await using var db = await _factory.CreateDbContextAsync();
+
+            if (await ValidateNoDuplicateEmail(db, instructor.Email,instructorId) is { } exc)
+            {
+                return exc;
+            }
 
             var editModel = await db.Instructors.FirstAsync(x => x.Id == instructorId);
 
@@ -181,6 +201,25 @@ public class AppService
         };
 
         await Navigation.PushAsync(page);
+    }
+
+    private static async Task<DomainException?> ValidateNoDuplicateEmail(LocalDbCtx db, string email, int? id = null)
+    {
+        email = email.ToLower();
+        var baseQuery = db.Instructors.Where(x => x.Email.ToLower() == email);
+
+        if (id is { } instructorId)
+        {
+            baseQuery = baseQuery.Where(x => x.Id != instructorId);
+        }
+
+        var maybeDuplicateEmail = await baseQuery
+           .Select(x => x.Email)
+           .FirstOrDefaultAsync();
+
+        return maybeDuplicateEmail is not null
+            ? new DomainException("Email already exists.")
+            : null;
     }
 
     public async Task GoToAssessmentDetailsPageAsync(int assessmentId)

@@ -4,8 +4,6 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     Spacing="5"
     x:Class="CoursePlanner.Controls.FieldContainer" >
-
-
     <VerticalStackLayout.Resources>
         <Style TargetType="HorizontalStackLayout" >
             <Setter Property="Spacing" Value="5" />
@@ -15,7 +13,6 @@
         </Style>
 
     </VerticalStackLayout.Resources>
-    <ContentPresenter />
 
 
 </VerticalStackLayout>

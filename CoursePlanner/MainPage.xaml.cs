@@ -1,5 +1,6 @@
 ﻿using CoursePlanner.Services;
 using CoursePlanner.ViewModels;
+using Plugin.LocalNotification;
 
 namespace CoursePlanner;
 
@@ -20,5 +21,10 @@ public partial class MainPage : ContentPage
     {
         base.OnAppearing();
         await Model.Init();
+
+        if (!await LocalNotificationCenter.Current.AreNotificationsEnabled())
+        {
+            await LocalNotificationCenter.Current.RequestNotificationPermission();
+        }
     }
 }

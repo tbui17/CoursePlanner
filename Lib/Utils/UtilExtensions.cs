@@ -1,20 +1,7 @@
-﻿using System.Collections.ObjectModel;
-using System.Runtime.CompilerServices;
-
-namespace Lib.Utils;
+﻿namespace Lib.Utils;
 
 public static class UtilExtensions
 {
-    public static async Task<ObservableCollection<T>> ToObservableCollectionAsync<T>(this Task<List<T>> collection)
-    {
-        return new ObservableCollection<T>(await collection);
-    }
-
-    public static ObservableCollection<T> ToObservableCollection<T>(this IEnumerable<T> collection)
-    {
-        return new ObservableCollection<T>(collection);
-    }
-
     public static T Get<T>(this IDictionary<string, object> dictionary, string key) => (T)dictionary[key];
 
     public static bool TryGet<T>(this IDictionary<string, object> dictionary, string key, out T value)
@@ -28,20 +15,41 @@ public static class UtilExtensions
         value = default!;
         return false;
     }
-    
-    public static string StringJoin<T>(this IEnumerable<T> collection, string separator = "") => string.Join(separator, collection);
+
+    public static T GetOrThrow<T>(this ISet<T> set, T value) =>
+        set.Contains(value)
+            ? value
+            : throw new ArgumentException($"Value {value} not found in ${set.StringJoin(",")}");
+
+    public static string StringJoin<T>(this IEnumerable<T> collection, string separator = "") =>
+        string.Join(separator, collection);
+
+
+    public static void Times(this int num, Action<int> action)
+    {
+        for (var i = 0; i < num; i++)
+        {
+            action(i);
+        }
+    }
+
+    public static void Times(this int num, Action action)
+    {
+        for (var i = 0; i < num; i++)
+        {
+            action();
+        }
+    }
 }
 
 public static class Util
 {
-   
-    
     public static string FullPath(string path)
     {
         var start = path.IndexOf('(') + 1;
         var end = path.IndexOf(')');
         var str = path[start..end];
-        
+
         return str;
     }
 }

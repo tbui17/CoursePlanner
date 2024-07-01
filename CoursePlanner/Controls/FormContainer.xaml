@@ -15,9 +15,8 @@
         </Style>
         <Style TargetType="Label" BasedOn="{StaticResource FieldLabel}" >
             <Setter Property="VerticalOptions" Value="Center" />
-            
         </Style>
       
     </ContentView.Resources>
-    <ContentPresenter />
+    
 </ContentView>

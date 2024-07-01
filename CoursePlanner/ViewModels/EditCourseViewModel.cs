@@ -1,12 +1,18 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Collections.ObjectModel;
+using CommunityToolkit.Maui.Core.Extensions;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CoursePlanner.Services;
+using Lib.Models;
 using Microsoft.EntityFrameworkCore;
+
 namespace CoursePlanner.ViewModels;
 
 public partial class EditCourseViewModel(ILocalDbCtxFactory factory, AppService appShell)
     : ObservableObject
 {
+    public ObservableCollection<string> Statuses { get; } = Course.Statuses.ToObservableCollection();
+
     [ObservableProperty]
     private int _id;
 
@@ -18,9 +24,13 @@ public partial class EditCourseViewModel(ILocalDbCtxFactory factory, AppService 
 
     [ObservableProperty]
     private DateTime _end;
-    
+
     [ObservableProperty]
     private bool _shouldNotify;
+
+    [ObservableProperty]
+    private string _selectedStatus = Course.Statuses.First();
+
 
     [RelayCommand]
     public async Task SaveAsync()
@@ -35,7 +45,7 @@ public partial class EditCourseViewModel(ILocalDbCtxFactory factory, AppService 
         course.Start = Start;
         course.End = End;
         course.ShouldNotify = ShouldNotify;
-
+        course.Status = SelectedStatus;
         await db.SaveChangesAsync();
         await BackAsync();
     }
@@ -60,8 +70,9 @@ public partial class EditCourseViewModel(ILocalDbCtxFactory factory, AppService 
         Start = course.Start;
         End = course.End;
         ShouldNotify = course.ShouldNotify;
+        SelectedStatus = course.Status;
     }
-    
+
     public async Task RefreshAsync()
     {
         await Init(Id);

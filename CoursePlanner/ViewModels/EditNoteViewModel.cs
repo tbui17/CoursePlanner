@@ -48,8 +48,7 @@ public partial class EditNoteViewModel(ILocalDbCtxFactory factory, AppService ap
                .Notes
                .FirstOrDefaultAsync(x => x.Id == noteId) ??
             new();
-
-        Id = note.Id;
+        
         Name = note.Name;
         Text = note.Value;
     }

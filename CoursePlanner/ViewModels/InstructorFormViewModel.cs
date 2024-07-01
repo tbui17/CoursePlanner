@@ -10,6 +10,10 @@ namespace CoursePlanner.ViewModels;
 public partial class InstructorFormViewModel(ILocalDbCtxFactory factory, AppService appShell)
     : ObservableObject
 {
+
+    [ObservableProperty]
+    private string _title = "Instructor Form";
+    
     [ObservableProperty]
     private int _id;
 
@@ -64,14 +68,6 @@ public partial class InstructorFormViewModel(ILocalDbCtxFactory factory, AppServ
                .FirstOrDefaultAsync(x => x.Id == id) ??
             new();
 
-        Id = instructor.Id;
-        Name = instructor.Name;
-        Email = instructor.Email;
-        Phone = instructor.Phone;
-    }
-
-    public void Init(Instructor instructor)
-    {
         Id = instructor.Id;
         Name = instructor.Name;
         Email = instructor.Email;

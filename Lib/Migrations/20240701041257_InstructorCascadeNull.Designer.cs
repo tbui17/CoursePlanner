@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Lib.Migrations
 {
     [DbContext(typeof(LocalDbCtx))]
-    [Migration("20240628204228_Migration2")]
-    partial class Migration2
+    [Migration("20240701041257_InstructorCascadeNull")]
+    partial class InstructorCascadeNull
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -42,8 +42,9 @@ namespace Lib.Migrations
                     b.Property<DateTime>("Start")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -60,7 +61,7 @@ namespace Lib.Migrations
                             Name = "ID: 1, Index: 1",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -70,7 +71,7 @@ namespace Lib.Migrations
                             Name = "ID: 2, Index: 2",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -80,7 +81,7 @@ namespace Lib.Migrations
                             Name = "ID: 3, Index: 3",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -90,7 +91,7 @@ namespace Lib.Migrations
                             Name = "ID: 4, Index: 4",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -100,7 +101,7 @@ namespace Lib.Migrations
                             Name = "ID: 5, Index: 5",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -110,7 +111,7 @@ namespace Lib.Migrations
                             Name = "ID: 6, Index: 6",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -120,7 +121,7 @@ namespace Lib.Migrations
                             Name = "ID: 7, Index: 1",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -130,7 +131,7 @@ namespace Lib.Migrations
                             Name = "ID: 8, Index: 2",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -140,7 +141,7 @@ namespace Lib.Migrations
                             Name = "ID: 9, Index: 3",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -150,7 +151,7 @@ namespace Lib.Migrations
                             Name = "ID: 10, Index: 4",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -160,7 +161,7 @@ namespace Lib.Migrations
                             Name = "ID: 11, Index: 5",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -170,7 +171,7 @@ namespace Lib.Migrations
                             Name = "ID: 12, Index: 6",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -180,7 +181,7 @@ namespace Lib.Migrations
                             Name = "ID: 13, Index: 1",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -190,7 +191,7 @@ namespace Lib.Migrations
                             Name = "ID: 14, Index: 2",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -200,7 +201,7 @@ namespace Lib.Migrations
                             Name = "ID: 15, Index: 3",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -210,7 +211,7 @@ namespace Lib.Migrations
                             Name = "ID: 16, Index: 4",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -220,7 +221,7 @@ namespace Lib.Migrations
                             Name = "ID: 17, Index: 5",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -230,7 +231,7 @@ namespace Lib.Migrations
                             Name = "ID: 18, Index: 6",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -240,7 +241,7 @@ namespace Lib.Migrations
                             Name = "ID: 19, Index: 1",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -250,7 +251,7 @@ namespace Lib.Migrations
                             Name = "ID: 20, Index: 2",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -260,7 +261,7 @@ namespace Lib.Migrations
                             Name = "ID: 21, Index: 3",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -270,7 +271,7 @@ namespace Lib.Migrations
                             Name = "ID: 22, Index: 4",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -280,7 +281,7 @@ namespace Lib.Migrations
                             Name = "ID: 23, Index: 5",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -290,7 +291,7 @@ namespace Lib.Migrations
                             Name = "ID: 24, Index: 6",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -300,7 +301,7 @@ namespace Lib.Migrations
                             Name = "ID: 25, Index: 1",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -310,7 +311,7 @@ namespace Lib.Migrations
                             Name = "ID: 26, Index: 2",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -320,7 +321,7 @@ namespace Lib.Migrations
                             Name = "ID: 27, Index: 3",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -330,7 +331,7 @@ namespace Lib.Migrations
                             Name = "ID: 28, Index: 4",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -340,7 +341,7 @@ namespace Lib.Migrations
                             Name = "ID: 29, Index: 5",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -350,7 +351,7 @@ namespace Lib.Migrations
                             Name = "ID: 30, Index: 6",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -360,7 +361,7 @@ namespace Lib.Migrations
                             Name = "ID: 31, Index: 1",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -370,7 +371,7 @@ namespace Lib.Migrations
                             Name = "ID: 32, Index: 2",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -380,7 +381,7 @@ namespace Lib.Migrations
                             Name = "ID: 33, Index: 3",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -390,7 +391,7 @@ namespace Lib.Migrations
                             Name = "ID: 34, Index: 4",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -400,7 +401,7 @@ namespace Lib.Migrations
                             Name = "ID: 35, Index: 5",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -410,7 +411,7 @@ namespace Lib.Migrations
                             Name = "ID: 36, Index: 6",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -420,7 +421,7 @@ namespace Lib.Migrations
                             Name = "ID: 37, Index: 1",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -430,7 +431,7 @@ namespace Lib.Migrations
                             Name = "ID: 38, Index: 2",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -440,7 +441,7 @@ namespace Lib.Migrations
                             Name = "ID: 39, Index: 3",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -450,7 +451,7 @@ namespace Lib.Migrations
                             Name = "ID: 40, Index: 4",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -460,7 +461,7 @@ namespace Lib.Migrations
                             Name = "ID: 41, Index: 5",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -470,7 +471,7 @@ namespace Lib.Migrations
                             Name = "ID: 42, Index: 6",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -480,7 +481,7 @@ namespace Lib.Migrations
                             Name = "ID: 43, Index: 1",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -490,7 +491,7 @@ namespace Lib.Migrations
                             Name = "ID: 44, Index: 2",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -500,7 +501,7 @@ namespace Lib.Migrations
                             Name = "ID: 45, Index: 3",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -510,7 +511,7 @@ namespace Lib.Migrations
                             Name = "ID: 46, Index: 4",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -520,7 +521,7 @@ namespace Lib.Migrations
                             Name = "ID: 47, Index: 5",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -530,7 +531,7 @@ namespace Lib.Migrations
                             Name = "ID: 48, Index: 6",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -540,7 +541,7 @@ namespace Lib.Migrations
                             Name = "ID: 49, Index: 1",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -550,7 +551,7 @@ namespace Lib.Migrations
                             Name = "ID: 50, Index: 2",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -560,7 +561,7 @@ namespace Lib.Migrations
                             Name = "ID: 51, Index: 3",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -570,7 +571,7 @@ namespace Lib.Migrations
                             Name = "ID: 52, Index: 4",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -580,7 +581,7 @@ namespace Lib.Migrations
                             Name = "ID: 53, Index: 5",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -590,7 +591,7 @@ namespace Lib.Migrations
                             Name = "ID: 54, Index: 6",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -600,7 +601,7 @@ namespace Lib.Migrations
                             Name = "ID: 55, Index: 1",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -610,7 +611,7 @@ namespace Lib.Migrations
                             Name = "ID: 56, Index: 2",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -620,7 +621,7 @@ namespace Lib.Migrations
                             Name = "ID: 57, Index: 3",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -630,7 +631,7 @@ namespace Lib.Migrations
                             Name = "ID: 58, Index: 4",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -640,7 +641,7 @@ namespace Lib.Migrations
                             Name = "ID: 59, Index: 5",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -650,7 +651,7 @@ namespace Lib.Migrations
                             Name = "ID: 60, Index: 6",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -660,7 +661,7 @@ namespace Lib.Migrations
                             Name = "ID: 61, Index: 1",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -670,7 +671,7 @@ namespace Lib.Migrations
                             Name = "ID: 62, Index: 2",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -680,7 +681,7 @@ namespace Lib.Migrations
                             Name = "ID: 63, Index: 3",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -690,7 +691,7 @@ namespace Lib.Migrations
                             Name = "ID: 64, Index: 4",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -700,7 +701,7 @@ namespace Lib.Migrations
                             Name = "ID: 65, Index: 5",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -710,7 +711,7 @@ namespace Lib.Migrations
                             Name = "ID: 66, Index: 6",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -720,7 +721,7 @@ namespace Lib.Migrations
                             Name = "ID: 67, Index: 1",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -730,7 +731,7 @@ namespace Lib.Migrations
                             Name = "ID: 68, Index: 2",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -740,7 +741,7 @@ namespace Lib.Migrations
                             Name = "ID: 69, Index: 3",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -750,7 +751,7 @@ namespace Lib.Migrations
                             Name = "ID: 70, Index: 4",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -760,7 +761,7 @@ namespace Lib.Migrations
                             Name = "ID: 71, Index: 5",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -770,7 +771,7 @@ namespace Lib.Migrations
                             Name = "ID: 72, Index: 6",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -780,7 +781,7 @@ namespace Lib.Migrations
                             Name = "ID: 73, Index: 1",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -790,7 +791,7 @@ namespace Lib.Migrations
                             Name = "ID: 74, Index: 2",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -800,7 +801,7 @@ namespace Lib.Migrations
                             Name = "ID: 75, Index: 3",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -810,7 +811,7 @@ namespace Lib.Migrations
                             Name = "ID: 76, Index: 4",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -820,7 +821,7 @@ namespace Lib.Migrations
                             Name = "ID: 77, Index: 5",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -830,7 +831,7 @@ namespace Lib.Migrations
                             Name = "ID: 78, Index: 6",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -840,7 +841,7 @@ namespace Lib.Migrations
                             Name = "ID: 79, Index: 1",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -850,7 +851,7 @@ namespace Lib.Migrations
                             Name = "ID: 80, Index: 2",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -860,7 +861,7 @@ namespace Lib.Migrations
                             Name = "ID: 81, Index: 3",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -870,7 +871,7 @@ namespace Lib.Migrations
                             Name = "ID: 82, Index: 4",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -880,7 +881,7 @@ namespace Lib.Migrations
                             Name = "ID: 83, Index: 5",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -890,7 +891,7 @@ namespace Lib.Migrations
                             Name = "ID: 84, Index: 6",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -900,7 +901,7 @@ namespace Lib.Migrations
                             Name = "ID: 85, Index: 1",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -910,7 +911,7 @@ namespace Lib.Migrations
                             Name = "ID: 86, Index: 2",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -920,7 +921,7 @@ namespace Lib.Migrations
                             Name = "ID: 87, Index: 3",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -930,7 +931,7 @@ namespace Lib.Migrations
                             Name = "ID: 88, Index: 4",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -940,7 +941,7 @@ namespace Lib.Migrations
                             Name = "ID: 89, Index: 5",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -950,7 +951,7 @@ namespace Lib.Migrations
                             Name = "ID: 90, Index: 6",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -960,7 +961,7 @@ namespace Lib.Migrations
                             Name = "ID: 91, Index: 1",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -970,7 +971,7 @@ namespace Lib.Migrations
                             Name = "ID: 92, Index: 2",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -980,7 +981,7 @@ namespace Lib.Migrations
                             Name = "ID: 93, Index: 3",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -990,7 +991,7 @@ namespace Lib.Migrations
                             Name = "ID: 94, Index: 4",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1000,7 +1001,7 @@ namespace Lib.Migrations
                             Name = "ID: 95, Index: 5",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1010,7 +1011,7 @@ namespace Lib.Migrations
                             Name = "ID: 96, Index: 6",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1020,7 +1021,7 @@ namespace Lib.Migrations
                             Name = "ID: 97, Index: 1",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1030,7 +1031,7 @@ namespace Lib.Migrations
                             Name = "ID: 98, Index: 2",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1040,7 +1041,7 @@ namespace Lib.Migrations
                             Name = "ID: 99, Index: 3",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1050,7 +1051,7 @@ namespace Lib.Migrations
                             Name = "ID: 100, Index: 4",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1060,7 +1061,7 @@ namespace Lib.Migrations
                             Name = "ID: 101, Index: 5",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1070,7 +1071,7 @@ namespace Lib.Migrations
                             Name = "ID: 102, Index: 6",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1080,7 +1081,7 @@ namespace Lib.Migrations
                             Name = "ID: 103, Index: 1",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1090,7 +1091,7 @@ namespace Lib.Migrations
                             Name = "ID: 104, Index: 2",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1100,7 +1101,7 @@ namespace Lib.Migrations
                             Name = "ID: 105, Index: 3",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1110,7 +1111,7 @@ namespace Lib.Migrations
                             Name = "ID: 106, Index: 4",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1120,7 +1121,7 @@ namespace Lib.Migrations
                             Name = "ID: 107, Index: 5",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1130,7 +1131,7 @@ namespace Lib.Migrations
                             Name = "ID: 108, Index: 6",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1140,7 +1141,7 @@ namespace Lib.Migrations
                             Name = "ID: 109, Index: 1",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1150,7 +1151,7 @@ namespace Lib.Migrations
                             Name = "ID: 110, Index: 2",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1160,7 +1161,7 @@ namespace Lib.Migrations
                             Name = "ID: 111, Index: 3",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1170,7 +1171,7 @@ namespace Lib.Migrations
                             Name = "ID: 112, Index: 4",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1180,7 +1181,7 @@ namespace Lib.Migrations
                             Name = "ID: 113, Index: 5",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1190,7 +1191,7 @@ namespace Lib.Migrations
                             Name = "ID: 114, Index: 6",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1200,7 +1201,7 @@ namespace Lib.Migrations
                             Name = "ID: 115, Index: 1",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1210,7 +1211,7 @@ namespace Lib.Migrations
                             Name = "ID: 116, Index: 2",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1220,7 +1221,7 @@ namespace Lib.Migrations
                             Name = "ID: 117, Index: 3",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1230,7 +1231,7 @@ namespace Lib.Migrations
                             Name = "ID: 118, Index: 4",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1240,7 +1241,7 @@ namespace Lib.Migrations
                             Name = "ID: 119, Index: 5",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1250,7 +1251,7 @@ namespace Lib.Migrations
                             Name = "ID: 120, Index: 6",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1260,7 +1261,7 @@ namespace Lib.Migrations
                             Name = "ID: 121, Index: 1",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1270,7 +1271,7 @@ namespace Lib.Migrations
                             Name = "ID: 122, Index: 2",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1280,7 +1281,7 @@ namespace Lib.Migrations
                             Name = "ID: 123, Index: 3",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1290,7 +1291,7 @@ namespace Lib.Migrations
                             Name = "ID: 124, Index: 4",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1300,7 +1301,7 @@ namespace Lib.Migrations
                             Name = "ID: 125, Index: 5",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1310,7 +1311,7 @@ namespace Lib.Migrations
                             Name = "ID: 126, Index: 6",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1320,7 +1321,7 @@ namespace Lib.Migrations
                             Name = "ID: 127, Index: 1",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1330,7 +1331,7 @@ namespace Lib.Migrations
                             Name = "ID: 128, Index: 2",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1340,7 +1341,7 @@ namespace Lib.Migrations
                             Name = "ID: 129, Index: 3",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1350,7 +1351,7 @@ namespace Lib.Migrations
                             Name = "ID: 130, Index: 4",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1360,7 +1361,7 @@ namespace Lib.Migrations
                             Name = "ID: 131, Index: 5",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1370,7 +1371,7 @@ namespace Lib.Migrations
                             Name = "ID: 132, Index: 6",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1380,7 +1381,7 @@ namespace Lib.Migrations
                             Name = "ID: 133, Index: 1",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1390,7 +1391,7 @@ namespace Lib.Migrations
                             Name = "ID: 134, Index: 2",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1400,7 +1401,7 @@ namespace Lib.Migrations
                             Name = "ID: 135, Index: 3",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1410,7 +1411,7 @@ namespace Lib.Migrations
                             Name = "ID: 136, Index: 4",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1420,7 +1421,7 @@ namespace Lib.Migrations
                             Name = "ID: 137, Index: 5",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1430,7 +1431,7 @@ namespace Lib.Migrations
                             Name = "ID: 138, Index: 6",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1440,7 +1441,7 @@ namespace Lib.Migrations
                             Name = "ID: 139, Index: 1",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1450,7 +1451,7 @@ namespace Lib.Migrations
                             Name = "ID: 140, Index: 2",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1460,7 +1461,7 @@ namespace Lib.Migrations
                             Name = "ID: 141, Index: 3",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1470,7 +1471,7 @@ namespace Lib.Migrations
                             Name = "ID: 142, Index: 4",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1480,7 +1481,7 @@ namespace Lib.Migrations
                             Name = "ID: 143, Index: 5",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         },
                         new
                         {
@@ -1490,7 +1491,7 @@ namespace Lib.Migrations
                             Name = "ID: 144, Index: 6",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Type = 0
+                            Type = "Performance"
                         });
                 });
 
@@ -1516,8 +1517,9 @@ namespace Lib.Migrations
                     b.Property<DateTime>("Start")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("TermId")
                         .HasColumnType("INTEGER");
@@ -1539,7 +1541,7 @@ namespace Lib.Migrations
                             Name = "ID: 1, Index: 1",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 1,
+                            Status = "In Progress",
                             TermId = 1
                         },
                         new
@@ -1550,7 +1552,7 @@ namespace Lib.Migrations
                             Name = "ID: 2, Index: 2",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 2,
+                            Status = "Completed",
                             TermId = 1
                         },
                         new
@@ -1561,7 +1563,7 @@ namespace Lib.Migrations
                             Name = "ID: 3, Index: 3",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 3,
+                            Status = "Dropped",
                             TermId = 1
                         },
                         new
@@ -1572,7 +1574,7 @@ namespace Lib.Migrations
                             Name = "ID: 4, Index: 4",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 0,
+                            Status = "Plan to Take",
                             TermId = 1
                         },
                         new
@@ -1583,7 +1585,7 @@ namespace Lib.Migrations
                             Name = "ID: 5, Index: 5",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 1,
+                            Status = "In Progress",
                             TermId = 1
                         },
                         new
@@ -1594,7 +1596,7 @@ namespace Lib.Migrations
                             Name = "ID: 6, Index: 6",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 2,
+                            Status = "Completed",
                             TermId = 1
                         },
                         new
@@ -1605,7 +1607,7 @@ namespace Lib.Migrations
                             Name = "ID: 7, Index: 1",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 3,
+                            Status = "Dropped",
                             TermId = 2
                         },
                         new
@@ -1616,7 +1618,7 @@ namespace Lib.Migrations
                             Name = "ID: 8, Index: 2",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 0,
+                            Status = "Plan to Take",
                             TermId = 2
                         },
                         new
@@ -1627,7 +1629,7 @@ namespace Lib.Migrations
                             Name = "ID: 9, Index: 3",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 1,
+                            Status = "In Progress",
                             TermId = 2
                         },
                         new
@@ -1638,7 +1640,7 @@ namespace Lib.Migrations
                             Name = "ID: 10, Index: 4",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 2,
+                            Status = "Completed",
                             TermId = 2
                         },
                         new
@@ -1649,7 +1651,7 @@ namespace Lib.Migrations
                             Name = "ID: 11, Index: 5",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 3,
+                            Status = "Dropped",
                             TermId = 2
                         },
                         new
@@ -1660,7 +1662,7 @@ namespace Lib.Migrations
                             Name = "ID: 12, Index: 6",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 0,
+                            Status = "Plan to Take",
                             TermId = 2
                         },
                         new
@@ -1671,7 +1673,7 @@ namespace Lib.Migrations
                             Name = "ID: 13, Index: 1",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 1,
+                            Status = "In Progress",
                             TermId = 3
                         },
                         new
@@ -1682,7 +1684,7 @@ namespace Lib.Migrations
                             Name = "ID: 14, Index: 2",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 2,
+                            Status = "Completed",
                             TermId = 3
                         },
                         new
@@ -1693,7 +1695,7 @@ namespace Lib.Migrations
                             Name = "ID: 15, Index: 3",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 3,
+                            Status = "Dropped",
                             TermId = 3
                         },
                         new
@@ -1704,7 +1706,7 @@ namespace Lib.Migrations
                             Name = "ID: 16, Index: 4",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 0,
+                            Status = "Plan to Take",
                             TermId = 3
                         },
                         new
@@ -1715,7 +1717,7 @@ namespace Lib.Migrations
                             Name = "ID: 17, Index: 5",
                             ShouldNotify = false,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 1,
+                            Status = "In Progress",
                             TermId = 3
                         },
                         new
@@ -1726,7 +1728,7 @@ namespace Lib.Migrations
                             Name = "ID: 18, Index: 6",
                             ShouldNotify = true,
                             Start = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 2,
+                            Status = "Completed",
                             TermId = 3
                         },
                         new
@@ -1737,7 +1739,7 @@ namespace Lib.Migrations
                             Name = "ID: 19, Index: 1",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 3,
+                            Status = "Dropped",
                             TermId = 4
                         },
                         new
@@ -1748,7 +1750,7 @@ namespace Lib.Migrations
                             Name = "ID: 20, Index: 2",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 0,
+                            Status = "Plan to Take",
                             TermId = 4
                         },
                         new
@@ -1759,7 +1761,7 @@ namespace Lib.Migrations
                             Name = "ID: 21, Index: 3",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 1,
+                            Status = "In Progress",
                             TermId = 4
                         },
                         new
@@ -1770,7 +1772,7 @@ namespace Lib.Migrations
                             Name = "ID: 22, Index: 4",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 2,
+                            Status = "Completed",
                             TermId = 4
                         },
                         new
@@ -1781,7 +1783,7 @@ namespace Lib.Migrations
                             Name = "ID: 23, Index: 5",
                             ShouldNotify = false,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 3,
+                            Status = "Dropped",
                             TermId = 4
                         },
                         new
@@ -1792,7 +1794,7 @@ namespace Lib.Migrations
                             Name = "ID: 24, Index: 6",
                             ShouldNotify = true,
                             Start = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 0,
+                            Status = "Plan to Take",
                             TermId = 4
                         });
                 });
@@ -2958,7 +2960,8 @@ namespace Lib.Migrations
                 {
                     b.HasOne("Lib.Models.Instructor", "Instructor")
                         .WithMany("Courses")
-                        .HasForeignKey("InstructorId");
+                        .HasForeignKey("InstructorId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("Lib.Models.Term", "Term")
                         .WithMany("Courses")

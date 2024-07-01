@@ -91,6 +91,7 @@
 
     <ItemGroup>
       <Folder Include="Behaviors\" />
+      <Folder Include="Utils\" />
     </ItemGroup>
 
 </Project>

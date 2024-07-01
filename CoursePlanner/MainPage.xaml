@@ -2,16 +2,17 @@
 
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:local="clr-namespace:CoursePlanner"
-    xmlns:models="clr-namespace:Lib.Models;assembly=Lib" x:DataType="local:MainPage" x:Class="CoursePlanner.MainPage" >
+    xmlns:models="clr-namespace:Lib.Models;assembly=Lib"
+    xmlns:controls="clr-namespace:CoursePlanner.Controls"
+    Title="Terms"
+    x:DataType="local:MainPage" x:Class="CoursePlanner.MainPage" >
 
 
     <ScrollView>
 
         <VerticalStackLayout Spacing="10" Margin="10" >
 
-            <Label HorizontalOptions="Center" Style="{StaticResource TitleLabel}" Text="Terms" />
-
-            <CollectionView HorizontalOptions="Center" ItemsSource="{Binding Model.Terms}" SelectionMode="Single"
+            <CollectionView ItemsSource="{Binding Model.Terms}" SelectionMode="Single"
                 SelectedItem="{Binding Model.SelectedTerm}" >
 
                 <CollectionView.ItemsLayout>
@@ -20,33 +21,30 @@
 
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:Term" >
-                        <Border Padding="25,10" HorizontalOptions="FillAndExpand" VerticalOptions="Center" >
-
-
-                            <VerticalStackLayout Spacing="5" HorizontalOptions="Start" >
-
-
+                        <Border>
+                            <controls:FieldContainer>
                                 <HorizontalStackLayout>
-                                    <Label Style="{StaticResource LabelRightMargin}" Text="Name:" />
-                                    <Label Style="{StaticResource FieldLabel}" Text="{Binding Name}" />
+                                    <Label Text="Name:" />
+                                    <Label Text="{Binding Name}" />
                                 </HorizontalStackLayout>
 
                                 <HorizontalStackLayout>
-                                    <Label Style="{StaticResource LabelRightMargin}" Text="Start Date:" />
-                                    <Label Text="{Binding Start, Converter={StaticResource dateConverter}}" />
+                                    <Label Text="Start Date:" />
+                                    <Label Text="{Binding Start, Converter={StaticResource DateConverter}}" />
                                 </HorizontalStackLayout>
                                 <HorizontalStackLayout>
-                                    <Label Style="{StaticResource LabelRightMargin}" Text="End Date:" />
-                                    <Label Text="{Binding End, Converter={StaticResource dateConverter}}" />
+                                    <Label Text="End Date:" />
+                                    <Label Text="{Binding End, Converter={StaticResource DateConverter}}" />
                                 </HorizontalStackLayout>
                                 <HorizontalStackLayout>
-                                    <Label Text="Courses:" Style="{StaticResource LabelRightMargin}" />
+                                    <Label Text="Courses:" />
+
                                     <Label
-                                        Text="{Binding Courses, Converter={StaticResource courseListToStringConverter}}"
-                                        LineBreakMode="CharacterWrap" MaximumWidthRequest="100" />
+                                        Text="{Binding Courses, Converter={StaticResource CourseListToStringConverter}}"
+                                        MaximumWidthRequest="200"
+                                        LineBreakMode="TailTruncation"/>
                                 </HorizontalStackLayout>
-                            </VerticalStackLayout>
-
+                            </controls:FieldContainer>
                         </Border>
 
                     </DataTemplate>

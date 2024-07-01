@@ -4,13 +4,17 @@ namespace Lib.Models;
 
 public class LocalDbCtx : DbCtx
 {
-    public static string File { get; protected set; } = "";
-    
+    public static string File { get; set; } = "";
+
+    public static string DbFileName { get; set; } = "db.sqlite";
+
+    public static string ApplicationDirectoryPath { get; set; } =
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+
 
     public LocalDbCtx()
     {
-        var path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        File = Path.Combine(path, "db.sqlite");
+        File = Path.Combine(ApplicationDirectoryPath, DbFileName);
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

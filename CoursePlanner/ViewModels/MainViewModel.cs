@@ -1,9 +1,9 @@
 ﻿using System.Collections.ObjectModel;
+using CommunityToolkit.Maui.Core.Extensions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CoursePlanner.Services;
 using Lib.Models;
-using Lib.Utils;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -20,11 +20,12 @@ public partial class MainViewModel(IDbContextFactory<LocalDbCtx> factory, AppSer
     public async Task Init()
     {
         await using var db = await factory.CreateDbContextAsync();
-        Terms = await db
+        var res = await db
            .Terms
            .Include(x => x.Courses)
-           .ToListAsync()
-           .ToObservableCollectionAsync();
+           .ToListAsync();
+
+        Terms = res.ToObservableCollection();
     }
 
     [RelayCommand]
@@ -53,7 +54,6 @@ public partial class MainViewModel(IDbContextFactory<LocalDbCtx> factory, AppSer
         await appShell.GoToDetailedTermPageAsync(SelectedTerm.Id);
     }
 
-    public bool CanExecuteTermCommand() => SelectedTerm is not null;
 
     [RelayCommand]
     public async Task DeleteTermAsync()

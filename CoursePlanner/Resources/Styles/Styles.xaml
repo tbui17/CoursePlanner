@@ -229,6 +229,7 @@
 
     <Style TargetType="Label" x:Key="FieldLabel" BasedOn="{StaticResource BaseLabel}" >
         <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="VerticalOptions" Value="Center" />
     </Style>
     
    

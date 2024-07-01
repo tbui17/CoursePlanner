@@ -28,7 +28,7 @@ public class TestDataFactory
                 course.Id = courseIdCounter;
                 course.Name = ToName(courseIdCounter, i);
                 course.InstructorId = instructors[i % instructors.Count].Id;
-                course.Status = (Status)(courseIdCounter % 4);
+                course.Status = Course.Statuses.ElementAt(courseIdCounter % Course.Statuses.Count);
                 course.TermId = term.Id;
                 course.ShouldNotify = ToBool(i);
                 courses.Add(course);
@@ -44,10 +44,13 @@ public class TestDataFactory
         {
             foreach (var i in range)
             {
+                var text = new List<string>();
                 var note = Note.From(course);
+                i.Times(() => text.Add($"Note Text {note.Id}"));
                 note.Id = noteIdCounter;
-                note.Value = ToName(noteIdCounter, i);
+                note.Value = text.StringJoin($"/{i}/");
                 note.CourseId = course.Id;
+                note.Name = ToName(noteIdCounter, i);
                 notes.Add(note);
                 noteIdCounter++;
 
