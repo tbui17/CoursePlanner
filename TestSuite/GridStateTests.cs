@@ -1,8 +1,6 @@
 using FluentAssertions;
 using FluentAssertions.Execution;
 using Lib.Models;
-
-
 namespace TestSuite;
 
 public class GridStateTests
@@ -11,40 +9,51 @@ public class GridStateTests
     public void Setup() { }
 
     [Test]
-    public void Beginning_Grid_State()
+    public void Starting_State_Should_Be_All_Falsy()
     {
-        var count = 0;
+        // ReSharper disable once CollectionNeverUpdated.Local
+        var elements = new List<int>();
 
 
-        var gridState = new AutoGridState { Columns = 2, ChildCount = () => count };
+        var gridState = new AutoGridState
+        {
+            Columns = 2,
+            ChildCount = () => elements.Count
+        };
 
         using var _ = new AssertionScope();
 
-        gridState.AssertGridState(new(0, 0, false, 0));
+        var test = new GridPropertyTest(0, 0, false, 0);
+
+        test.AssertGridState(gridState);
     }
 
 
     [Test, TestCaseSource(nameof(GridStateTestCases))]
     public void GridState_Should_Be_Congruent_With_Element_Count(
         int columns,
-        List<GridTestDataItem> expected
+        List<GridPropertyTest> tests
     )
     {
         var elements = new List<int>();
-        var gridState = new AutoGridState { Columns = columns, ChildCount = () => elements.Count };
+        var gridState = new AutoGridState
+        {
+            Columns = columns,
+            ChildCount = () => elements.Count
+        };
 
         using var _ = new AssertionScope();
 
-        foreach (var item in expected)
+        foreach (var test in tests)
         {
             elements.Add(1);
-            gridState.AssertGridState(item);
+            test.AssertGridState(gridState);
         }
     }
 
     private static IEnumerable<TestCaseData> GridStateTestCases()
     {
-        List<GridTestDataItem> oneColumnCaseData =
+        List<GridPropertyTest> oneColumnCaseData =
         [
             new(0, 0, true, 1),
             new(0, 1, true, 2),
@@ -57,7 +66,7 @@ public class GridStateTests
             new(0, 8, true, 9)
         ];
 
-        GridTestCaseData[] data =
+        GridTestCase[] data =
         [
             new(0, oneColumnCaseData),
             new(1, oneColumnCaseData),
@@ -100,34 +109,43 @@ public class GridStateTests
     }
 }
 
-public record GridTestCaseData(int Columns, List<GridTestDataItem> Expected)
+public record GridTestCase(int Columns, List<GridPropertyTest> Tests)
 {
-    
-    public static implicit operator TestCaseData(GridTestCaseData data) => new(data.Columns, data.Expected);
+    public static implicit operator TestCaseData(GridTestCase data) => new(data.Columns, data.Tests);
 }
 
-public record GridTestDataItem(int Col, int Row, bool ShouldAddRow, int Rows);
-
-public static class GridStateTestExtensions
+public record GridPropertyTest(int Column, int Row, bool ShouldAddRowDefinition, int Rows)
 {
-    public static void AssertGridState(this AutoGridState gridState, GridTestDataItem item)
+    public void AssertGridState(AutoGridState gridState)
     {
-        var (column, row, shouldAddRow, rows) = item;
+        using var scope = new AssertionScope();
+
+        var data = new
+        {
+            Id = Guid
+               .NewGuid()
+               .ToString(),
+            GridState = gridState.ToString(),
+            TestData = ToString(),
+        };
+
+        scope.AddReportable(data.Id, data.ToString);
+        
         gridState
            .Column
            .Should()
-           .Be(column);
+           .Be(Column, ToString());
         gridState
            .Row
            .Should()
-           .Be(row);
+           .Be(Row);
         gridState
            .ShouldAddRowDefinition
            .Should()
-           .Be(shouldAddRow);
+           .Be(ShouldAddRowDefinition);
         gridState
            .Rows
            .Should()
-           .Be(rows);
+           .Be(Rows);
     }
 }

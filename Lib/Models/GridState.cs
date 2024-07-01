@@ -1,6 +1,6 @@
 ﻿namespace Lib.Models;
 
-public abstract class GridState
+public abstract record GridState
 {
     public required Func<int> ChildCount { get; init; }
 
@@ -34,7 +34,7 @@ public abstract class GridState
         };
 }
 
-public class AutoGridState : GridState
+public record AutoGridState : GridState
 {
     public bool ShouldAddRowDefinition => Column is 0 && Count > 0;
 }
