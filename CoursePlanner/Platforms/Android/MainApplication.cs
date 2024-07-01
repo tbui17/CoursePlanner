@@ -1,8 +1,7 @@
-﻿using System;
-using Android;
+﻿using Android;
 using Android.App;
 using Android.Runtime;
-using Microsoft.Maui.Hosting;
+
 [assembly: UsesPermission(Manifest.Permission.WakeLock)]
 [assembly: UsesPermission(Manifest.Permission.ReceiveBootCompleted)]
 [assembly: UsesPermission(Manifest.Permission.Vibrate)]
