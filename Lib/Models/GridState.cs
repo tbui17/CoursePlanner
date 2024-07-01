@@ -3,7 +3,14 @@
 public abstract class GridState
 {
     public required Func<int> ChildCount { get; init; }
-    public int Columns { get; init; } = 2;
+
+    private readonly int _columns = 2;
+
+    public int Columns
+    {
+        get => _columns;
+        init => _columns = Math.Max(value, 1);
+    }
 
     protected int Index => Count - 1;
 
