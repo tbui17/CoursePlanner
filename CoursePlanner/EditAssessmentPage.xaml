@@ -25,6 +25,6 @@
             <Label Text="Should Notify:" />
             <Switch IsToggled="{Binding ShouldNotify}" />
         </controls:AutoGrid>
-        <Button Text="Save" Command="{Binding SaveCommand}" HorizontalOptions="Center" />
+        <Button Text="Save" Command="{Binding SaveCommand}"  />
     </VerticalStackLayout>
 </ContentPage>

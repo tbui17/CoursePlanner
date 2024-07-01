@@ -21,6 +21,6 @@
             <Label Text="End:" />
             <DatePicker Date="{Binding End}" />
         </controls:AutoGrid>
-        <Button Text="Save" Command="{Binding SaveCommand}" HorizontalOptions="Center" />
+        <Button Text="Save" Command="{Binding SaveCommand}" />
     </VerticalStackLayout>
 </ContentPage>
