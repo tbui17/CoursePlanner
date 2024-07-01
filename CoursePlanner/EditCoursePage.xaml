@@ -29,6 +29,6 @@
                 SelectedItem="{Binding SelectedStatus}"
                 ItemsSource="{Binding Statuses}" />
         </controls:AutoGrid>
-        <Button Text="Save" Command="{Binding SaveCommand}" HorizontalOptions="Center" />
+        <Button Text="Save" Command="{Binding SaveCommand}" />
     </VerticalStackLayout>
 </ContentPage>

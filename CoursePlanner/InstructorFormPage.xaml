@@ -22,6 +22,6 @@
             <Label Text="Phone:" />
             <Entry Text="{Binding Phone}" />
         </controls:AutoGrid>
-        <Button Text="Save" Command="{Binding SaveCommand}" HorizontalOptions="Center" />
+        <Button Text="Save" Command="{Binding SaveCommand}" />
     </VerticalStackLayout>
 </ContentPage>
