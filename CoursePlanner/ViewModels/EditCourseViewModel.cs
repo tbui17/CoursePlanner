@@ -35,7 +35,7 @@ public partial class EditCourseViewModel(ILocalDbCtxFactory factory, AppService 
     [RelayCommand]
     public async Task SaveAsync()
     {
-        var db = await factory.CreateDbContextAsync();
+        await using var db = await factory.CreateDbContextAsync();
         var course = await db
            .Courses
            .AsTracking()

@@ -34,7 +34,7 @@ public partial class EditAssessmentViewModel(ILocalDbCtxFactory factory, AppServ
     [RelayCommand]
     public async Task SaveAsync()
     {
-        var db = await factory.CreateDbContextAsync();
+        await using var db = await factory.CreateDbContextAsync();
         var assessment = await db
            .Assessments
            .AsTracking()

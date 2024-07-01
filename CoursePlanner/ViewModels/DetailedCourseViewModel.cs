@@ -1,6 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.Text;
-using System.Text.Json;
 using CommunityToolkit.Maui.Core.Extensions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
