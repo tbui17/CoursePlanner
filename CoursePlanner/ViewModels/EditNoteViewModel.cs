@@ -20,7 +20,7 @@ public partial class EditNoteViewModel(ILocalDbCtxFactory factory, AppService ap
     [RelayCommand]
     public async Task SaveAsync()
     {
-        var db = await factory.CreateDbContextAsync();
+        await using var db = await factory.CreateDbContextAsync();
         var note = await db
            .Notes
            .AsTracking()
