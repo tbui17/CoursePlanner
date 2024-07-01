@@ -1,9 +1,10 @@
 ﻿using System.Collections.ObjectModel;
+using CommunityToolkit.Maui.Core.Extensions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CoursePlanner.Services;
 using Lib.Models;
-using Lib.Utils;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace CoursePlanner.ViewModels;

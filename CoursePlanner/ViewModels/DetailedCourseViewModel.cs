@@ -1,16 +1,17 @@
 ﻿using System.Collections.ObjectModel;
+using System.Text;
 using System.Text.Json;
 using CommunityToolkit.Maui.Core.Extensions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CoursePlanner.Services;
 using Lib.Models;
+using Lib.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace CoursePlanner.ViewModels;
 
-
-public partial class DetailedCourseViewModel : ObservableObject
+public partial class DetailedCourseViewModel(ILocalDbCtxFactory factory, AppService appShell) : ObservableObject
 {
     [ObservableProperty]
     private int _id;
@@ -38,18 +39,7 @@ public partial class DetailedCourseViewModel : ObservableObject
     [ObservableProperty]
     private Note? _selectedNote;
 
-    private readonly IDbContextFactory<LocalDbCtx> _factory;
-    private readonly AppService _appShell;
 
-    
-    public DetailedCourseViewModel(IDbContextFactory<LocalDbCtx> factory, AppService appShell)
-    {
-        _factory = factory;
-        _appShell = appShell;
-        
-    }
-
-    
     async partial void OnSelectedInstructorChanged(Instructor? oldValue, Instructor? newValue)
     {
         if (newValue is not { Id: > 0 })
@@ -62,19 +52,17 @@ public partial class DetailedCourseViewModel : ObservableObject
             return;
         }
 
-        await using var db = await _factory.CreateDbContextAsync();
+        await using var db = await factory.CreateDbContextAsync();
         await db
            .Courses
            .Where(x => x.Id == Course.Id)
            .ExecuteUpdateAsync(x => x.SetProperty(p => p.InstructorId, newValue.Id));
-        
     }
-     
 
 
     private async Task Init(int id)
     {
-        await using var db = await _factory.CreateDbContextAsync();
+        await using var db = await factory.CreateDbContextAsync();
         var course = await db
                .Courses
                .Include(x => x.Instructor)
@@ -87,34 +75,51 @@ public partial class DetailedCourseViewModel : ObservableObject
 
         Course = course;
         Instructors = instructors.ToObservableCollection();
-        SelectedInstructor = Instructors.FirstOrDefault();
+        SelectedInstructor = Instructors.FirstOrDefault(x => x.Id == course.Instructor?.Id);
         SelectedNote = Notes.FirstOrDefault();
     }
 
     [RelayCommand]
     public async Task EditAsync()
     {
-        await _appShell.GoToEditCoursePageAsync(Course.Id);
+        await appShell.GoToEditCoursePageAsync(Course.Id);
     }
 
     [RelayCommand]
     public async Task AddInstructorAsync()
     {
-        await _appShell.GoToAddInstructorPageAsync();
+        await appShell.GoToAddInstructorPageAsync();
     }
-    
+
     [RelayCommand]
     public async Task EditInstructorAsync()
     {
         if (SelectedInstructor is not { Id: var id and > 0 }) return;
-        await _appShell.GotoEditInstructorPageAsync(id);
+        await appShell.GotoEditInstructorPageAsync(id);
+    }
+
+    [RelayCommand]
+    public async Task DeleteInstructorAsync()
+    {
+        if (SelectedInstructor is not { Id: var id and > 0 }) return;
+        await using var db = await factory.CreateDbContextAsync();
+        await db
+           .Instructors
+           .Where(x => x.Id == id)
+           .ExecuteDeleteAsync();
+        await RefreshAsync();
     }
 
     [RelayCommand]
     public async Task AddAssessmentAsync()
     {
-        await using var db = await _factory.CreateDbContextAsync();
+        var name = await appShell.DisplayNamePromptAsync();
+
+        if (name is null) return;
+
+        await using var db = await factory.CreateDbContextAsync();
         var assessment = Assessment.From(Course);
+        assessment.Name = name;
         db.Assessments.Add(assessment);
         await db.SaveChangesAsync();
         await RefreshAsync();
@@ -124,16 +129,16 @@ public partial class DetailedCourseViewModel : ObservableObject
     public async Task DetailedAssessmentAsync()
     {
         if (SelectedAssessment is not { Id: var id and > 0 }) return;
-        
-        await _appShell.GoToAssessmentDetailsPageAsync(id);
+
+        await appShell.GoToAssessmentDetailsPageAsync(id);
     }
 
     [RelayCommand]
-    public async Task DeleteCourseAsync()
+    public async Task DeleteAssessmentAsync()
     {
-        await using var db = await _factory.CreateDbContextAsync();
+        await using var db = await factory.CreateDbContextAsync();
         await db
-           .Courses
+           .Assessments
            .Where(x => x.Id == Course.Id)
            .ExecuteDeleteAsync();
         await RefreshAsync();
@@ -142,8 +147,13 @@ public partial class DetailedCourseViewModel : ObservableObject
     [RelayCommand]
     public async Task AddNoteAsync()
     {
-        await using var db = await _factory.CreateDbContextAsync();
+        var name = await appShell.DisplayNamePromptAsync();
+
+        if (name is null) return;
+
+        await using var db = await factory.CreateDbContextAsync();
         var note = Note.From(Course);
+        note.Name = name;
         db.Notes.Add(note);
         await db.SaveChangesAsync();
         await RefreshAsync();
@@ -153,14 +163,14 @@ public partial class DetailedCourseViewModel : ObservableObject
     public async Task DetailedNoteAsync()
     {
         if (SelectedNote is not { Id: var id and > 0 }) return;
-        await _appShell.GoToNoteDetailsPageAsync(id);
+        await appShell.GoToNoteDetailsPageAsync(id);
     }
 
     [RelayCommand]
     public async Task DeleteNoteAsync()
     {
         if (SelectedNote is not { Id: > 0 }) return;
-        await using var db = await _factory.CreateDbContextAsync();
+        await using var db = await factory.CreateDbContextAsync();
         await db
            .Notes
            .Where(x => x.Id == SelectedNote.Id)
@@ -172,13 +182,9 @@ public partial class DetailedCourseViewModel : ObservableObject
     {
         if (SelectedNote is not { Id: > 0 }) return;
 
-        var request = new ShareTextRequest
-        {
-            Title = "Share Note",
-            Text = CreateNoteText()
-        };
+        var request = new ShareTextRequest { Title = "Share Note", Text = CreateNoteText() };
 
-        await _appShell.ShareAsync(request);
+        await appShell.ShareAsync(request);
 
         return;
 
@@ -187,21 +193,25 @@ public partial class DetailedCourseViewModel : ObservableObject
             var data = new
             {
                 CourseId = Course.Id,
-                Text = SelectedNote.Value,
                 Course = Course.Name,
+                Instructor = SelectedNote.Course.Instructor?.ToString() ?? "",
                 CourseStart = SelectedNote.Course.Start,
                 CourseEnd = SelectedNote.Course.End,
-                Instructor = SelectedNote.Course.Instructor?.ToString() ?? "",
+                Text = SelectedNote.Value,
             };
-            return JsonSerializer.Serialize(data,new JsonSerializerOptions{WriteIndented = true});
-        }
 
+            return data
+               .GetType()
+               .GetProperties()
+               .Select(x => $"{x.Name}: {x.GetValue(data)}")
+               .StringJoin("\n");
+        }
     }
 
     [RelayCommand]
     public async Task BackAsync()
     {
-        await _appShell.GoBackToDetailedTermPageAsync();
+        await appShell.GoBackToDetailedTermPageAsync();
     }
 
     public async Task RefreshAsync()

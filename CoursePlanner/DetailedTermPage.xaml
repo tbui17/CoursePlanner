@@ -4,43 +4,52 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:coursePlanner="clr-namespace:CoursePlanner"
     xmlns:models="clr-namespace:Lib.Models;assembly=Lib"
     xmlns:viewModels="clr-namespace:CoursePlanner.ViewModels"
+    xmlns:controls="clr-namespace:CoursePlanner.Controls"
     x:DataType="viewModels:DetailedTermViewModel"
+    Title="Detailed Term"
     x:Class="CoursePlanner.DetailedTermPage" >
 
- 
 
     <ContentPage.Content>
 
         <ScrollView>
             <VerticalStackLayout Spacing="50" >
 
-                <HorizontalStackLayout>
-                    <Label HorizontalOptions="Center" Style="{StaticResource TitleLabel}" Text="Detailed Term" />
-                </HorizontalStackLayout>
-
-
                 <VerticalStackLayout Spacing="25" >
-                    <Label HorizontalOptions="Center" Text="Fields" />
-                    <Grid RowDefinitions="*,*,*" ColumnDefinitions="40*,60*" >
-                        <Label Grid.Column="0" Grid.Row="0" Text="Name:" />
-                        <Label Grid.Column="1" Grid.Row="0" Text="{Binding Term.Name}" />
-                        <Label Grid.Column="0" Grid.Row="1" Text="Start:" />
-                        <Label Grid.Column="1" Grid.Row="1"
-                            Text="{Binding Term.Start, Converter={StaticResource dateConverter}}" />
-                        <Label Grid.Column="0" Grid.Row="2" Text="End:" />
-                        <Label Grid.Column="1" Grid.Row="2"
-                            Text="{Binding Term.End, Converter={StaticResource dateConverter}}" />
-                    </Grid>
-                    <Button Text="Edit" HorizontalOptions="Center" Command="{Binding EditTermCommand}" />
+                    <Label Style="{StaticResource Subheading}" Text="Fields" />
+
+                    <controls:FieldContainer>
+                        <HorizontalStackLayout>
+                            <Label Text="Name:" />
+                            <Label Text="{Binding Term.Name}" />
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout>
+                            <Label Text="Start:" />
+                            <Label Text="{Binding Term.Start, Converter={StaticResource DateConverter}}" />
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout>
+                            <Label Text="End:" />
+                            <Label Text="{Binding Term.End, Converter={StaticResource DateConverter}}" />
+                        </HorizontalStackLayout>
+                    </controls:FieldContainer>
+
+                    <Button Text="Edit" Command="{Binding EditTermCommand}" />
                 </VerticalStackLayout>
 
 
-                <Label Text="Courses" HorizontalOptions="Center" />
+                <Label Style="{StaticResource Subheading}" Text="Courses" />
 
                 <ScrollView Orientation="Both" >
 
                     <CollectionView x:Name="CoursesView" ItemsSource="{Binding Courses}" SelectionMode="Single"
                         SelectedItem="{Binding SelectedCourse}" >
+
+                        <CollectionView.Resources>
+                            <Style TargetType="Label" >
+                                <Setter Property="HorizontalOptions" Value="Center" />
+
+                            </Style>
+                        </CollectionView.Resources>
 
 
                         <CollectionView.ItemsLayout>
@@ -48,12 +57,13 @@
                         </CollectionView.ItemsLayout>
 
                         <CollectionView.Header>
-                            <Grid ColumnDefinitions="100,100,100,100,100" ColumnSpacing="10" >
-                                <Label Text="Name" Grid.Column="0" HorizontalOptions="Center" />
-                                <Label Text="Instructor" Grid.Column="1" HorizontalOptions="Center" />
-                                <Label Text="Start" Grid.Column="2" HorizontalOptions="Center" />
-                                <Label Text="End" Grid.Column="3" HorizontalOptions="Center" />
-                                <Label Text="Should Notify" Grid.Column="4" HorizontalOptions="Center" />
+                            <Grid ColumnDefinitions="100,100,100,100,100,100" ColumnSpacing="10" >
+                                <Label Text="Name" Grid.Column="0" />
+                                <Label Text="Instructor" Grid.Column="1" />
+                                <Label Text="Start" Grid.Column="2" />
+                                <Label Text="End" Grid.Column="3" />
+                                <Label Text="Notifications" Grid.Column="4" />
+                                <Label Text="Status " Grid.Column="5" />
                             </Grid>
                         </CollectionView.Header>
 
@@ -61,15 +71,15 @@
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="models:Course" >
                                 <Border>
-                                    <Grid ColumnDefinitions="100,100,100,100,100" ColumnSpacing="10" >
-                                        <Label Text="{Binding Name}" Grid.Column="0" HorizontalOptions="Center" />
-                                        <Label Text="{Binding Instructor.Name, FallbackValue=''}" Grid.Column="1"
-                                            HorizontalOptions="Center" />
-                                        <Label Text="{Binding Start, Converter={StaticResource dateConverter}}"
-                                            Grid.Column="2" HorizontalOptions="Center" />
-                                        <Label Text="{Binding End, Converter={StaticResource dateConverter}}"
-                                            Grid.Column="3" HorizontalOptions="Center" />
-                                        <Label Text="{Binding ShouldNotify}" Grid.Column="4" HorizontalOptions="Center" />
+                                    <Grid ColumnDefinitions="100,100,100,100,100,100" ColumnSpacing="10" >
+                                        <Label Text="{Binding Name}" Grid.Column="0" />
+                                        <Label Text="{Binding Instructor.Name, FallbackValue=''}" Grid.Column="1" />
+                                        <Label Text="{Binding Start, Converter={StaticResource DateConverter}}"
+                                            Grid.Column="2" />
+                                        <Label Text="{Binding End, Converter={StaticResource DateConverter}}"
+                                            Grid.Column="3" />
+                                        <Label Text="{Binding ShouldNotify}" Grid.Column="4" />
+                                        <Label Text="{Binding Status}" Grid.Column="5" />
                                     </Grid>
                                 </Border>
                             </DataTemplate>
@@ -80,18 +90,11 @@
                 </ScrollView>
 
 
-                <FlexLayout Style="{StaticResource ButtonContainer}" >
-                    <FlexLayout.Resources>
-                        <Style TargetType="Button" BasedOn="{StaticResource ButtonStyle}" >
-                            <Setter Property="MinimumWidthRequest" Value="75" />
-
-                        </Style>
-                    </FlexLayout.Resources>
+                <controls:ButtonContainer HorizontalOptions="Center" >
                     <Button Text="Add" Command="{Binding AddCourseCommand}" />
                     <Button Text="Details" Command="{Binding DetailedCourseCommand}" />
                     <Button Text="Delete" Command="{Binding DeleteCourseCommand}" />
-
-                </FlexLayout>
+                </controls:ButtonContainer>
 
 
             </VerticalStackLayout>

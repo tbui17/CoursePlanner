@@ -1,4 +1,6 @@
-﻿using CoursePlanner.ViewModels;
+﻿
+using CoursePlanner.ViewModels;
+
 
 namespace CoursePlanner;
 
@@ -11,8 +13,11 @@ public partial class EditCoursePage : ContentPage
         Model = model;
         InitializeComponent();
         HideSoftInputOnTapped = true;
+        BindingContext = Model;
+
+
     }
-    
+
     protected override async void OnAppearing()
     {
         base.OnAppearing();

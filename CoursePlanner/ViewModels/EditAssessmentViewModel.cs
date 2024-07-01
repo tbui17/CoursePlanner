@@ -1,6 +1,9 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Collections.ObjectModel;
+using CommunityToolkit.Maui.Core.Extensions;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CoursePlanner.Services;
+using Lib.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace CoursePlanner.ViewModels;
@@ -19,10 +22,14 @@ public partial class EditAssessmentViewModel(ILocalDbCtxFactory factory, AppServ
 
     [ObservableProperty]
     private DateTime _end;
-    
+
     [ObservableProperty]
     private bool _shouldNotify;
-    
+
+    public ObservableCollection<string> AssessmentTypes { get; } = Assessment.Types.ToObservableCollection();
+
+    [ObservableProperty]
+    private string _selectedAssessmentType = Assessment.Types.First();
 
     [RelayCommand]
     public async Task SaveAsync()
@@ -36,6 +43,8 @@ public partial class EditAssessmentViewModel(ILocalDbCtxFactory factory, AppServ
         assessment.Name = Name;
         assessment.Start = Start;
         assessment.End = End;
+        assessment.ShouldNotify = ShouldNotify;
+        assessment.Type = SelectedAssessmentType;
 
         await db.SaveChangesAsync();
         await BackAsync();
@@ -61,7 +70,7 @@ public partial class EditAssessmentViewModel(ILocalDbCtxFactory factory, AppServ
         Start = assessment.Start;
         End = assessment.End;
         ShouldNotify = assessment.ShouldNotify;
-        
+        SelectedAssessmentType = assessment.Type;
     }
 
     public async Task RefreshAsync()

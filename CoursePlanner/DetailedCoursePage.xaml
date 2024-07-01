@@ -5,6 +5,7 @@
     xmlns:models="clr-namespace:Lib.Models;assembly=Lib"
     xmlns:viewModels="clr-namespace:CoursePlanner.ViewModels"
     xmlns:controls="clr-namespace:CoursePlanner.Controls"
+    Title="Detailed Course"
     x:DataType="viewModels:DetailedCourseViewModel"
 
     x:Class="CoursePlanner.DetailedCoursePage" >
@@ -13,9 +14,6 @@
 
         <ScrollView>
             <VerticalStackLayout Spacing="50" >
-
-                <Label Style="{StaticResource TitleLabel}" Text="Detailed Course" />
-
                 <VerticalStackLayout Spacing="25" >
                     <Label Style="{StaticResource Subheading}" Text="Fields" />
 
@@ -24,20 +22,25 @@
                             <Label Text="Name:" />
                             <Label Text="{Binding Course.Name}" />
                         </HorizontalStackLayout>
-                        
+
                         <HorizontalStackLayout>
                             <Label Text="Start:" />
-                            <Label Text="{Binding Course.Start, Converter={StaticResource dateConverter}}" />
+                            <Label Text="{Binding Course.Start, Converter={StaticResource DateConverter}}" />
                         </HorizontalStackLayout>
 
                         <HorizontalStackLayout>
                             <Label Text="End:" />
-                            <Label Text="{Binding Course.End, Converter={StaticResource dateConverter}}" />
+                            <Label Text="{Binding Course.End, Converter={StaticResource DateConverter}}" />
                         </HorizontalStackLayout>
 
                         <HorizontalStackLayout>
                             <Label Text="Notifications:" />
                             <Label Text="{Binding Course.ShouldNotify}" />
+                        </HorizontalStackLayout>
+
+                        <HorizontalStackLayout>
+                            <Label Text="Status:" />
+                            <Label Text="{Binding Course.Status}" />
                         </HorizontalStackLayout>
                     </controls:FieldContainer>
 
@@ -47,15 +50,17 @@
 
 
                 <VerticalStackLayout Spacing="10" >
-                    <HorizontalStackLayout Spacing="5">
-                        <Label Text="Instructor:" Style="{StaticResource FieldLabel}" VerticalOptions="Center" />
-                        <Picker ItemsSource="{Binding Instructors}" SelectedItem="{Binding SelectedInstructor}" VerticalOptions="Center" />
-                    </HorizontalStackLayout>
+                    <controls:AutoGrid>
+                        <Label Text="Instructor:" Style="{StaticResource FieldLabel}" />
+                        <Picker ItemsSource="{Binding Instructors}" SelectedItem="{Binding SelectedInstructor}" />
+                    </controls:AutoGrid>
 
-                    <HorizontalStackLayout Spacing="5" >
+
+                    <controls:ButtonContainer>
                         <Button Text="Add" Command="{Binding AddInstructorCommand}" />
                         <Button Text="Edit" Command="{Binding EditInstructorCommand}" />
-                    </HorizontalStackLayout>
+                        <Button Text="Delete" Command="{Binding DeleteInstructorCommand}" />
+                    </controls:ButtonContainer>
                 </VerticalStackLayout>
 
                 <Label Text="Assessments" Style="{StaticResource Subheading}" />
@@ -80,16 +85,21 @@
 
                                     <HorizontalStackLayout>
                                         <Label Text="Start Date:" />
-                                        <Label Text="{Binding Start, Converter={StaticResource dateConverter}}" />
+                                        <Label Text="{Binding Start, Converter={StaticResource DateConverter}}" />
                                     </HorizontalStackLayout>
                                     <HorizontalStackLayout>
                                         <Label Text="End Date:" />
-                                        <Label Text="{Binding End, Converter={StaticResource dateConverter}}" />
+                                        <Label Text="{Binding End, Converter={StaticResource DateConverter}}" />
                                     </HorizontalStackLayout>
 
                                     <HorizontalStackLayout>
                                         <Label Text="Notifications" />
                                         <Label Text="{Binding ShouldNotify}" />
+                                    </HorizontalStackLayout>
+
+                                    <HorizontalStackLayout>
+                                        <Label Text="Type:" />
+                                        <Label Text="{Binding Type }" />
                                     </HorizontalStackLayout>
                                 </controls:FieldContainer>
 
@@ -108,7 +118,7 @@
                     </FlexLayout.Resources>
                     <Button Text="Add" Command="{Binding AddAssessmentCommand}" />
                     <Button Text="Details" Command="{Binding DetailedAssessmentCommand}" />
-                    <Button Text="Delete" Command="{Binding DeleteCourseCommand}" />
+                    <Button Text="Delete" Command="{Binding DeleteAssessmentCommand}" />
 
                 </FlexLayout>
 
@@ -117,12 +127,12 @@
 
                 <CollectionView ItemsSource="{Binding Notes}" SelectionMode="Single"
                     SelectedItem="{Binding SelectedNote}" >
-                
+
                     <CollectionView.ItemsLayout>
                         <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
                     </CollectionView.ItemsLayout>
-                
-                
+
+
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="models:Note" >
                             <Border>

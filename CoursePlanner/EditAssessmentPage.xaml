@@ -1,8 +1,30 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" x:Class="CoursePlanner.EditAssessmentPage" >
-    <ContentPage.Content>
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:CoursePlanner.Controls"
+    xmlns:viewModels="clr-namespace:CoursePlanner.ViewModels"
+    x:DataType="viewModels:EditAssessmentViewModel"
+    Title="Edit Assessment"
+    x:Class="CoursePlanner.EditAssessmentPage" >
 
-    </ContentPage.Content>
+    <ContentPage.Resources>
+        <Style TargetType="Label" BasedOn="{StaticResource FieldLabel}" ></Style>
+    </ContentPage.Resources>
+
+    <VerticalStackLayout Margin="10,10" >
+        <controls:AutoGrid>
+            <Label Text="Name:" />
+            <Entry Text="{Binding Name}" />
+            <Label Text="Type:" />
+            <Picker SelectedItem="{Binding SelectedAssessmentType}" ItemsSource="{Binding AssessmentTypes }" />
+            <Label Text="Start Date:" />
+            <DatePicker Date="{Binding Start}" />
+            <Label Text="End Date:" />
+            <DatePicker Date="{Binding End}" />
+            <Label Text="Should Notify:" />
+            <Switch IsToggled="{Binding ShouldNotify}" />
+        </controls:AutoGrid>
+        <Button Text="Save" Command="{Binding SaveCommand}" HorizontalOptions="Center" />
+    </VerticalStackLayout>
 </ContentPage>

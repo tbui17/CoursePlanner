@@ -1,9 +1,24 @@
-﻿namespace Lib.Models;
+﻿using Lib.Utils;
+
+namespace Lib.Models;
 
 public class Assessment : INotification
 {
+    public const string Performance = "Performance";
+    public const string Objective = "Objective";
+
+    public static readonly ISet<string> Types = new HashSet<string> { Performance, Objective };
+
     public int Id { get; set; }
-    public AssessmentType Type { get; set; } = AssessmentType.Performance;
+
+    private string _type = Types.First();
+
+    public string Type
+    {
+        get => _type;
+        set => _type = Types.GetOrThrow(value);
+    }
+
     public string Name { get; set; } = string.Empty;
     public DateTime Start { get; set; } = DateTime.Now;
     public DateTime End { get; set; } = DateTime.Now;
@@ -22,10 +37,4 @@ public class Assessment : INotification
             ShouldNotify = false,
         };
     }
-}
-
-public enum AssessmentType
-{
-    Performance,
-    Objective
 }

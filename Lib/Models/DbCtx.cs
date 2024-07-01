@@ -16,7 +16,9 @@ public class DbCtx : DbContext
     {
         b
            .UseSqlite("Data Source=db.sqlite")
-           .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+           .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
+           .EnableSensitiveDataLogging()
+           .EnableDetailedErrors();
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -37,9 +39,18 @@ public class DbCtx : DbContext
         b
            .Entity<Course>()
            .HasData(courses);
+
+        b
+           .Entity<Course>()
+           .HasOne(x => x.Instructor)
+           .WithMany(x => x.Courses)
+           .HasForeignKey(x => x.InstructorId)
+           .OnDelete(DeleteBehavior.SetNull);
+
         b
            .Entity<Note>()
            .HasData(notes);
+        
         b
            .Entity<Assessment>()
            .HasData(assessments);

@@ -11,7 +11,7 @@ public partial class EditTermPage
         Model = model;
         InitializeComponent();
         HideSoftInputOnTapped = true;
-        BindingContext = model;
+        BindingContext = Model;
     }
 
     protected override async void OnAppearing()

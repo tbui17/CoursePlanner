@@ -8,15 +8,19 @@
     x:Class="CoursePlanner.EditTermPage"
     x:DataType="viewModels:EditTermViewModel" Title="Edit Term" >
 
+    <ContentPage.Resources>
+        <Style TargetType="Label" BasedOn="{StaticResource FieldLabel}" ></Style>
+    </ContentPage.Resources>
 
-   
-    
-    <controls:AutoGrid>
-        <Label Text="Name:" />
-        <Entry Text="{Binding Name}" />
-        <Label Text="Start:" />
-        <DatePicker Date="{Binding Start}" />
-        <Label Text="End:" />
-        <DatePicker Date="{Binding End}" />
-    </controls:AutoGrid>
+    <VerticalStackLayout Margin="10,10" >
+        <controls:AutoGrid>
+            <Label Text="Name:" />
+            <Entry Text="{Binding Name}" />
+            <Label Text="Start:" />
+            <DatePicker Date="{Binding Start}" />
+            <Label Text="End:" />
+            <DatePicker Date="{Binding End}" />
+        </controls:AutoGrid>
+        <Button Text="Save" Command="{Binding SaveCommand}" HorizontalOptions="Center" />
+    </VerticalStackLayout>
 </ContentPage>

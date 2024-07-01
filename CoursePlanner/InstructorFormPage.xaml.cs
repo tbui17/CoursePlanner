@@ -8,9 +8,15 @@ public partial class InstructorFormPage : ContentPage
     {
         Model = model;
         InitializeComponent();
-        BindingContext = Model;
         HideSoftInputOnTapped = true;
+        BindingContext = Model;
     }
 
     public InstructorFormViewModel Model { get; set; }
+    
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+        await Model.RefreshAsync();
+    }
 }

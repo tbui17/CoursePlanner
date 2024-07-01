@@ -1,31 +1,30 @@
 ﻿using Lib.Models;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
-namespace CoursePlanner
+
+
+namespace CoursePlanner;
+
+public partial class App
 {
-    public partial class App : Application
+    public App()
     {
-        public App()
+        LocalDbCtx.ApplicationDirectoryPath = FileSystem.Current.AppDataDirectory;
+        using var db = new LocalDbCtx();
+        try
         {
-            var file = new FileInfo(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
-            if (file.Exists)
-            {
-                file.Delete();
-                using var db = new LocalDbCtx();
-                db.Database.EnsureDeleted();
-                db.Database.Migrate();
-            }
-            else
-            {
-                using var db = new LocalDbCtx();
-                db.Database.EnsureDeleted();
-                db.Database.Migrate();
-            }
-
-            InitializeComponent();
-
-
-            MainPage = new AppShell();
+            db.Database.Migrate();
         }
+        catch (SqliteException e) when (e.Message.Contains("already exists"))
+        {
+            Console.Error.WriteLine(e);
+            db.Database.EnsureDeleted();
+            db.Database.Migrate();
+        }
+        
+        InitializeComponent();
+        
+        MainPage = new AppShell();
     }
 }
