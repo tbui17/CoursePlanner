@@ -69,20 +69,24 @@ public record NotificationResult
 
     public bool IsUpcoming => StartIsUpcoming || EndIsUpcoming;
 
-    public IList<string> ToMessages()
+    public string ToMessage()
     {
-        var messages = new List<string>();
+        if (StartIsUpcoming && EndIsUpcoming)
+        {
+            return $"{Entity.Name} starts soon at {Entity.Start} and ends soon at {Entity.End}";
+        }
+
         if (StartIsUpcoming)
         {
-            messages.Add($"{Entity.Name} starts soon at {Entity.Start}");
+            return $"{Entity.Name} starts soon at {Entity.Start}";
         }
 
         if (EndIsUpcoming)
         {
-            messages.Add($"{Entity.Name} ends soon at {Entity.End}");
+            return $"{Entity.Name} ends soon at {Entity.End}";
         }
 
-        return messages;
+        return "";
     }
 
 
@@ -100,6 +104,7 @@ public static class NotificationResultExtensions
 {
     public static string ToMessage(this IEnumerable<NotificationResult> results) =>
         results
-           .SelectMany(x => x.ToMessages())
+           .Select(x => x.ToMessage())
+           .Where(x => !string.IsNullOrEmpty(x))
            .StringJoin(Environment.NewLine);
 }
