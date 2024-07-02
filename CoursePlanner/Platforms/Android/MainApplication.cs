@@ -5,7 +5,7 @@ using Android.Runtime;
 [assembly: UsesPermission(Manifest.Permission.WakeLock)]
 [assembly: UsesPermission(Manifest.Permission.ReceiveBootCompleted)]
 [assembly: UsesPermission(Manifest.Permission.Vibrate)]
-[assembly: UsesPermission("android.permission.POST_NOTIFICATIONS")]
+[assembly: UsesPermission(Manifest.Permission.PostNotifications)]
 namespace CoursePlanner
 {
 
