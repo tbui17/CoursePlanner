@@ -1,6 +1,8 @@
-﻿using Lib.Models;
+﻿using Android.Util;
+using Lib.Models;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+
 
 namespace CoursePlanner;
 
@@ -25,10 +27,11 @@ public partial class App
         }
         catch (SqliteException e) when (e.Message.Contains("already exists"))
         {
-            Console.WriteLine($"A database entity already exists. Attempting to re-initialize database. ${e.Message}");
+            Log.Warn("DATABASE", $"A database entity already exists. Attempting to re-initialize database. ${e.Message}"
+            );
             db.Database.EnsureDeleted();
             db.Database.Migrate();
-            Console.WriteLine("Database re-initialized.");
+            Log.Info("DATABASE", "Database re-initialized.");
         }
     }
 }
