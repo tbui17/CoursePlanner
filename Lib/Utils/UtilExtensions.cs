@@ -1,4 +1,6 @@
-﻿namespace Lib.Utils;
+﻿using System.Text;
+
+namespace Lib.Utils;
 
 public static class UtilExtensions
 {
@@ -40,16 +42,22 @@ public static class UtilExtensions
             action();
         }
     }
-}
 
-public static class Util
-{
-    public static string FullPath(string path)
+    public static string SpaceBetweenUppers(this string text)
     {
-        var start = path.IndexOf('(') + 1;
-        var end = path.IndexOf(')');
-        var str = path[start..end];
+        var sb = new StringBuilder();
 
-        return str;
+        foreach (var c in text)
+        {
+            if (char.IsUpper(c) && sb.Length > 0)
+            {
+                sb.Append(' ');
+            }
+
+            sb.Append(c);
+        }
+
+        return sb.ToString();
     }
 }
+
