@@ -23,13 +23,18 @@ public class AppService
         _notificationJob = CreateTimer();
     }
 
-    private Timer CreateTimer() =>
-        new(
+    private Timer CreateTimer()
+    {
+        var time = TimeSpan.FromDays(1);
+        Console.WriteLine($"Created notification timer with {time}");
+        return new(
             NotifyTask,
             null,
             TimeSpan.Zero,
-            TimeSpan.FromDays(1)
+            time
         );
+    }
+
 
     private async void NotifyTask(object? _) => await Notify();
 
@@ -41,7 +46,10 @@ public class AppService
 
     public async Task Notify()
     {
+        Console.WriteLine("Retrieving notifications.");
         var notifications = (await _notificationService.GetNotifications()).ToList();
+
+        Console.WriteLine($"Found {notifications.Count} notifications.");
 
         if (notifications.Count == 0)
         {
@@ -50,7 +58,9 @@ public class AppService
 
         var notificationRequest = CreateNotificationRequest(notifications);
 
+        Console.WriteLine($"Showing notification {notificationRequest.NotificationId}: {notificationRequest.Title}");
         await LocalNotificationCenter.Current.Show(notificationRequest);
+        Console.WriteLine("Successfully sent notification.");
 
         return;
 

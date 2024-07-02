@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Lib.Models;
 
@@ -20,6 +21,10 @@ public class LocalDbCtx : DbCtx
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder
-           .UseSqlite($"Filename={File}");
+           .UseSqlite($"Filename={File}")
+           // .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking) // re-enable after refactors into services
+           .EnableSensitiveDataLogging()
+           .EnableDetailedErrors()
+           .LogTo(Console.WriteLine,LogLevel.Information);
     }
 }

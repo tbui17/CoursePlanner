@@ -40,6 +40,8 @@ public static class MauiProgram
            .AddTransient<EditAssessmentPage, EditAssessmentViewModel>()
            .AddTransient<DevPage>();
 
+        builder.Logging.AddConsole();
+
 #if DEBUG
         builder
            .Logging
