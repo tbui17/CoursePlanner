@@ -77,35 +77,35 @@ public class TestDataFactory
             {
                 Id = 1,
                 Name = "Instructor One",
-                Phone = "1111111111",
+                Phone = "1111111",
                 Email = "instructor.one@example.com"
             },
             new()
             {
                 Id = 2,
                 Name = "Instructor Two",
-                Phone = "2222222222",
+                Phone = "2222222",
                 Email = "instructor.two@example.com"
             },
             new()
             {
                 Id = 3,
                 Name = "Instructor Three",
-                Phone = "3333333333",
+                Phone = "3333333",
                 Email = "instructor.three@example.com"
             },
             new()
             {
                 Id = 4,
                 Name = "Instructor Four",
-                Phone = "4444444444",
+                Phone = "4444444",
                 Email = "instructor.four@example.com"
             },
             new()
             {
                 Id = 5,
                 Name = "Instructor Five",
-                Phone = "5555555555",
+                Phone = "5555555",
                 Email = "instructor.five@example.com"
             }
         ];
