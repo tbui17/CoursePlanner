@@ -37,7 +37,8 @@ public static class MauiProgram
            .AddTransient<EditCoursePage, EditCourseViewModel>()
            .AddTransient<InstructorFormPage, InstructorFormViewModel>()
            .AddTransient<EditNotePage, EditNoteViewModel>()
-           .AddTransient<EditAssessmentPage, EditAssessmentViewModel>();
+           .AddTransient<EditAssessmentPage, EditAssessmentViewModel>()
+           .AddTransient<DevPage>();
 
 #if DEBUG
         builder
