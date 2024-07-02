@@ -27,6 +27,35 @@ public class NotificationService(IDbContextFactory<LocalDbCtx> factory)
            .Concat(courseResults)
            .Where(x => x.IsUpcoming);
     }
+
+    public async Task SetAllNotificationStartTimes(DateTime time)
+    {
+        await using var db = await factory.CreateDbContextAsync();
+
+        var courses = await db
+           .Courses
+           .AsTracking()
+           .ToListAsync();
+
+        var assessments = await db
+           .Assessments
+           .AsTracking()
+           .ToListAsync();
+
+        foreach (var course in courses)
+        {
+            course.Start = time;
+            course.ShouldNotify = true;
+        }
+
+        foreach (var assessment in assessments)
+        {
+            assessment.Start = time;
+            assessment.ShouldNotify = true;
+        }
+
+        await db.SaveChangesAsync();
+    }
 }
 
 public record NotificationResult

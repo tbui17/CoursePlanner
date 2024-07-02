@@ -34,7 +34,15 @@ public abstract record GridState
         };
 }
 
-public record AutoGridState : GridState
+public interface IAutoGridState
+{
+    int Rows { get; }
+    int Row { get; }
+    int Column { get; }
+    bool ShouldAddRowDefinition { get; }
+}
+
+public record AutoGridState : GridState, IAutoGridState
 {
     public bool ShouldAddRowDefinition => Column is 0 && Count > 0;
 }

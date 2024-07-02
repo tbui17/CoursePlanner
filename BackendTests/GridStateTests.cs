@@ -1,14 +1,12 @@
 using FluentAssertions;
 using FluentAssertions.Execution;
 using Lib.Models;
-namespace TestSuite;
+
+namespace BackendTests;
 
 public class GridStateTests
 {
-    [SetUp]
-    public void Setup() { }
-
-    [Test]
+    [Fact]
     public void Starting_State_Should_Be_All_Falsy()
     {
         // ReSharper disable once CollectionNeverUpdated.Local
@@ -29,7 +27,8 @@ public class GridStateTests
     }
 
 
-    [Test, TestCaseSource(nameof(GridStateTestCases))]
+    [Theory]
+    [MemberData(nameof(GridStateTestCases))]
     public void GridState_Should_Be_Congruent_With_Element_Count(
         int columns,
         List<GridPropertyTest> tests
@@ -42,7 +41,7 @@ public class GridStateTests
             ChildCount = () => elements.Count
         };
 
-        using var _ = new AssertionScope();
+        using var scope = new AssertionScope();
 
         foreach (var test in tests)
         {
@@ -51,7 +50,8 @@ public class GridStateTests
         }
     }
 
-    private static IEnumerable<TestCaseData> GridStateTestCases()
+
+    public static IEnumerable<object[]> GridStateTestCases()
     {
         List<GridPropertyTest> oneColumnCaseData =
         [
@@ -103,23 +103,20 @@ public class GridStateTests
                 ]
             ),
         ];
-        return data
-           .Select(TestCaseData (x) => x)
-           .Select(x => x.SetName($"{x.Arguments[0]} columns"));
+        return data.Select(x => (object[])x);
     }
 }
 
 public record GridTestCase(int Columns, List<GridPropertyTest> Tests)
 {
-    public static implicit operator TestCaseData(GridTestCase data) => new(data.Columns, data.Tests);
-}
+    public static implicit operator object[](GridTestCase x) => [x.Columns, x.Tests];
+};
 
-public record GridPropertyTest(int Column, int Row, bool ShouldAddRowDefinition, int Rows)
+public record GridPropertyTest(int Column, int Row, bool ShouldAddRowDefinition, int Rows) : IAutoGridState
 {
     public void AssertGridState(AutoGridState gridState)
     {
         using var scope = new AssertionScope();
-
         var data = new
         {
             Id = Guid
@@ -130,22 +127,9 @@ public record GridPropertyTest(int Column, int Row, bool ShouldAddRowDefinition,
         };
 
         scope.AddReportable(data.Id, data.ToString);
-        
+
         gridState
-           .Column
            .Should()
-           .Be(Column, ToString());
-        gridState
-           .Row
-           .Should()
-           .Be(Row);
-        gridState
-           .ShouldAddRowDefinition
-           .Should()
-           .Be(ShouldAddRowDefinition);
-        gridState
-           .Rows
-           .Should()
-           .Be(Rows);
+           .BeEquivalentTo(this);
     }
-}
+};
