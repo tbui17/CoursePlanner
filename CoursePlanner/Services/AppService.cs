@@ -39,7 +39,7 @@ public class AppService
     }
 
 
-    private async Task Notify()
+    public async Task Notify()
     {
         var notifications = (await _notificationService.GetNotifications()).ToList();
 
@@ -54,15 +54,20 @@ public class AppService
 
         return;
 
-        static NotificationRequest CreateNotificationRequest(IReadOnlyList<NotificationResult> notifications) =>
-            new()
+        static NotificationRequest CreateNotificationRequest(IReadOnlyList<NotificationResult> notifications)
+        {
+            var title = $"{notifications.Count} upcoming events.";
+            var description = title + "\n" + notifications.ToMessage();
+
+
+            return new()
             {
                 NotificationId = 1,
-                Title = "Upcoming Events",
-                Description = $"You have {notifications.Count} upcoming events.",
+                Title = title,
+                Description = description,
                 BadgeNumber = notifications.Count,
-                Subtitle = notifications.ToMessage(),
             };
+        }
     }
 
 
@@ -186,7 +191,7 @@ public class AppService
 
             await using var db = await _factory.CreateDbContextAsync();
 
-            if (await ValidateNoDuplicateEmail(db, instructor.Email,instructorId) is { } exc)
+            if (await ValidateNoDuplicateEmail(db, instructor.Email, instructorId) is { } exc)
             {
                 return exc;
             }
@@ -235,5 +240,10 @@ public class AppService
     public async Task PopAsync()
     {
         await Navigation.PopAsync();
+    }
+
+    public async Task AlertAsync(string message)
+    {
+        await Current.DisplayAlert("Alert", message, "OK");
     }
 }
