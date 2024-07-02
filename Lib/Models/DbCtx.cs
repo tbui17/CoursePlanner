@@ -24,6 +24,13 @@ public class DbCtx : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         SeedData(modelBuilder);
+
+        modelBuilder
+           .Entity<Course>()
+           .HasOne(x => x.Instructor)
+           .WithMany(x => x.Courses)
+           .HasForeignKey(x => x.InstructorId)
+           .OnDelete(DeleteBehavior.SetNull);
     }
 
     private static void SeedData(ModelBuilder b)
@@ -41,16 +48,9 @@ public class DbCtx : DbContext
            .HasData(courses);
 
         b
-           .Entity<Course>()
-           .HasOne(x => x.Instructor)
-           .WithMany(x => x.Courses)
-           .HasForeignKey(x => x.InstructorId)
-           .OnDelete(DeleteBehavior.SetNull);
-
-        b
            .Entity<Note>()
            .HasData(notes);
-        
+
         b
            .Entity<Assessment>()
            .HasData(assessments);
