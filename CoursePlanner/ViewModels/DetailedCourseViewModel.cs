@@ -180,30 +180,11 @@ public partial class DetailedCourseViewModel(ILocalDbCtxFactory factory, AppServ
     {
         if (SelectedNote is not { Id: > 0 }) return;
 
-        var request = new ShareTextRequest { Title = "Share Note", Text = CreateNoteText() };
+        var note = (ShareNote)SelectedNote;
+
+        var request = new ShareTextRequest { Title = "Share Note", Text = note.ToFriendlyText() };
 
         await appShell.ShareAsync(request);
-
-        return;
-
-        string CreateNoteText()
-        {
-            var data = new
-            {
-                CourseId = Course.Id,
-                Course = Course.Name,
-                Instructor = SelectedNote.Course.Instructor?.ToString() ?? "",
-                CourseStart = SelectedNote.Course.Start,
-                CourseEnd = SelectedNote.Course.End,
-                Text = SelectedNote.Value,
-            };
-
-            return data
-               .GetType()
-               .GetProperties()
-               .Select(x => $"{x.Name}: {x.GetValue(data)}")
-               .StringJoin("\n");
-        }
     }
 
     [RelayCommand]
