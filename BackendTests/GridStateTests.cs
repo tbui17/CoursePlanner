@@ -51,7 +51,7 @@ public class GridStateTests
     }
 
 
-    public static IEnumerable<object[]> GridStateTestCases()
+    public static TheoryData<int, List<GridPropertyTest>> GridStateTestCases()
     {
         List<GridPropertyTest> oneColumnCaseData =
         [
@@ -66,29 +66,27 @@ public class GridStateTests
             new(0, 8, true, 9)
         ];
 
-        GridTestCase[] data =
-        [
-            new(0, oneColumnCaseData),
-            new(1, oneColumnCaseData),
-            new(2,
-                [
+        return new()
+        {
+            { 0, oneColumnCaseData },
+            { 1, oneColumnCaseData },
+            {
+                2, [
                     new(0, 0, true, 1),
                     new(1, 0, false, 1),
-
                     new(0, 1, true, 2),
-                    new(1, 1, false, 2),
 
+                    new(1, 1, false, 2),
                     new(0, 2, true, 3),
                     new(1, 2, false, 3),
 
                     new(0, 3, true, 4),
                     new(1, 3, false, 4),
-
                     new(0, 4, true, 5)
                 ]
-            ),
-            new(3,
-                [
+            },
+            {
+                3, [
                     new(0, 0, true, 1),
                     new(1, 0, false, 1),
                     new(2, 0, false, 1),
@@ -101,16 +99,10 @@ public class GridStateTests
                     new(1, 2, false, 3),
                     new(2, 2, false, 3)
                 ]
-            ),
-        ];
-        return data.Select(x => (object[])x);
+            },
+        };
     }
 }
-
-public record GridTestCase(int Columns, List<GridPropertyTest> Tests)
-{
-    public static implicit operator object[](GridTestCase x) => [x.Columns, x.Tests];
-};
 
 public record GridPropertyTest(int Column, int Row, bool ShouldAddRowDefinition, int Rows) : IAutoGridState
 {
