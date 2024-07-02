@@ -62,6 +62,7 @@ public partial class DevPage : ContentPage
                 await using var db = await Factory.CreateDbContextAsync();
                 var course = await db
                    .Courses
+                   .AsTracking()
                    .OrderBy(x => x.Id)
                    .FirstAsync();
 
