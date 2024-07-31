@@ -22,9 +22,9 @@ public partial class AutoGrid
         if (ColumnDefinitions.Count == 0) ColumnCount.Times(AddColumnDefinition);
     }
 
-    private void AddRowDefinition() => RowDefinitions.Add(new RowDefinition(DefaultRowLength));
+    private void AddRowDefinition() => RowDefinitions.Add(new RowDefinition(GridLength.Star));
 
-    private void AddColumnDefinition() => ColumnDefinitions.Add(new ColumnDefinition(DefaultColumnLength));
+    private void AddColumnDefinition() => ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
 
     private AutoGridState CreateAutoGridState() =>
         new() { Columns = ColumnDefinitions.Count, ChildCount = () => Children.Count };
@@ -42,39 +42,7 @@ public partial class AutoGrid
 
 public partial class AutoGrid
 {
-    public static readonly BindableProperty DefaultColumnLengthProperty =
-        BindableProperty.Create(
-            nameof(DefaultColumnLength),
-            typeof(GridLength),
-            typeof(AutoGrid)
-        );
 
-    public GridLength DefaultColumnLength
-    {
-        get => GetGridLength(DefaultColumnLengthProperty);
-        set => SetValue(DefaultColumnLengthProperty, value);
-    }
-
-    private GridLength GetGridLength(BindableProperty bindable) =>
-        (GridLength)GetValue(bindable) switch
-        {
-            { Value: <= 0 } => GridLength.Star,
-            var x => x
-        };
-
-
-    public static readonly BindableProperty DefaultRowLengthProperty =
-        BindableProperty.Create(
-            nameof(DefaultRowLength),
-            typeof(GridLength),
-            typeof(AutoGrid)
-        );
-
-    public GridLength DefaultRowLength
-    {
-        get => GetGridLength(DefaultColumnLengthProperty);
-        set => SetValue(DefaultRowLengthProperty, value);
-    }
 
     public static readonly BindableProperty ColumnCountProperty =
         BindableProperty.Create(
