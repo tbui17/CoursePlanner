@@ -82,7 +82,7 @@ public class OneDayAfterNotificationTests : IAsyncLifetime
     private OneDayAfterFixture _fixture = null!;
 
     [Fact]
-    public void Should_Have_Notifications()
+    public void ShouldHaveNotifications()
     {
         _fixture
            .Results
@@ -91,7 +91,7 @@ public class OneDayAfterNotificationTests : IAsyncLifetime
     }
 
     [Fact]
-    public void Should_Have_All_Notification_Entities()
+    public void ShouldHaveAllNotificationEntities()
     {
         using var _ = new AssertionScope();
 
@@ -122,7 +122,7 @@ public class OneHourBeforeNotificationTests : IAsyncLifetime
     private OneHourBeforeFixture _fixture = null!;
 
     [Fact]
-    public void Should_Have_No_Notifications()
+    public void ShouldHaveNoNotifications()
     {
         _fixture
            .Results
