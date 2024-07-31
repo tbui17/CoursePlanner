@@ -7,44 +7,52 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace BackendTests;
 
-public class DbFixture : IAsyncLifetime
-{
-    private async Task ResetDb()
-    {
-        await using var db = await Provider
-           .DbCtxFactory()();
-
-        await db.Database.EnsureDeletedAsync();
-        await db.Database.MigrateAsync();
-    }
-
-    public async Task InitializeAsync()
-    {
-        // await ResetDb();
-    }
-
-    public async Task DisposeAsync()
-    {
-        // await ResetDb();
-    }
-}
-
-public abstract class NotificationFixture
+public abstract class NotificationFixture(DateTime time) : IAsyncLifetime
 {
     public List<NotificationResult> Results { get; set; } = null!;
     public List<Course> Courses { get; set; } = null!;
     public List<Assessment> Assessments { get; set; } = null!;
     public DateTime Now { get; set; }
 
-    private readonly DbFixture _fixture = new();
+    public async Task SetAllNotificationStartTimes()
+    {
+        var factory = Provider.GetRequiredService<IDbContextFactory<LocalDbCtx>>();
+        await using var db = await factory.CreateDbContextAsync();
+
+        var courses = await db
+           .Courses
+           .AsTracking()
+           .ToListAsync();
+
+        var assessments = await db
+           .Assessments
+           .AsTracking()
+           .ToListAsync();
+
+        foreach (var course in courses)
+        {
+            course.Start = time;
+            course.ShouldNotify = true;
+        }
+
+        foreach (var assessment in assessments)
+        {
+            assessment.Start = time;
+            assessment.ShouldNotify = true;
+        }
+
+        await db.SaveChangesAsync();
+    }
+
+
 
     public async Task InitializeAsync()
     {
-        await _fixture.InitializeAsync();
+
         Now = DateTime.Now;
         var notificationService = Provider.GetRequiredService<NotificationService>();
 
-        await notificationService.SetAllNotificationStartTimes(Time);
+        await SetAllNotificationStartTimes();
 
         Results = (await notificationService.GetNotifications()).ToList();
 
@@ -61,21 +69,19 @@ public abstract class NotificationFixture
 
     public async Task DisposeAsync()
     {
-        await _fixture.DisposeAsync();
+
     }
-
-    protected abstract DateTime Time { get; }
 }
 
-public class OneDayAfterFixture : NotificationFixture, IAsyncLifetime
-{
-    protected override DateTime Time => Now.AddHours(23);
-}
+public class OneDayAfterFixture() : NotificationFixture(DateTime.Now.AddHours(23));
 
-public class OneHourBeforeFixture : NotificationFixture, IAsyncLifetime
-{
-    protected override DateTime Time => Now.AddHours(-1);
-}
+
+
+
+public class OneHourBeforeFixture() : NotificationFixture(DateTime.Now.AddHours(-1));
+
+
+
 
 public class OneDayAfterNotificationTests : IAsyncLifetime
 {
@@ -140,12 +146,4 @@ public class OneHourBeforeNotificationTests : IAsyncLifetime
     {
         await _fixture.DisposeAsync();
     }
-}
-
-public static class ProviderExtensions
-{
-    public static Func<Task<LocalDbCtx>> DbCtxFactory(this IServiceProvider provider) =>
-        () => provider
-           .GetRequiredService<IDbContextFactory<LocalDbCtx>>()
-           .CreateDbContextAsync();
 }
