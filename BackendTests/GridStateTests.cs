@@ -7,7 +7,7 @@ namespace BackendTests;
 public class GridStateTests
 {
     [Fact]
-    public void Starting_State_Should_Be_All_Falsy()
+    public void StartingProperties_ShouldBeFalsy()
     {
         // ReSharper disable once CollectionNeverUpdated.Local
         var elements = new List<int>();
@@ -29,7 +29,7 @@ public class GridStateTests
 
     [Theory]
     [MemberData(nameof(GridStateTestCases))]
-    public void GridState_Should_Be_Congruent_With_Element_Count(
+    public void GridState_ShouldBeCongruentWithElementCount(
         int columns,
         List<GridPropertyTest> tests
     )
