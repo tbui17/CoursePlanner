@@ -22,7 +22,6 @@ public class LocalDbCtx : DbCtx
     {
         optionsBuilder
            .UseSqlite($"Filename={File}")
-           // .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking) // re-enable after refactors into services
            .EnableSensitiveDataLogging()
            .EnableDetailedErrors()
            .LogTo(Console.WriteLine,LogLevel.Information);
