@@ -5,23 +5,20 @@ namespace Lib.Models;
 
 public class LocalDbCtx : DbCtx
 {
-    public static string File { get; set; } = "";
+    private string DbFileName { get; set; } = "db.sqlite";
 
-    public static string DbFileName { get; set; } = "db.sqlite";
-
-    public static string ApplicationDirectoryPath { get; set; } =
+    public string ApplicationDirectoryPath { get; init; } =
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
 
-
-    public LocalDbCtx()
+    private string GetSqlFilePath()
     {
-        File = Path.Combine(ApplicationDirectoryPath, DbFileName);
+        return Path.Combine(ApplicationDirectoryPath, DbFileName);
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder
-           .UseSqlite($"Filename={File}")
+           .UseSqlite($"Filename={GetSqlFilePath()}")
            .EnableSensitiveDataLogging()
            .EnableDetailedErrors()
            .LogTo(Console.WriteLine,LogLevel.Information);
