@@ -90,12 +90,12 @@ public record NotificationResult
     }
 
 
-    public static NotificationResult From<T>(T x) where T : INotification
+    public static NotificationResult From(INotification item)
     {
         var now = DateTime.Now;
         return new NotificationResult
         {
-            Entity = x, StartIsUpcoming = IsUpcoming(now, x.Start), EndIsUpcoming = IsUpcoming(now, x.End),
+            Entity = item, StartIsUpcoming = IsUpcoming(now, item.Start), EndIsUpcoming = IsUpcoming(now, item.End),
         };
     }
 }
