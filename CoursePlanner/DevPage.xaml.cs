@@ -79,7 +79,7 @@ public partial class DevPage : ContentPage
                    .Notes
                    .Include(x => x.Course)
                    .ThenInclude(x => x.Instructor)
-                   .Select(x => (ShareNote)x);
+                   .Select(x => new ShareNote(x));
 
                 var note = await query.FirstAsync();
 

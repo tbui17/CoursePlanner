@@ -4,13 +4,27 @@ namespace Lib.Models;
 
 public record ShareNote
 {
-    public int CourseId { get; set; }
-    public string CourseName { get; set; } = "";
-    public string InstructorName { get; set; } = "";
-    public DateTime CourseStart { get; set; }
-    public DateTime CourseEnd { get; set; }
-    public int NoteId { get; set; }
-    public string NoteText { get; set; } = "";
+    
+    public ShareNote(){}
+
+    public ShareNote(Note note)
+    {
+        CourseId = note.Course.Id;
+        CourseName = note.Course.Name;
+        InstructorName = note.Course.Instructor?.ToString() ?? "";
+        CourseStart = note.Course.Start;
+        CourseEnd = note.Course.End;
+        NoteId = note.Id;
+        NoteText = note.Value;
+    }
+    
+    public int CourseId { get; init; }
+    public string CourseName { get; init; } = "";
+    public string InstructorName { get; init; } = "";
+    public DateTime CourseStart { get; init; }
+    public DateTime CourseEnd { get; init; }
+    public int NoteId { get; init; }
+    public string NoteText { get; init; } = "";
 
     public string ToFriendlyText() =>
         GetType()
@@ -31,15 +45,5 @@ public record ShareNote
             )
            .StringJoin("\n");
 
-    public static explicit operator ShareNote(Note note) =>
-        new()
-        {
-            CourseId = note.Course.Id,
-            CourseName = note.Course.Name,
-            InstructorName = note.Course.Instructor?.ToString() ?? "",
-            CourseStart = note.Course.Start,
-            CourseEnd = note.Course.End,
-            NoteId = note.Id,
-            NoteText = note.Value
-        };
+   
 }

@@ -180,9 +180,12 @@ public partial class DetailedCourseViewModel(ILocalDbCtxFactory factory, AppServ
     {
         if (SelectedNote is not { Id: > 0 }) return;
 
-        var note = (ShareNote)SelectedNote;
 
-        var request = new ShareTextRequest { Title = "Share Note", Text = note.ToFriendlyText() };
+        var request = new ShareTextRequest
+        {
+            Title = "Share Note",
+            Text = new ShareNote(SelectedNote).ToFriendlyText()
+        };
 
         await appShell.ShareAsync(request);
     }

@@ -73,6 +73,11 @@
                                 <DataTemplate x:DataType="models:Course" >
                                     <Border>
                                         <Grid ColumnDefinitions="100,100,100,100,100,100" ColumnSpacing="10" >
+                                            <Grid.Resources>
+                                                <Style TargetType="Label">
+                                                    <Setter Property="Style" Value="{StaticResource BaseLabel}" />
+                                                </Style>
+                                            </Grid.Resources>
                                             <Label Text="{Binding Name}" Grid.Column="0" />
                                             <Label Text="{Binding Instructor.Name, FallbackValue=''}" Grid.Column="1" />
                                             <Label Text="{Binding Start, Converter={StaticResource DateConverter}}"
