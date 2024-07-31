@@ -3,8 +3,14 @@ using CommunityToolkit.Maui.Markup;
 using CoursePlanner.Services;
 using CoursePlanner.ViewModels;
 using Lib;
+using Lib.Models;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Plugin.LocalNotification;
+#if ANDROID
+using Android.Util;
+#endif
 
 namespace CoursePlanner;
 
@@ -27,6 +33,8 @@ public static class MauiProgram
                 }
             );
 
+
+
         Configs
            .ConfigBackendServices(builder.Services)
            .AddSingleton<AppService>()
@@ -48,6 +56,42 @@ public static class MauiProgram
            .AddDebug();
 #endif
 
-        return builder.Build();
+
+        var app = builder.Build();
+
+        SetupDb();
+
+        return app;
+
+
+        void SetupDb()
+        {
+
+            using var db = new LocalDbCtx{ ApplicationDirectoryPath = FileSystem.Current.AppDataDirectory };
+            var logger = app.Services.GetRequiredService<ILogger<LocalDbCtx>>();
+            logger.LogInformation("Attempting to migrate database.");
+            try
+            {
+                db.Database.Migrate();
+                logger.LogInformation("Database migrated.");
+            }
+            catch (SqliteException e) when (e.Message.Contains("already exists"))
+            {
+                logger.LogInformation($"A database entity already exists. Attempting to re-initialize database. {e.Message}");
+                db.Database.EnsureDeleted();
+                db.Database.Migrate();
+                logger.LogInformation("Database re-initialized.");
+            }
+        }
+
+    }
+
+
+
+    private static void Info(string tag, string message)
+    {
+#if ANDROID
+        Log.Info(tag, message);
+#endif
     }
 }

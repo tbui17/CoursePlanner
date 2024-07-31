@@ -1,5 +1,4 @@
 ﻿using Lib;
-using Lib.Models;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BackendTests;

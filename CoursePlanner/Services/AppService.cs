@@ -2,6 +2,7 @@
 using Lib.Models;
 using Lib.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Plugin.LocalNotification;
 
 namespace CoursePlanner.Services;
@@ -14,19 +15,21 @@ public class AppService
 
     // ReSharper disable once NotAccessedField.Local
     private readonly Timer _notificationJob;
+    private readonly ILogger<AppService> _logger;
 
-    public AppService(IServiceProvider provider, ILocalDbCtxFactory factory, NotificationService notificationService)
+    public AppService(IServiceProvider provider, ILocalDbCtxFactory factory, NotificationService notificationService, ILogger<AppService> logger)
     {
         _provider = provider;
         _factory = factory;
         _notificationService = notificationService;
         _notificationJob = CreateTimer();
+        _logger = logger;
     }
 
     private Timer CreateTimer()
     {
         var time = TimeSpan.FromDays(1);
-        Console.WriteLine($"Created notification timer with {time}");
+        _logger.LogInformation($"Created notification timer with {time}");
         return new(
             NotifyTask,
             null,
@@ -46,10 +49,10 @@ public class AppService
 
     public async Task Notify()
     {
-        Console.WriteLine("Retrieving notifications.");
+        _logger.LogInformation("Retrieving notifications.");
         var notifications = (await _notificationService.GetNotifications()).ToList();
 
-        Console.WriteLine($"Found {notifications.Count} notifications.");
+        _logger.LogInformation($"Found {notifications.Count} notifications.");
 
         if (notifications.Count == 0)
         {
@@ -58,9 +61,9 @@ public class AppService
 
         var notificationRequest = CreateNotificationRequest(notifications);
 
-        Console.WriteLine($"Showing notification {notificationRequest.NotificationId}: {notificationRequest.Title}");
+        _logger.LogInformation($"Showing notification {notificationRequest.NotificationId}: {notificationRequest.Title}");
         await LocalNotificationCenter.Current.Show(notificationRequest);
-        Console.WriteLine("Successfully sent notification.");
+        _logger.LogInformation("Successfully sent notification.");
 
         return;
 
