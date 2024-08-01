@@ -2,13 +2,11 @@
 
 namespace Lib.Utils;
 
-
-
 public class TestDataFactory
 {
-    private  bool ToBool(int i) => i % 2 == 0;
+    private bool ToBool(int i) => i % 2 == 0;
 
-    public  TestDataResult CreateData()
+    public TestDataResult CreateData()
     {
         var terms = CreateTerms();
         var instructors = CreateInstructors();
@@ -25,15 +23,15 @@ public class TestDataFactory
         {
             foreach (var i in range)
             {
-                var course = new Course(term)
-                {
-                    Id = courseIdCounter,
-                    Name = $"Course {courseIdCounter}",
-                    InstructorId = instructors[i % instructors.Count].Id,
-                    Status = Course.Statuses.ElementAt(courseIdCounter % Course.Statuses.Count),
-                    TermId = term.Id,
-                    ShouldNotify = ToBool(i)
-                };
+                var course = Course.From(term);
+
+                course.Id = courseIdCounter;
+                course.Name = $"Course {courseIdCounter}";
+                course.InstructorId = instructors[i % instructors.Count].Id;
+                course.Status = Course.Statuses.ElementAt(courseIdCounter % Course.Statuses.Count);
+                course.TermId = term.Id;
+                course.ShouldNotify = ToBool(i);
+
                 courses.Add(course);
                 courseIdCounter++;
             }
@@ -78,8 +76,7 @@ public class TestDataFactory
     }
 
 
-
-    public  List<Instructor> CreateInstructors()
+    public List<Instructor> CreateInstructors()
     {
         return
         [
@@ -121,7 +118,7 @@ public class TestDataFactory
         ];
     }
 
-    public  List<Term> CreateTerms()
+    public List<Term> CreateTerms()
     {
         return
         [
@@ -176,7 +173,13 @@ public record TestDataResult
     public required List<Note> Notes { get; set; }
     public required List<Assessment> Assessments { get; set; }
 
-    public void Deconstruct(out List<Term> terms, out List<Instructor> instructors, out List<Course> courses, out List<Note> notes, out List<Assessment> assessments)
+    public void Deconstruct(
+        out List<Term> terms,
+        out List<Instructor> instructors,
+        out List<Course> courses,
+        out List<Note> notes,
+        out List<Assessment> assessments
+    )
     {
         terms = Terms;
         instructors = Instructors;
