@@ -1,13 +1,15 @@
+﻿namespace LibTests;
+
 using FluentAssertions;
 using FluentAssertions.Execution;
 using Lib.Models;
-
-namespace BackendTests;
+using NUnit.Framework;
+using System.Collections.Generic;
 
 public class GridStateTests
 {
-    [Fact]
-    public void StartingProperties_ShouldBeFalsy()
+    [Test]
+    public void Properties_Initial_ShouldBeFalsy()
     {
         // ReSharper disable once CollectionNeverUpdated.Local
         var elements = new List<int>();
@@ -26,13 +28,8 @@ public class GridStateTests
         test.AssertGridState(gridState);
     }
 
-
-    [Theory]
-    [MemberData(nameof(GridStateTestCases))]
-    public void GridState_ShouldBeCongruentWithElementCount(
-        int columns,
-        List<GridPropertyTest> tests
-    )
+    [TestCaseSource(nameof(GridStateTestCases))]
+    public void Properties_ShouldBeCongruentWithElementCount(int columns, List<GridPropertyTest> tests)
     {
         var elements = new List<int>();
         var gridState = new AutoGridState
@@ -50,11 +47,10 @@ public class GridStateTests
         }
     }
 
-
-    public static TheoryData<int, List<GridPropertyTest>> GridStateTestCases()
+    public static IEnumerable<TestCaseData> GridStateTestCases()
     {
-        List<GridPropertyTest> oneColumnCaseData =
-        [
+        List<GridPropertyTest> oneColumnCaseData = new List<GridPropertyTest>
+        {
             new(0, 0, true, 1),
             new(0, 1, true, 2),
             new(0, 2, true, 3),
@@ -64,43 +60,38 @@ public class GridStateTests
             new(0, 6, true, 7),
             new(0, 7, true, 8),
             new(0, 8, true, 9)
-        ];
-
-        return new()
-        {
-            { 0, oneColumnCaseData },
-            { 1, oneColumnCaseData },
-            {
-                2, [
-                    new(0, 0, true, 1),
-                    new(1, 0, false, 1),
-                    new(0, 1, true, 2),
-
-                    new(1, 1, false, 2),
-                    new(0, 2, true, 3),
-                    new(1, 2, false, 3),
-
-                    new(0, 3, true, 4),
-                    new(1, 3, false, 4),
-                    new(0, 4, true, 5)
-                ]
-            },
-            {
-                3, [
-                    new(0, 0, true, 1),
-                    new(1, 0, false, 1),
-                    new(2, 0, false, 1),
-
-                    new(0, 1, true, 2),
-                    new(1, 1, false, 2),
-                    new(2, 1, false, 2),
-
-                    new(0, 2, true, 3),
-                    new(1, 2, false, 3),
-                    new(2, 2, false, 3)
-                ]
-            },
         };
+
+        yield return new TestCaseData(0, oneColumnCaseData);
+        yield return new TestCaseData(1, oneColumnCaseData);
+
+        yield return new TestCaseData(2, new List<GridPropertyTest>
+            {
+                new(0, 0, true, 1),
+                new(1, 0, false, 1),
+                new(0, 1, true, 2),
+                new(1, 1, false, 2),
+                new(0, 2, true, 3),
+                new(1, 2, false, 3),
+                new(0, 3, true, 4),
+                new(1, 3, false, 4),
+                new(0, 4, true, 5)
+            }
+        );
+
+        yield return new TestCaseData(3, new List<GridPropertyTest>
+            {
+                new(0, 0, true, 1),
+                new(1, 0, false, 1),
+                new(2, 0, false, 1),
+                new(0, 1, true, 2),
+                new(1, 1, false, 2),
+                new(2, 1, false, 2),
+                new(0, 2, true, 3),
+                new(1, 2, false, 3),
+                new(2, 2, false, 3)
+            }
+        );
     }
 }
 
@@ -124,4 +115,4 @@ public record GridPropertyTest(int Column, int Row, bool ShouldAddRowDefinition,
            .Should()
            .BeEquivalentTo(this);
     }
-};
+}

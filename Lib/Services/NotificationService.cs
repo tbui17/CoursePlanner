@@ -7,7 +7,7 @@ namespace Lib.Services;
 
 public class NotificationService(IDbContextFactory<LocalDbCtx> factory)
 {
-    public async Task<IEnumerable<NotificationResult>> GetNotifications()
+    public async Task<IList<NotificationResult>> GetNotifications()
     {
         await using var db = await factory.CreateDbContextAsync();
         var assessments = await db
@@ -25,7 +25,7 @@ public class NotificationService(IDbContextFactory<LocalDbCtx> factory)
 
         return assessmentResults
            .Concat(courseResults)
-           .Where(x => x.IsUpcoming);
+           .Where(x => x.IsUpcoming).ToList();
     }
 }
 
