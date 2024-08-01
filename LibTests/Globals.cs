@@ -1,7 +1,7 @@
 ﻿using Lib;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace BackendTests;
+namespace LibTests;
 
 public static class Globals
 {

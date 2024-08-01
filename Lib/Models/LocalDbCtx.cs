@@ -23,4 +23,7 @@ public class LocalDbCtx : DbCtx
            .EnableDetailedErrors()
            .LogTo(Console.WriteLine,LogLevel.Information);
     }
+
+
+
 }

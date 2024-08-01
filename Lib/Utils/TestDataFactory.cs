@@ -2,12 +2,13 @@
 
 namespace Lib.Utils;
 
+
+
 public class TestDataFactory
 {
-    private static bool ToBool(int i) => i % 2 == 0;
+    private  bool ToBool(int i) => i % 2 == 0;
 
-    public static (List<Term> terms, List<Instructor> instructors, List<Course> courses, List<Note> notes,
-        List<Assessment> assessments) CreateData()
+    public  TestDataResult CreateData()
     {
         var terms = CreateTerms();
         var instructors = CreateInstructors();
@@ -24,13 +25,15 @@ public class TestDataFactory
         {
             foreach (var i in range)
             {
-                var course = Course.From(term);
-                course.Id = courseIdCounter;
-                course.Name = ToName(courseIdCounter, i);
-                course.InstructorId = instructors[i % instructors.Count].Id;
-                course.Status = Course.Statuses.ElementAt(courseIdCounter % Course.Statuses.Count);
-                course.TermId = term.Id;
-                course.ShouldNotify = ToBool(i);
+                var course = new Course(term)
+                {
+                    Id = courseIdCounter,
+                    Name = $"Course {courseIdCounter}",
+                    InstructorId = instructors[i % instructors.Count].Id,
+                    Status = Course.Statuses.ElementAt(courseIdCounter % Course.Statuses.Count),
+                    TermId = term.Id,
+                    ShouldNotify = ToBool(i)
+                };
                 courses.Add(course);
                 courseIdCounter++;
             }
@@ -50,13 +53,13 @@ public class TestDataFactory
                 note.Id = noteIdCounter;
                 note.Value = text.StringJoin($"/{i}/");
                 note.CourseId = course.Id;
-                note.Name = ToName(noteIdCounter, i);
+                note.Name = $"Note {noteIdCounter}";
                 notes.Add(note);
                 noteIdCounter++;
 
                 var assessment = Assessment.From(course);
                 assessment.Id = assessmentIdCounter;
-                assessment.Name = ToName(assessmentIdCounter, i);
+                assessment.Name = $"Assessment {assessmentIdCounter}";
                 assessment.CourseId = course.Id;
                 assessment.ShouldNotify = ToBool(i);
                 assessments.Add(assessment);
@@ -64,12 +67,19 @@ public class TestDataFactory
             }
         }
 
-        return (terms, instructors, courses, notes, assessments);
+        return new TestDataResult
+        {
+            Terms = terms,
+            Instructors = instructors,
+            Courses = courses,
+            Notes = notes,
+            Assessments = assessments
+        };
     }
 
-    private static string ToName(int id, int i) => $"ID: {id}, Index: {i}";
 
-    public static List<Instructor> CreateInstructors()
+
+    public  List<Instructor> CreateInstructors()
     {
         return
         [
@@ -111,7 +121,7 @@ public class TestDataFactory
         ];
     }
 
-    public static List<Term> CreateTerms()
+    public  List<Term> CreateTerms()
     {
         return
         [
@@ -144,5 +154,34 @@ public class TestDataFactory
                 End = new DateTime(2024, 5, 31)
             }
         ];
+    }
+
+    public async Task SeedDatabase(LocalDbCtx db)
+    {
+        var data = CreateData();
+        await db.Terms.AddRangeAsync(data.Terms);
+        await db.Instructors.AddRangeAsync(data.Instructors);
+        await db.Courses.AddRangeAsync(data.Courses);
+        await db.Notes.AddRangeAsync(data.Notes);
+        await db.Assessments.AddRangeAsync(data.Assessments);
+        await db.SaveChangesAsync();
+    }
+}
+
+public record TestDataResult
+{
+    public required List<Term> Terms { get; set; }
+    public required List<Instructor> Instructors { get; set; }
+    public required List<Course> Courses { get; set; }
+    public required List<Note> Notes { get; set; }
+    public required List<Assessment> Assessments { get; set; }
+
+    public void Deconstruct(out List<Term> terms, out List<Instructor> instructors, out List<Course> courses, out List<Note> notes, out List<Assessment> assessments)
+    {
+        terms = Terms;
+        instructors = Instructors;
+        courses = Courses;
+        notes = Notes;
+        assessments = Assessments;
     }
 }

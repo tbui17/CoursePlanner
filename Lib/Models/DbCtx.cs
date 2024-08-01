@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using static Lib.Utils.TestDataFactory;
 
 namespace Lib.Models;
 
@@ -23,8 +22,6 @@ public class DbCtx : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        SeedData(modelBuilder);
-
         modelBuilder
            .Entity<Course>()
            .HasOne(x => x.Instructor)
@@ -33,26 +30,5 @@ public class DbCtx : DbContext
            .OnDelete(DeleteBehavior.SetNull);
     }
 
-    private static void SeedData(ModelBuilder b)
-    {
-        var (terms, instructors, courses, notes, assessments) = CreateData();
 
-        b
-           .Entity<Term>()
-           .HasData(terms);
-        b
-           .Entity<Instructor>()
-           .HasData(instructors);
-        b
-           .Entity<Course>()
-           .HasData(courses);
-
-        b
-           .Entity<Note>()
-           .HasData(notes);
-
-        b
-           .Entity<Assessment>()
-           .HasData(assessments);
-    }
 }
