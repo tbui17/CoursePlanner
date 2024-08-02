@@ -22,14 +22,15 @@ public class AppService
         _provider = provider;
         _factory = factory;
         _notificationService = notificationService;
-        _notificationJob = CreateTimer();
         _logger = logger;
+        _notificationJob = CreateTimer();
+
     }
 
     private Timer CreateTimer()
     {
         var time = TimeSpan.FromDays(1);
-        _logger.LogInformation($"Created notification timer with {time}");
+        _logger.LogInformation("Created notification timer with {Time}",time);
         return new(
             NotifyTask,
             null,
@@ -52,7 +53,7 @@ public class AppService
         _logger.LogInformation("Retrieving notifications.");
         var notifications = (await _notificationService.GetNotifications()).ToList();
 
-        _logger.LogInformation($"Found {notifications.Count} notifications.");
+        _logger.LogInformation("Found {NotificationsCount} notifications.", notifications.Count);
 
         if (notifications.Count == 0)
         {
@@ -61,7 +62,7 @@ public class AppService
 
         var notificationRequest = CreateNotificationRequest(notifications);
 
-        _logger.LogInformation($"Showing notification {notificationRequest.NotificationId}: {notificationRequest.Title}");
+        _logger.LogInformation("Showing notification {NotificationId}: {NotificationTitle}", notificationRequest.NotificationId, notificationRequest.Title);
         await LocalNotificationCenter.Current.Show(notificationRequest);
         _logger.LogInformation("Successfully sent notification.");
 

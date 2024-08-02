@@ -37,6 +37,7 @@ public static class MauiProgram
 
         Configs
            .ConfigBackendServices(builder.Services)
+           .AddDbContextFactory<LocalDbCtx>(x => x.UseSqlite($"Filename={FileSystem.Current.AppDataDirectory}/db.sqlite"))
            .AddSingleton<AppService>()
            .AddTransient<MainPage, MainViewModel>()
            .AddTransient<DetailedTermPage, DetailedTermViewModel>()
@@ -67,8 +68,10 @@ public static class MauiProgram
         void SetupDb()
         {
 
-            using var db = new LocalDbCtx{ ApplicationDirectoryPath = FileSystem.Current.AppDataDirectory };
+            var factory = app.Services.GetRequiredService<IDbContextFactory<LocalDbCtx>>();
+            using var db = factory.CreateDbContext();
             var logger = app.Services.GetRequiredService<ILogger<LocalDbCtx>>();
+
             logger.LogInformation("Attempting to migrate database.");
             try
             {

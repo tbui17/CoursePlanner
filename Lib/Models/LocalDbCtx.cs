@@ -10,20 +10,12 @@ public class LocalDbCtx : DbCtx
     public string ApplicationDirectoryPath { get; init; } =
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
 
-    private string GetSqlFilePath()
-    {
-        return Path.Combine(ApplicationDirectoryPath, DbFileName);
-    }
-
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder
-           .UseSqlite($"Filename={GetSqlFilePath()}")
+           .UseSqlite($"Filename={DbFileName}")
            .EnableSensitiveDataLogging()
            .EnableDetailedErrors()
-           .LogTo(Console.WriteLine,LogLevel.Information);
+           .LogTo(Console.WriteLine, LogLevel.Information);
     }
-
-
-
 }
