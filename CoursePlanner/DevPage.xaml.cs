@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Maui.Core.Extensions;
 using CoursePlanner.Services;
 using Lib.Models;
+using Lib.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace CoursePlanner;
@@ -92,6 +93,13 @@ public partial class DevPage : ContentPage
                 );
             },
             ["Trigger Notification Service"] = async () => await ApplicationService.Notify(),
+            ["Seed database"] = async () =>
+            {
+                await using var db = await Factory.CreateDbContextAsync();
+                await new TestDataFactory().SeedDatabase(db);
+                await ApplicationService.AlertAsync("Database has been seeded.");
+
+            }
         };
     }
 }
