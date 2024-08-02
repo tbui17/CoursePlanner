@@ -1,4 +1,6 @@
 ﻿using Lib;
+using Lib.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LibTests;
@@ -13,6 +15,7 @@ public static class Globals
     {
         var services = new ServiceCollection();
         Configs.ConfigBackendServices(services);
+        services.AddDbContextFactory<LocalDbCtx>(x => x.UseSqlite("Data Source=:memory:"));
         return services.BuildServiceProvider();
     }
 }
