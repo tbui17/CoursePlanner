@@ -69,11 +69,22 @@ public partial class DetailedCourseViewModel(ILocalDbCtxFactory factory, AppServ
             new();
 
         var instructors = await db.Instructors.ToListAsync();
+        SetInstructors();
 
         Course = course;
-        Instructors = instructors.ToObservableCollection();
-        SelectedInstructor = Instructors.FirstOrDefault(x => x.Id == course.Instructor?.Id);
+
         SelectedNote = Notes.FirstOrDefault();
+
+        return;
+
+        void SetInstructors()
+        {
+            var instructorCollection = instructors.ToObservableCollection();
+            // must deselect or MAUI will throw unexpected range exception.
+            SelectedInstructor = null;
+            Instructors = instructorCollection;
+            SelectedInstructor = instructorCollection.FirstOrDefault(x => x.Id == course.Instructor?.Id);
+        }
     }
 
     [RelayCommand]
