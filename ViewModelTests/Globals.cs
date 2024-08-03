@@ -29,12 +29,20 @@ public static class Globals
            .AddDbContextFactory<LocalDbCtx>()
            .AddSingleton(mockNavigation.Object)
            .AddSingleton(mockAppService.Object)
-           .AddSingleton<EditTermViewModel>()
-            ;
+           .AddTransient<DetailedCourseViewModel>()
+           .AddTransient<DetailedTermViewModel>()
+           .AddTransient<EditAssessmentViewModel>()
+           .AddTransient<EditCourseViewModel>()
+           .AddTransient<EditTermViewModel>()
+           .AddTransient<InstructorFormViewModel>()
+           .AddTransient<MainViewModel>();
         return services.BuildServiceProvider();
     }
 
     public static T Resolve<T>() where T : notnull => Provider.GetRequiredService<T>();
 
-    public static Func<LocalDbCtx> GetDbFactory() => () => Provider.GetRequiredService<IDbContextFactory<LocalDbCtx>>().CreateDbContext();
+    public static Func<LocalDbCtx> GetDbFactory() =>
+        () => Provider
+           .GetRequiredService<IDbContextFactory<LocalDbCtx>>()
+           .CreateDbContext();
 }
