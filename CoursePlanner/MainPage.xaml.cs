@@ -1,5 +1,6 @@
-﻿using CoursePlanner.ViewModels;
+﻿
 using Plugin.LocalNotification;
+using ViewModels.PageViewModels;
 
 namespace CoursePlanner;
 

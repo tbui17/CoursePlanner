@@ -2,11 +2,11 @@
 
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:coursePlanner="clr-namespace:CoursePlanner"
-    xmlns:viewModels="clr-namespace:CoursePlanner.ViewModels"
     xmlns:controls="clr-namespace:CoursePlanner.Controls"
+    xmlns:pageViewModels="clr-namespace:ViewModels.PageViewModels;assembly=ViewModels"
 
     x:Class="CoursePlanner.EditTermPage"
-    x:DataType="viewModels:EditTermViewModel" Title="Edit Term" >
+    x:DataType="pageViewModels:EditTermViewModel" Title="Edit Term" >
 
     <ContentPage.Resources>
         <Style TargetType="Label" BasedOn="{StaticResource FieldLabel}" ></Style>

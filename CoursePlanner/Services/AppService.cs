@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using ViewModels.Services;
 
 namespace CoursePlanner.Services;
 
@@ -11,7 +12,11 @@ public class AppService : IAppService, INavigationService
     // ReSharper disable once NotAccessedField.Local
     private readonly ILogger<AppService> _logger;
 
-    public AppService(IServiceProvider provider, ILocalNotificationService localNotificationService, ILogger<AppService> logger)
+    public AppService(
+        IServiceProvider provider,
+        ILocalNotificationService localNotificationService,
+        ILogger<AppService> logger
+    )
     {
         _provider = provider;
         _localNotificationService = localNotificationService;
@@ -24,9 +29,8 @@ public class AppService : IAppService, INavigationService
 
     private void StartScheduledTasks()
     {
-
         var time = TimeSpan.FromDays(1);
-        _logger.LogInformation("Created notification timer with {Time}",time);
+        _logger.LogInformation("Created notification timer with {Time}", time);
         _notificationJob = new Timer(
             NotifyTask,
             null,
@@ -36,7 +40,6 @@ public class AppService : IAppService, INavigationService
         return;
         async void NotifyTask(object? _) => await _localNotificationService.Notify();
     }
-
 
 
     public async Task ShareAsync(ShareTextRequest request)

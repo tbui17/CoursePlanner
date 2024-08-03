@@ -1,11 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using CoursePlanner.Services;
 using Microsoft.EntityFrameworkCore;
+using ViewModels.Services;
 
-namespace CoursePlanner.ViewModels;
+namespace ViewModels.PageViewModels;
 
-public partial class EditTermViewModel(ILocalDbCtxFactory factory, INavigationService navService)
+public partial class EditNoteViewModel(ILocalDbCtxFactory factory, INavigationService navService)
     : ObservableObject
 {
     [ObservableProperty]
@@ -15,23 +15,20 @@ public partial class EditTermViewModel(ILocalDbCtxFactory factory, INavigationSe
     private string _name = "";
 
     [ObservableProperty]
-    private DateTime _start;
-
-    [ObservableProperty]
-    private DateTime _end;
+    private string _text = "";
 
     [RelayCommand]
     public async Task SaveAsync()
     {
-        var db = await factory.CreateDbContextAsync();
-        var term = await db
-           .Terms
+        await using var db = await factory.CreateDbContextAsync();
+        var note = await db
+           .Notes
            .AsTracking()
            .FirstAsync(x => x.Id == Id);
 
-        term.Name = Name;
-        term.Start = Start;
-        term.End = End;
+        note.Name = Name;
+        note.Value = Text;
+
 
         await db.SaveChangesAsync();
         await BackAsync();
@@ -43,19 +40,17 @@ public partial class EditTermViewModel(ILocalDbCtxFactory factory, INavigationSe
         await navService.PopAsync();
     }
 
-    public async Task Init(int termId)
+    public async Task Init(int noteId)
     {
         await using var db = await factory.CreateDbContextAsync();
 
-        var term = await db
-               .Terms
-               .FirstOrDefaultAsync(x => x.Id == termId) ??
+        var note = await db
+               .Notes
+               .FirstOrDefaultAsync(x => x.Id == noteId) ??
             new();
 
-        Id = term.Id;
-        Name = term.Name;
-        Start = term.Start;
-        End = term.End;
+        Name = note.Name;
+        Text = note.Value;
     }
 
     public async Task RefreshAsync()

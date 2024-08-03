@@ -2,12 +2,11 @@
 using CommunityToolkit.Maui.Core.Extensions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using CoursePlanner.Services;
 using Lib.Models;
-
 using Microsoft.EntityFrameworkCore;
+using ViewModels.Services;
 
-namespace CoursePlanner.ViewModels;
+namespace ViewModels.PageViewModels;
 
 
 public partial class DetailedTermViewModel(IDbContextFactory<LocalDbCtx> factory, INavigationService navService, IAppService appService)
@@ -78,9 +77,8 @@ public partial class DetailedTermViewModel(IDbContextFactory<LocalDbCtx> factory
     {
         if (SelectedCourse is null) return;
         await using var db = await factory.CreateDbContextAsync();
-        await db
-           .Courses
-           .Where(x => x.Id == SelectedCourse.Id)
+        await Queryable.Where(db
+               .Courses, x => x.Id == SelectedCourse.Id)
            .ExecuteDeleteAsync();
         await RefreshAsync();
     }

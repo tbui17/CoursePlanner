@@ -3,12 +3,18 @@ using CoursePlanner.Services;
 using Lib.Models;
 using Lib.Utils;
 using Microsoft.EntityFrameworkCore;
+using ViewModels.Services;
 
 namespace CoursePlanner;
 
 public partial class DevPage : ContentPage
 {
-    public DevPage(IServiceProvider provider, ILocalDbCtxFactory factory, IAppService appService, ILocalNotificationService notificationService)
+    public DevPage(
+        IServiceProvider provider,
+        ILocalDbCtxFactory factory,
+        IAppService appService,
+        ILocalNotificationService notificationService
+    )
     {
         Provider = provider;
         Factory = factory;
@@ -101,7 +107,6 @@ public partial class DevPage : ContentPage
                 await using var db = await Factory.CreateDbContextAsync();
                 await new TestDataFactory().SeedDatabase(db);
                 await ApplicationService.AlertAsync("Database has been seeded.");
-
             }
         };
     }

@@ -1,11 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using CoursePlanner.Services;
 using Lib.Exceptions;
 using Lib.Models;
 using Microsoft.EntityFrameworkCore;
+using ViewModels.Services;
 
-namespace CoursePlanner.ViewModels;
+namespace ViewModels.PageViewModels;
 
 public partial class InstructorFormViewModel(ILocalDbCtxFactory factory, INavigationService navService, IAppService appService)
     : ObservableObject

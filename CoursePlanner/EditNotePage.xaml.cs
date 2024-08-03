@@ -1,4 +1,4 @@
-﻿using CoursePlanner.ViewModels;
+﻿using ViewModels.PageViewModels;
 
 namespace CoursePlanner;
 
@@ -13,7 +13,7 @@ public partial class EditNotePage : ContentPage
     }
 
     public EditNoteViewModel Model { get; set; }
-    
+
     protected override async void OnAppearing()
     {
         base.OnAppearing();

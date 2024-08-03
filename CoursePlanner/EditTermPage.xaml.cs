@@ -1,4 +1,6 @@
-using CoursePlanner.ViewModels;
+
+
+using ViewModels.PageViewModels;
 
 namespace CoursePlanner;
 

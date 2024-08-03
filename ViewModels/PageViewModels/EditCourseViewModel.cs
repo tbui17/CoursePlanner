@@ -2,11 +2,11 @@
 using CommunityToolkit.Maui.Core.Extensions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using CoursePlanner.Services;
 using Lib.Models;
 using Microsoft.EntityFrameworkCore;
+using ViewModels.Services;
 
-namespace CoursePlanner.ViewModels;
+namespace ViewModels.PageViewModels;
 
 public partial class EditCourseViewModel(ILocalDbCtxFactory factory, INavigationService navService)
     : ObservableObject
