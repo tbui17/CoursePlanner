@@ -5,12 +5,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CoursePlanner.ViewModels;
 
-public partial class EditNoteViewModel(ILocalDbCtxFactory factory, AppService appShell)
+public partial class EditNoteViewModel(ILocalDbCtxFactory factory, INavigationService navService)
     : ObservableObject
 {
     [ObservableProperty]
     private int _id;
-    
+
     [ObservableProperty]
     private string _name = "";
 
@@ -28,7 +28,7 @@ public partial class EditNoteViewModel(ILocalDbCtxFactory factory, AppService ap
 
         note.Name = Name;
         note.Value = Text;
-        
+
 
         await db.SaveChangesAsync();
         await BackAsync();
@@ -37,7 +37,7 @@ public partial class EditNoteViewModel(ILocalDbCtxFactory factory, AppService ap
     [RelayCommand]
     public async Task BackAsync()
     {
-        await appShell.PopAsync();
+        await navService.PopAsync();
     }
 
     public async Task Init(int noteId)
@@ -48,7 +48,7 @@ public partial class EditNoteViewModel(ILocalDbCtxFactory factory, AppService ap
                .Notes
                .FirstOrDefaultAsync(x => x.Id == noteId) ??
             new();
-        
+
         Name = note.Name;
         Text = note.Value;
     }

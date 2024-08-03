@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CoursePlanner.ViewModels;
 
-public partial class EditTermViewModel(ILocalDbCtxFactory factory, AppService appShell)
+public partial class EditTermViewModel(ILocalDbCtxFactory factory, INavigationService navService)
     : ObservableObject
 {
     [ObservableProperty]
@@ -40,7 +40,7 @@ public partial class EditTermViewModel(ILocalDbCtxFactory factory, AppService ap
     [RelayCommand]
     public async Task BackAsync()
     {
-        await appShell.PopAsync();
+        await navService.PopAsync();
     }
 
     public async Task Init(int termId)
@@ -57,7 +57,7 @@ public partial class EditTermViewModel(ILocalDbCtxFactory factory, AppService ap
         Start = term.Start;
         End = term.End;
     }
-    
+
     public async Task RefreshAsync()
     {
         await Init(Id);

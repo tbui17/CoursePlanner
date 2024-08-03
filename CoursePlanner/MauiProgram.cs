@@ -41,6 +41,8 @@ public static class MauiProgram
             )
            .AddDbContextFactory<LocalDbCtx>()
            .AddSingleton<AppService>()
+           .AddSingleton<INavigationService, AppService>()
+           .AddSingleton<IAppService, AppService>()
            .AddTransient<MainPage, MainViewModel>()
            .AddTransient<DetailedTermPage, DetailedTermViewModel>()
            .AddTransient<EditTermPage, EditTermViewModel>()

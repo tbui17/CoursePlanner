@@ -1,11 +1,8 @@
-﻿using Lib.Exceptions;
-using Lib.Models;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 
 namespace CoursePlanner.Services;
 
-public class AppService
+public class AppService : IAppService, INavigationService
 {
     private readonly IServiceProvider _provider;
     private readonly ILocalNotificationService _localNotificationService;

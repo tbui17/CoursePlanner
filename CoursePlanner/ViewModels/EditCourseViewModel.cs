@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CoursePlanner.ViewModels;
 
-public partial class EditCourseViewModel(ILocalDbCtxFactory factory, AppService appShell)
+public partial class EditCourseViewModel(ILocalDbCtxFactory factory, INavigationService navService)
     : ObservableObject
 {
     public ObservableCollection<string> Statuses { get; } = Course.Statuses.ToObservableCollection();
@@ -53,7 +53,7 @@ public partial class EditCourseViewModel(ILocalDbCtxFactory factory, AppService 
     [RelayCommand]
     public async Task BackAsync()
     {
-        await appShell.PopAsync();
+        await navService.PopAsync();
     }
 
     public async Task Init(int id)

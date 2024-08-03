@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 namespace CoursePlanner.ViewModels;
 
 
-public partial class DetailedTermViewModel(IDbContextFactory<LocalDbCtx> factory, AppService appShell)
+public partial class DetailedTermViewModel(IDbContextFactory<LocalDbCtx> factory, INavigationService navService, IAppService appService)
     : ObservableObject
 {
     [ObservableProperty]
@@ -47,20 +47,20 @@ public partial class DetailedTermViewModel(IDbContextFactory<LocalDbCtx> factory
     [RelayCommand]
     public async Task EditTermAsync()
     {
-        await appShell.GoToEditTermPageAsync(Id);
+        await navService.GoToEditTermPageAsync(Id);
     }
 
 
     [RelayCommand]
     public async Task BackAsync()
     {
-        await appShell.PopAsync();
+        await navService.PopAsync();
     }
 
     [RelayCommand]
     public async Task AddCourseAsync()
     {
-        var name = await appShell.DisplayNamePromptAsync();
+        var name = await appService.DisplayNamePromptAsync();
         if (name is null)
         {
             return;
@@ -89,6 +89,6 @@ public partial class DetailedTermViewModel(IDbContextFactory<LocalDbCtx> factory
     public async Task DetailedCourseAsync()
     {
         if (SelectedCourse is null) return;
-        await appShell.GoToDetailedCoursesPageAsync(SelectedCourse.Id);
+        await navService.GoToDetailedCoursesPageAsync(SelectedCourse.Id);
     }
 }

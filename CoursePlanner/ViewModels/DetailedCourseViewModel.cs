@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CoursePlanner.ViewModels;
 
-public partial class DetailedCourseViewModel(ILocalDbCtxFactory factory, AppService appShell) : ObservableObject
+public partial class DetailedCourseViewModel(ILocalDbCtxFactory factory, IAppService appService, INavigationService navService) : ObservableObject
 {
     [ObservableProperty]
     private int _id;
@@ -90,20 +90,20 @@ public partial class DetailedCourseViewModel(ILocalDbCtxFactory factory, AppServ
     [RelayCommand]
     public async Task EditAsync()
     {
-        await appShell.GoToEditCoursePageAsync(Course.Id);
+        await navService.GoToEditCoursePageAsync(Course.Id);
     }
 
     [RelayCommand]
     public async Task AddInstructorAsync()
     {
-        await appShell.GoToAddInstructorPageAsync();
+        await navService.GoToAddInstructorPageAsync();
     }
 
     [RelayCommand]
     public async Task EditInstructorAsync()
     {
         if (SelectedInstructor is not { Id: var id and > 0 }) return;
-        await appShell.GotoEditInstructorPageAsync(id);
+        await navService.GotoEditInstructorPageAsync(id);
     }
 
     [RelayCommand]
@@ -121,7 +121,7 @@ public partial class DetailedCourseViewModel(ILocalDbCtxFactory factory, AppServ
     [RelayCommand]
     public async Task AddAssessmentAsync()
     {
-        var name = await appShell.DisplayNamePromptAsync();
+        var name = await appService.DisplayNamePromptAsync();
 
         if (name is null) return;
 
@@ -138,7 +138,7 @@ public partial class DetailedCourseViewModel(ILocalDbCtxFactory factory, AppServ
     {
         if (SelectedAssessment is not { Id: var id and > 0 }) return;
 
-        await appShell.GoToAssessmentDetailsPageAsync(id);
+        await navService.GoToAssessmentDetailsPageAsync(id);
     }
 
     [RelayCommand]
@@ -155,7 +155,7 @@ public partial class DetailedCourseViewModel(ILocalDbCtxFactory factory, AppServ
     [RelayCommand]
     public async Task AddNoteAsync()
     {
-        var name = await appShell.DisplayNamePromptAsync();
+        var name = await appService.DisplayNamePromptAsync();
 
         if (name is null) return;
 
@@ -171,7 +171,7 @@ public partial class DetailedCourseViewModel(ILocalDbCtxFactory factory, AppServ
     public async Task DetailedNoteAsync()
     {
         if (SelectedNote is not { Id: var id and > 0 }) return;
-        await appShell.GoToNoteDetailsPageAsync(id);
+        await navService.GoToNoteDetailsPageAsync(id);
     }
 
     [RelayCommand]
@@ -197,13 +197,13 @@ public partial class DetailedCourseViewModel(ILocalDbCtxFactory factory, AppServ
             Text = new ShareNote(SelectedNote).ToFriendlyText()
         };
 
-        await appShell.ShareAsync(request);
+        await appService.ShareAsync(request);
     }
 
     [RelayCommand]
     public async Task BackAsync()
     {
-        await appShell.GoBackToDetailedTermPageAsync();
+        await navService.GoBackToDetailedTermPageAsync();
     }
 
     public async Task RefreshAsync()
