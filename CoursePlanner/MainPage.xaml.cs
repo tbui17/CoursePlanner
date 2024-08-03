@@ -1,5 +1,4 @@
-﻿using CoursePlanner.Services;
-using CoursePlanner.ViewModels;
+﻿using CoursePlanner.ViewModels;
 using Plugin.LocalNotification;
 
 namespace CoursePlanner;
@@ -7,12 +6,10 @@ namespace CoursePlanner;
 public partial class MainPage : ContentPage
 {
     public MainViewModel Model { get; set; }
-    public AppService ShellModel { get; set; }
 
-    public MainPage(MainViewModel model, AppService shellModel)
+    public MainPage(MainViewModel model)
     {
         Model = model;
-        ShellModel = shellModel;
         InitializeComponent();
         BindingContext = this;
     }
