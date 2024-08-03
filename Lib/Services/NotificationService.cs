@@ -10,24 +10,29 @@ public class NotificationService(IDbContextFactory<LocalDbCtx> factory)
     public async Task<IList<NotificationResult>> GetNotifications()
     {
         await using var db = await factory.CreateDbContextAsync();
-        var assessments = await db
-           .Assessments
-           .Where(x => x.ShouldNotify)
+        var now = DateTime.Now;
+        var queryFactory = new NotificationQueryFactory(now);
+        var assessments = queryFactory.CreateUpcomingNotificationQuery(db.Assessments)
            .ToListAsync();
-        var courses = await db
-           .Courses
-           .Where(x => x.ShouldNotify)
+        var courses = queryFactory.CreateUpcomingNotificationQuery(db.Courses)
            .ToListAsync();
+        var tasks = await Task.WhenAll(assessments, courses);
+        var notifications = tasks
+           .SelectMany(x => x)
+           .Select(NotificationResult.From);
+        return notifications.ToList();
+    }
 
-
-        var assessmentResults = assessments.Select(NotificationResult.From);
-        var courseResults = courses.Select(NotificationResult.From);
-
-        return assessmentResults
-           .Concat(courseResults)
-           .Where(x => x.IsUpcoming).ToList();
+    private class NotificationQueryFactory(DateTime now)
+    {
+        public IQueryable<INotification> CreateUpcomingNotificationQuery(IQueryable<INotification> queryable) =>
+            queryable
+               .Where(x => x.ShouldNotify)
+               .Where(IsUpcomingExpr<INotification>(now));
     }
 }
+
+
 
 public record NotificationResult
 {
