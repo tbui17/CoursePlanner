@@ -8,11 +8,12 @@ namespace CoursePlanner;
 
 public partial class DevPage : ContentPage
 {
-    public DevPage(IServiceProvider provider, ILocalDbCtxFactory factory, AppService appService)
+    public DevPage(IServiceProvider provider, ILocalDbCtxFactory factory, AppService appService, ILocalNotificationService notificationService)
     {
         Provider = provider;
         Factory = factory;
         ApplicationService = appService;
+        NotificationService = notificationService;
 
         Actions = CreateActions();
 
@@ -23,6 +24,8 @@ public partial class DevPage : ContentPage
         Input.ItemsSource = Actions.Keys.ToObservableCollection();
         Input.SelectedIndex = 0;
     }
+
+    public ILocalNotificationService NotificationService { get; set; }
 
     private Dictionary<string, Func<Task>> Actions { get; }
 
@@ -92,7 +95,7 @@ public partial class DevPage : ContentPage
                     }
                 );
             },
-            ["Trigger Notification Service"] = async () => await ApplicationService.Notify(),
+            ["Trigger Notification Service"] = async () => await NotificationService.Notify(),
             ["Seed database"] = async () =>
             {
                 await using var db = await Factory.CreateDbContextAsync();

@@ -1,16 +1,13 @@
 ﻿using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Markup;
 using CoursePlanner.Services;
+using CoursePlanner.Utils;
 using CoursePlanner.ViewModels;
 using Lib;
 using Lib.Models;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Plugin.LocalNotification;
-#if ANDROID
-using Android.Util;
-#endif
 
 namespace CoursePlanner;
 
@@ -34,10 +31,15 @@ public static class MauiProgram
             );
 
 
-
         Configs
            .ConfigBackendServices(builder.Services)
-           .AddDbContextFactory<LocalDbCtx>(x => x.UseSqlite($"Filename={FileSystem.Current.AppDataDirectory}/db.sqlite"))
+           .AddDbContext<LocalDbCtx>(x => x
+               .UseSqlite($"DataSource={FileSystem.Current.AppDataDirectory}/database.db")
+               .EnableSensitiveDataLogging()
+               .EnableDetailedErrors()
+               .LogTo(Console.WriteLine)
+            )
+           .AddDbContextFactory<LocalDbCtx>()
            .AddSingleton<AppService>()
            .AddTransient<MainPage, MainViewModel>()
            .AddTransient<DetailedTermPage, DetailedTermViewModel>()
@@ -47,7 +49,9 @@ public static class MauiProgram
            .AddTransient<InstructorFormPage, InstructorFormViewModel>()
            .AddTransient<EditNotePage, EditNoteViewModel>()
            .AddTransient<EditAssessmentPage, EditAssessmentViewModel>()
-           .AddTransient<DevPage>();
+           .AddTransient<DevPage>()
+           .AddScoped<ILocalNotificationService, LocalNotificationService>()
+           .AddTransient<DbSetup>();
 
         builder.Logging.AddConsole();
 
@@ -60,41 +64,8 @@ public static class MauiProgram
 
         var app = builder.Build();
 
-        SetupDb();
+        app.Services.GetRequiredService<DbSetup>().SetupDb();
 
         return app;
-
-
-        void SetupDb()
-        {
-
-            var factory = app.Services.GetRequiredService<IDbContextFactory<LocalDbCtx>>();
-            using var db = factory.CreateDbContext();
-            var logger = app.Services.GetRequiredService<ILogger<LocalDbCtx>>();
-
-            logger.LogInformation("Attempting to migrate database.");
-            try
-            {
-                db.Database.Migrate();
-                logger.LogInformation("Database migrated.");
-            }
-            catch (SqliteException e) when (e.Message.Contains("already exists"))
-            {
-                logger.LogInformation($"A database entity already exists. Attempting to re-initialize database. {e.Message}");
-                db.Database.EnsureDeleted();
-                db.Database.Migrate();
-                logger.LogInformation("Database re-initialized.");
-            }
-        }
-
-    }
-
-
-
-    private static void Info(string tag, string message)
-    {
-#if ANDROID
-        Log.Info(tag, message);
-#endif
     }
 }
