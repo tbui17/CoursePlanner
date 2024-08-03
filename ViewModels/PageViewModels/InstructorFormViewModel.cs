@@ -8,7 +8,7 @@ using ViewModels.Services;
 namespace ViewModels.PageViewModels;
 
 public partial class InstructorFormViewModel(ILocalDbCtxFactory factory, INavigationService navService, IAppService appService)
-    : ObservableObject
+    : ObservableObject, IInstructorFormFields
 {
 
     [ObservableProperty]
