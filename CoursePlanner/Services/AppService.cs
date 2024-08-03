@@ -1,9 +1,7 @@
 ﻿using Lib.Exceptions;
 using Lib.Models;
-using Lib.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Plugin.LocalNotification;
 
 namespace CoursePlanner.Services;
 
@@ -11,77 +9,44 @@ public class AppService
 {
     private readonly IServiceProvider _provider;
     private readonly ILocalDbCtxFactory _factory;
-    private readonly NotificationService _notificationService;
+    private readonly ILocalNotificationService _localNotificationService;
+
 
     // ReSharper disable once NotAccessedField.Local
-    private readonly Timer _notificationJob;
     private readonly ILogger<AppService> _logger;
 
-    public AppService(IServiceProvider provider, ILocalDbCtxFactory factory, NotificationService notificationService, ILogger<AppService> logger)
+    public AppService(IServiceProvider provider, ILocalDbCtxFactory factory, ILocalNotificationService localNotificationService, ILogger<AppService> logger)
     {
         _provider = provider;
         _factory = factory;
-        _notificationService = notificationService;
+        _localNotificationService = localNotificationService;
         _logger = logger;
-        _notificationJob = CreateTimer();
-
+        StartScheduledTasks();
     }
 
-    private Timer CreateTimer()
+    // ReSharper disable once NotAccessedField.Local Avoid losing reference to timer
+    private Timer? _notificationJob;
+
+    private void StartScheduledTasks()
     {
+
         var time = TimeSpan.FromDays(1);
         _logger.LogInformation("Created notification timer with {Time}",time);
-        return new(
+        _notificationJob = new Timer(
             NotifyTask,
             null,
             TimeSpan.Zero,
             time
         );
+        return;
+        async void NotifyTask(object? _) => await _localNotificationService.Notify();
     }
 
 
-    private async void NotifyTask(object? _) => await Notify();
 
     public async Task ShareAsync(ShareTextRequest request)
     {
         await Share.RequestAsync(request);
-    }
-
-
-    public async Task Notify()
-    {
-        _logger.LogInformation("Retrieving notifications.");
-        var notifications = (await _notificationService.GetNotifications()).ToList();
-
-        _logger.LogInformation("Found {NotificationsCount} notifications.", notifications.Count);
-
-        if (notifications.Count == 0)
-        {
-            return;
-        }
-
-        var notificationRequest = CreateNotificationRequest(notifications);
-
-        _logger.LogInformation("Showing notification {NotificationId}: {NotificationTitle}", notificationRequest.NotificationId, notificationRequest.Title);
-        await LocalNotificationCenter.Current.Show(notificationRequest);
-        _logger.LogInformation("Successfully sent notification.");
-
-        return;
-
-        static NotificationRequest CreateNotificationRequest(IReadOnlyList<NotificationResult> notifications)
-        {
-            var title = $"{notifications.Count} upcoming events.";
-            var description = title + "\n" + notifications.ToMessage();
-
-
-            return new()
-            {
-                NotificationId = 1,
-                Title = title,
-                Description = description,
-                BadgeNumber = notifications.Count,
-            };
-        }
     }
 
 
