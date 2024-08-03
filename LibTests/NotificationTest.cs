@@ -4,32 +4,38 @@ using Lib.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
+[assembly: NonParallelizable]
+
 namespace LibTests;
 
 public class NotificationUpcomingTest : BaseDbTest
 {
-    [SetUp]
-    public new async Task Setup()
+    private IList<NotificationResult> Result { get; set; }
+
+
+    [OneTimeSetUp]
+    public override async Task Setup()
     {
-        await NotificationSetupUtil.SetStartTimes(DateTime.Now.AddHours(23));
+        await base.Setup();
+        var notificationSetupUtil = Provider.GetRequiredService<NotificationSetupUtil>();
+        await notificationSetupUtil.SetStartTimes(DateTime.Now.AddHours(23));
+        var notificationService = Provider.GetRequiredService<NotificationService>();
+        Result = await notificationService.GetNotifications();
     }
 
     [Test]
-    public async Task GetNotifications_ReturnSome()
+    public void GetNotifications_ReturnSome()
     {
-        var notificationService = Provider.GetRequiredService<NotificationService>();
-        var result = await notificationService.GetNotifications();
-        result
+        Result
            .Should()
            .HaveCount(2);
     }
 
+
     [Test]
-    public async Task GetNotifications_ReturnAllTypes()
+    public void GetNotifications_ReturnAllTypes()
     {
-        var notificationService = Provider.GetRequiredService<NotificationService>();
-        var result = await notificationService.GetNotifications();
-        result
+        Result
            .Should()
            .HaveCount(2)
            .And
@@ -42,9 +48,11 @@ public class NotificationUpcomingTest : BaseDbTest
 public class NotificationLapsedTest : BaseDbTest
 {
     [SetUp]
-    public new async Task Setup()
+    public override async Task Setup()
     {
-        await NotificationSetupUtil.SetStartTimes(DateTime.Now.AddHours(-1));
+        await base.Setup();
+        var notificationSetupUtil = Provider.GetRequiredService<NotificationSetupUtil>();
+        await notificationSetupUtil.SetStartTimes(DateTime.Now.AddHours(-1));
     }
 
     [Test]
@@ -58,12 +66,12 @@ public class NotificationLapsedTest : BaseDbTest
     }
 }
 
-internal static class NotificationSetupUtil
-{
-    public static async Task SetStartTimes(DateTime time)
-    {
-        var db = new LocalDbCtx();
 
+public class NotificationSetupUtil(IDbContextFactory<LocalDbCtx> factory)
+{
+    public async Task SetStartTimes(DateTime time)
+    {
+        await using var db = await factory.CreateDbContextAsync();
         var course1 = await db
            .Courses
            .AsTracking()

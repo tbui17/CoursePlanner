@@ -14,8 +14,16 @@ public static class Globals
     private static IServiceProvider CreateProvider()
     {
         var services = new ServiceCollection();
-        Configs.ConfigBackendServices(services);
-        services.AddDbContextFactory<LocalDbCtx>(x => x.UseSqlite("Data Source=:memory:"));
+        Configs
+           .ConfigBackendServices(services)
+           .AddDbContext<LocalDbCtx>(x => x
+               .UseSqlite("DataSource=database.db")
+               .EnableDetailedErrors()
+               .EnableSensitiveDataLogging()
+               .LogTo(Console.WriteLine)
+            )
+           .AddDbContextFactory<LocalDbCtx>()
+           .AddTransient<NotificationSetupUtil>();
         return services.BuildServiceProvider();
     }
 }
