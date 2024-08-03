@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CoursePlanner.ViewModels;
 
-public partial class InstructorFormViewModel(ILocalDbCtxFactory factory, AppService appShell)
+public partial class InstructorFormViewModel(ILocalDbCtxFactory factory, INavigationService navService, IAppService appService)
     : ObservableObject
 {
 
@@ -47,7 +47,7 @@ public partial class InstructorFormViewModel(ILocalDbCtxFactory factory, AppServ
 
         if (message is not null)
         {
-            await appShell.ShowErrorAsync(message.Message);
+            await appService.ShowErrorAsync(message.Message);
             return;
         }
         await BackAsync();
@@ -56,7 +56,7 @@ public partial class InstructorFormViewModel(ILocalDbCtxFactory factory, AppServ
     [RelayCommand]
     public async Task BackAsync()
     {
-        await appShell.PopAsync();
+        await navService.PopAsync();
     }
 
     public async Task Init(int id)

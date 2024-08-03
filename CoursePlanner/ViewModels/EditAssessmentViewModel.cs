@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CoursePlanner.ViewModels;
 
-public partial class EditAssessmentViewModel(ILocalDbCtxFactory factory, AppService appShell)
+public partial class EditAssessmentViewModel(ILocalDbCtxFactory factory, INavigationService navService)
     : ObservableObject
 {
     [ObservableProperty]
@@ -53,7 +53,7 @@ public partial class EditAssessmentViewModel(ILocalDbCtxFactory factory, AppServ
     [RelayCommand]
     public async Task BackAsync()
     {
-        await appShell.PopAsync();
+        await navService.PopAsync();
     }
 
     public async Task Init(int assessmentId)

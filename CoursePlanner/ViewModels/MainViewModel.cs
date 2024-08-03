@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CoursePlanner.ViewModels;
 
-public partial class MainViewModel(IDbContextFactory<LocalDbCtx> factory, AppService appShell) : ObservableObject
+public partial class MainViewModel(IDbContextFactory<LocalDbCtx> factory, INavigationService navService, IAppService appService) : ObservableObject
 {
     [ObservableProperty]
     private ObservableCollection<Term> _terms = [];
@@ -31,7 +31,7 @@ public partial class MainViewModel(IDbContextFactory<LocalDbCtx> factory, AppSer
     [RelayCommand]
     public async Task AddTermAsync()
     {
-        var name = await appShell.DisplayNamePromptAsync();
+        var name = await appService.DisplayNamePromptAsync();
         if (name is null)
         {
             return;
@@ -51,7 +51,7 @@ public partial class MainViewModel(IDbContextFactory<LocalDbCtx> factory, AppSer
             return;
         }
 
-        await appShell.GoToDetailedTermPageAsync(SelectedTerm.Id);
+        await navService.GoToDetailedTermPageAsync(SelectedTerm.Id);
     }
 
 
