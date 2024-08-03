@@ -3,12 +3,13 @@ using CommunityToolkit.Maui.Core.Extensions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Lib.Models;
+using Lib.Services;
 using Microsoft.EntityFrameworkCore;
 using ViewModels.Services;
 
 namespace ViewModels.PageViewModels;
 
-public partial class DetailedCourseViewModel(ILocalDbCtxFactory factory, IAppService appService, INavigationService navService) : ObservableObject
+public partial class DetailedCourseViewModel(ILocalDbCtxFactory factory, IAppService appService, INavigationService navService, ICourseService courseService) : ObservableObject
 {
     [ObservableProperty]
     private int _id;
@@ -59,21 +60,17 @@ public partial class DetailedCourseViewModel(ILocalDbCtxFactory factory, IAppSer
 
     public async Task Init(int id)
     {
+        Id = id;
+        SelectedNote = null;
+        SelectedAssessment = null;
         await using var db = await factory.CreateDbContextAsync();
-        var course = await db
-               .Courses
-               .Include(x => x.Instructor)
-               .Include(x => x.Assessments)
-               .Include(x => x.Notes)
-               .FirstOrDefaultAsync(x => x.Id == id) ??
-            new();
+        var course = await courseService.GetFullCourse(id) ?? new();
 
         var instructors = await db.Instructors.ToListAsync();
         SetInstructors();
 
         Course = course;
 
-        SelectedNote = Notes.FirstOrDefault();
 
         return;
 

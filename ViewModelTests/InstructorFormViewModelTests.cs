@@ -26,6 +26,12 @@ public class InstructorFormViewModelTests : BaseDbTest
 
     public LocalDbCtx Db { get; set; }
 
+    [TearDown]
+    public async Task TearDown()
+    {
+        await Db.DisposeAsync();
+    }
+
 
 
 

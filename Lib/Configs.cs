@@ -8,7 +8,8 @@ public class Configs
     public static IServiceCollection ConfigBackendServices(IServiceCollection b)
     {
         b
-           .AddScoped<NotificationService>();
+           .AddScoped<NotificationService>()
+           .AddScoped<ICourseService, CourseService>();
         return b;
     }
 }
