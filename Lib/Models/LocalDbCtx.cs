@@ -1,21 +1,30 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
+﻿
+using Microsoft.EntityFrameworkCore;
 
 namespace Lib.Models;
 
-public class LocalDbCtx : DbCtx
+public class LocalDbCtx : DbContext
 {
-    private string DbFileName { get; set; } = "db.sqlite";
 
-    public string ApplicationDirectoryPath { get; init; } =
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+    public LocalDbCtx(){}
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    public LocalDbCtx(DbContextOptions<LocalDbCtx> options) : base(options)
     {
-        optionsBuilder
-           .UseSqlite($"Filename={DbFileName}")
-           .EnableSensitiveDataLogging()
-           .EnableDetailedErrors()
-           .LogTo(Console.WriteLine, LogLevel.Information);
+    }
+
+    public DbSet<Instructor> Instructors { get; set; }
+    public DbSet<Term> Terms { get; set; }
+    public DbSet<Course> Courses { get; set; }
+    public DbSet<Note> Notes { get; set; }
+    public DbSet<Assessment> Assessments { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder
+           .Entity<Course>()
+           .HasOne(x => x.Instructor)
+           .WithMany(x => x.Courses)
+           .HasForeignKey(x => x.InstructorId)
+           .OnDelete(DeleteBehavior.SetNull);
     }
 }
