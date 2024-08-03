@@ -155,12 +155,13 @@ public class TestDataFactory
 
     public async Task SeedDatabase(LocalDbCtx db)
     {
+        
         var data = CreateData();
-        await db.Terms.AddRangeAsync(data.Terms);
-        await db.Instructors.AddRangeAsync(data.Instructors);
-        await db.Courses.AddRangeAsync(data.Courses);
-        await db.Notes.AddRangeAsync(data.Notes);
-        await db.Assessments.AddRangeAsync(data.Assessments);
+        db.Terms.AddRange(data.Terms);
+        db.Instructors.AddRange(data.Instructors);
+        db.Courses.AddRange(data.Courses);
+        db.Notes.AddRange(data.Notes);
+        db.Assessments.AddRange(data.Assessments);
         await db.SaveChangesAsync();
     }
 }
