@@ -101,9 +101,171 @@ public class DetailedCourseViewModelTests : BaseDbTest
            .Should()
            .BeNull();
 
+
         Model
            .SelectedNote
            .Should()
            .BeNull();
+    }
+
+    [Test]
+    public async Task ShareAsync_SelectedNote_SendsShareTextRequestWithNonEmptyStringToApp()
+    {
+        var args = new List<ShareTextRequest>();
+        AppMock.Setup(x => x.ShareAsync(Capture.In(args)));
+        await Model.Init(1);
+
+        var note = Model.Notes.First();
+        Model.SelectedNote = note;
+
+        await Model.ShareAsync();
+
+        using var _ = new AssertionScope();
+
+        var request = args
+           .Should()
+           .ContainSingle()
+           .Subject;
+
+        request
+           .Text
+           .Should()
+           .NotBeNullOrEmpty();
+
+        request
+           .Title
+           .Should()
+           .NotBeNullOrEmpty();
+    }
+
+    [Test]
+    public async Task ShareAsync_SelectedNote_ShareRequestContainsNoteContents()
+    {
+        var args = new List<ShareTextRequest>();
+        AppMock.Setup(x => x.ShareAsync(Capture.In(args)));
+
+        await Model.Init(1);
+        var note = Model.Notes.First();
+        Model.SelectedNote = note;
+
+        await Model.ShareAsync();
+
+        using var _ = new AssertionScope();
+
+
+        var textRequest = args
+           .Should()
+           .ContainSingle()
+           .Subject;
+
+        textRequest
+           .Text
+           .Should()
+           .Contain(note.Value);
+    }
+
+
+    private class InstructorSelectionTests : BaseDbTest
+    {
+       private const int InstructorId = 1;
+       private const int NewInstructorId = 2;
+       private const int CourseId = 1;
+
+        [SetUp]
+        public override async Task Setup()
+        {
+            await base.Setup();
+            Db = GetDbFactory()();
+            NavMock = new Mock<INavigationService>();
+            AppMock = new Mock<IAppService>();
+            Model = new DetailedCourseViewModel(factory: Resolve<ILocalDbCtxFactory>(), appService: AppMock.Object,
+                navService: NavMock.Object, courseService: Resolve<ICourseService>()
+            );
+            await SetInitialDbAndModelStates();
+        }
+
+        private async Task SetInitialDbAndModelStates()
+        {
+           await Db.Courses.ExecuteUpdateAsync(x => x.SetProperty(p => p.InstructorId, InstructorId));
+           await Model.Init(CourseId);
+        }
+
+        private Mock<IAppService> AppMock { get; set; }
+
+        private Mock<INavigationService> NavMock { get; set; }
+
+        private DetailedCourseViewModel Model { get; set; }
+
+        private LocalDbCtx Db { get; set; }
+
+        [TearDown]
+        public async Task TearDown()
+        {
+            await Db.DisposeAsync();
+        }
+
+
+
+        [Test]
+        public void FixtureInitializedWithCorrectValues()
+        {
+           Model.Course.Id.Should().Be(CourseId);
+           Model.Id.Should().Be(CourseId);
+           Model
+             .Course
+             .InstructorId
+             .Should()
+             .Be(InstructorId);
+
+           Model
+             .SelectedInstructor
+            ?.Id
+             .Should()
+             .Be(InstructorId);
+        }
+
+
+        [Test]
+        public async Task OnSelectedInstructorChanged_NewId_ModelHasUpdatedValues()
+        {
+
+            Model.SelectedInstructor = Model.Instructors.First(x => x.Id == NewInstructorId);
+
+            var updatedCourse = await Db
+               .Courses
+               .AsNoTracking()
+               .FirstAsync(x => x.Id == CourseId);
+
+            updatedCourse
+               .InstructorId
+               .Should()
+               .Be(NewInstructorId);
+
+            Model
+               .SelectedInstructor
+              ?.Id
+               .Should()
+               .Be(NewInstructorId);
+
+            Model
+               .Course
+               .InstructorId
+               .Should()
+               .Be(NewInstructorId);
+        }
+
+        [Test]
+        public async Task DeleteInstructorAsync_ModelHasNullInstructor()
+        {
+           await Model.DeleteInstructorAsync();
+           using var _ = new AssertionScope();
+           Model.SelectedInstructor.Should().BeNull();
+           Model
+             .Course
+             .Instructor
+             .Should()
+             .BeNull();
+           Model.Course.InstructorId.Should().Be(null);
+        }
     }
 }
