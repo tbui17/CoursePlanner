@@ -8,17 +8,15 @@ namespace CoursePlanner.Services;
 public class AppService
 {
     private readonly IServiceProvider _provider;
-    private readonly ILocalDbCtxFactory _factory;
     private readonly ILocalNotificationService _localNotificationService;
 
 
     // ReSharper disable once NotAccessedField.Local
     private readonly ILogger<AppService> _logger;
 
-    public AppService(IServiceProvider provider, ILocalDbCtxFactory factory, ILocalNotificationService localNotificationService, ILogger<AppService> logger)
+    public AppService(IServiceProvider provider, ILocalNotificationService localNotificationService, ILogger<AppService> logger)
     {
         _provider = provider;
-        _factory = factory;
         _localNotificationService = localNotificationService;
         _logger = logger;
         StartScheduledTasks();
@@ -113,11 +111,6 @@ public class AppService
         await GoToAsync<EditTermPage>(x => x.Model.Id = id);
     }
 
-    public async Task GoBackToDetailedCoursePageAsync()
-    {
-        await Navigation.PopAsync();
-    }
-
     public async Task GoToEditCoursePageAsync(int courseId)
     {
         await GoToAsync<EditCoursePage>(x => x.Model.Id = courseId);
@@ -126,29 +119,7 @@ public class AppService
     public async Task GoToAddInstructorPageAsync()
     {
         var page = Resolve<InstructorFormPage>();
-
-
-        page.Model.Title = "Add Instructor";
-
-        page.Model.InstructorPersistence = async instructor =>
-        {
-            if (instructor.Validate() is { } e)
-            {
-                return e;
-            }
-
-            await using var db = await _factory.CreateDbContextAsync();
-
-            if (await ValidateNoDuplicateEmail(db, instructor.Email) is { } exc)
-            {
-                return exc;
-            }
-
-            db.Instructors.Add(instructor);
-            await db.SaveChangesAsync();
-
-            return null;
-        };
+        page.Model.SetAdding();
 
         await Navigation.PushAsync(page);
     }
@@ -157,53 +128,9 @@ public class AppService
     {
         var page = Resolve<InstructorFormPage>();
 
-        page.Model.Title = "Edit Instructor";
-        page.Model.Id = instructorId;
-
-        page.Model.InstructorPersistence = async instructor =>
-        {
-            if (instructor.Validate() is { } e)
-            {
-                return e;
-            }
-
-
-            await using var db = await _factory.CreateDbContextAsync();
-
-            if (await ValidateNoDuplicateEmail(db, instructor.Email, instructorId) is { } exc)
-            {
-                return exc;
-            }
-
-            var editModel = await db.Instructors.FirstAsync(x => x.Id == instructorId);
-
-            editModel.Name = instructor.Name;
-            editModel.Email = instructor.Email;
-            editModel.Phone = instructor.Phone;
-            await db.SaveChangesAsync();
-            return null;
-        };
+        page.Model.SetEditing(instructorId);
 
         await Navigation.PushAsync(page);
-    }
-
-    private static async Task<DomainException?> ValidateNoDuplicateEmail(LocalDbCtx db, string email, int? id = null)
-    {
-        email = email.ToLower();
-        var baseQuery = db.Instructors.Where(x => x.Email.ToLower() == email);
-
-        if (id is { } instructorId)
-        {
-            baseQuery = baseQuery.Where(x => x.Id != instructorId);
-        }
-
-        var maybeDuplicateEmail = await baseQuery
-           .Select(x => x.Email)
-           .FirstOrDefaultAsync();
-
-        return maybeDuplicateEmail is not null
-            ? new DomainException("Email already exists.")
-            : null;
     }
 
     public async Task GoToAssessmentDetailsPageAsync(int assessmentId)
