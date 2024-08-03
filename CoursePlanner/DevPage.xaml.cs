@@ -8,7 +8,7 @@ namespace CoursePlanner;
 
 public partial class DevPage : ContentPage
 {
-    public DevPage(IServiceProvider provider, ILocalDbCtxFactory factory, AppService appService, ILocalNotificationService notificationService)
+    public DevPage(IServiceProvider provider, ILocalDbCtxFactory factory, IAppService appService, ILocalNotificationService notificationService)
     {
         Provider = provider;
         Factory = factory;
@@ -31,7 +31,7 @@ public partial class DevPage : ContentPage
 
     private ILocalDbCtxFactory Factory { get; set; }
 
-    private AppService ApplicationService { get; set; }
+    private IAppService ApplicationService { get; set; }
 
     private IServiceProvider Provider { get; set; }
 
