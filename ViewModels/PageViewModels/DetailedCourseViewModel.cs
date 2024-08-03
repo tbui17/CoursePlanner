@@ -50,6 +50,9 @@ public partial class DetailedCourseViewModel(ILocalDbCtxFactory factory, IAppSer
             return;
         }
 
+        Course.Instructor = Instructors.First(x => x.Id == newValue.Id);
+        Course.InstructorId = newValue.Id;
+
         await using var db = await factory.CreateDbContextAsync();
         await db
            .Courses
