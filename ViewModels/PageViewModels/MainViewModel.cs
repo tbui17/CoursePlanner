@@ -2,12 +2,11 @@
 using CommunityToolkit.Maui.Core.Extensions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using CoursePlanner.Services;
 using Lib.Models;
 using Microsoft.EntityFrameworkCore;
+using ViewModels.Services;
 
-
-namespace CoursePlanner.ViewModels;
+namespace ViewModels.PageViewModels;
 
 public partial class MainViewModel(IDbContextFactory<LocalDbCtx> factory, INavigationService navService, IAppService appService) : ObservableObject
 {
@@ -64,9 +63,8 @@ public partial class MainViewModel(IDbContextFactory<LocalDbCtx> factory, INavig
         }
 
         await using var db = await factory.CreateDbContextAsync();
-        await db
-           .Terms
-           .Where(x => x.Id == SelectedTerm.Id)
+        await Queryable.Where(db
+               .Terms, x => x.Id == SelectedTerm.Id)
            .ExecuteDeleteAsync();
         await Init();
     }

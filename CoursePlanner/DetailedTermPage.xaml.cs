@@ -1,4 +1,4 @@
-﻿using CoursePlanner.ViewModels;
+﻿using ViewModels.PageViewModels;
 
 namespace CoursePlanner;
 
@@ -13,8 +13,8 @@ public partial class DetailedTermPage
         HideSoftInputOnTapped = true;
         BindingContext = model;
     }
-    
-    
+
+
     protected override async void OnAppearing()
     {
         base.OnAppearing();

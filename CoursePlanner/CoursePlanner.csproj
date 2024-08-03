@@ -57,7 +57,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="CommunityToolkit.Maui" Version="9.0.1"/>
+        <PackageReference Include="CommunityToolkit.Maui" Version="9.0.2" />
         <PackageReference Include="CommunityToolkit.Maui.Markup" Version="4.0.0"/>
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2"/>
         <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
@@ -81,6 +81,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Lib\Lib.csproj"/>
+        <ProjectReference Include="..\ViewModels\ViewModels.csproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -88,6 +89,10 @@
             <DependentUpon>DataTable.xaml</DependentUpon>
             <SubType>Code</SubType>
         </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="ViewModels\" />
     </ItemGroup>
 
 </Project>

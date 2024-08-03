@@ -1,4 +1,4 @@
-﻿namespace CoursePlanner.Services;
+﻿namespace ViewModels.Services;
 
 public interface IAppService
 {

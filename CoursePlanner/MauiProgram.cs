@@ -2,12 +2,13 @@
 using CommunityToolkit.Maui.Markup;
 using CoursePlanner.Services;
 using CoursePlanner.Utils;
-using CoursePlanner.ViewModels;
 using Lib;
 using Lib.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Plugin.LocalNotification;
+using ViewModels.PageViewModels;
+using ViewModels.Services;
 
 namespace CoursePlanner;
 
