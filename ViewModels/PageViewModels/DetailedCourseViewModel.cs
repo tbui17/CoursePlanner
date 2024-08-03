@@ -57,7 +57,7 @@ public partial class DetailedCourseViewModel(ILocalDbCtxFactory factory, IAppSer
     }
 
 
-    private async Task Init(int id)
+    public async Task Init(int id)
     {
         await using var db = await factory.CreateDbContextAsync();
         var course = await db
