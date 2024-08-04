@@ -183,6 +183,7 @@ public partial class DetailedCourseViewModel(ILocalDbCtxFactory factory, IAppSer
            .Notes
            .Where(x => x.Id == SelectedNote.Id)
            .ExecuteDeleteAsync();
+        await RefreshAsync();
     }
 
     [RelayCommand]
