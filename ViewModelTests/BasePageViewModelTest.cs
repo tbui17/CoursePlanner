@@ -8,7 +8,7 @@ public class BasePageViewModelTest<T> : BaseDbTest where T : notnull
     public override async Task Setup()
     {
         await base.Setup();
-        Db = GetDbFactory()();
+        Db = GetDb();
         Model = Resolve<T>();
     }
 

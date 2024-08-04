@@ -15,7 +15,7 @@ public class DetailedCourseViewModelTests : BaseDbTest
     public override async Task Setup()
     {
         await base.Setup();
-        Db = GetDbFactory()();
+        Db = GetDb();
         NavMock = new Mock<INavigationService>();
         AppMock = new Mock<IAppService>();
         Model = new DetailedCourseViewModel(factory: Resolve<ILocalDbCtxFactory>(), appService: AppMock.Object,
@@ -175,7 +175,7 @@ public class DetailedCourseViewModelTests : BaseDbTest
         public override async Task Setup()
         {
             await base.Setup();
-            Db = GetDbFactory()();
+            Db = GetDb();
             NavMock = new Mock<INavigationService>();
             AppMock = new Mock<IAppService>();
             Model = new DetailedCourseViewModel(factory: Resolve<ILocalDbCtxFactory>(), appService: AppMock.Object,

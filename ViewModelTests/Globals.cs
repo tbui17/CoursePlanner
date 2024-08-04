@@ -42,8 +42,8 @@ public static class Globals
     public static T Resolve<T>() where T : notnull => Provider.GetRequiredService<T>();
 
     //TODO: Change to get db directly
-    public static Func<LocalDbCtx> GetDbFactory() =>
-        () => Provider
+    public static LocalDbCtx GetDb() =>
+        Provider
            .GetRequiredService<IDbContextFactory<LocalDbCtx>>()
            .CreateDbContext();
 }
