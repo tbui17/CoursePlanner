@@ -1,24 +1,29 @@
 ﻿using Lib.Services;
 using Microsoft.Extensions.Logging;
 using Plugin.LocalNotification;
+using Plugin.LocalNotification.EventArgs;
 
 namespace ViewModels.Services;
 
 public interface ILocalNotificationService
 {
-    Task Notify();
+    Task SendUpcomingNotifications();
     Task Notify(NotificationRequest request);
     void StartListening();
+    event EventHandler<NotificationEventArgs>? NotificationReceived;
 }
 
-public class LocalNotificationService(NotificationService notificationService, ILogger<LocalNotificationService> logger)
+public class LocalNotificationService(
+    NotificationService notificationService,
+    ILogger<ILocalNotificationService> logger)
     : ILocalNotificationService
 {
     // ReSharper disable once NotAccessedField.Local Avoid losing reference to timer
     private Timer? _notificationJob;
 
+    public event EventHandler<NotificationEventArgs>? NotificationReceived;
 
-    public async Task Notify()
+    public async Task SendUpcomingNotifications()
     {
         logger.LogInformation("Retrieving notifications.");
         var notifications = (await notificationService.GetNotifications()).ToList();
@@ -58,11 +63,13 @@ public class LocalNotificationService(NotificationService notificationService, I
 
     public async Task Notify(NotificationRequest request)
     {
+        NotificationReceived?.Invoke(this, new NotificationEventArgs { Request = request });
         if (LocalNotificationCenter.Current is { } c)
         {
             await c.Show(request);
             return;
         }
+
         var msg = new
         {
             request.NotificationId,
@@ -85,6 +92,6 @@ public class LocalNotificationService(NotificationService notificationService, I
             time
         );
         return;
-        async void NotifyTask(object? _) => await Notify();
+        async void NotifyTask(object? _) => await SendUpcomingNotifications();
     }
 }
