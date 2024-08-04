@@ -101,7 +101,7 @@ public partial class DevPage : ContentPage
                     }
                 );
             },
-            ["Trigger Notification Service"] = async () => await NotificationService.Notify(),
+            ["Trigger Notification Service"] = async () => await NotificationService.SendUpcomingNotifications(),
             ["Seed database"] = async () =>
             {
                 await using var db = await Factory.CreateDbContextAsync();
