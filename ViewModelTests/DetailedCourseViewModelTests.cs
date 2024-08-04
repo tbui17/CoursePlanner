@@ -165,11 +165,54 @@ public class DetailedCourseViewModelTests : BaseDbTest
     }
 
 
+    [Test]
+    public async Task DeleteNoteAsync_DbAndModelStateUpdated()
+    {
+        var initialDbNotes = await Db.Notes.AsNoTracking().ToListAsync();
+        await Model.Init(1);
+        var note = Model.Notes.First();
+        var noteId = note.Id;
+        var noteCount = Model.Notes.Count;
+
+        var expectedNoteCount = noteCount - 1;
+        var expectedDbNoteCount = initialDbNotes.Count - 1;
+
+
+
+        Model.SelectedNote = note;
+        await Model.DeleteNoteAsync();
+
+        var dbNotes = await Db.Notes.AsNoTracking().ToListAsync();
+
+        using var scope = new AssertionScope();
+        scope.FormattingOptions.MaxLines = 0;
+
+        dbNotes
+           .Should()
+           .NotContain(x => x.Id == noteId)
+           .And
+           .HaveCount(expectedDbNoteCount);
+
+        Model
+           .Notes
+           .Should()
+           .NotContain(x => x.Id == noteId)
+           .And
+           .HaveCount(expectedNoteCount);
+
+        Model
+           .SelectedNote
+           .Should()
+           .BeNull();
+
+    }
+
+
     private class InstructorSelectionTests : BaseDbTest
     {
-       private const int InstructorId = 1;
-       private const int NewInstructorId = 2;
-       private const int CourseId = 1;
+        private const int InstructorId = 1;
+        private const int NewInstructorId = 2;
+        private const int CourseId = 1;
 
         [SetUp]
         public override async Task Setup()
@@ -186,8 +229,8 @@ public class DetailedCourseViewModelTests : BaseDbTest
 
         private async Task SetInitialDbAndModelStates()
         {
-           await Db.Courses.ExecuteUpdateAsync(x => x.SetProperty(p => p.InstructorId, InstructorId));
-           await Model.Init(CourseId);
+            await Db.Courses.ExecuteUpdateAsync(x => x.SetProperty(p => p.InstructorId, InstructorId));
+            await Model.Init(CourseId);
         }
 
         private Mock<IAppService> AppMock { get; set; }
@@ -205,30 +248,35 @@ public class DetailedCourseViewModelTests : BaseDbTest
         }
 
 
-
         [Test]
         public void FixtureInitializedWithCorrectValues()
         {
-           Model.Course.Id.Should().Be(CourseId);
-           Model.Id.Should().Be(CourseId);
-           Model
-             .Course
-             .InstructorId
-             .Should()
-             .Be(InstructorId);
+            Model
+               .Course
+               .Id
+               .Should()
+               .Be(CourseId);
+            Model
+               .Id
+               .Should()
+               .Be(CourseId);
+            Model
+               .Course
+               .InstructorId
+               .Should()
+               .Be(InstructorId);
 
-           Model
-             .SelectedInstructor
-            ?.Id
-             .Should()
-             .Be(InstructorId);
+            Model
+               .SelectedInstructor
+              ?.Id
+               .Should()
+               .Be(InstructorId);
         }
 
 
         [Test]
         public async Task OnSelectedInstructorChanged_NewId_ModelHasUpdatedValues()
         {
-
             Model.SelectedInstructor = Model.Instructors.First(x => x.Id == NewInstructorId);
 
             var updatedCourse = await Db
@@ -257,15 +305,22 @@ public class DetailedCourseViewModelTests : BaseDbTest
         [Test]
         public async Task DeleteInstructorAsync_ModelHasNullInstructor()
         {
-           await Model.DeleteInstructorAsync();
-           using var _ = new AssertionScope();
-           Model.SelectedInstructor.Should().BeNull();
-           Model
-             .Course
-             .Instructor
-             .Should()
-             .BeNull();
-           Model.Course.InstructorId.Should().Be(null);
+            await Model.DeleteInstructorAsync();
+            using var _ = new AssertionScope();
+            Model
+               .SelectedInstructor
+               .Should()
+               .BeNull();
+            Model
+               .Course
+               .Instructor
+               .Should()
+               .BeNull();
+            Model
+               .Course
+               .InstructorId
+               .Should()
+               .Be(null);
         }
     }
 }
