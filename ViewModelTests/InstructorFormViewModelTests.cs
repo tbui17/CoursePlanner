@@ -12,7 +12,7 @@ public class InstructorFormViewModelTests : BaseDbTest
     public override async Task Setup()
     {
         await base.Setup();
-        Db = GetDbFactory()();
+        Db = GetDb();
         NavMock = new Mock<INavigationService>();
         AppMock = new Mock<IAppService>();
         Model = new InstructorFormViewModel(factory: Resolve<ILocalDbCtxFactory>(), NavMock.Object, AppMock.Object);

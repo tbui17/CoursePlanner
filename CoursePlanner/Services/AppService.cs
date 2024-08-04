@@ -21,25 +21,10 @@ public class AppService : IAppService, INavigationService
         _provider = provider;
         _localNotificationService = localNotificationService;
         _logger = logger;
-        StartScheduledTasks();
+        _localNotificationService.StartListening();
     }
 
-    // ReSharper disable once NotAccessedField.Local Avoid losing reference to timer
-    private Timer? _notificationJob;
 
-    private void StartScheduledTasks()
-    {
-        var time = TimeSpan.FromDays(1);
-        _logger.LogInformation("Created notification timer with {Time}", time);
-        _notificationJob = new Timer(
-            NotifyTask,
-            null,
-            TimeSpan.Zero,
-            time
-        );
-        return;
-        async void NotifyTask(object? _) => await _localNotificationService.Notify();
-    }
 
 
     public async Task ShareAsync(ShareTextRequest request)
