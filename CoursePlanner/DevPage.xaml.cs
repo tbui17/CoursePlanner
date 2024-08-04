@@ -1,5 +1,4 @@
 ﻿using CommunityToolkit.Maui.Core.Extensions;
-using CoursePlanner.Services;
 using Lib.Models;
 using Lib.Utils;
 using Microsoft.EntityFrameworkCore;
