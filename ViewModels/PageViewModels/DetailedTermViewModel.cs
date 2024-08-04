@@ -77,8 +77,8 @@ public partial class DetailedTermViewModel(IDbContextFactory<LocalDbCtx> factory
     {
         if (SelectedCourse is null) return;
         await using var db = await factory.CreateDbContextAsync();
-        await Queryable.Where(db
-               .Courses, x => x.Id == SelectedCourse.Id)
+        await db
+           .Courses.Where(x => x.Id == SelectedCourse.Id)
            .ExecuteDeleteAsync();
         await RefreshAsync();
     }
