@@ -168,7 +168,10 @@ public class DetailedCourseViewModelTests : BaseDbTest
     [Test]
     public async Task DeleteNoteAsync_DbAndModelStateUpdated()
     {
-        var initialDbNotes = await Db.Notes.AsNoTracking().ToListAsync();
+        var initialDbNotes = await Db
+           .Notes
+           .AsNoTracking()
+           .ToListAsync();
         await Model.Init(1);
         var note = Model.Notes.First();
         var noteId = note.Id;
@@ -178,11 +181,13 @@ public class DetailedCourseViewModelTests : BaseDbTest
         var expectedDbNoteCount = initialDbNotes.Count - 1;
 
 
-
         Model.SelectedNote = note;
         await Model.DeleteNoteAsync();
 
-        var dbNotes = await Db.Notes.AsNoTracking().ToListAsync();
+        var dbNotes = await Db
+           .Notes
+           .AsNoTracking()
+           .ToListAsync();
 
         using var scope = new AssertionScope();
         scope.FormattingOptions.MaxLines = 0;
@@ -204,7 +209,37 @@ public class DetailedCourseViewModelTests : BaseDbTest
            .SelectedNote
            .Should()
            .BeNull();
+    }
 
+    [Test]
+    public async Task AddNoteAsync_UpdatesDbAndModelState()
+    {
+        const string newNoteName = "My New Note ABC";
+        AppMock
+           .Setup(x => x.DisplayNamePromptAsync())
+           .ReturnsAsync(newNoteName);
+
+        await Model.Init(1);
+        await Model.AddNoteAsync();
+
+
+        var dbNotes = await Db
+           .Courses
+           .Where(x => x.Id == 1)
+           .Include(x => x.Notes)
+           .Select(x => x.Notes)
+           .FirstAsync();
+
+        using var _ = new AssertionScope();
+
+        dbNotes
+           .Should()
+           .ContainSingle(x => x.Name == newNoteName);
+
+        Model
+           .Notes
+           .Should()
+           .ContainSingle(x => x.Name == newNoteName);
     }
 
 

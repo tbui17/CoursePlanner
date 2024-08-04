@@ -28,6 +28,7 @@ public partial class DetailedTermViewModel(IDbContextFactory<LocalDbCtx> factory
 
     public async Task Init(int id)
     {
+        Id = id;
         await using var db = await factory.CreateDbContextAsync();
         var res = await db
                .Terms
