@@ -11,7 +11,7 @@ public class EditTermViewModelTest : BaseDbTest
     public override async Task Setup()
     {
         await base.Setup();
-        Db = GetDbFactory()();
+        Db = GetDb();
         Model = Resolve<EditTermViewModel>();
     }
 
