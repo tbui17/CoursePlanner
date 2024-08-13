@@ -58,7 +58,6 @@ public class DetailedCourseViewModelTests : BaseDbTest
 
         using var _ = new AssertionScope();
 
-
         Model
            .Instructors
            .Select(x => x.Name)

@@ -21,13 +21,11 @@ public class LocalNotificationServiceTests
         course.ShouldNotify = true;
         await db.SaveChangesAsync();
         _course = course;
-
     }
 
     [Test]
     public async Task SendUpcomingNotifications_1UpcomingEvent_MessageShouldContainNotificationNameAndCount()
     {
-
         // subscribe to notifications
 
         var service = Resolve<ILocalNotificationService>();
