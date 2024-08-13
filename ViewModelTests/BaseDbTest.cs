@@ -14,6 +14,5 @@ public abstract class BaseDbTest
         await db.Database.EnsureDeletedAsync();
         await db.Database.EnsureCreatedAsync();
         await new TestDataFactory().SeedDatabase(db);
-
     }
 }
