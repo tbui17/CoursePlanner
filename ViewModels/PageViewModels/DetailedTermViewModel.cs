@@ -9,7 +9,7 @@ using ViewModels.Services;
 namespace ViewModels.PageViewModels;
 
 
-public partial class DetailedTermViewModel(IDbContextFactory<LocalDbCtx> factory, INavigationService navService, IAppService appService)
+public partial class DetailedTermViewModel(ILocalDbCtxFactory factory, INavigationService navService, IAppService appService)
     : ObservableObject
 {
     [ObservableProperty]
@@ -60,6 +60,15 @@ public partial class DetailedTermViewModel(IDbContextFactory<LocalDbCtx> factory
     [RelayCommand]
     public async Task AddCourseAsync()
     {
+        await using var db = await factory.CreateDbContextAsync();
+
+        var courseCount = await db.Courses.CountAsync(x => x.TermId == Term.Id);
+        if (courseCount >= 6)
+        {
+            await appService.ShowErrorAsync("You can only have up to 6 courses per term");
+            return;
+        }
+
         var name = await appService.DisplayNamePromptAsync();
         if (name is null)
         {
@@ -67,7 +76,7 @@ public partial class DetailedTermViewModel(IDbContextFactory<LocalDbCtx> factory
         }
         var course = Course.From(Term);
         course.Name = name;
-        await using var db = await factory.CreateDbContextAsync();
+
         db.Courses.Add(course);
         await db.SaveChangesAsync();
         await RefreshAsync();

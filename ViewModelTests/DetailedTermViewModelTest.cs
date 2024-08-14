@@ -12,12 +12,15 @@ public class DetailedTermViewModelTest : BasePageViewModelTest
     public override async Task Setup()
     {
         await base.Setup();
-        Model = new DetailedTermViewModel(factory: Resolve<ILocalDbCtxFactory>(), appService: AppMock.Object, navService: NavMock.Object);
+        Model = new DetailedTermViewModel(
+            factory: Resolve<ILocalDbCtxFactory>(),
+            appService: AppMock.Object,
+            navService: NavMock.Object
+        );
     }
 
 
     private DetailedTermViewModel Model { get; set; }
-
 
 
     [Test]
@@ -49,9 +52,10 @@ public class DetailedTermViewModelTest : BasePageViewModelTest
     [Test]
     public async Task AddCourse_UpdatesModelAndDbState()
     {
-
         const string courseName = "My New Course";
-        AppMock.Setup(x => x.DisplayNamePromptAsync()).ReturnsAsync(courseName);
+        AppMock
+           .Setup(x => x.DisplayNamePromptAsync())
+           .ReturnsAsync(courseName);
 
         await Model.Init(1);
 
@@ -60,10 +64,9 @@ public class DetailedTermViewModelTest : BasePageViewModelTest
 
         var dbTerm = await Db
            .Terms
-           .Where(x => x. Id == 1)
+           .Where(x => x.Id == 1)
            .Include(x => x.Courses)
            .FirstAsync();
-
 
 
         using var _ = new AssertionScope();
@@ -74,42 +77,59 @@ public class DetailedTermViewModelTest : BasePageViewModelTest
            .ContainSingle(x => x.Name == courseName);
 
 
-        Model.Courses
+        Model
+           .Courses
            .Should()
            .ContainSingle(x => x.Name == courseName);
-
     }
 
 
     [Test]
-    public async Task AddCourse_LimitsToMax6()
+    public async Task AddCourse_LimitsMaxCourse()
     {
+        // precondition
+        await Model.Init(1);
+        Model
+           .Courses
+           .Should()
+           .HaveCount(6);
 
 
-
-       const string courseName = "My New Course";
-       AppMock.Setup(x => x.DisplayNamePromptAsync()).ReturnsAsync(courseName);
-
-       await Model.Init(1);
-       await Model.AddCourseAsync();
-
-       var dbTerm = await Db
-         .Terms
-         .Where(x => x. Id == 1)
-         .Include(x => x.Courses)
-         .FirstAsync();
-
-       using var _ = new AssertionScope();
-
-       dbTerm
-         .Courses
-         .Should()
-         .NotContain(x => x.Name == courseName);
+        const string courseName = "My New Course";
+        AppMock
+           .Setup(x => x.DisplayNamePromptAsync())
+           .ReturnsAsync(courseName);
 
 
-       Model.Courses
-         .Should()
-         .NotContain(x => x.Name == courseName);
+        await Model.Init(1);
+        await Model.AddCourseAsync();
 
+        var dbTerm = await Db
+           .Terms
+           .Where(x => x.Id == 1)
+           .Include(x => x.Courses)
+           .FirstAsync();
+
+        using var scope = new AssertionScope();
+
+        scope.FormattingOptions.MaxLines = 1;
+
+        dbTerm
+           .Courses
+           .Should()
+           .NotContain(x => x.Name == courseName)
+           .And
+           .HaveCount(6);
+
+
+        Model
+           .Courses
+           .Should()
+           .NotContain(x => x.Name == courseName)
+           .And
+           .HaveCount(6);
+
+
+        AppMock.VerifyReceivedError();
     }
 }
