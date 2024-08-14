@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Lib.Exceptions;
+using Lib.Interfaces;
 using Lib.Models;
 using Microsoft.EntityFrameworkCore;
 using ViewModels.Services;
