@@ -21,6 +21,14 @@ public static class UtilExtensions
         }
     }
 
+    public static void Times(this int num, Action<int> action)
+    {
+        for (var i = 0; i < num; i++)
+        {
+            action(i);
+        }
+    }
+
     public static string SpaceBetweenUppers(this string text)
     {
         var sb = new StringBuilder();
