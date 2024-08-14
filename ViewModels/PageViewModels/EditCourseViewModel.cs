@@ -2,14 +2,16 @@
 using CommunityToolkit.Maui.Core.Extensions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Lib.Interfaces;
 using Lib.Models;
+using Lib.Utils;
 using Microsoft.EntityFrameworkCore;
 using ViewModels.Services;
 
 namespace ViewModels.PageViewModels;
 
-public partial class EditCourseViewModel(ILocalDbCtxFactory factory, INavigationService navService)
-    : ObservableObject
+public partial class EditCourseViewModel(ILocalDbCtxFactory factory, INavigationService navService, IAppService appService)
+    : ObservableObject, IEntity, IDateTimeRange
 {
     public ObservableCollection<string> Statuses { get; } = Course.Statuses.ToObservableCollection();
 
@@ -35,6 +37,11 @@ public partial class EditCourseViewModel(ILocalDbCtxFactory factory, INavigation
     [RelayCommand]
     public async Task SaveAsync()
     {
+        if (AggregateValidation(this.ValidateDates(), this.ValidateName()) is {} exc)
+        {
+            await appService.ShowErrorAsync(exc.Message);
+            return;
+        }
         await using var db = await factory.CreateDbContextAsync();
         var course = await db
            .Courses

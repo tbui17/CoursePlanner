@@ -1,21 +1,22 @@
-﻿using Lib.Interfaces;
+﻿using Lib.Exceptions;
+using Lib.Interfaces;
 
 namespace Lib.Utils;
 
 public static class ValidationExtensions
 {
 
-    public static Exception? ValidateName(this IEntity entity)
+    public static DomainException? ValidateName(this IEntity entity)
     {
         return string.IsNullOrWhiteSpace(entity.Name)
-            ? new ArgumentException("Name cannot be null or empty")
+            ? new DomainException("Name cannot be null or empty")
             : null;
     }
 
-    public static Exception? ValidateDates(this IDateTimeRange dateTimeRange)
+    public static DomainException? ValidateDates(this IDateTimeRange dateTimeRange)
     {
         return dateTimeRange.Start >= dateTimeRange.End
-            ? new ArgumentException("Start must be before end")
+            ? new DomainException("Start must be before end")
             : null;
     }
 
