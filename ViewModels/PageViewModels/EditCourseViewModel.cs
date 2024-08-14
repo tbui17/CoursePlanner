@@ -11,7 +11,7 @@ using ViewModels.Services;
 namespace ViewModels.PageViewModels;
 
 public partial class EditCourseViewModel(ILocalDbCtxFactory factory, INavigationService navService, IAppService appService)
-    : ObservableObject, IEntity, IDateTimeRange
+    : ObservableObject, IDateTimeEntity
 {
     public ObservableCollection<string> Statuses { get; } = Course.Statuses.ToObservableCollection();
 
@@ -37,7 +37,7 @@ public partial class EditCourseViewModel(ILocalDbCtxFactory factory, INavigation
     [RelayCommand]
     public async Task SaveAsync()
     {
-        if (AggregateValidation(this.ValidateDates(), this.ValidateName()) is {} exc)
+        if (this.ValidateNameAndDates() is {} exc)
         {
             await appService.ShowErrorAsync(exc.Message);
             return;
