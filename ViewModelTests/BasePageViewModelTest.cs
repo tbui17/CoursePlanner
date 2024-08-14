@@ -29,6 +29,7 @@ public abstract class BasePageViewModelTest : BaseDbTest
     protected AppServiceMock AppMock { get; set; }
     protected ILocalDbCtxFactory DbFactory { get; set; }
 
+
 }
 
 public class AppServiceMock : Mock<IAppService>
