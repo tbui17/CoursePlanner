@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using FluentAssertions.Execution;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Maui.Platform;
 using Moq;
 using ViewModels.PageViewModels;
 
@@ -52,6 +53,13 @@ public class DetailedTermViewModelTest : BasePageViewModelTest
     [Test]
     public async Task AddCourse_UpdatesModelAndDbState()
     {
+        await Db.Courses.Where(x => x.TermId == 1).Take(1).ExecuteDeleteAsync();
+        await Model.Init(1);
+        Model
+           .Courses
+           .Should()
+           .HaveCount(5);
+
         const string courseName = "My New Course";
         AppMock
            .Setup(x => x.DisplayNamePromptAsync())
