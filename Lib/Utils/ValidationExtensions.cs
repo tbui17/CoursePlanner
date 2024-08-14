@@ -20,4 +20,9 @@ public static class ValidationExtensions
             : null;
     }
 
+    public static DomainException? ValidateNameAndDates(this IDateTimeEntity entity)
+    {
+        return AggregateValidation(entity.ValidateName(), entity.ValidateDates());
+    }
+
 }
