@@ -20,8 +20,8 @@ public class Assessment : INotification
     }
 
     public string Name { get; set; } = string.Empty;
-    public DateTime Start { get; set; } = DateTime.Now;
-    public DateTime End { get; set; } = DateTime.Now;
+    public DateTime Start { get; set; } = DefaultStart();
+    public DateTime End { get; set; } = DefaultEnd();
     public bool ShouldNotify { get; set; }
 
     public int CourseId { get; set; }
