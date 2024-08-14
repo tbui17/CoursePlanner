@@ -9,7 +9,7 @@ using ViewModels.Services;
 
 namespace ViewModelTests;
 
-public class DetailedCourseViewModelTests : BaseDbTest
+public class DetailedCourseViewModelTest : BaseDbTest
 {
     [SetUp]
     public override async Task Setup()
