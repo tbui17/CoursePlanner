@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Lib.Interfaces;
 using Lib.Models;
+using Lib.Traits;
 using Lib.Utils;
 using Microsoft.EntityFrameworkCore;
 using ViewModels.Services;

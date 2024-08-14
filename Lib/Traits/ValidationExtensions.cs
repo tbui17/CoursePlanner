@@ -1,7 +1,7 @@
 ﻿using Lib.Exceptions;
 using Lib.Interfaces;
 
-namespace Lib.Utils;
+namespace Lib.Traits;
 
 public static class ValidationExtensions
 {
