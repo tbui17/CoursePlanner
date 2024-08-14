@@ -1,14 +1,12 @@
+﻿using ViewModels.PageViewModels;
 
+namespace CoursePlanner.Pages;
 
-using ViewModels.PageViewModels;
-
-namespace CoursePlanner;
-
-public partial class EditTermPage
+public partial class EditCoursePage : ContentPage
 {
-    public EditTermViewModel Model { get; set; }
+    public EditCourseViewModel Model { get; set; }
 
-    public EditTermPage(EditTermViewModel model)
+    public EditCoursePage(EditCourseViewModel model)
     {
         Model = model;
         InitializeComponent();

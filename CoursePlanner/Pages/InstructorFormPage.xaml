@@ -5,7 +5,7 @@
     xmlns:controls="clr-namespace:CoursePlanner.Controls"
     xmlns:pageViewModels="clr-namespace:ViewModels.PageViewModels;assembly=ViewModels"
 
-    x:Class="CoursePlanner.InstructorFormPage"
+    x:Class="CoursePlanner.Pages.InstructorFormPage"
     x:DataType="pageViewModels:InstructorFormViewModel" Title="{Binding Title}" >
 
     <ContentPage.Resources>

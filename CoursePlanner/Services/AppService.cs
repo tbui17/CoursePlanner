@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using CoursePlanner.Pages;
+using Microsoft.Extensions.Logging;
 using ViewModels.Services;
 
 namespace CoursePlanner.Services;

@@ -6,7 +6,7 @@
     xmlns:pageViewModels="clr-namespace:ViewModels.PageViewModels;assembly=ViewModels"
     x:DataType="pageViewModels:EditAssessmentViewModel"
     Title="Edit Assessment"
-    x:Class="CoursePlanner.EditAssessmentPage" >
+    x:Class="CoursePlanner.Pages.EditAssessmentPage" >
 
     <ContentPage.Resources>
         <Style TargetType="Label" BasedOn="{StaticResource FieldLabel}" ></Style>

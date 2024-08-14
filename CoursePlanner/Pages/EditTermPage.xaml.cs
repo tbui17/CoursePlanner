@@ -1,10 +1,14 @@
-﻿using ViewModels.PageViewModels;
 
-namespace CoursePlanner;
 
-public partial class EditAssessmentPage : ContentPage
+using ViewModels.PageViewModels;
+
+namespace CoursePlanner.Pages;
+
+public partial class EditTermPage
 {
-    public EditAssessmentPage(EditAssessmentViewModel model)
+    public EditTermViewModel Model { get; set; }
+
+    public EditTermPage(EditTermViewModel model)
     {
         Model = model;
         InitializeComponent();
@@ -17,6 +21,4 @@ public partial class EditAssessmentPage : ContentPage
         base.OnAppearing();
         await Model.RefreshAsync();
     }
-
-    public EditAssessmentViewModel Model { get; set; }
 }

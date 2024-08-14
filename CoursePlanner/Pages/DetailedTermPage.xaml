@@ -7,7 +7,7 @@
     xmlns:pageViewModels="clr-namespace:ViewModels.PageViewModels;assembly=ViewModels"
     x:DataType="pageViewModels:DetailedTermViewModel"
     Title="Term Details"
-    x:Class="CoursePlanner.DetailedTermPage" >
+    x:Class="CoursePlanner.Pages.DetailedTermPage" >
 
 
     <ContentPage.Content>

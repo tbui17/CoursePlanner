@@ -1,10 +1,10 @@
 ﻿using ViewModels.PageViewModels;
 
-namespace CoursePlanner;
+namespace CoursePlanner.Pages;
 
-public partial class EditNotePage : ContentPage
+public partial class EditAssessmentPage : ContentPage
 {
-    public EditNotePage(EditNoteViewModel model)
+    public EditAssessmentPage(EditAssessmentViewModel model)
     {
         Model = model;
         InitializeComponent();
@@ -12,11 +12,11 @@ public partial class EditNotePage : ContentPage
         BindingContext = Model;
     }
 
-    public EditNoteViewModel Model { get; set; }
-
     protected override async void OnAppearing()
     {
         base.OnAppearing();
         await Model.RefreshAsync();
     }
+
+    public EditAssessmentViewModel Model { get; set; }
 }
