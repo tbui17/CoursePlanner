@@ -1,4 +1,6 @@
-﻿using Lib.Utils;
+﻿using System.ComponentModel.DataAnnotations;
+using Lib.Interfaces;
+using Lib.Utils;
 
 namespace Lib.Models;
 

@@ -1,4 +1,6 @@
-﻿namespace LibTests;
+﻿using Lib.Utils;
+
+namespace LibTests;
 
 using FluentAssertions;
 using FluentAssertions.Execution;
