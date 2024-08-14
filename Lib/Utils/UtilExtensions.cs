@@ -4,19 +4,6 @@ namespace Lib.Utils;
 
 public static class UtilExtensions
 {
-    public static T Get<T>(this IDictionary<string, object> dictionary, string key) => (T)dictionary[key];
-
-    public static bool TryGet<T>(this IDictionary<string, object> dictionary, string key, out T value)
-    {
-        if (dictionary.TryGetValue(key, out var obj))
-        {
-            value = (T)obj;
-            return true;
-        }
-
-        value = default!;
-        return false;
-    }
 
     public static T GetOrThrow<T>(this ISet<T> set, T value) =>
         set.Contains(value)
@@ -25,15 +12,6 @@ public static class UtilExtensions
 
     public static string StringJoin<T>(this IEnumerable<T> collection, string separator = "") =>
         string.Join(separator, collection);
-
-
-    public static void Times(this int num, Action<int> action)
-    {
-        for (var i = 0; i < num; i++)
-        {
-            action(i);
-        }
-    }
 
     public static void Times(this int num, Action action)
     {
