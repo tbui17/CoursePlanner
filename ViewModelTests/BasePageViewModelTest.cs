@@ -26,7 +26,16 @@ public abstract class BasePageViewModelTest : BaseDbTest
 
     protected LocalDbCtx Db { get; set; }
     protected Mock<INavigationService> NavMock { get; set; }
-    protected Mock<IAppService> AppMock { get; set; }
+    protected AppServiceMock AppMock { get; set; }
     protected ILocalDbCtxFactory DbFactory { get; set; }
 
+}
+
+public class AppServiceMock : Mock<IAppService>
+{
+
+    public void VerifyReceivedError(int times = 1)
+    {
+        Verify(x => x.ShowErrorAsync(It.IsAny<string>()), Times.Exactly(times));
+    }
 }
