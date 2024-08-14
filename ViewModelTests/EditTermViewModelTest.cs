@@ -1,47 +1,34 @@
 using FluentAssertions;
-using Lib.Models;
+using FluentAssertions.Execution;
 using Microsoft.EntityFrameworkCore;
 using ViewModels.PageViewModels;
+using ViewModelTests.TestData;
 
 namespace ViewModelTests;
 
-public class EditTermViewModelTest : BaseDbTest
+public class EditTermViewModelTest : BasePageViewModelTest
 {
     [SetUp]
     public override async Task Setup()
     {
         await base.Setup();
-        Db = GetDb();
-        Model = Resolve<EditTermViewModel>();
+        Model = new EditTermViewModel(factory: DbFactory, navService: NavMock.Object, appService: AppMock.Object);
+        await Model.Init(1);
     }
 
     private EditTermViewModel Model { get; set; }
-
-    [TearDown]
-    public void TearDown()
-    {
-        Db.Dispose();
-    }
-
-    private LocalDbCtx Db { get; set; }
 
     [Test]
     public async Task Init_ShouldMapToDbValues()
     {
 
         var expected = await Db.Terms.FirstAsync();
-
-        Model
-           .Should()
-           .NotBeNull();
-        await Model.Init(1);
         Model.Should().BeEquivalentTo(expected, x => x.ExcludingMissingMembers());
     }
 
     [Test]
     public async Task SaveAsync_PersistsChangesToDb()
     {
-        await Model.Init(1);
         Model.Name = "Test 123";
         Model.Start = DateTime.Now;
         Model.End = DateTime.Now.AddDays(1);
@@ -49,5 +36,26 @@ public class EditTermViewModelTest : BaseDbTest
         var term = await Db.Terms.Where(x => x.Name == "Test 123").ToListAsync();
         term.Should().NotBeEmpty();
 
+    }
+
+
+    [TestCaseSource(typeof(TestParam), nameof(TestParam.NameAndDate))]
+    public async Task SaveAsync_InvalidInputs_RejectsChangesToDb(string name, DateTime start, DateTime end)
+    {
+        Model.Name = name;
+        Model.Start = start;
+        Model.End = end;
+
+        await Model.SaveAsync();
+
+        using var _ = new AssertionScope();
+
+        var term = await Db
+           .Terms
+           .Where(x => x.Name == name)
+           .ToListAsync();
+
+        term.Should().BeEmpty();
+        AppMock.VerifyReceivedError();
     }
 }

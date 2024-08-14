@@ -5,7 +5,10 @@ using ViewModels.Services;
 
 namespace ViewModels.PageViewModels;
 
-public partial class EditTermViewModel(ILocalDbCtxFactory factory, INavigationService navService)
+public partial class EditTermViewModel(
+    ILocalDbCtxFactory factory,
+    INavigationService navService,
+    IAppService appService)
     : ObservableObject
 {
     [ObservableProperty]
@@ -45,6 +48,7 @@ public partial class EditTermViewModel(ILocalDbCtxFactory factory, INavigationSe
 
     public async Task Init(int termId)
     {
+
         await using var db = await factory.CreateDbContextAsync();
 
         var term = await db
