@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Markup;
+using CoursePlanner.Pages;
 using CoursePlanner.Services;
 using CoursePlanner.Utils;
 using Lib;

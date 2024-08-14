@@ -4,7 +4,7 @@ using Lib.Utils;
 using Microsoft.EntityFrameworkCore;
 using ViewModels.Services;
 
-namespace CoursePlanner;
+namespace CoursePlanner.Pages;
 
 public partial class DevPage : ContentPage
 {

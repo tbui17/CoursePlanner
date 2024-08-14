@@ -5,7 +5,7 @@
     xmlns:controls="clr-namespace:CoursePlanner.Controls"
     xmlns:pageViewModels="clr-namespace:ViewModels.PageViewModels;assembly=ViewModels"
 
-    x:Class="CoursePlanner.EditNotePage"
+    x:Class="CoursePlanner.Pages.EditNotePage"
     x:DataType="pageViewModels:EditNoteViewModel" Title="Edit Note" >
 
     <ContentPage.Resources>

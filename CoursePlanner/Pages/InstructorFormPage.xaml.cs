@@ -1,18 +1,18 @@
 ﻿using ViewModels.PageViewModels;
 
-namespace CoursePlanner;
+namespace CoursePlanner.Pages;
 
-public partial class DetailedCoursePage
+public partial class InstructorFormPage : ContentPage
 {
-    public DetailedCourseViewModel Model { get; }
-
-    public DetailedCoursePage(DetailedCourseViewModel model)
+    public InstructorFormPage(InstructorFormViewModel model)
     {
         Model = model;
         InitializeComponent();
         HideSoftInputOnTapped = true;
-        BindingContext = model;
+        BindingContext = Model;
     }
+
+    public InstructorFormViewModel Model { get; set; }
 
     protected override async void OnAppearing()
     {

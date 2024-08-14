@@ -5,7 +5,7 @@
     xmlns:controls="clr-namespace:CoursePlanner.Controls"
     xmlns:pageViewModels="clr-namespace:ViewModels.PageViewModels;assembly=ViewModels"
 
-    x:Class="CoursePlanner.EditTermPage"
+    x:Class="CoursePlanner.Pages.EditTermPage"
     x:DataType="pageViewModels:EditTermViewModel" Title="Edit Term" >
 
     <ContentPage.Resources>

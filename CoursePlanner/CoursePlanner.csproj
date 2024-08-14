@@ -69,14 +69,36 @@
     </ItemGroup>
 
     <ItemGroup>
-        <MauiXaml Update="EditTermPage.xaml">
-            <Generator>MSBuild:Compile</Generator>
-        </MauiXaml>
         <MauiXaml Update="Resources\Util\Utils.xaml">
             <Generator>MSBuild:Compile</Generator>
         </MauiXaml>
         <MauiXaml Update="Views\DataGridView.xaml">
             <SubType>Designer</SubType>
+        </MauiXaml>
+        <MauiXaml Update="Pages\DetailedCoursePage.xaml">
+          <SubType>Designer</SubType>
+        </MauiXaml>
+        <MauiXaml Update="Pages\DetailedTermPage.xaml">
+          <SubType>Designer</SubType>
+        </MauiXaml>
+        <MauiXaml Update="Pages\DevPage.xaml">
+          <SubType>Designer</SubType>
+        </MauiXaml>
+        <MauiXaml Update="Pages\EditAssessmentPage.xaml">
+          <SubType>Designer</SubType>
+        </MauiXaml>
+        <MauiXaml Update="Pages\EditCoursePage.xaml">
+          <SubType>Designer</SubType>
+        </MauiXaml>
+        <MauiXaml Update="Pages\EditNotePage.xaml">
+          <SubType>Designer</SubType>
+        </MauiXaml>
+        <MauiXaml Update="Pages\EditTermPage.xaml">
+          <SubType>Designer</SubType>
+          <Generator>MSBuild:Compile</Generator>
+        </MauiXaml>
+        <MauiXaml Update="Pages\InstructorFormPage.xaml">
+          <SubType>Designer</SubType>
         </MauiXaml>
     </ItemGroup>
 
@@ -89,6 +111,38 @@
         <Compile Update="Views\DataGridView.xaml.cs">
             <DependentUpon>DataTable.xaml</DependentUpon>
             <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Pages\DetailedCoursePage.xaml.cs">
+          <DependentUpon>DetailedCoursePage.xaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Pages\DetailedTermPage.xaml.cs">
+          <DependentUpon>DetailedTermPage.xaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Pages\DevPage.xaml.cs">
+          <DependentUpon>DevPage.xaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Pages\EditAssessmentPage.xaml.cs">
+          <DependentUpon>EditAssessmentPage.xaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Pages\EditCoursePage.xaml.cs">
+          <DependentUpon>EditCoursePage.xaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Pages\EditNotePage.xaml.cs">
+          <DependentUpon>EditNotePage.xaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Pages\EditTermPage.xaml.cs">
+          <DependentUpon>EditTermPage.xaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Pages\InstructorFormPage.xaml.cs">
+          <DependentUpon>InstructorFormPage.xaml</DependentUpon>
+          <SubType>Code</SubType>
         </Compile>
     </ItemGroup>
 

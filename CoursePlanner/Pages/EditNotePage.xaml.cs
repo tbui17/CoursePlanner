@@ -1,10 +1,10 @@
 ﻿using ViewModels.PageViewModels;
 
-namespace CoursePlanner;
+namespace CoursePlanner.Pages;
 
-public partial class InstructorFormPage : ContentPage
+public partial class EditNotePage : ContentPage
 {
-    public InstructorFormPage(InstructorFormViewModel model)
+    public EditNotePage(EditNoteViewModel model)
     {
         Model = model;
         InitializeComponent();
@@ -12,7 +12,7 @@ public partial class InstructorFormPage : ContentPage
         BindingContext = Model;
     }
 
-    public InstructorFormViewModel Model { get; set; }
+    public EditNoteViewModel Model { get; set; }
 
     protected override async void OnAppearing()
     {
