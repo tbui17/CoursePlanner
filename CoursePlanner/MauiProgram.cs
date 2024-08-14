@@ -35,15 +35,17 @@ public static class MauiProgram
         Configs
            .ConfigBackendServices(builder.Services)
            .AddDbContext<LocalDbCtx>(x => x
-               .UseSqlite($"DataSource={FileSystem.Current.AppDataDirectory}/database.db")
-               .EnableSensitiveDataLogging()
-               .EnableDetailedErrors()
-               .LogTo(Console.WriteLine)
+                   .UseSqlite($"DataSource={FileSystem.Current.AppDataDirectory}/database.db")
+                   .EnableSensitiveDataLogging()
+                   .EnableDetailedErrors()
+                   .LogTo(Console.WriteLine),
+                ServiceLifetime.Transient
             )
-           .AddDbContextFactory<LocalDbCtx>()
+           .AddDbContextFactory<LocalDbCtx>(lifetime: ServiceLifetime.Transient)
            .AddSingleton<AppService>()
            .AddSingleton<INavigationService, AppService>()
            .AddSingleton<IAppService, AppService>()
+           .AddSingleton<ILocalNotificationService, LocalNotificationService>()
            .AddTransient<MainPage, MainViewModel>()
            .AddTransient<DetailedTermPage, DetailedTermViewModel>()
            .AddTransient<EditTermPage, EditTermViewModel>()
@@ -53,7 +55,6 @@ public static class MauiProgram
            .AddTransient<EditNotePage, EditNoteViewModel>()
            .AddTransient<EditAssessmentPage, EditAssessmentViewModel>()
            .AddTransient<DevPage>()
-           .AddScoped<ILocalNotificationService, LocalNotificationService>()
            .AddTransient<DbSetup>();
 
         builder.Logging.AddConsole();
@@ -67,7 +68,10 @@ public static class MauiProgram
 
         var app = builder.Build();
 
-        app.Services.GetRequiredService<DbSetup>().SetupDb();
+        app
+           .Services
+           .GetRequiredService<DbSetup>()
+           .SetupDb();
 
         return app;
     }
