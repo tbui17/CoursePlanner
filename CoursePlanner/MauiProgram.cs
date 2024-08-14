@@ -1,5 +1,4 @@
 ﻿using CommunityToolkit.Maui;
-using CommunityToolkit.Maui.Markup;
 using CoursePlanner.Pages;
 using CoursePlanner.Services;
 using CoursePlanner.Utils;
@@ -21,7 +20,6 @@ public static class MauiProgram
         builder
            .UseMauiApp<App>()
            .UseMauiCommunityToolkit()
-           .UseMauiCommunityToolkitMarkup()
            .UseLocalNotification()
            .ConfigureFonts
             (
