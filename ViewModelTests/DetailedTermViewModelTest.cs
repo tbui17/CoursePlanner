@@ -1,7 +1,6 @@
 ﻿using FluentAssertions;
 using FluentAssertions.Execution;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Maui.Platform;
 using Moq;
 using ViewModels.PageViewModels;
 
