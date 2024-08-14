@@ -1,3 +1,3 @@
 ﻿
 
-global using static Lib.Constants.Globals;
+global using static Lib.Globals;

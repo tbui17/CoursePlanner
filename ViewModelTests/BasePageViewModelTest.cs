@@ -1,18 +1,22 @@
 ﻿using Lib.Models;
+using Moq;
+using ViewModels.Services;
 
 namespace ViewModelTests;
 
-public class BasePageViewModelTest<T> : BaseDbTest where T : notnull
+public abstract class BasePageViewModelTest : BaseDbTest
 {
+
     [SetUp]
     public override async Task Setup()
     {
         await base.Setup();
         Db = GetDb();
-        Model = Resolve<T>();
+        NavMock = new();
+        AppMock = new();
+        DbFactory = Resolve<ILocalDbCtxFactory>();
     }
 
-    protected T Model { get; set; }
 
     [TearDown]
     public void TearDown()
@@ -21,5 +25,8 @@ public class BasePageViewModelTest<T> : BaseDbTest where T : notnull
     }
 
     protected LocalDbCtx Db { get; set; }
+    protected Mock<INavigationService> NavMock { get; set; }
+    protected Mock<IAppService> AppMock { get; set; }
+    protected ILocalDbCtxFactory DbFactory { get; set; }
 
 }
