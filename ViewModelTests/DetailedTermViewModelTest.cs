@@ -1,33 +1,23 @@
 ﻿using FluentAssertions;
 using FluentAssertions.Execution;
-using Lib.Models;
-using Lib.Services;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using ViewModels.PageViewModels;
-using ViewModels.Services;
 
 namespace ViewModelTests;
 
-public class DetailedTermViewModelTest : BaseDbTest
+public class DetailedTermViewModelTest : BasePageViewModelTest
 {
     [SetUp]
     public override async Task Setup()
     {
         await base.Setup();
-        Db = GetDb();
-        NavMock = new Mock<INavigationService>();
-        AppMock = new Mock<IAppService>();
         Model = new DetailedTermViewModel(factory: Resolve<ILocalDbCtxFactory>(), appService: AppMock.Object, navService: NavMock.Object);
     }
 
-    private Mock<IAppService> AppMock { get; set; }
-
-    private Mock<INavigationService> NavMock { get; set; }
 
     private DetailedTermViewModel Model { get; set; }
 
-    private LocalDbCtx Db { get; set; }
 
 
     [Test]
@@ -87,6 +77,39 @@ public class DetailedTermViewModelTest : BaseDbTest
         Model.Courses
            .Should()
            .ContainSingle(x => x.Name == courseName);
+
+    }
+
+
+    [Test]
+    public async Task AddCourse_LimitsToMax6()
+    {
+
+
+
+       const string courseName = "My New Course";
+       AppMock.Setup(x => x.DisplayNamePromptAsync()).ReturnsAsync(courseName);
+
+       await Model.Init(1);
+       await Model.AddCourseAsync();
+
+       var dbTerm = await Db
+         .Terms
+         .Where(x => x. Id == 1)
+         .Include(x => x.Courses)
+         .FirstAsync();
+
+       using var _ = new AssertionScope();
+
+       dbTerm
+         .Courses
+         .Should()
+         .NotContain(x => x.Name == courseName);
+
+
+       Model.Courses
+         .Should()
+         .NotContain(x => x.Name == courseName);
 
     }
 }
