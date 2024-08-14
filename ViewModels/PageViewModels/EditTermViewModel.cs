@@ -1,5 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Lib.Interfaces;
+using Lib.Traits;
+using Lib.Utils;
 using Microsoft.EntityFrameworkCore;
 using ViewModels.Services;
 
@@ -9,7 +12,7 @@ public partial class EditTermViewModel(
     ILocalDbCtxFactory factory,
     INavigationService navService,
     IAppService appService)
-    : ObservableObject
+    : ObservableObject, IDateTimeEntity
 {
     [ObservableProperty]
     private int _id;
@@ -26,6 +29,12 @@ public partial class EditTermViewModel(
     [RelayCommand]
     public async Task SaveAsync()
     {
+
+        if (this.ValidateNameAndDates() is { } exc)
+        {
+            await appService.ShowErrorAsync(exc.Message);
+            return;
+        }
 
         var db = await factory.CreateDbContextAsync();
         var term = await db
