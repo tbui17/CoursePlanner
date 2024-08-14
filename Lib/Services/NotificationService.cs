@@ -1,7 +1,8 @@
-﻿using Lib.Models;
+﻿using Lib.Interfaces;
+using Lib.Models;
 using Lib.Utils;
 using Microsoft.EntityFrameworkCore;
-using static Lib.Models.INotification;
+using static Lib.Interfaces.INotification;
 
 namespace Lib.Services;
 

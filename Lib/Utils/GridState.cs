@@ -1,4 +1,4 @@
-﻿namespace Lib.Models;
+﻿namespace Lib.Utils;
 
 public abstract record GridState
 {

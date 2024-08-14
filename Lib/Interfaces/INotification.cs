@@ -1,14 +1,10 @@
 ﻿
 using System.Linq.Expressions;
 
-namespace Lib.Models;
+namespace Lib.Interfaces;
 
-public interface INotification
+public interface INotification : IEntity, IDateTimeRange
 {
-    int Id { get; }
-    string Name { get; }
-    DateTime Start { get; }
-    DateTime End { get; }
     bool ShouldNotify { get; }
 
     public static Expression<Func<T, bool>> IsUpcomingExpr<T>(DateTime time) where T : INotification
@@ -24,6 +20,7 @@ public interface INotification
 
     public static bool IsUpcoming(DateTime time, DateTime target)
     {
+
         var oneDay = TimeSpan.FromDays(1);
         var zero = TimeSpan.Zero;
 
