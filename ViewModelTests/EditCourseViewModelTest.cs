@@ -48,7 +48,7 @@ public class EditCourseViewModelTest : BasePageViewModelTest
            .NotBeEmpty();
     }
 
-    public static IEnumerable<TestCaseData> InvalidInputTestCases()
+    private static IEnumerable<TestCaseData> InvalidInputTestCases()
     {
         yield return new TestCaseData(
                 "",
@@ -88,18 +88,7 @@ public class EditCourseViewModelTest : BasePageViewModelTest
         Model.Name = name;
         Model.Start = start;
         Model.End = end;
-
-
         await Model.SaveAsync();
-
-        var course = await Db
-           .Courses
-           .Where(x => x.Name == name)
-           .ToListAsync();
-        course
-           .Should()
-           .BeEmpty();
-
-
+        AppMock.Verify(x => x.ShowErrorAsync(It.IsAny<string>()), Times.Once);
     }
 }
