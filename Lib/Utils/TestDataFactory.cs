@@ -43,6 +43,22 @@ public class TestDataFactory
 
         foreach (var course in courses)
         {
+            2.Times(i =>
+                {
+                    var assessment = Assessment.From(course);
+                    assessment.Id = assessmentIdCounter;
+                    assessment.Name = $"Assessment {assessmentIdCounter}";
+                    assessment.CourseId = course.Id;
+                    assessment.ShouldNotify = ToBool(i);
+                    assessments.Add(assessment);
+                    assessmentIdCounter++;
+                    assessment.Type = i == 0
+                        ? Assessment.Objective
+                        : Assessment.Performance;
+                }
+            );
+
+
             foreach (var i in range)
             {
                 var text = new List<string>();
@@ -54,14 +70,6 @@ public class TestDataFactory
                 note.Name = $"Note {noteIdCounter}";
                 notes.Add(note);
                 noteIdCounter++;
-
-                var assessment = Assessment.From(course);
-                assessment.Id = assessmentIdCounter;
-                assessment.Name = $"Assessment {assessmentIdCounter}";
-                assessment.CourseId = course.Id;
-                assessment.ShouldNotify = ToBool(i);
-                assessments.Add(assessment);
-                assessmentIdCounter++;
             }
         }
 
@@ -155,7 +163,7 @@ public class TestDataFactory
 
     public async Task SeedDatabase(LocalDbCtx db)
     {
-        
+
         var data = CreateData();
         db.Terms.AddRange(data.Terms);
         db.Instructors.AddRange(data.Instructors);
