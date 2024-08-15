@@ -14,10 +14,4 @@ public static class AssignmentTrait
         form.ShouldNotify = otherForm.ShouldNotify;
         form.Type = otherForm.Type;
     }
-
-    public static void Assign<T>(this T form, Course course) where T : IAssessmentForm
-    {
-        var otherAssessment = Assessment.From(course);
-        form.Assign(otherAssessment);
-    }
 }
