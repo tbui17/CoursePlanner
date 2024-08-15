@@ -345,8 +345,13 @@ public class DetailedCourseViewModelTest : BasePageViewModelTest
     }
 }
 
+// both run both tests at once and both must pass
 public class DetailedCourseViewModelAssessmentTest : BasePageViewModelTest
 {
+    private Assessment ObjectiveAssessment { get; set; }
+    private Assessment PerformanceAssessment { get; set; }
+    private DetailedCourseViewModel Model { get; set; }
+
     [SetUp]
     public override async Task Setup()
     {
@@ -355,7 +360,12 @@ public class DetailedCourseViewModelAssessmentTest : BasePageViewModelTest
             navService: NavMock.Object, courseService: Resolve<ICourseService>()
         );
 
-        var assessments = await Db
+        // remove assessments and assign their references
+        // should have 1 objective and 1 performance
+
+        await using var db = await DbFactory.CreateDbContextAsync();
+
+        var assessments = await db
            .Assessments
            .AsNoTracking()
            .Where(x => x.CourseId == 1)
@@ -376,21 +386,56 @@ public class DetailedCourseViewModelAssessmentTest : BasePageViewModelTest
            .Select(x => x.Id)
            .ToList();
 
-        var res = await Db
+        var res = await db
            .Assessments
            .Where(x => ids.Contains(x.Id))
            .ExecuteDeleteAsync();
         res
            .Should()
            .Be(assessmentCount);
+
+        ObjectiveAssessment = assessments.First(x => x.Type == Assessment.Objective);
+        PerformanceAssessment = assessments.First(x => x.Type == Assessment.Performance);
     }
 
-    public DetailedCourseViewModel Model { get; set; }
+    private async Task AddAssessmentTestImpl(Assessment assessment)
+    {
+        Db.Assessments.Add(assessment);
+        await Db.SaveChangesAsync();
+
+        const int courseId = 1;
+        const string newCourseName = "My New Assessment12345";
+        AppMock
+           .Setup(x => x.DisplayNamePromptAsync())
+           .ReturnsAsync(newCourseName);
+
+        await Model.Init(courseId);
+        await Model.AddAssessmentAsync();
+
+        using var scope = new AssertionScope();
+        scope.FormattingOptions.MaxLines = 1;
+
+        Model
+           .Assessments
+           .Where(x => x.Type is Assessment.Objective or Assessment.Performance)
+           .Should()
+           .HaveCount(2)
+           .And
+           .ContainSingle(x => x.Name == newCourseName)
+           .And
+           .ContainSingle(x => x.Type == assessment.Type);
+    }
 
 
     [Test]
-    public async Task AddAssessmentAsync_DefaultsWithUniqueType()
+    public async Task AddAssessmentAsync_Performance_DefaultsWithUniqueType()
     {
-        await Model.Init(1);
+        await AddAssessmentTestImpl(PerformanceAssessment);
+    }
+
+    [Test]
+    public async Task AddAssessmentAsync_Objective_DefaultsWithUniqueType()
+    {
+        await AddAssessmentTestImpl(ObjectiveAssessment);
     }
 }
