@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using Lib.Interfaces;
+﻿using Lib.Interfaces;
 
 namespace ViewModelTests.TestData;
 
@@ -12,13 +11,23 @@ public class TestParam
             new TestCaseData(
                 "",
                 DateTime.Now,
-                DateTime.Now.AddDays(1)
+                DateTime.Now.AddMinutes(1)
             ).SetName("EmptyName"),
             new TestCaseData(
+                "   ",
+                DateTime.Now,
+                DateTime.Now.AddMinutes(1)
+            ).SetName("Whitespace"),
+            new TestCaseData(
                 "Valid Name",
-                DateTime.Now.AddDays(1),
+                DateTime.Now.AddMinutes(1),
                 DateTime.Now
-            ).SetName("StartAfterEnd")
+            ).SetName("StartAfterEnd"),
+            new TestCaseData(
+                "",
+                DateTime.Now.AddMinutes(1),
+                DateTime.Now
+            ).SetName("AllInvalid"),
         };
     }
 }
