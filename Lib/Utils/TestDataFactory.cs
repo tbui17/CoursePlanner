@@ -1,4 +1,5 @@
-﻿using Lib.Models;
+﻿using System.Diagnostics;
+using Lib.Models;
 
 namespace Lib.Utils;
 
@@ -72,6 +73,23 @@ public class TestDataFactory
                 noteIdCounter++;
             }
         }
+
+        #if DEBUG
+
+        foreach (var group in assessments.GroupBy(x => x.CourseId))
+        {
+            Debug.Assert(group.Count() <= 3);
+            var types = group.GroupBy(x => x.Type).ToList();
+            Debug.Assert(types.Count <= 2);
+            Debug.Assert(types.Distinct().Count() <= 2);
+        }
+
+        foreach (var courseGroup in courses.GroupBy(x => x.TermId))
+        {
+            Debug.Assert(courseGroup.Count() <= 6);
+        }
+
+        #endif
 
         return new TestDataResult
         {
