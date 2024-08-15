@@ -1,6 +1,4 @@
-﻿using Lib.Models;
-using Lib.Utils;
-using Microsoft.EntityFrameworkCore;
+﻿using Lib.Utils;
 
 namespace ViewModelTests;
 
