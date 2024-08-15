@@ -4,7 +4,6 @@ namespace LibTests;
 
 using FluentAssertions;
 using FluentAssertions.Execution;
-using Lib.Models;
 using NUnit.Framework;
 using System.Collections.Generic;
 

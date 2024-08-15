@@ -2,15 +2,17 @@
 using CommunityToolkit.Maui.Core.Extensions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Lib.Interfaces;
 using Lib.Models;
 using Lib.Traits;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using ViewModels.Services;
 
 namespace ViewModels.PageViewModels;
 
 public abstract partial class AssessmentFormViewModel(INavigationService navService)
-    : ObservableObject, IAssessmentForm
+    : ObservableObject, IAssessmentAssociatedForm
 {
     [ObservableProperty]
     private int _id;
@@ -27,12 +29,13 @@ public abstract partial class AssessmentFormViewModel(INavigationService navServ
     [ObservableProperty]
     private bool _shouldNotify;
 
-    public ObservableCollection<string> AssessmentTypes { get; } = Assessment.Types.ToObservableCollection();
+    public ObservableCollection<string> AssessmentTypes { get; set; } = Assessment.Types.ToObservableCollection();
 
     [ObservableProperty]
     private string _selectedAssessmentType = Assessment.Types.First();
 
-    string IAssessmentForm.Type
+
+    string IAssessmentType.Type
     {
         get => SelectedAssessmentType;
         set => SelectedAssessmentType = value;
@@ -44,7 +47,7 @@ public abstract partial class AssessmentFormViewModel(INavigationService navServ
     [RelayCommand]
     public async Task SaveAsync()
     {
-       await SaveAsyncImpl();
+        await SaveAsyncImpl();
     }
 
     [RelayCommand]
@@ -103,8 +106,11 @@ public class EditAssessmentViewModel(
 public class AddAssessmentViewModel(
     ILocalDbCtxFactory factory,
     INavigationService navService,
-    IAppService appService) : AssessmentFormViewModel(navService)
+    IAppService appService,
+    ILogger<AddAssessmentViewModel> logger) : AssessmentFormViewModel(navService)
 {
+    private readonly INavigationService _navService = navService;
+
     protected override async Task SaveAsyncImpl()
     {
         if (this.ValidateNameAndDates() is { } exc)
@@ -134,6 +140,54 @@ public class AddAssessmentViewModel(
            .Include(x => x.Assessments)
            .FirstAsync(x => x.Id == courseId);
 
-        this.Assign(course);
+        if (AddChangeLog.Create(course) is not { } changelog)
+        {
+            logger.LogInformation("Changelog null. Returning. {CourseId}", course.Id);
+            await appService.ShowErrorAsync("Course already has 2 assessments. Returning to previous page.");
+            await _navService.GoBackToDetailedTermPageAsync();
+            return;
+        }
+
+        logger.LogInformation("Applying changelog to assessment. {Changelog}", changelog);
+
+        this.Assign(changelog);
+    }
+}
+
+public record AddChangeLog : IAssessmentAssociatedForm
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = "";
+    public DateTime Start { get; set; }
+    public DateTime End { get; set; }
+    public bool ShouldNotify { get; set; }
+    public string Type { get; set; } = Assessment.DefaultType;
+    public ObservableCollection<string> AssessmentTypes { get; set; } = [];
+
+    public static IAssessmentForm? Create(Course course)
+    {
+        if (course.Assessments.Count >= 2)
+        {
+            return null;
+        }
+
+        IAssessmentForm assessment = course.CreateAssessment();
+
+        if (course.Assessments.FirstOrDefault() is { } other)
+        {
+            assessment.EnsureOppositeType(other);
+            var noAssessmentChangelog = new AddChangeLog();
+            noAssessmentChangelog.Assign(assessment);
+            noAssessmentChangelog.AssessmentTypes = [];
+            return noAssessmentChangelog;
+        }
+
+        IAssessmentAssociatedForm oneAssessmentChangelog = new AddChangeLog();
+
+        oneAssessmentChangelog.Assign(course.CreateAssessment());
+
+        oneAssessmentChangelog.AssessmentTypes = [oneAssessmentChangelog.OppositeType];
+
+        return oneAssessmentChangelog;
     }
 }

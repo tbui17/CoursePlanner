@@ -1,5 +1,4 @@
-﻿using Lib.Models;
-using Lib.Utils;
+﻿using Lib.Utils;
 
 namespace CoursePlanner.Controls;
 
