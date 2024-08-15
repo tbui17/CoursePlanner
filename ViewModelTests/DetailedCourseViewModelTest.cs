@@ -3,6 +3,7 @@ using FluentAssertions.Execution;
 using Lib.Models;
 using Lib.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Moq;
 using ViewModels.PageViewModels;
 using ViewModels.Services;
@@ -16,7 +17,8 @@ public class DetailedCourseViewModelTest : BasePageViewModelTest
     {
         await base.Setup();
         Model = new DetailedCourseViewModel(factory: DbFactory, appService: AppMock.Object,
-            navService: NavMock.Object, courseService: Resolve<ICourseService>()
+            navService: NavMock.Object, courseService: Resolve<ICourseService>(),
+            logger: Resolve<ILogger<DetailedCourseViewModel>>()
         );
     }
 
@@ -242,7 +244,8 @@ public class DetailedCourseViewModelTest : BasePageViewModelTest
             NavMock = new Mock<INavigationService>();
             AppMock = new Mock<IAppService>();
             Model = new DetailedCourseViewModel(factory: Resolve<ILocalDbCtxFactory>(), appService: AppMock.Object,
-                navService: NavMock.Object, courseService: Resolve<ICourseService>()
+                navService: NavMock.Object, courseService: Resolve<ICourseService>(),
+                logger: Resolve<ILogger<DetailedCourseViewModel>>()
             );
             await SetInitialDbAndModelStates();
         }
@@ -271,6 +274,7 @@ public class DetailedCourseViewModelTest : BasePageViewModelTest
         [Test]
         public void FixtureInitializedWithCorrectValues()
         {
+            using var _ = new AssertionScope();
             Model
                .Course
                .Id
@@ -345,7 +349,7 @@ public class DetailedCourseViewModelTest : BasePageViewModelTest
     }
 }
 
-// both run both tests at once and both must pass
+[Description("run both tests at once and both must pass")]
 public class DetailedCourseViewModelAssessmentTest : BasePageViewModelTest
 {
     private Assessment ObjectiveAssessment { get; set; }
@@ -356,8 +360,12 @@ public class DetailedCourseViewModelAssessmentTest : BasePageViewModelTest
     public override async Task Setup()
     {
         await base.Setup();
-        Model = new DetailedCourseViewModel(factory: DbFactory, appService: AppMock.Object,
-            navService: NavMock.Object, courseService: Resolve<ICourseService>()
+        Model = new DetailedCourseViewModel(
+            factory: DbFactory,
+            appService: AppMock.Object,
+            navService: NavMock.Object,
+            courseService: Resolve<ICourseService>(),
+            logger: Resolve<ILogger<DetailedCourseViewModel>>()
         );
 
         // remove assessments and assign their references
