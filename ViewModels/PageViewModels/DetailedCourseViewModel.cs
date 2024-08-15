@@ -1,15 +1,22 @@
 ﻿using System.Collections.ObjectModel;
+using System.Diagnostics;
 using CommunityToolkit.Maui.Core.Extensions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Lib.Models;
 using Lib.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using ViewModels.Services;
 
 namespace ViewModels.PageViewModels;
 
-public partial class DetailedCourseViewModel(ILocalDbCtxFactory factory, IAppService appService, INavigationService navService, ICourseService courseService) : ObservableObject
+public partial class DetailedCourseViewModel(
+    ILocalDbCtxFactory factory,
+    IAppService appService,
+    INavigationService navService,
+    ICourseService courseService,
+    ILogger<DetailedCourseViewModel> logger) : ObservableObject
 {
     [ObservableProperty]
     private int _id;
@@ -40,24 +47,36 @@ public partial class DetailedCourseViewModel(ILocalDbCtxFactory factory, IAppSer
 
     async partial void OnSelectedInstructorChanged(Instructor? oldValue, Instructor? newValue)
     {
+        logger.LogInformation("Selected Instructor Changed: {NewId}, {OldId}", newValue?.Id, oldValue?.Id);
         if (newValue is not { Id: > 0 })
         {
+            logger.LogInformation("Selected Instructor is null or has no id.");
             return;
         }
 
         if (oldValue?.Id == newValue.Id)
         {
+            logger.LogInformation("Selected Instructor is the same as the old value.");
             return;
         }
 
-        Course.Instructor = Instructors.First(x => x.Id == newValue.Id);
+        var oldId = Course.InstructorId;
+        logger.LogInformation("Old Instructor: {InstructorId} {InstructorName}", oldId, Course.Instructor?.Name);
+        var newInstructor = Instructors.First(x => x.Id == newValue.Id);
+        logger.LogInformation("New Instructor: {InstructorId} {InstructorName}", newInstructor.Id, newInstructor.Name);
+
+        logger.LogInformation("Course State: {CourseId} {CourseInstructorId} {CourseInstructorName}", Course.Id, Course.InstructorId, Course.Instructor?.Name);
+        logger.LogInformation("Setting Course Instructor to {InstructorId} {InstructorName}", newInstructor.Id, newInstructor.Name);
+        Course.Instructor = newInstructor;
         Course.InstructorId = newValue.Id;
+        logger.LogInformation("Updated Course State: {CourseId} {CourseInstructorId} {CourseInstructorName}", Course.Id, Course.InstructorId, Course.Instructor?.Name);
 
         await using var db = await factory.CreateDbContextAsync();
-        await db
+        var res = await db
            .Courses
            .Where(x => x.Id == Course.Id)
            .ExecuteUpdateAsync(x => x.SetProperty(p => p.InstructorId, newValue.Id));
+        logger.LogInformation("Updated Instructor in database: {UpdateCount}",res);
     }
 
 
@@ -121,16 +140,48 @@ public partial class DetailedCourseViewModel(ILocalDbCtxFactory factory, IAppSer
     [RelayCommand]
     public async Task AddAssessmentAsync()
     {
+        logger.LogInformation("Adding Assessment. {AssessmentCount}", Assessments.Count);
+        if (Assessments.Count >= 2)
+        {
+            logger.LogInformation("{AssessmentCount} assessments already exist.", Assessments.Count);
+            await appService.ShowErrorAsync("Only 2 assessments allowed per course.");
+            return;
+        }
+
         var name = await appService.DisplayNamePromptAsync();
 
         if (name is null) return;
 
         await using var db = await factory.CreateDbContextAsync();
-        var assessment = Assessment.From(Course);
-        assessment.Name = name;
+        var assessment = CreateAssessment();
         db.Assessments.Add(assessment);
         await db.SaveChangesAsync();
         await RefreshAsync();
+        return;
+
+        Assessment CreateAssessment()
+        {
+            var assessment2 = Assessment.From(Course);
+            assessment2.Name = name;
+
+            if (Assessments.Count == 0)
+            {
+                return assessment2;
+            }
+
+            if (Assessments.Count > 1)
+            {
+                throw new UnreachableException("There should not be more than 2 assessments.");
+            }
+
+            var assessment1 = Assessments[0];
+
+            assessment2.Type = assessment1.Type is Assessment.Objective
+                ? Assessment.Performance
+                : Assessment.Objective;
+
+            return assessment2;
+        }
     }
 
     [RelayCommand]
