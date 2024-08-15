@@ -1,6 +1,4 @@
-﻿using Lib.Interfaces;
-
-namespace ViewModelTests.TestData;
+﻿namespace ViewModelTests.TestData;
 
 public class TestParam
 {
@@ -30,12 +28,4 @@ public class TestParam
             ).SetName("AllInvalid"),
         };
     }
-}
-
-public record NameAndDate : IEntity, IDateTimeRange
-{
-    public int Id { get; set; }
-    public string Name { get; set; }
-    public DateTime Start { get; set; }
-    public DateTime End { get; set; }
 }
