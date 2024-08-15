@@ -161,7 +161,7 @@ public partial class DetailedCourseViewModel(
 
         Assessment CreateAssessment()
         {
-            var assessment2 = Assessment.From(Course);
+            var assessment2 = Course.CreateAssessment();
             assessment2.Name = name;
 
             if (Assessments.Count == 0)
@@ -211,7 +211,7 @@ public partial class DetailedCourseViewModel(
         if (name is null) return;
 
         await using var db = await factory.CreateDbContextAsync();
-        var note = Note.From(Course);
+        var note = Course.CreateNote();
         note.Name = name;
         db.Notes.Add(note);
         await db.SaveChangesAsync();

@@ -24,7 +24,7 @@ public class TestDataFactory
         {
             foreach (var i in range)
             {
-                var course = Course.From(term);
+                var course = term.CreateCourse();
 
                 course.Id = courseIdCounter;
                 course.Name = $"Course {courseIdCounter}";
@@ -46,7 +46,7 @@ public class TestDataFactory
         {
             2.Times(i =>
                 {
-                    var assessment = Assessment.From(course);
+                    var assessment = course.CreateAssessment();
                     assessment.Id = assessmentIdCounter;
                     assessment.Name = $"Assessment {assessmentIdCounter}";
                     assessment.CourseId = course.Id;
@@ -63,7 +63,7 @@ public class TestDataFactory
             foreach (var i in range)
             {
                 var text = new List<string>();
-                var note = Note.From(course);
+                var note = course.CreateNote();
                 i.Times(() => text.Add($"Note Text {note.Id}"));
                 note.Id = noteIdCounter;
                 note.Value = text.StringJoin($"/{i}/");

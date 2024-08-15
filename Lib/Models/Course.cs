@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Lib.Interfaces;
+﻿using Lib.Interfaces;
 using Lib.Utils;
 
 namespace Lib.Models;
@@ -47,11 +46,25 @@ public class Course : INotification
 
     public ICollection<Note> Notes { get; set; } = [];
 
-    public static Course From(Term term)
+
+    public Assessment CreateAssessment()
     {
-        return new Course
+        return new Assessment
         {
-            TermId = term.Id, Start = term.Start, End = term.End,
+            CourseId = Id,
+            Name = string.Empty,
+            Start = Start,
+            End = End,
+            ShouldNotify = false,
+        };
+    }
+
+    public Note CreateNote()
+    {
+        return new Note
+        {
+            CourseId = Id,
+            Value = string.Empty,
         };
     }
 }
