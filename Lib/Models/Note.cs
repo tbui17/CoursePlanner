@@ -13,14 +13,4 @@ public class Note : IEntity
     public int CourseId { get; set; }
 
     public Course Course { get; set; } = null!;
-
-
-    public static Note From(Course course)
-    {
-        return new Note
-        {
-            CourseId = course.Id,
-            Value = string.Empty,
-        };
-    }
 }

@@ -37,15 +37,8 @@ public class Assessment : IAssessmentForm
 
     public int CourseId { get; set; }
 
-    public static Assessment From(Course course)
+    public void SetOppositeType(Assessment other)
     {
-        return new Assessment
-        {
-            CourseId = course.Id,
-            Name = string.Empty,
-            Start = course.Start,
-            End = course.End,
-            ShouldNotify = false,
-        };
+        Type = other.Type == Performance ? Objective : Performance;
     }
 }

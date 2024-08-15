@@ -74,7 +74,8 @@ public partial class DetailedTermViewModel(ILocalDbCtxFactory factory, INavigati
         {
             return;
         }
-        var course = Course.From(Term);
+
+        var course = Term.CreateCourse();
         course.Name = name;
 
         db.Courses.Add(course);

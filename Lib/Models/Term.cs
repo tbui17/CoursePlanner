@@ -12,6 +12,13 @@ public class Term : IEntity, IDateTimeRange
     public ICollection<Course> Courses { get; set; } = [];
 
 
+    public Course CreateCourse()
+    {
+        return new Course
+        {
+            TermId = Id, Start = Start, End = End,
+        };
+    }
 
 
 }
