@@ -1,12 +1,17 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Lib.Interfaces;
+using Lib.Traits;
 using Microsoft.EntityFrameworkCore;
 using ViewModels.Services;
 
 namespace ViewModels.PageViewModels;
 
-public partial class EditNoteViewModel(ILocalDbCtxFactory factory, INavigationService navService)
-    : ObservableObject
+public partial class EditNoteViewModel(
+    ILocalDbCtxFactory factory,
+    INavigationService navService,
+    IAppService appService)
+    : ObservableObject, IEntity
 {
     [ObservableProperty]
     private int _id;
@@ -20,6 +25,12 @@ public partial class EditNoteViewModel(ILocalDbCtxFactory factory, INavigationSe
     [RelayCommand]
     public async Task SaveAsync()
     {
+        if (this.ValidateName() is { } exc)
+        {
+            await appService.ShowErrorAsync(exc.Message);
+            return;
+        }
+
         await using var db = await factory.CreateDbContextAsync();
         var note = await db
            .Notes
@@ -42,6 +53,7 @@ public partial class EditNoteViewModel(ILocalDbCtxFactory factory, INavigationSe
 
     public async Task Init(int noteId)
     {
+        Id = noteId;
         await using var db = await factory.CreateDbContextAsync();
 
         var note = await db
