@@ -2,7 +2,9 @@
 using CommunityToolkit.Maui.Core.Extensions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Lib.Interfaces;
 using Lib.Models;
+using Lib.Traits;
 using Microsoft.EntityFrameworkCore;
 using ViewModels.Services;
 
@@ -12,7 +14,7 @@ public partial class EditAssessmentViewModel(
     ILocalDbCtxFactory factory,
     INavigationService navService,
     IAppService appService)
-    : ObservableObject
+    : ObservableObject, INotification
 {
     [ObservableProperty]
     private int _id;
@@ -37,6 +39,11 @@ public partial class EditAssessmentViewModel(
     [RelayCommand]
     public async Task SaveAsync()
     {
+        if (this.ValidateNameAndDates() is { } exc)
+        {
+            await appService.ShowErrorAsync(exc.Message);
+            return;
+        }
         await using var db = await factory.CreateDbContextAsync();
         var assessment = await db
            .Assessments
