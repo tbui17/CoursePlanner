@@ -3,7 +3,17 @@ using Lib.Utils;
 
 namespace Lib.Models;
 
-public class Assessment : INotification
+public interface IAssessmentForm : INotification
+{
+    new int Id { get; set; }
+    new string Name { get; set; }
+    new DateTime Start { get; set; }
+    new DateTime End { get; set; }
+    new bool ShouldNotify { get; set; }
+    string Type { get; set; }
+}
+
+public class Assessment : IAssessmentForm
 {
     public const string Performance = "Performance";
     public const string Objective = "Objective";

@@ -33,14 +33,14 @@ public class EditAssessmentViewModelTest : BasePageViewModelTest
         Model.Start = DateTime.Now;
         Model.End = DateTime.Now.AddDays(1);
         await Model.SaveAsync();
-        var term = await Db.Assessments.Where(x => x.Name == "Test 123").ToListAsync();
-        term.Should().NotBeEmpty();
+        var assessment = await Db.Assessments.Where(x => x.Name == "Test 123").ToListAsync();
+        assessment.Should().NotBeEmpty();
 
     }
 
 
     [TestCaseSource(typeof(TestParam), nameof(TestParam.NameAndDate))]
-    public async Task SaveAsync_InvalidInputs_RejectsChangesToDb(string name, DateTime start, DateTime end)
+    public async Task SaveAsync_InvalidInputsIDateTimeEntity_RejectsChangesToDb(string name, DateTime start, DateTime end)
     {
         Model.Name = name;
         Model.Start = start;
@@ -48,14 +48,60 @@ public class EditAssessmentViewModelTest : BasePageViewModelTest
 
         await Model.SaveAsync();
 
-        using var _ = new AssertionScope();
 
-        var term = await Db
+
+        var assessment = await Db
            .Assessments
            .Where(x => x.Name == name)
            .ToListAsync();
 
-        term.Should().BeEmpty();
+        using var _ = new AssertionScope();
+
+        assessment.Should().BeEmpty();
+        AppMock.VerifyReceivedError();
+    }
+
+    [Test]
+    public async Task SaveAsync_InvalidInputsObjectiveAssessment_RejectsChangesToDb()
+    {
+        Model.Name = "Test 123";
+        Model.Start = DateTime.Now;
+        Model.End = Model.Start.AddDays(1);
+
+        await Model.SaveAsync();
+
+
+
+        var assessment = await Db
+           .Assessments
+           .Where(x => x.Name == Model.Name)
+           .ToListAsync();
+
+        using var _ = new AssertionScope();
+
+        assessment.Should().BeEmpty();
+        AppMock.VerifyReceivedError();
+    }
+
+    [Test]
+    public async Task SaveAsync_InvalidInputsPerformanceAssessment_RejectsChangesToDb()
+    {
+        Model.Name = "Test 123";
+        Model.Start = DateTime.Now;
+        Model.End = Model.Start.AddDays(1);
+
+        await Model.SaveAsync();
+
+
+
+        var assessment = await Db
+           .Assessments
+           .Where(x => x.Name == Model.Name)
+           .ToListAsync();
+
+        using var _ = new AssertionScope();
+
+        assessment.Should().BeEmpty();
         AppMock.VerifyReceivedError();
     }
 }

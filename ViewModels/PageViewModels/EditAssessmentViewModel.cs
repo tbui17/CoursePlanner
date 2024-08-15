@@ -2,7 +2,6 @@
 using CommunityToolkit.Maui.Core.Extensions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Lib.Interfaces;
 using Lib.Models;
 using Lib.Traits;
 using Microsoft.EntityFrameworkCore;
@@ -10,11 +9,8 @@ using ViewModels.Services;
 
 namespace ViewModels.PageViewModels;
 
-public partial class EditAssessmentViewModel(
-    ILocalDbCtxFactory factory,
-    INavigationService navService,
-    IAppService appService)
-    : ObservableObject, INotification
+public abstract partial class AssessmentFormViewModel(INavigationService navService)
+    : ObservableObject, IAssessmentForm
 {
     [ObservableProperty]
     private int _id;
@@ -36,28 +32,19 @@ public partial class EditAssessmentViewModel(
     [ObservableProperty]
     private string _selectedAssessmentType = Assessment.Types.First();
 
+    string IAssessmentForm.Type
+    {
+        get => SelectedAssessmentType;
+        set => SelectedAssessmentType = value;
+    }
+
+
+    protected abstract Task SaveAsyncImpl();
+
     [RelayCommand]
     public async Task SaveAsync()
     {
-        if (this.ValidateNameAndDates() is { } exc)
-        {
-            await appService.ShowErrorAsync(exc.Message);
-            return;
-        }
-        await using var db = await factory.CreateDbContextAsync();
-        var assessment = await db
-           .Assessments
-           .AsTracking()
-           .FirstAsync(x => x.Id == Id);
-
-        assessment.Name = Name;
-        assessment.Start = Start;
-        assessment.End = End;
-        assessment.ShouldNotify = ShouldNotify;
-        assessment.Type = SelectedAssessmentType;
-
-        await db.SaveChangesAsync();
-        await BackAsync();
+       await SaveAsyncImpl();
     }
 
     [RelayCommand]
@@ -66,7 +53,41 @@ public partial class EditAssessmentViewModel(
         await navService.PopAsync();
     }
 
-    public async Task Init(int assessmentId)
+    public abstract Task Init(int id);
+
+
+    public async Task RefreshAsync()
+    {
+        await Init(Id);
+    }
+}
+
+public class EditAssessmentViewModel(
+    ILocalDbCtxFactory factory,
+    INavigationService navService,
+    IAppService appService) : AssessmentFormViewModel(navService)
+{
+    protected override async Task SaveAsyncImpl()
+    {
+        if (this.ValidateNameAndDates() is { } exc)
+        {
+            await appService.ShowErrorAsync(exc.Message);
+            return;
+        }
+
+        await using var db = await factory.CreateDbContextAsync();
+        var assessment = await db
+           .Assessments
+           .AsTracking()
+           .FirstAsync(x => x.Id == Id);
+
+        assessment.Assign(this);
+
+        await db.SaveChangesAsync();
+        await BackAsync();
+    }
+
+    public override async Task Init(int assessmentId)
     {
         await using var db = await factory.CreateDbContextAsync();
 
@@ -75,16 +96,44 @@ public partial class EditAssessmentViewModel(
                .FirstOrDefaultAsync(x => x.Id == assessmentId) ??
             new();
 
-        Id = assessment.Id;
-        Name = assessment.Name;
-        Start = assessment.Start;
-        End = assessment.End;
-        ShouldNotify = assessment.ShouldNotify;
-        SelectedAssessmentType = assessment.Type;
+        this.Assign(assessment);
+    }
+}
+
+public class AddAssessmentViewModel(
+    ILocalDbCtxFactory factory,
+    INavigationService navService,
+    IAppService appService) : AssessmentFormViewModel(navService)
+{
+    protected override async Task SaveAsyncImpl()
+    {
+        if (this.ValidateNameAndDates() is { } exc)
+        {
+            await appService.ShowErrorAsync(exc.Message);
+            return;
+        }
+
+        await using var db = await factory.CreateDbContextAsync();
+        var assessment = await db
+           .Assessments
+           .AsTracking()
+           .FirstAsync(x => x.Id == Id);
+
+        assessment.Assign(this);
+
+        await db.SaveChangesAsync();
+        await BackAsync();
     }
 
-    public async Task RefreshAsync()
+    public override async Task Init(int courseId)
     {
-        await Init(Id);
+        await using var db = await factory.CreateDbContextAsync();
+        var course = await db
+           .Courses
+           .AsNoTracking()
+           .Include(x => x.Assessments)
+           .FirstAsync(x => x.Id == courseId);
+
+        this.Assign(course);
     }
 }
