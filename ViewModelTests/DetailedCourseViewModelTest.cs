@@ -9,33 +9,18 @@ using ViewModels.Services;
 
 namespace ViewModelTests;
 
-public class DetailedCourseViewModelTest : BaseDbTest
+public class DetailedCourseViewModelTest : BasePageViewModelTest
 {
     [SetUp]
     public override async Task Setup()
     {
         await base.Setup();
-        Db = GetDb();
-        NavMock = new Mock<INavigationService>();
-        AppMock = new Mock<IAppService>();
-        Model = new DetailedCourseViewModel(factory: Resolve<ILocalDbCtxFactory>(), appService: AppMock.Object,
+        Model = new DetailedCourseViewModel(factory: DbFactory, appService: AppMock.Object,
             navService: NavMock.Object, courseService: Resolve<ICourseService>()
         );
     }
 
-    private Mock<IAppService> AppMock { get; set; }
-
-    private Mock<INavigationService> NavMock { get; set; }
-
     private DetailedCourseViewModel Model { get; set; }
-
-    private LocalDbCtx Db { get; set; }
-
-    [TearDown]
-    public async Task TearDown()
-    {
-        await Db.DisposeAsync();
-    }
 
 
     [Test]
@@ -210,6 +195,7 @@ public class DetailedCourseViewModelTest : BaseDbTest
            .BeNull();
     }
 
+
     [Test]
     public async Task AddNoteAsync_UpdatesDbAndModelState()
     {
@@ -356,5 +342,55 @@ public class DetailedCourseViewModelTest : BaseDbTest
                .Should()
                .Be(null);
         }
+    }
+}
+
+public class DetailedCourseViewModelAssessmentTest : BasePageViewModelTest
+{
+    [SetUp]
+    public override async Task Setup()
+    {
+        await base.Setup();
+        Model = new DetailedCourseViewModel(factory: DbFactory, appService: AppMock.Object,
+            navService: NavMock.Object, courseService: Resolve<ICourseService>()
+        );
+
+        var assessments = await Db
+           .Assessments
+           .AsNoTracking()
+           .Where(x => x.CourseId == 1)
+           .ToListAsync();
+
+        const int assessmentCount = 2;
+
+        assessments
+           .Should()
+           .HaveCount(assessmentCount)
+           .And
+           .Subject
+           .Where(x => x.Type is Assessment.Objective or Assessment.Performance)
+           .Should()
+           .HaveCount(assessmentCount);
+
+        var ids = assessments
+           .Select(x => x.Id)
+           .ToList();
+
+        var res = await Db
+           .Assessments
+           .Where(x => ids.Contains(x.Id))
+           .ExecuteDeleteAsync();
+        res
+           .Should()
+           .Be(assessmentCount);
+    }
+
+    public DetailedCourseViewModel Model { get; set; }
+
+
+    [Test]
+    public async Task AddAssessmentAsync_DefaultsWithUniqueType()
+    {
+        await Model.Init(1);
     }
 }
