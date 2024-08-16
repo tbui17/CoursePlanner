@@ -4,7 +4,9 @@
         xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
         xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest"
         xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
-        IgnorableNamespaces="uap rescap">
+        xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
+        xmlns:com="http://schemas.microsoft.com/appx/manifest/com/windows10"
+        IgnorableNamespaces="uap rescap com desktop">
 
     <Identity Name="maui-package-name-placeholder" Publisher="CN=User Name" Version="0.0.0.0"/>
 
@@ -38,7 +40,25 @@
                                  Square310x310Logo="$placeholder$.png"/>
                 <uap:SplashScreen Image="$placeholder$.png"/>
             </uap:VisualElements>
+			<Extensions>
+				<!-- Specify which CLSID to activate when toast clicked -->
+				<desktop:Extension Category="windows.toastNotificationActivation">
+					<!-- Change Id to your ApplicationIdGuid, which can be found in your .Net Maui csproj -->
+					<desktop:ToastNotificationActivation ToastActivatorCLSID="058bbdc7-fb68-4e55-8dd7-71a2456f7d48" />
+				</desktop:Extension>
+				<!--Register COM CLSID LocalServer32 registry key-->
+				<com:Extension Category="windows.comServer">
+					<com:ComServer>
+						<!-- Change Executable to the EXE of your project -->
+						<com:ExeServer Executable="CoursePlanner.exe" Arguments="-ToastActivated" DisplayName="CoursePlanner Toast Activator">
+							<!-- Change Id to your ApplicationIdGuid, which can be found in your .Net Maui csproj -->
+							<com:Class Id="058bbdc7-fb68-4e55-8dd7-71a2456f7d48" DisplayName="Toast activator"/>
+						</com:ExeServer>
+					</com:ComServer>
+				</com:Extension>
+			</Extensions>
         </Application>
+       
     </Applications>
 
     <Capabilities>
