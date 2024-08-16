@@ -67,7 +67,7 @@
 
                 <Border Style="{StaticResource CollectionBorder}">
                     <ScrollView Style="{StaticResource CollectionScrollView}" >
-                        <CollectionView ItemsSource="{Binding Assessments}" SelectionMode="Single"
+                        <CollectionView ItemsSource="{Binding Assessments}" SelectionMode="None"
                              >
 
 
