@@ -104,9 +104,17 @@ public partial class DevPage
             ["Trigger Notification Service"] = async () => await NotificationService.SendUpcomingNotifications(),
             ["Seed database"] = async () =>
             {
-                await using var db = await Factory.CreateDbContextAsync();
-                await new TestDataFactory().SeedDatabase(db);
-                await ApplicationService.AlertAsync("Database has been seeded.");
+                try
+                {
+                    await using var db = await Factory.CreateDbContextAsync();
+                    await new TestDataFactory().SeedDatabase(db);
+                    await ApplicationService.AlertAsync("Database has been seeded.");
+                }
+                catch (Exception)
+                {
+                    await ApplicationService.AlertAsync("There was an error attempting to seed the database. Did you forget to reset before using this action?");
+                }
+
             }
         };
     }
