@@ -10,6 +10,14 @@ public static class UtilExtensions
             ? value
             : throw new ArgumentException($"Value {value} not found in ${set.StringJoin(",")}");
 
+
+    public static T? GetOrDefault<T>(this ISet<T> set, T value) =>
+        set.Contains(value) ? value : default;
+
+    public static T GetOrDefault<T>(this ISet<T> set, T value, T defaultValue) =>
+        set.Contains(value) ? value : defaultValue;
+
+
     public static string StringJoin<T>(this IEnumerable<T> collection, string separator = "") =>
         string.Join(separator, collection);
 
