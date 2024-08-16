@@ -1,205 +1,265 @@
-﻿using FluentAssertions;
+﻿using System.Windows.Input;
+using CommunityToolkit.Mvvm.Input;
+using FluentAssertions;
 using FluentAssertions.Execution;
+using Lib.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Moq;
 using ViewModels.PageViewModels;
-using ViewModelTests.TestData;
 
 namespace ViewModelTests;
 
 public class EditAssessmentViewModelTest : BasePageViewModelTest
 {
+    private EditAssessmentViewModel Model { get; set; }
+
     [SetUp]
     public override async Task Setup()
     {
         await base.Setup();
-        Model = new EditAssessmentViewModel(factory: DbFactory, navService: NavMock.Object, appService: AppMock.Object);
+        Model = new EditAssessmentViewModel(factory: DbFactory, navService: NavMock.Object, appService: AppMock.Object,
+            logger: Resolve<ILogger<EditAssessmentViewModel>>());
+    }
+
+
+    [Test]
+    public async Task Init_SetsAssessmentsToDbValues()
+    {
+        const int courseId = 1;
+        await Model.Init(courseId);
+
+        var res = await FluentActions.Awaiting(() => Db.Courses
+                .Where(x => x.Id == courseId)
+                .Include(x => x.Assessments)
+                .FirstAsync()
+            )
+            .Should()
+            .NotThrowAsync();
+
+        var dbCourse = res.Subject;
+
+        using var _ = new AssertionScope();
+
+        var vmAssessments = Model.GetDbModels().ToList();
+        var dbAssessments = dbCourse.Assessments.ToList();
+
+        vmAssessments
+            .Should()
+            .HaveCountGreaterOrEqualTo(dbAssessments.Count);
+
+        vmAssessments
+            .Select(x => x.Name)
+            .Should()
+            .BeEquivalentTo(dbAssessments.Select(x => x.Name));
+
+        vmAssessments.Should().BeEquivalentTo(dbAssessments);
+    }
+
+    [Test]
+    public async Task DeleteAsyncTest()
+    {
         await Model.Init(1);
-    }
 
-    private EditAssessmentViewModel Model { get; set; }
+        Model.Assessments.Should().HaveCount(2);
+
+        var first = Model.Assessments.ElementAt(0);
+        var second = Model.Assessments.ElementAt(1);
+        using var scope = new AssertionScope();
+        Model.SelectedAssessment = first;
+        await Model.DeleteAssessmentCommand.ExecuteAsync();
+
+        Model.SelectedAssessment.Should().BeNull("First assessment needs to be unselected");
+        Model.Assessments.Should().NotContain(first);
+        Model.SelectedAssessment = second;
+        await Model.DeleteAssessmentCommand.ExecuteAsync();
+        Model.Assessments.Should().BeEmpty();
+        Model.SelectedAssessment.Should().BeNull("Second assessment needs to be unselected");
+    }
 
     [Test]
-    public async Task Init_ShouldMapToDbValues()
+    public async Task SaveAsync_DuplicateTypes_ShouldShowError()
     {
+        await Model.Init(1);
 
-        var expected = await Db.Assessments.FirstAsync();
-        Model.Should().BeEquivalentTo(expected, x => x.ExcludingMissingMembers());
+        var first = Model.Assessments.First();
+
+        first.Type = Assessment.Performance;
+
+        var second = Model.Assessments.ElementAt(1);
+        second.Type = Assessment.Performance;
+        first.Name = "";
+        second.Name = "";
+
+        await Model.SaveAsync();
+        AppMock.VerifyReceivedError();
+        NavMock.Verify(x => x.PopAsync(), Times.Never);
     }
 
     [Test]
-    public async Task SaveAsync_PersistsChangesToDb()
+    public async Task SaveAsync_NoIssues_ShouldPersistChanges()
     {
-        Model.Name = "Test 123";
-        Model.Start = DateTime.Now;
-        Model.End = DateTime.Now.AddDays(1);
-        await Model.SaveAsync();
-        var assessment = await Db.Assessments.Where(x => x.Name == "Test 123").ToListAsync();
-        assessment.Should().NotBeEmpty();
+        await Model.Init(1);
 
+        const string firstName = "MY FIRST ASSESSMENT NAME";
+        const string secondName = "MY SECOND ASSESSMENT NAME";
+
+        var first = Model.Assessments.First();
+        first.Type = Assessment.Performance;
+        first.Name = firstName;
+
+        var second = Model.Assessments.ElementAt(1);
+        second.Type = Assessment.Objective;
+        second.Name = secondName;
+
+        await Model.SaveAsync();
+
+
+        using var _ = new AssertionScope();
+        var dbAssessments = await Db.Assessments.Where(x => x.CourseId == 1).ToListAsync();
+
+        dbAssessments.Should()
+            .HaveCount(2)
+            .And.ContainSingle(x => x.Name == firstName && x.Type == Assessment.Performance)
+            .And.ContainSingle(x => x.Name == secondName && x.Type == Assessment.Objective)
+            .And.BeEquivalentTo(Model.Assessments, o => o.ExcludingMissingMembers());
+
+        AppMock.VerifyReceivedError(0);
+        NavMock.Verify(x => x.PopAsync());
     }
 
-
-    [TestCaseSource(typeof(TestParam), nameof(TestParam.NameAndDate))]
-    public async Task SaveAsync_InvalidInputsIDateTimeEntity_RejectsChangesToDb(string name, DateTime start, DateTime end)
+    [Test]
+    public async Task AddAssessmentTest()
     {
-        Model.Name = name;
-        Model.Start = start;
-        Model.End = end;
-
-        await Model.SaveAsync();
-
-
-
-        var assessment = await Db
-           .Assessments
-           .Where(x => x.Name == name)
-           .ToListAsync();
+        await DeleteAssessments();
+        await Model.Init(1);
 
         using var _ = new AssertionScope();
 
-        assessment.Should().BeEmpty();
+        await Model.AddAssessmentCommand.ExecuteAsync();
+        Model.Assessments.Should().HaveCount(1);
+        Model.Assessments.First().Type.Should().Be(Assessment.Objective);
+
+        await Model.AddAssessmentCommand.ExecuteAsync();
+        Model.Assessments.Should().HaveCount(2);
+        Model.Assessments.DistinctBy(x => x.Type).Should().HaveCount(2);
+
+        await Model.AddAssessmentCommand.ExecuteAsync();
+        Model.Assessments.Should().HaveCount(2);
         AppMock.VerifyReceivedError();
+        NavMock.Verify(x => x.PopAsync(), Times.Never);
     }
 
     [Test]
-    public async Task SaveAsync_InvalidInputsObjectiveAssessment_RejectsChangesToDb()
+    public async Task AddAndEditTest()
     {
-        Model.Name = "Test 123";
-        Model.Start = DateTime.Now;
-        Model.End = Model.Start.AddDays(1);
-
-        await Model.SaveAsync();
-
-
-
-        var assessment = await Db
-           .Assessments
-           .Where(x => x.Name == Model.Name)
-           .ToListAsync();
+        await DeleteAssessments();
+        await Model.Init(1);
+        const string name = "MY ASSESSMENT NAME";
 
         using var _ = new AssertionScope();
 
-        assessment.Should().BeEmpty();
-        AppMock.VerifyReceivedError();
+        await Model.AddAssessmentCommand.ExecuteAsync();
+        var assessment = Model.Assessments.First();
+        assessment.Name = name;
+        await Model.SaveAsync();
+        var dbAssessment = Db.Assessments.FirstOrDefaultAsync(x => x.Name == name);
+
+        dbAssessment.Should().NotBeNull();
+
+        AppMock.VerifyReceivedError(0);
+        NavMock.Verify(x => x.PopAsync(), Times.Once);
     }
 
     [Test]
-    public async Task SaveAsync_InvalidInputsPerformanceAssessment_RejectsChangesToDb()
+    public async Task AddAndDeleteTest()
     {
-        Model.Name = "Test 123";
-        Model.Start = DateTime.Now;
-        Model.End = Model.Start.AddDays(1);
-
-        await Model.SaveAsync();
-
-
-
-        var assessment = await Db
-           .Assessments
-           .Where(x => x.Name == Model.Name)
-           .ToListAsync();
+        await DeleteAssessments();
+        await Model.Init(1);
+        const string name = "MY ASSESSMENT NAME";
 
         using var _ = new AssertionScope();
 
-        assessment.Should().BeEmpty();
-        AppMock.VerifyReceivedError();
+        await Model.AddAssessmentCommand.ExecuteAsync();
+        await Model.AddAssessmentCommand.ExecuteAsync();
+        Model.SelectedAssessment = Model.Assessments.First();
+        await Model.DeleteAssessmentCommand.ExecuteAsync();
+        Model.Assessments.Should().HaveCount(1,"First delete");
+        var assessment = Model.Assessments.First();
+        assessment.Name = name;
+        await Model.SaveAsync();
+        var dbAssessment = Db.Assessments.FirstOrDefaultAsync(x => x.Name == name);
+
+        dbAssessment.Should().NotBeNull();
+
+        Model.Assessments.Should().HaveCount(1,"Second delete");
+
+        AppMock.VerifyReceivedError(0);
+        NavMock.Verify(x => x.PopAsync(), Times.Once);
+    }
+
+
+    [Test]
+    public async Task AddEditAndDeleteTest()
+    {
+        await Model.Init(1);
+        const string name = "MY ASSESSMENT NAME";
+        const string name2 = "MY SECOND ASSESSMENT NAME";
+
+
+
+        var first = Model.Assessments.ElementAt(0);
+        var second = Model.Assessments.ElementAt(1);
+        first.Name = name;
+        Model.SelectedAssessment = second;
+        await Model.DeleteAssessmentCommand.ExecuteAsync();
+        Model.Assessments.Should().HaveCount(1);
+        Model.SelectedAssessment.Should().BeNull();
+
+
+        AppMock.VerifyReceivedError(0,"0");
+        await Model.AddAssessmentCommand.ExecuteAsync();
+        await Model.SaveAsync();
+        AppMock.VerifyReceivedError(1,"1");
+
+
+        NavMock.Verify(x => x.PopAsync(), Times.Never,"2");
+
+        var newAdd = Model.Assessments.First(x => x.Name is not name);
+
+
+        newAdd.Name = name2;
+        await Model.SaveAsync();
+        Model.Assessments.Count.Should().Be(2);
+        AppMock.VerifyReceivedError(1,"3");
+
+        NavMock.Verify(x => x.PopAsync(), Times.Once,"4");
+
+    }
+
+
+    private async Task DeleteAssessments()
+    {
+        await Db.Assessments.Where(x => x.CourseId == 1).ExecuteDeleteAsync();
+    }
+
+    [Test]
+    public async Task SaveAsync_NoAssessments_ShouldNavigateBack()
+    {
+        await DeleteAssessments();
+
+        await Model.Init(1);
+        await Model.SaveAsync();
+
+        AppMock.VerifyReceivedError(0);
+        NavMock.Verify(x => x.PopAsync());
     }
 }
 
-//
-// [Description("run both tests at once and both must pass")]
-// public class AssessmentFormTest : BasePageViewModelTest
-// {
-//     private Assessment ObjectiveAssessment { get; set; }
-//     private Assessment PerformanceAssessment { get; set; }
-//     private EditAssessmentViewModel Model { get; set; }
-//
-//     [SetUp]
-//     public override async Task Setup()
-//     {
-//         await base.Setup();
-//         Model = new EditAssessmentViewModel(
-//             factory: DbFactory,
-//             appService: AppMock.Object,
-//             navService: NavMock.Object
-//         );
-//
-//         // remove assessments and assign their references
-//         // should have 1 objective and 1 performance
-//
-//         await using var db = await DbFactory.CreateDbContextAsync();
-//
-//         var assessments = await db
-//            .Assessments
-//            .AsNoTracking()
-//            .Where(x => x.CourseId == 1)
-//            .ToListAsync();
-//
-//         const int assessmentCount = 2;
-//
-//         assessments
-//            .Should()
-//            .HaveCount(assessmentCount)
-//            .And
-//            .Subject
-//            .Where(x => x.Type is Assessment.Objective or Assessment.Performance)
-//            .Should()
-//            .HaveCount(assessmentCount);
-//
-//         var ids = assessments
-//            .Select(x => x.Id)
-//            .ToList();
-//
-//         var res = await db
-//            .Assessments
-//            .Where(x => ids.Contains(x.Id))
-//            .ExecuteDeleteAsync();
-//         res
-//            .Should()
-//            .Be(assessmentCount);
-//
-//         ObjectiveAssessment = assessments.First(x => x.Type == Assessment.Objective);
-//         PerformanceAssessment = assessments.First(x => x.Type == Assessment.Performance);
-//     }
-//
-//     private async Task AddAssessmentTestImpl(Assessment assessment)
-//     {
-//         Db.Assessments.Add(assessment);
-//         await Db.SaveChangesAsync();
-//
-//         const int assessmentId = 1;
-//         const string newAssessmentName = "My New Assessment12345";
-//         // AppMock
-//         //    .Setup(x => x.DisplayNamePromptAsync())
-//         //    .ReturnsAsync(newAssessmentName);
-//
-//         await Model.Init(assessmentId);
-//         await Model.SaveAsync();
-//
-//         using var scope = new AssertionScope();
-//         scope.FormattingOptions.MaxLines = 1;
-//
-//         Model
-//            .Assessments
-//            .Where(x => x.Type is Assessment.Objective or Assessment.Performance)
-//            .Should()
-//            .HaveCount(2)
-//            .And
-//            .ContainSingle(x => x.Name == newAssessmentName)
-//            .And
-//            .ContainSingle(x => x.Type == assessment.Type);
-//     }
-//
-//
-//     [Test]
-//     public async Task AddAssessmentAsync_Performance_DefaultsWithUniqueType()
-//     {
-//         await AddAssessmentTestImpl(PerformanceAssessment);
-//     }
-//
-//     [Test]
-//     public async Task AddAssessmentAsync_Objective_DefaultsWithUniqueType()
-//     {
-//         await AddAssessmentTestImpl(ObjectiveAssessment);
-//     }
-// }
+public static class CommandExtensions
+{
+    public static async Task ExecuteAsync(this IAsyncRelayCommand command)
+    {
+        await command.ExecuteAsync(null);
+    }
+}
