@@ -4,7 +4,7 @@ namespace Lib.Traits;
 
 public static class AssignmentTrait
 {
-    public static void Assign<T, T2>(this T form, T2 otherForm)
+    public static T Assign<T, T2>(this T form, T2 otherForm)
         where T : IAssessmentForm where T2 : IAssessmentForm
     {
         form.Id = otherForm.Id;
@@ -13,15 +13,8 @@ public static class AssignmentTrait
         form.End = otherForm.End;
         form.ShouldNotify = otherForm.ShouldNotify;
         form.Type = otherForm.Type;
-    }
+        form.CourseId = otherForm.CourseId;
 
-    public static void Assign(this IAssessmentAssociatedForm form, IAssessmentAssociatedForm otherForm)
-    {
-        form.Id = otherForm.Id;
-        form.Name = otherForm.Name;
-        form.Start = otherForm.Start;
-        form.End = otherForm.End;
-        form.ShouldNotify = otherForm.ShouldNotify;
-        form.Type = otherForm.Type;
+        return form;
     }
 }
