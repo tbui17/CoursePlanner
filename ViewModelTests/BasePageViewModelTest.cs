@@ -39,4 +39,9 @@ public class AppServiceMock : Mock<IAppService>
     {
         Verify(x => x.ShowErrorAsync(It.IsAny<string>()), Times.Exactly(times));
     }
+
+    public void VerifyReceivedError(int times, string message)
+    {
+        Verify(x => x.ShowErrorAsync(It.IsAny<string>()), Times.Exactly(times),message);
+    }
 }
