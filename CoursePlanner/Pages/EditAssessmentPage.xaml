@@ -1,40 +1,53 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:controls="clr-namespace:CoursePlanner.Controls"
-    xmlns:pageViewModels="clr-namespace:ViewModels.PageViewModels;assembly=ViewModels"
-    x:DataType="pageViewModels:EditAssessmentViewModel"
-    Title="Edit Assessment"
-    x:Class="CoursePlanner.Pages.EditAssessmentPage" >
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:l="clr-namespace:CoursePlanner.Controls"
+             xmlns:pageViewModels="clr-namespace:ViewModels.PageViewModels;assembly=ViewModels"
+             x:DataType="pageViewModels:EditAssessmentViewModel"
+             Title="Edit Assessment"
+             x:Class="CoursePlanner.Pages.EditAssessmentPage">
 
-    <ContentPage.Resources>
-        <Style TargetType="Label" BasedOn="{StaticResource FieldLabel}" ></Style>
-    </ContentPage.Resources>
+    <ScrollView>
+        <VerticalStackLayout Margin="10,10">
+            <CollectionView ItemsSource="{Binding Assessments}" SelectionMode="Single" SelectedItem="{Binding SelectedAssessment}">
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="5" />
+                </CollectionView.ItemsLayout>
+                <CollectionView.ItemTemplate>
 
-    <VerticalStackLayout Margin="10,10" >
-        <CollectionView ItemsSource="{Binding Assessments}" SelectionMode="Single">
-            <CollectionView.ItemsLayout>
-                <LinearItemsLayout Orientation="Vertical" ItemSpacing="5" />
-            </CollectionView.ItemsLayout>
-            <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="pageViewModels:AssessmentItemViewModel">
+                        <Border>
+                            <Border.Resources>
+                                <Style TargetType="Label" BasedOn="{StaticResource FieldLabel}">
+                                </Style>
+                            </Border.Resources>
+                            <l:AutoGrid>
+                                <Label Text="Name:" />
+                                <Entry Text="{Binding Name}" />
+                                <Label Text="Start Date:" />
+                                <DatePicker Date="{Binding Start}" />
+                                <Label Text="End Date:" />
+                                <DatePicker Date="{Binding End}" />
+                                <Label Text="Notifications:" />
+                                <Switch IsToggled="{Binding ShouldNotify}" />
+                                <Label Text="Assessment Type:" />
+                                <Picker
+                                    ItemsSource="{Binding AssessmentTypes}"
+                                    SelectedItem="{Binding Type}"
+                                     />
+                            </l:AutoGrid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
 
-                <DataTemplate x:DataType="pageViewModels:AssessmentItemViewModel">
-                    <Border>
-                        <controls:AutoGrid>
-                            <Label Text="Name:" />
-                            <Entry Text="{Binding Name}" />
-                            <Label Text="Type:" />
-                            <Label Text="Start Date:" />
-                            <DatePicker Date="{Binding Start}" />
-                            <Label Text="End Date:" />
-                            <DatePicker Date="{Binding End}" />
-                            <Label Text="Should Notify:" />
-                            <Switch IsToggled="{Binding ShouldNotify}" />
-                        </controls:AutoGrid></Border>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
+            <HorizontalStackLayout>
+                <Button Text="Delete" Command="{Binding DeleteAssessmentCommand}" />
+                <Button Text="Add" Command="{Binding AddAssessmentCommand}" />
+            </HorizontalStackLayout>
+            <Button Text="Save" Command="{Binding SaveCommand}" />
+        </VerticalStackLayout>
 
-    </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>
