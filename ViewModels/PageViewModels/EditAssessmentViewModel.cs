@@ -70,8 +70,6 @@ public partial class EditAssessmentViewModel(
             : null;
     }
 
-    public ObservableCollection<string> AssessmentTypes { get; } = Assessment.Types.ToObservableCollection();
-
     [RelayCommand]
     public async Task SaveAsync()
     {
@@ -256,43 +254,4 @@ public partial class EditAssessmentViewModel(
     {
         await Init(Id);
     }
-}
-
-public partial class AssessmentItemViewModel
-    : ObservableObject, IAssessmentForm
-{
-    public AssessmentItemViewModel()
-    {
-    }
-
-    public AssessmentItemViewModel(Assessment assessment)
-    {
-        this.Assign(assessment);
-    }
-
-    [ObservableProperty]
-    private int _id;
-
-    [ObservableProperty]
-    private string _name = "";
-
-    [ObservableProperty]
-    private DateTime _start;
-
-    [ObservableProperty]
-    private DateTime _end;
-
-    [ObservableProperty]
-    private bool _shouldNotify;
-
-    [ObservableProperty]
-    private string _selectedAssessmentType = Assessment.Types.First();
-
-    public string Type
-    {
-        get => SelectedAssessmentType;
-        set => SelectedAssessmentType = value;
-    }
-
-    public int CourseId { get; set; }
 }
