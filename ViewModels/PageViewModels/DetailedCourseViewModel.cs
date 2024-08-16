@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.Diagnostics;
 using CommunityToolkit.Maui.Core.Extensions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -138,69 +137,11 @@ public partial class DetailedCourseViewModel(
     }
 
     [RelayCommand]
-    public async Task AddAssessmentAsync()
-    {
-        logger.LogInformation("Adding Assessment. {AssessmentCount}", Assessments.Count);
-        if (Assessments.Count >= 2)
-        {
-            logger.LogInformation("{AssessmentCount} assessments already exist.", Assessments.Count);
-            await appService.ShowErrorAsync("Only 2 assessments allowed per course.");
-            return;
-        }
-
-        var name = await appService.DisplayNamePromptAsync();
-
-        if (name is null) return;
-
-        await using var db = await factory.CreateDbContextAsync();
-        var assessment = CreateAssessment();
-        db.Assessments.Add(assessment);
-        await db.SaveChangesAsync();
-        await RefreshAsync();
-        return;
-
-        Assessment CreateAssessment()
-        {
-            var assessment2 = Course.CreateAssessment();
-            assessment2.Name = name;
-
-            if (Assessments.Count == 0)
-            {
-                return assessment2;
-            }
-
-            if (Assessments.Count > 1)
-            {
-                throw new UnreachableException("There should not be more than 2 assessments.");
-            }
-
-            var assessment1 = Assessments[0];
-
-            assessment2.Type = assessment1.Type is Assessment.Objective
-                ? Assessment.Performance
-                : Assessment.Objective;
-
-            return assessment2;
-        }
-    }
-
-    [RelayCommand]
     public async Task DetailedAssessmentAsync()
     {
         if (SelectedAssessment is not { Id: var id and > 0 }) return;
 
         await navService.GoToAssessmentDetailsPageAsync(id);
-    }
-
-    [RelayCommand]
-    public async Task DeleteAssessmentAsync()
-    {
-        await using var db = await factory.CreateDbContextAsync();
-        await db
-           .Assessments
-           .Where(x => x.Id == Course.Id)
-           .ExecuteDeleteAsync();
-        await RefreshAsync();
     }
 
     [RelayCommand]
