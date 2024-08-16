@@ -29,7 +29,7 @@ public class Course : INotification
     public string Status
     {
         get => _status;
-        set => _status = Statuses.GetOrThrow(value);
+        set => _status = Statuses.GetOrDefault(value, PlanToTake);
     }
 
     public bool ShouldNotify { get; set; }

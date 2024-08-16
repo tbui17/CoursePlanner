@@ -10,7 +10,7 @@ public class Assessment : IAssessmentForm
 
     public static readonly ISet<string> Types = new HashSet<string> { Objective, Performance };
 
-    public static readonly string DefaultType = Objective;
+    public static string DefaultType => Objective;
 
     public int Id { get; set; }
 
@@ -19,7 +19,7 @@ public class Assessment : IAssessmentForm
     public string Type
     {
         get => _type;
-        set => _type = Types.GetOrThrow(value);
+        set => _type = Types.GetOrDefault(value, DefaultType);
     }
 
     public string Name { get; set; } = string.Empty;
