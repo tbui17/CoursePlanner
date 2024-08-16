@@ -1,4 +1,5 @@
 ﻿using System.Net.Mail;
+using System.Text.RegularExpressions;
 using Lib.Exceptions;
 using Lib.Interfaces;
 using Lib.Utils;
@@ -7,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Lib.Models;
 
 [Index(nameof(Email), IsUnique = true)]
-public class Instructor : IInstructorFormFields
+public partial class Instructor : IInstructorFormFields
 {
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
@@ -15,6 +16,12 @@ public class Instructor : IInstructorFormFields
     public string Email { get; set; } = string.Empty;
 
     public ICollection<Course> Courses { get; set; } = [];
+
+    private const string PhoneRegexPattern = @"^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}$";
+
+    [GeneratedRegex(PhoneRegexPattern)]
+    private static partial Regex PhoneRegex();
+
 
 
     public override string ToString()
@@ -55,15 +62,13 @@ public class Instructor : IInstructorFormFields
                 list.Add("Email is not valid.");
             }
 
-            if (Phone.Length != PhoneLength || !Phone.All(Digits.Contains))
+            if (!PhoneRegex().IsMatch(Phone))
             {
-                list.Add("Phone must be in ddddddd format.");
+                list.Add("Invalid phone format.");
             }
 
             return list;
         }
     }
 
-    private static readonly HashSet<char> Digits = new("0123456789");
-    private const int PhoneLength = 7;
 }
