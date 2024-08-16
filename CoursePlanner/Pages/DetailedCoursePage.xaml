@@ -68,7 +68,7 @@
                 <Border Style="{StaticResource CollectionBorder}">
                     <ScrollView Style="{StaticResource CollectionScrollView}" >
                         <CollectionView ItemsSource="{Binding Assessments}" SelectionMode="Single"
-                            SelectedItem="{Binding SelectedAssessment}" >
+                             >
 
 
                             <CollectionView.ItemsLayout>
@@ -119,9 +119,9 @@
 
                         </Style>
                     </FlexLayout.Resources>
-                    <Button Text="Add" Command="{Binding AddAssessmentCommand}" />
+
                     <Button Text="Details" Command="{Binding DetailedAssessmentCommand}" />
-                    <Button Text="Delete" Command="{Binding DeleteAssessmentCommand}" />
+
 
                 </FlexLayout>
 

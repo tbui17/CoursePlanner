@@ -82,11 +82,6 @@ public class DetailedCourseViewModelTest : BasePageViewModelTest
            .Should()
            .BeEquivalentTo(expected.Notes.Select(x => x.Value));
 
-        Model
-           .SelectedAssessment
-           .Should()
-           .BeNull();
-
 
         Model
            .SelectedNote

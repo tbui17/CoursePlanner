@@ -6,7 +6,7 @@ using ViewModels.Services;
 
 namespace CoursePlanner.Pages;
 
-public partial class DevPage : ContentPage
+public partial class DevPage
 {
     public DevPage(
         IServiceProvider provider,
@@ -38,6 +38,7 @@ public partial class DevPage : ContentPage
 
     private IAppService ApplicationService { get; set; }
 
+    // ReSharper disable once UnusedAutoPropertyAccessor.Local
     private IServiceProvider Provider { get; set; }
 
     private async void Button_OnClicked(object? sender, EventArgs e)
@@ -64,7 +65,7 @@ public partial class DevPage : ContentPage
                 await db.Database.EnsureDeletedAsync();
                 await db.Database.MigrateAsync();
                 await ApplicationService.AlertAsync("Database has been reset. Closing application.");
-                App.Current.Quit();
+                Application.Current!.Quit();
             },
             ["Set Notification Data"] = async () =>
             {

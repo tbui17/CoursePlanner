@@ -13,18 +13,28 @@
     </ContentPage.Resources>
 
     <VerticalStackLayout Margin="10,10" >
-        <controls:AutoGrid>
-            <Label Text="Name:" />
-            <Entry Text="{Binding Name}" />
-            <Label Text="Type:" />
-            <Picker SelectedItem="{Binding SelectedAssessmentType}" ItemsSource="{Binding AssessmentTypes }" />
-            <Label Text="Start Date:" />
-            <DatePicker Date="{Binding Start}" />
-            <Label Text="End Date:" />
-            <DatePicker Date="{Binding End}" />
-            <Label Text="Should Notify:" />
-            <Switch IsToggled="{Binding ShouldNotify}" />
-        </controls:AutoGrid>
-        <Button Text="Save" Command="{Binding SaveCommand}"  />
+        <CollectionView ItemsSource="{Binding Assessments}" SelectionMode="Single">
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Vertical" ItemSpacing="5" />
+            </CollectionView.ItemsLayout>
+            <CollectionView.ItemTemplate>
+
+                <DataTemplate x:DataType="pageViewModels:AssessmentItemViewModel">
+                    <Border>
+                        <controls:AutoGrid>
+                            <Label Text="Name:" />
+                            <Entry Text="{Binding Name}" />
+                            <Label Text="Type:" />
+                            <Label Text="Start Date:" />
+                            <DatePicker Date="{Binding Start}" />
+                            <Label Text="End Date:" />
+                            <DatePicker Date="{Binding End}" />
+                            <Label Text="Should Notify:" />
+                            <Switch IsToggled="{Binding ShouldNotify}" />
+                        </controls:AutoGrid></Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
     </VerticalStackLayout>
 </ContentPage>

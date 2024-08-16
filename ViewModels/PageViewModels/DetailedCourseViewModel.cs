@@ -34,10 +34,6 @@ public partial class DetailedCourseViewModel(
 
     public ObservableCollection<Assessment> Assessments => Course.Assessments.ToObservableCollection();
 
-
-    [ObservableProperty]
-    private Assessment? _selectedAssessment;
-
     public ObservableCollection<Note> Notes => Course.Notes.ToObservableCollection();
 
     [ObservableProperty]
@@ -83,7 +79,6 @@ public partial class DetailedCourseViewModel(
     {
         Id = id;
         SelectedNote = null;
-        SelectedAssessment = null;
         await using var db = await factory.CreateDbContextAsync();
         var course = await courseService.GetFullCourse(id) ?? new();
 
@@ -139,9 +134,7 @@ public partial class DetailedCourseViewModel(
     [RelayCommand]
     public async Task DetailedAssessmentAsync()
     {
-        if (SelectedAssessment is not { Id: var id and > 0 }) return;
-
-        await navService.GoToAssessmentDetailsPageAsync(id);
+        await navService.GoToAssessmentDetailsPageAsync(Id);
     }
 
     [RelayCommand]
