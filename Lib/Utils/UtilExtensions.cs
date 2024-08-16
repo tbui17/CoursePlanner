@@ -1,10 +1,10 @@
-﻿using System.Text;
+﻿using System.Collections;
+using System.Text;
 
 namespace Lib.Utils;
 
 public static class UtilExtensions
 {
-
     public static T GetOrThrow<T>(this ISet<T> set, T value) =>
         set.Contains(value)
             ? value
@@ -44,5 +44,49 @@ public static class UtilExtensions
         }
 
         return sb.ToString();
+    }
+
+    public static IEnumerable<T> Tap<T>(this IEnumerable<T> collection, Action<T> action)
+    {
+        foreach (var item in collection)
+        {
+            action(item);
+            yield return item;
+        }
+    }
+
+    public static IEnumerable<IGrouping<TKey, TResult>> SelectValues<TKey, TValue, TResult>(
+        this IEnumerable<IGrouping<TKey, TValue>> groups,
+        Func<(TKey Key, TValue Value), TResult> selector
+    ) =>
+        from g in groups
+        let value = g.Select(x => selector((g.Key, x)))
+        select new Grouping<TKey, TResult>(g.Key, value);
+}
+
+public static class Grouping
+{
+    public static Grouping<TKey, TValue> Create<TKey, TValue>(IGrouping<TKey, TValue> grouping) =>
+        new(grouping.Key, grouping);
+}
+
+public record Grouping<TKey, TValue>(TKey Key, IEnumerable<TValue> Values) : IGrouping<TKey, TValue>
+{
+    public static Grouping<TKey, TValue> FromIGrouping(IGrouping<TKey, TValue> grouping)
+    {
+        return new Grouping<TKey, TValue>(grouping.Key, grouping);
+    }
+
+    public IEnumerator<TValue> GetEnumerator()
+    {
+        foreach (var value in Values)
+        {
+            yield return value;
+        }
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
     }
 }

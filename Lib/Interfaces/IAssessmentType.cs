@@ -5,19 +5,27 @@ namespace Lib.Interfaces;
 public interface IAssessmentType
 {
     string Type { get; set; }
+}
 
-    public string OppositeType => Type switch
+public static class AssessmentTypeExtensions
+{
+    public static string OppositeType(this IAssessmentType item) => item.Type switch
     {
         Assessment.Performance => Assessment.Objective,
         Assessment.Objective => Assessment.Performance,
         _ => throw new ArgumentOutOfRangeException()
     };
 
-    public void EnsureOppositeType(IAssessmentType other)
+    public static void SetOppositeType(this IAssessmentType item)
     {
-        if (Type == other.Type)
+        item.Type = item.OppositeType();
+    }
+
+    public static void EnsureOppositeType(this IAssessmentType item, IAssessmentType other)
+    {
+        if (item.Type == other.Type)
         {
-            Type = OppositeType;
+            item.Type = item.OppositeType();
         }
     }
 }

@@ -1,6 +1,4 @@
-﻿using System.Collections.ObjectModel;
-
-namespace Lib.Interfaces;
+﻿namespace Lib.Interfaces;
 
 public interface IAssessmentForm : INotification, IAssessmentType
 {
@@ -9,10 +7,5 @@ public interface IAssessmentForm : INotification, IAssessmentType
     new DateTime Start { get; set; }
     new DateTime End { get; set; }
     new bool ShouldNotify { get; set; }
-}
-
-
-public interface IAssessmentAssociatedForm : IAssessmentForm
-{
-    ObservableCollection<string> AssessmentTypes { get; set; }
+    public int CourseId { get; set; }
 }
