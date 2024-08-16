@@ -1,5 +1,4 @@
-﻿using System.Windows.Input;
-using CommunityToolkit.Mvvm.Input;
+﻿using CommunityToolkit.Mvvm.Input;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using Lib.Models;
@@ -54,6 +53,20 @@ public class EditAssessmentViewModelTest : BasePageViewModelTest
             .BeEquivalentTo(dbAssessments.Select(x => x.Name));
 
         vmAssessments.Should().BeEquivalentTo(dbAssessments);
+
+        Model.Assessments
+            .Should()
+            .HaveCount(2)
+            .And.AllSatisfy(x =>
+            {
+                x.Type.Should()
+                    .BeOneOf(Assessment.Types);
+
+                x.AssessmentTypes
+                    .ToList()
+                    .Should()
+                    .BeEquivalentTo(Assessment.Types.ToList());
+            });
     }
 
     [Test]
@@ -184,7 +197,7 @@ public class EditAssessmentViewModelTest : BasePageViewModelTest
         await Model.AddAssessmentCommand.ExecuteAsync();
         Model.SelectedAssessment = Model.Assessments.First();
         await Model.DeleteAssessmentCommand.ExecuteAsync();
-        Model.Assessments.Should().HaveCount(1,"First delete");
+        Model.Assessments.Should().HaveCount(1, "First delete");
         var assessment = Model.Assessments.First();
         assessment.Name = name;
         await Model.SaveAsync();
@@ -192,7 +205,7 @@ public class EditAssessmentViewModelTest : BasePageViewModelTest
 
         dbAssessment.Should().NotBeNull();
 
-        Model.Assessments.Should().HaveCount(1,"Second delete");
+        Model.Assessments.Should().HaveCount(1, "Second delete");
 
         AppMock.VerifyReceivedError(0);
         NavMock.Verify(x => x.PopAsync(), Times.Once);
@@ -207,7 +220,6 @@ public class EditAssessmentViewModelTest : BasePageViewModelTest
         const string name2 = "MY SECOND ASSESSMENT NAME";
 
 
-
         var first = Model.Assessments.ElementAt(0);
         var second = Model.Assessments.ElementAt(1);
         first.Name = name;
@@ -217,13 +229,13 @@ public class EditAssessmentViewModelTest : BasePageViewModelTest
         Model.SelectedAssessment.Should().BeNull();
 
 
-        AppMock.VerifyReceivedError(0,"0");
+        AppMock.VerifyReceivedError(0, "0");
         await Model.AddAssessmentCommand.ExecuteAsync();
         await Model.SaveAsync();
-        AppMock.VerifyReceivedError(1,"1");
+        AppMock.VerifyReceivedError(1, "1");
 
 
-        NavMock.Verify(x => x.PopAsync(), Times.Never,"2");
+        NavMock.Verify(x => x.PopAsync(), Times.Never, "2");
 
         var newAdd = Model.Assessments.First(x => x.Name is not name);
 
@@ -231,12 +243,10 @@ public class EditAssessmentViewModelTest : BasePageViewModelTest
         newAdd.Name = name2;
         await Model.SaveAsync();
         Model.Assessments.Count.Should().Be(2);
-        AppMock.VerifyReceivedError(1,"3");
+        AppMock.VerifyReceivedError(1, "3");
 
-        NavMock.Verify(x => x.PopAsync(), Times.Once,"4");
-
+        NavMock.Verify(x => x.PopAsync(), Times.Once, "4");
     }
-
 
     private async Task DeleteAssessments()
     {
