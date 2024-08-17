@@ -80,12 +80,12 @@ public class EditAssessmentViewModelTest : BasePageViewModelTest
         var second = Model.Assessments.ElementAt(1);
         using var scope = new AssertionScope();
         Model.SelectedAssessment = first;
-        await Model.DeleteAssessmentCommand.ExecuteAsync();
+        Model.DeleteAssessmentCommand.Execute();
 
         Model.SelectedAssessment.Should().BeNull("First assessment needs to be unselected");
         Model.Assessments.Should().NotContain(first);
         Model.SelectedAssessment = second;
-        await Model.DeleteAssessmentCommand.ExecuteAsync();
+        Model.DeleteAssessmentCommand.Execute();
         Model.Assessments.Should().BeEmpty();
         Model.SelectedAssessment.Should().BeNull("Second assessment needs to be unselected");
     }
@@ -196,7 +196,7 @@ public class EditAssessmentViewModelTest : BasePageViewModelTest
         await Model.AddAssessmentCommand.ExecuteAsync();
         await Model.AddAssessmentCommand.ExecuteAsync();
         Model.SelectedAssessment = Model.Assessments.First();
-        await Model.DeleteAssessmentCommand.ExecuteAsync();
+        Model.DeleteAssessmentCommand.Execute();
         Model.Assessments.Should().HaveCount(1, "First delete");
         var assessment = Model.Assessments.First();
         assessment.Name = name;
@@ -224,7 +224,7 @@ public class EditAssessmentViewModelTest : BasePageViewModelTest
         var second = Model.Assessments.ElementAt(1);
         first.Name = name;
         Model.SelectedAssessment = second;
-        await Model.DeleteAssessmentCommand.ExecuteAsync();
+        Model.DeleteAssessmentCommand.Execute();
         Model.Assessments.Should().HaveCount(1);
         Model.SelectedAssessment.Should().BeNull();
 
@@ -271,5 +271,10 @@ public static class CommandExtensions
     public static async Task ExecuteAsync(this IAsyncRelayCommand command)
     {
         await command.ExecuteAsync(null);
+    }
+
+    public static void Execute(this IRelayCommand command)
+    {
+        command.Execute(null);
     }
 }
