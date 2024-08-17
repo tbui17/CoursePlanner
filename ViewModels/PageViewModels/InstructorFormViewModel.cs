@@ -3,15 +3,18 @@ using CommunityToolkit.Mvvm.Input;
 using Lib.Exceptions;
 using Lib.Interfaces;
 using Lib.Models;
+using Lib.Traits;
 using Microsoft.EntityFrameworkCore;
 using ViewModels.Services;
 
 namespace ViewModels.PageViewModels;
 
-public partial class InstructorFormViewModel(ILocalDbCtxFactory factory, INavigationService navService, IAppService appService)
-    : ObservableObject, IInstructorFormFields
+public partial class InstructorFormViewModel(
+    ILocalDbCtxFactory factory,
+    INavigationService navService,
+    IAppService appService)
+    : ObservableObject, IUser
 {
-
     [ObservableProperty]
     private string _title = "Instructor Form";
 
@@ -37,20 +40,14 @@ public partial class InstructorFormViewModel(ILocalDbCtxFactory factory, INaviga
             throw new InvalidOperationException($"{nameof(InstructorPersistence)} is not set");
         }
 
-        var message = await InstructorPersistence(new Instructor
-            {
-                Id = Id,
-                Name = Name,
-                Email = Email,
-                Phone = Phone,
-            }
-        );
+        var message = await InstructorPersistence(new Instructor().SetFromUser(this));
 
         if (message is not null)
         {
             await appService.ShowErrorAsync(message.Message);
             return;
         }
+
         await BackAsync();
     }
 
@@ -65,14 +62,11 @@ public partial class InstructorFormViewModel(ILocalDbCtxFactory factory, INaviga
         await using var db = await factory.CreateDbContextAsync();
 
         var instructor = await db
-               .Instructors
-               .FirstOrDefaultAsync(x => x.Id == id) ??
-            new();
+                             .Instructors
+                             .FirstOrDefaultAsync(x => x.Id == id) ??
+                         new();
 
-        Id = instructor.Id;
-        Name = instructor.Name;
-        Email = instructor.Email;
-        Phone = instructor.Phone;
+        this.SetFromUser(instructor);
     }
 
     public async Task RefreshAsync()
@@ -102,9 +96,7 @@ public partial class InstructorFormViewModel(ILocalDbCtxFactory factory, INaviga
 
             var editModel = await db.Instructors.FirstAsync(x => x.Id == instructorId);
 
-            editModel.Name = instructor.Name;
-            editModel.Email = instructor.Email;
-            editModel.Phone = instructor.Phone;
+            editModel.SetFromUserField(editModel);
             await db.SaveChangesAsync();
             return null;
         };
@@ -119,6 +111,7 @@ public partial class InstructorFormViewModel(ILocalDbCtxFactory factory, INaviga
             {
                 return e;
             }
+
             await using var db = await factory.CreateDbContextAsync();
 
             if (await ValidateNoDuplicateEmail(db, instructor.Email) is { } exc)
@@ -131,8 +124,6 @@ public partial class InstructorFormViewModel(ILocalDbCtxFactory factory, INaviga
 
             return null;
         };
-
-
     }
 
     private static async Task<DomainException?> ValidateNoDuplicateEmail(LocalDbCtx db, string email, int? id = null)
@@ -146,8 +137,8 @@ public partial class InstructorFormViewModel(ILocalDbCtxFactory factory, INaviga
         }
 
         var maybeDuplicateEmail = await baseQuery
-           .Select(x => x.Email)
-           .FirstOrDefaultAsync();
+            .Select(x => x.Email)
+            .FirstOrDefaultAsync();
 
         return maybeDuplicateEmail is not null
             ? new DomainException("Email already exists.")
