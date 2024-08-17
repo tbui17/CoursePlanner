@@ -9,8 +9,6 @@ public abstract class BaseDbTest
     {
         var factory = Provider.GetRequiredService<ILocalDbCtxFactory>();
         await using var db = await factory.CreateDbContextAsync();
-        await db.Database.EnsureDeletedAsync();
-        await db.Database.EnsureCreatedAsync();
-        await new TestDataFactory().SeedDatabase(db);
+        await new DbUtil(db).ResetAndSeedDb();
     }
 }

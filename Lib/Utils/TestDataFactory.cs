@@ -7,6 +7,57 @@ public class TestDataFactory
 {
     private bool ToBool(int i) => i % 2 == 0;
 
+
+    public Term CreateC6Data()
+    {
+
+        var baseDate = new DateTime(2020, 1, 1);
+        var oneMonthLater = baseDate.AddMonths(1);
+        var sixMonthsLater = baseDate.AddMonths(6);
+
+        var term = new Term
+        {
+            Name = "Test Term 1",
+            Start = baseDate,
+            End = sixMonthsLater,
+            Courses = [
+                new()
+                {
+                    Name = "Test Course 1",
+                    Assessments = [
+                        new()
+                        {
+                            Name = "Test Assessment 1",
+                            Type = Assessment.Objective,
+                            Start = baseDate,
+                            End = oneMonthLater,
+                            ShouldNotify = true,
+                        },
+                        new()
+                        {
+                            Name = "Test Assessment 2",
+                            Type = Assessment.Performance,
+                            Start = baseDate,
+                            End = oneMonthLater,
+                            ShouldNotify = false,
+                        }
+                    ],
+                    Instructor = new()
+                    {
+                        Name = "Anika Patel",
+                        Phone = "555-123-4567",
+                        Email = "anika.patel@strimeuniversity.edu",
+                    },
+                    Status = Course.PlanToTake,
+                    Start = baseDate,
+                    End = oneMonthLater,
+                }
+            ]
+        };
+
+        return term;
+    }
+
     public TestDataResult CreateData()
     {
         var terms = CreateTerms();
@@ -181,13 +232,15 @@ public class TestDataFactory
 
     public async Task SeedDatabase(LocalDbCtx db)
     {
-
         var data = CreateData();
         db.Terms.AddRange(data.Terms);
         db.Instructors.AddRange(data.Instructors);
         db.Courses.AddRange(data.Courses);
         db.Notes.AddRange(data.Notes);
         db.Assessments.AddRange(data.Assessments);
+        await db.SaveChangesAsync();
+        var c6data = CreateC6Data();
+        db.Terms.Add(c6data);
         await db.SaveChangesAsync();
     }
 }
