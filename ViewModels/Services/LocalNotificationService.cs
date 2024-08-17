@@ -7,7 +7,7 @@ namespace ViewModels.Services;
 
 public interface ILocalNotificationService
 {
-    Task SendUpcomingNotifications();
+    Task<int> SendUpcomingNotifications();
     Task Notify(NotificationRequest request);
     void StartListening();
     event EventHandler<NotificationEventArgs>? NotificationReceived;
@@ -23,16 +23,18 @@ public class LocalNotificationService(
 
     public event EventHandler<NotificationEventArgs>? NotificationReceived;
 
-    public async Task SendUpcomingNotifications()
+    public async Task<int> SendUpcomingNotifications()
     {
         logger.LogInformation("Retrieving notifications.");
         var notifications = (await notificationService.GetNotifications()).ToList();
 
+        var notificationCount = notifications.Count;
+
         logger.LogInformation("Found {NotificationsCount} notifications.", notifications.Count);
 
-        if (notifications.Count == 0)
+        if (notificationCount == 0)
         {
-            return;
+            return notificationCount;
         }
 
         var notificationRequest = CreateNotificationRequest(notifications);
@@ -43,7 +45,7 @@ public class LocalNotificationService(
         await Notify(notificationRequest);
         logger.LogInformation("Successfully sent notification.");
 
-        return;
+        return notificationCount;
 
         static NotificationRequest CreateNotificationRequest(IReadOnlyList<NotificationResult> notifications)
         {

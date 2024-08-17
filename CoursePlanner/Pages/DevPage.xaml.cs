@@ -12,8 +12,7 @@ public partial class DevPage
         IServiceProvider provider,
         ILocalDbCtxFactory factory,
         IAppService appService,
-        ILocalNotificationService notificationService
-    )
+        ILocalNotificationService notificationService)
     {
         Provider = provider;
         Factory = factory;
@@ -61,47 +60,107 @@ public partial class DevPage
         {
             ["Reset"] = async () =>
             {
-                await using var db = await Factory.CreateDbContextAsync();
-                await db.Database.EnsureDeletedAsync();
-                await db.Database.MigrateAsync();
-                await ApplicationService.AlertAsync("Database has been reset. Closing application.");
-                Application.Current!.Quit();
+                try
+                {
+                    await using var db = await Factory.CreateDbContextAsync();
+                    await db.Database.EnsureDeletedAsync();
+                    await db.Database.MigrateAsync();
+                    await ApplicationService.AlertAsync(
+                        "Database has been reset. Open the application and seed the database afterwards. Closing application now.");
+                }
+
+                catch (Exception e)
+                {
+                    await ApplicationService.AlertAsync(
+                        "There was an error attempting to reset the database. Application closing." +
+                        Environment.NewLine + e.Message);
+                }
+                finally
+                {
+                    Application.Current!.Quit();
+                }
             },
             ["Set Notification Data"] = async () =>
             {
                 await using var db = await Factory.CreateDbContextAsync();
                 var course = await db
-                   .Courses
-                   .AsTracking()
-                   .OrderBy(x => x.Id)
-                   .FirstAsync();
+                    .Courses
+                    .AsTracking()
+                    .OrderBy(x => x.Id)
+                    .FirstAsync();
 
                 course.ShouldNotify = true;
                 course.Start = DateTime.Now.AddHours(3);
                 course.End = DateTime.Now.AddHours(6);
-                await db.SaveChangesAsync();
+
+                var success = false;
+                try
+                {
+                    await db.SaveChangesAsync();
+                    success = true;
+                }
+                catch (Exception e)
+                {
+                    await ApplicationService.AlertAsync("Error setting notification data: " + e.Message);
+                }
+
+                if (success)
+                {
+                    await ApplicationService.AlertAsync("Notification data has been set.");
+                }
             },
             ["Share"] = async () =>
             {
-                await using var db = await Factory.CreateDbContextAsync();
+                ShareNote note;
+                try
+                {
+                    await using var db = await Factory.CreateDbContextAsync();
 
-                var query = db
-                   .Notes
-                   .Include(x => x.Course)
-                   .ThenInclude(x => x.Instructor)
-                   .Select(x => new ShareNote(x));
+                    var query = db
+                        .Notes
+                        .Include(x => x.Course)
+                        .ThenInclude(x => x.Instructor)
+                        .Select(x => new ShareNote(x));
 
-                var note = await query.FirstAsync();
+                    note = await query.FirstAsync();
+                }
+                catch (Exception e)
+                {
+                    await ApplicationService.AlertAsync("Error getting note: " + e.Message);
+                    return;
+                }
 
 
-                await ApplicationService.ShareAsync(new ShareTextRequest
-                    {
-                        Title = "Share",
-                        Text = note.ToFriendlyText()
-                    }
-                );
+                try
+                {
+                    await ApplicationService.ShareAsync(new ShareTextRequest
+                        {
+                            Title = "ShareNote12345",
+                            Text = note.ToFriendlyText()
+                        }
+                    );
+                }
+                catch (Exception e)
+                {
+                    await ApplicationService.AlertAsync("Error sharing note: " + e.Message);
+                }
             },
-            ["Trigger Notification Service"] = async () => await NotificationService.SendUpcomingNotifications(),
+            ["Trigger Notification Service"] = async () =>
+            {
+                int count;
+                try
+                {
+                    count = await NotificationService.SendUpcomingNotifications();
+                }
+                catch (Exception e)
+                {
+                    await ApplicationService.AlertAsync("Error triggering notification service: " + e.Message);
+                    return;
+                }
+
+                await ApplicationService.AlertAsync(
+                    $"{count} Notifications found. Batched and sent notifications if any.");
+            },
             ["Seed database"] = async () =>
             {
                 try
@@ -110,11 +169,26 @@ public partial class DevPage
                     await new TestDataFactory().SeedDatabase(db);
                     await ApplicationService.AlertAsync("Database has been seeded.");
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
-                    await ApplicationService.AlertAsync("There was an error attempting to seed the database. Did you forget to reset before using this action?");
+                    await ApplicationService.AlertAsync(
+                        "There was an error attempting to seed the database. Did you forget to reset before using this action?" +
+                        Environment.NewLine + e.Message);
                 }
+            },
+            ["Create Test Data"] = async () =>
+            {
+                try
+                {
+                    await using var db = await Factory.CreateDbContextAsync();
+                    await db.Database.EnsureCreatedAsync();
 
+                    await new TestDataFactory().SeedDatabase(db);
+                }
+                catch (Exception e)
+                {
+                    await ApplicationService.AlertAsync("Error creating test data: " + e.Message);
+                }
             }
         };
     }
