@@ -1,8 +1,8 @@
 ﻿using System.Collections.Immutable;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
-using System.Text;
 using CommunityToolkit.Maui.Core.Extensions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -15,8 +15,25 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Logging;
 using ViewModels.Services;
+using PropertyChangingEventHandler = System.ComponentModel.PropertyChangingEventHandler;
 
 namespace ViewModels.PageViewModels;
+
+public interface IEditAssessmentViewModel
+{
+    int Id { get; set; }
+    IEnumerable<Assessment> GetDbModels();
+    Task Init(int courseId);
+    Task RefreshAsync();
+    ObservableCollection<AssessmentItemViewModel> Assessments { get; set; }
+    AssessmentItemViewModel? SelectedAssessment { get; set; }
+    IAsyncRelayCommand BackCommand { get; }
+    IRelayCommand DeleteAssessmentCommand { get; }
+    IAsyncRelayCommand SaveCommand { get; }
+    IAsyncRelayCommand AddAssessmentCommand { get; }
+    event PropertyChangedEventHandler? PropertyChanged;
+    event PropertyChangingEventHandler? PropertyChanging;
+}
 
 public partial class EditAssessmentViewModel(
     ILocalDbCtxFactory factory,
@@ -24,7 +41,7 @@ public partial class EditAssessmentViewModel(
     IAppService appService,
     ILogger<EditAssessmentViewModel> logger
 )
-    : ObservableObject
+    : ObservableObject, IEditAssessmentViewModel
 {
     [ObservableProperty]
     private int _id;
@@ -35,8 +52,9 @@ public partial class EditAssessmentViewModel(
     [ObservableProperty]
     private AssessmentItemViewModel? _selectedAssessment;
 
-    [ObservableProperty]
-    private Course _course = new();
+    private Course Course { get; set; } = new();
+
+    private HashSet<int> LocalDeleteLog { get; } = [];
 
 
     public IEnumerable<Assessment> GetDbModels() =>
@@ -71,7 +89,7 @@ public partial class EditAssessmentViewModel(
     }
 
     [RelayCommand]
-    public async Task SaveAsync()
+    private async Task SaveAsync()
     {
         var assessmentCount = Assessments.Count;
         logger.LogInformation("Assessment count: {AssessmentCount}", assessmentCount);
@@ -120,49 +138,93 @@ public partial class EditAssessmentViewModel(
             await using var db = await factory.CreateDbContextAsync();
             await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable);
 
-            var ids = assessments.Select(x => x.Id).ToList();
+            var updateLog = await GetUpdateLog(assessments, db);
 
-            logger.LogInformation("Updating assessments: {AssessmentIds}", ids);
+            var addLog = GetAddLog(assessments);
 
-            var toUpdate = await db.Assessments
-                .AsTracking()
-                .Where(x => ids.Contains(x.Id))
-                .ToListAsync();
+            var deleteLog = GetDeleteLog();
 
-            var pairs = from dbCopy in toUpdate
-                join local in assessments on dbCopy.Id equals local.Id
-                select (dbCopy, local);
 
-            foreach (var x in pairs)
+            var deleteQuery = db.Assessments
+                .Where(x => deleteLog.Contains(x.Id));
+
+            foreach (var x in updateLog)
             {
-                x.dbCopy.Assign(x.local);
+                x.dbModel.Assign(x.localModel);
             }
 
-
-            foreach (var model in assessments.Where(x => x.Id == 0))
+            foreach (var model in addLog)
             {
                 db.Assessments.Add(model);
             }
 
-            var changes = GetChanges(db.ChangeTracker);
 
-
-            logger.LogInformation("Changes: {}{Changes}", Environment.NewLine, changes);
-
+            LogChanges(db.ChangeTracker, deleteLog);
+            await deleteQuery.ExecuteDeleteAsync();
             await db.SaveChangesAsync();
             await tx.CommitAsync();
         }
     }
 
-    private static string GetChanges(ChangeTracker tracker) =>
-        tracker
-            .Entries<Assessment>()
-            .GroupBy(x => x.State)
-            .Select(group => group.Aggregate(
-                new StringBuilder().AppendLine($"State: {group.Key}"),
-                (sb, entry) => sb.Append('\t').AppendLine($"Id: {entry.Entity.Id}, Name: {entry.Entity.Name}")))
+    private void LogChanges(ChangeTracker changeTracker, List<int> deleteLog)
+    {
+        var addUpdateChanges = GetAddAndUpdateChanges(changeTracker);
+        var deleteChanges = deleteLog.Select(x => new LogEntry(EntityState.Deleted, new Assessment { Id = x }));
+        var changeMessage = addUpdateChanges
+            .Concat(deleteChanges)
             .Select(x => x.ToString())
             .StringJoin(Environment.NewLine);
+
+        logger.LogInformation("Changes: {Changes}", changeMessage);
+    }
+
+    private List<int> GetDeleteLog()
+    {
+        var deleteLog = LocalDeleteLog.Where(x => x is not 0).ToList();
+        return deleteLog;
+    }
+
+    private static IEnumerable<Assessment> GetAddLog(ImmutableList<Assessment> assessments)
+    {
+        var addLog = assessments.Where(x => x.Id == 0);
+        return addLog;
+    }
+
+    private static async Task<IEnumerable<(Assessment dbModel, Assessment localModel)>> GetUpdateLog(
+        ImmutableList<Assessment> assessments, LocalDbCtx db)
+    {
+        var idsOfItemsToUpdate = assessments.Select(x => x.Id).ToList();
+
+        var toUpdateData = await db.Assessments
+            .AsTracking()
+            .Where(x => idsOfItemsToUpdate.Contains(x.Id))
+            .ToListAsync();
+
+        var updateLog = from dbModel in toUpdateData
+            join localModel in assessments on dbModel.Id equals localModel.Id
+            select (dbModel, localModel);
+        return updateLog;
+    }
+
+    private static IEnumerable<LogEntry> GetAddAndUpdateChanges(ChangeTracker tracker)
+    {
+        return tracker.Entries<Assessment>()
+            .Select(x => new LogEntry(x.State, x.Entity));
+    }
+
+    private record LogEntry(EntityState State, Assessment Assessment)
+    {
+        public override string ToString()
+        {
+            var res = new
+            {
+                State, Assessment.Id, Assessment.Name, Assessment.Type, Assessment.Start, Assessment.End,
+                Assessment.CourseId, Assessment.ShouldNotify
+            };
+            return res.ToString() ?? "";
+        }
+    };
+
 
     [RelayCommand]
     public async Task BackAsync()
@@ -173,6 +235,7 @@ public partial class EditAssessmentViewModel(
 
     public async Task Init(int courseId)
     {
+        LocalDeleteLog.Clear();
         Id = courseId;
 
         await using var db = await factory.CreateDbContextAsync();
@@ -194,7 +257,7 @@ public partial class EditAssessmentViewModel(
 
 
     [RelayCommand]
-    private async Task DeleteAssessmentAsync()
+    private void DeleteAssessment()
     {
         if (SelectedAssessment is null)
         {
@@ -204,16 +267,11 @@ public partial class EditAssessmentViewModel(
         var assessment = SelectedAssessment;
         Assessments.Remove(assessment);
         SelectedAssessment = null;
-
-        await using var db = await factory.CreateDbContextAsync();
-        await db
-            .Assessments
-            .Where(x => x.Id == assessment.Id)
-            .ExecuteDeleteAsync();
+        LocalDeleteLog.Add(assessment.Id);
     }
 
     [RelayCommand]
-    public async Task AddAssessmentAsync()
+    private async Task AddAssessmentAsync()
     {
         logger.LogInformation("Adding Assessment. {AssessmentCount}", Assessments.Count);
         if (Assessments.Count >= 2)
