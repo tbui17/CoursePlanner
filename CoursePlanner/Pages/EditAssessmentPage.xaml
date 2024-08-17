@@ -42,10 +42,16 @@
                 </CollectionView.ItemTemplate>
             </CollectionView>
 
-            <HorizontalStackLayout>
-                <Button Text="Delete" Command="{Binding DeleteAssessmentCommand}" />
+            <FlexLayout Style="{StaticResource ButtonContainer}" Margin="0,10,0,10" >
+                <FlexLayout.Resources>
+                    <Style TargetType="Button" BasedOn="{StaticResource ButtonStyle}" >
+                        <Setter Property="MinimumWidthRequest" Value="75" />
+                    </Style>
+                </FlexLayout.Resources>
                 <Button Text="Add" Command="{Binding AddAssessmentCommand}" />
-            </HorizontalStackLayout>
+                <Button Text="Delete" Command="{Binding DeleteAssessmentCommand}" />
+            </FlexLayout>
+
             <Button Text="Save" Command="{Binding SaveCommand}" />
         </VerticalStackLayout>
 
