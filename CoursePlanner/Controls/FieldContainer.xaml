@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<VerticalStackLayout xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Spacing="5"
+    x:Class="CoursePlanner.Controls.FieldContainer" >
+    <VerticalStackLayout.Resources>
+        <Style TargetType="HorizontalStackLayout" >
+            <Setter Property="Spacing" Value="5" />
+        </Style>
+        <Style TargetType="Label" BasedOn="{StaticResource FieldLabel}" >
+            
+        </Style>
+
+    </VerticalStackLayout.Resources>
+
+
+</VerticalStackLayout>
