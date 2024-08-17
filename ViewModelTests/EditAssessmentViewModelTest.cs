@@ -104,7 +104,7 @@ public class EditAssessmentViewModelTest : BasePageViewModelTest
         first.Name = "";
         second.Name = "";
 
-        await Model.SaveAsync();
+        await Model.SaveCommand.ExecuteAsync();
         AppMock.VerifyReceivedError();
         NavMock.Verify(x => x.PopAsync(), Times.Never);
     }
@@ -125,7 +125,7 @@ public class EditAssessmentViewModelTest : BasePageViewModelTest
         second.Type = Assessment.Objective;
         second.Name = secondName;
 
-        await Model.SaveAsync();
+        await Model.SaveCommand.ExecuteAsync();
 
 
         using var _ = new AssertionScope();
@@ -175,7 +175,7 @@ public class EditAssessmentViewModelTest : BasePageViewModelTest
         await Model.AddAssessmentCommand.ExecuteAsync();
         var assessment = Model.Assessments.First();
         assessment.Name = name;
-        await Model.SaveAsync();
+        await Model.SaveCommand.ExecuteAsync();
         var dbAssessment = Db.Assessments.FirstOrDefaultAsync(x => x.Name == name);
 
         dbAssessment.Should().NotBeNull();
@@ -200,7 +200,7 @@ public class EditAssessmentViewModelTest : BasePageViewModelTest
         Model.Assessments.Should().HaveCount(1, "First delete");
         var assessment = Model.Assessments.First();
         assessment.Name = name;
-        await Model.SaveAsync();
+        await Model.SaveCommand.ExecuteAsync();
         var dbAssessment = Db.Assessments.FirstOrDefaultAsync(x => x.Name == name);
 
         dbAssessment.Should().NotBeNull();
@@ -231,7 +231,7 @@ public class EditAssessmentViewModelTest : BasePageViewModelTest
 
         AppMock.VerifyReceivedError(0, "0");
         await Model.AddAssessmentCommand.ExecuteAsync();
-        await Model.SaveAsync();
+        await Model.SaveCommand.ExecuteAsync();
         AppMock.VerifyReceivedError(1, "1");
 
 
@@ -241,7 +241,7 @@ public class EditAssessmentViewModelTest : BasePageViewModelTest
 
 
         newAdd.Name = name2;
-        await Model.SaveAsync();
+        await Model.SaveCommand.ExecuteAsync();
         Model.Assessments.Count.Should().Be(2);
         AppMock.VerifyReceivedError(1, "3");
 
@@ -259,7 +259,7 @@ public class EditAssessmentViewModelTest : BasePageViewModelTest
         await DeleteAssessments();
 
         await Model.Init(1);
-        await Model.SaveAsync();
+        await Model.SaveCommand.ExecuteAsync();
 
         AppMock.VerifyReceivedError(0);
         NavMock.Verify(x => x.PopAsync());
