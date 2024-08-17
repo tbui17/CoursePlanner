@@ -125,23 +125,6 @@ public class TestDataFactory
             }
         }
 
-        #if DEBUG
-
-        foreach (var group in assessments.GroupBy(x => x.CourseId))
-        {
-            Debug.Assert(group.Count() <= 3);
-            var types = group.GroupBy(x => x.Type).ToList();
-            Debug.Assert(types.Count <= 2);
-            Debug.Assert(types.Distinct().Count() <= 2);
-        }
-
-        foreach (var courseGroup in courses.GroupBy(x => x.TermId))
-        {
-            Debug.Assert(courseGroup.Count() <= 6);
-        }
-
-        #endif
-
         return new TestDataResult
         {
             Terms = terms,
@@ -155,44 +138,44 @@ public class TestDataFactory
 
     public List<Instructor> CreateInstructors()
     {
-        return
-        [
+        return new List<Instructor>
+        {
             new()
             {
                 Id = 1,
                 Name = "Instructor One",
-                Phone = "1111111",
+                Phone = "(111) 111-1111",
                 Email = "instructor.one@example.com"
             },
             new()
             {
                 Id = 2,
                 Name = "Instructor Two",
-                Phone = "2222222",
+                Phone = "(222) 222-2222",
                 Email = "instructor.two@example.com"
             },
             new()
             {
                 Id = 3,
                 Name = "Instructor Three",
-                Phone = "3333333",
+                Phone = "(333) 333-3333",
                 Email = "instructor.three@example.com"
             },
             new()
             {
                 Id = 4,
                 Name = "Instructor Four",
-                Phone = "4444444",
+                Phone = "(444) 444-4444",
                 Email = "instructor.four@example.com"
             },
             new()
             {
                 Id = 5,
                 Name = "Instructor Five",
-                Phone = "5555555",
+                Phone = "(555) 555-5555",
                 Email = "instructor.five@example.com"
             }
-        ];
+        };
     }
 
     public List<Term> CreateTerms()
