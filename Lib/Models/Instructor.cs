@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Lib.Models;
 
 [Index(nameof(Email), IsUnique = true)]
-public partial class Instructor : IInstructorFormFields
+public partial class Instructor : IUser
 {
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;

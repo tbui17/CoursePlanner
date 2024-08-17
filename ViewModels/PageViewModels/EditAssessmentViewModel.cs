@@ -59,7 +59,7 @@ public partial class EditAssessmentViewModel(
 
     public IEnumerable<Assessment> GetDbModels() =>
         Assessments
-            .Select(x => new Assessment().Assign(x));
+            .Select(x => new Assessment().SetFromAssessmentForm(x));
 
 
     private static IEnumerable<DomainException> Validate(ICollection<Assessment> assessments)
@@ -150,7 +150,7 @@ public partial class EditAssessmentViewModel(
 
             foreach (var x in updateLog)
             {
-                x.dbModel.Assign(x.localModel);
+                x.dbModel.SetFromAssessmentForm(x.localModel);
             }
 
             foreach (var model in addLog)
