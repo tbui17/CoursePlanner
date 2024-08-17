@@ -17,7 +17,7 @@ public partial class AssessmentItemViewModel
 
     public AssessmentItemViewModel(Assessment assessment)
     {
-        this.Assign(assessment);
+        this.SetFromAssessmentForm(assessment);
     }
 
     [ObservableProperty]
