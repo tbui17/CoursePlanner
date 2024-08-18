@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace LibTests;
 
+
 public class NotificationUpcomingTest : BaseDbTest
 {
     private IList<NotificationResult> Result { get; set; }
@@ -18,7 +19,7 @@ public class NotificationUpcomingTest : BaseDbTest
     {
         await base.Setup();
         var notificationSetupUtil = Provider.GetRequiredService<NotificationSetupUtil>();
-        await notificationSetupUtil.SetStartTimes(DateTime.Now.AddHours(23));
+        await notificationSetupUtil.SetStartTimes(DateTime.Now.Date);
         var notificationService = Provider.GetRequiredService<NotificationService>();
         Result = await notificationService.GetNotifications();
     }
@@ -52,7 +53,7 @@ public class NotificationLapsedTest : BaseDbTest
     {
         await base.Setup();
         var notificationSetupUtil = Provider.GetRequiredService<NotificationSetupUtil>();
-        await notificationSetupUtil.SetStartTimes(DateTime.Now.AddHours(-1));
+        await notificationSetupUtil.SetStartTimes(DateTime.Now.Date.AddSeconds(-1));
     }
 
     [Test]
