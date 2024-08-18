@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:coursePlanner="clr-namespace:CoursePlanner"
+
+
+    xmlns:controls="clr-namespace:CoursePlanner.Controls"
+    xmlns:pageViewModels="clr-namespace:ViewModels.PageViewModels;assembly=ViewModels"
+
+    x:Class="CoursePlanner.Pages.EditCoursePage"
+    x:DataType="pageViewModels:EditCourseViewModel" Title="Edit Course" >
+
+    <ContentPage.Resources>
+        <Style TargetType="Label" BasedOn="{StaticResource FieldLabel}" ></Style>
+    </ContentPage.Resources>
+
+    <VerticalStackLayout Margin="10,10" >
+        <controls:AutoGrid>
+            <Label Text="Name:" />
+            <Entry Text="{Binding Name}" />
+            <Label Text="Start Date:" />
+            <DatePicker Date="{Binding Start}" />
+            <Label Text="End Date:" />
+            <DatePicker Date="{Binding End}" />
+            <Label Text="Notifications:" />
+            <Switch IsToggled="{Binding ShouldNotify}" />
+            <Label Text="Status:" />
+            <Picker
+                SelectedItem="{Binding SelectedStatus}"
+                ItemsSource="{Binding Statuses}" />
+        </controls:AutoGrid>
+        <Button Text="Save" Command="{Binding SaveCommand}" />
+    </VerticalStackLayout>
+</ContentPage>
