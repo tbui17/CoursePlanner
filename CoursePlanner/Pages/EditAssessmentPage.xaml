@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:l="clr-namespace:CoursePlanner.Controls"
+             xmlns:pageViewModels="clr-namespace:ViewModels.PageViewModels;assembly=ViewModels"
+             x:DataType="pageViewModels:EditAssessmentViewModel"
+             Title="Edit Assessment"
+             x:Class="CoursePlanner.Pages.EditAssessmentPage">
+
+    <ScrollView>
+        <VerticalStackLayout Margin="10,10">
+            <CollectionView ItemsSource="{Binding Assessments}" SelectionMode="Single" SelectedItem="{Binding SelectedAssessment}">
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="5" />
+                </CollectionView.ItemsLayout>
+                <CollectionView.ItemTemplate>
+
+                    <DataTemplate x:DataType="pageViewModels:AssessmentItemViewModel">
+                        <Border>
+                            <Border.Resources>
+                                <Style TargetType="Label" BasedOn="{StaticResource FieldLabel}">
+                                </Style>
+                            </Border.Resources>
+                            <l:AutoGrid>
+                                <Label Text="Name:" />
+                                <Entry Text="{Binding Name}" />
+                                <Label Text="Start Date:" />
+                                <DatePicker Date="{Binding Start}" />
+                                <Label Text="End Date:" />
+                                <DatePicker Date="{Binding End}" />
+                                <Label Text="Notifications:" />
+                                <Switch IsToggled="{Binding ShouldNotify}" />
+                                <Label Text="Assessment Type:" />
+                                <Picker
+                                    ItemsSource="{Binding AssessmentTypes}"
+                                    SelectedItem="{Binding Type}"
+                                     />
+                            </l:AutoGrid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <FlexLayout Style="{StaticResource ButtonContainer}" Margin="0,10,0,10" >
+                <FlexLayout.Resources>
+                    <Style TargetType="Button" BasedOn="{StaticResource ButtonStyle}" >
+                        <Setter Property="MinimumWidthRequest" Value="75" />
+                    </Style>
+                </FlexLayout.Resources>
+                <Button Text="Add" Command="{Binding AddAssessmentCommand}" />
+                <Button Text="Delete" Command="{Binding DeleteAssessmentCommand}" />
+            </FlexLayout>
+
+            <Button Text="Save" Command="{Binding SaveCommand}" />
+        </VerticalStackLayout>
+
+    </ScrollView>
+</ContentPage>
