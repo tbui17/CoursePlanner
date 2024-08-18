@@ -59,6 +59,7 @@ public partial class DevPage
             try
             {
                 await action();
+                return;
             }
             catch (Exception exc)
             {
@@ -118,8 +119,8 @@ public partial class DevPage
                     }
 
                     course.ShouldNotify = true;
-                    course.Start = DateTime.Now.AddHours(3);
-                    course.End = DateTime.Now.AddHours(6);
+                    course.Start = DateTime.Now.Date;
+                    course.End = DateTime.Now.Date;
                     await db.SaveChangesAsync();
                     await ApplicationService.AlertAsync("Notification data has been set.");
                 }
