@@ -142,6 +142,27 @@ public class EditAssessmentViewModelTest : BasePageViewModelTest
     }
 
     [Test]
+    public async Task Delete_NoItems_ShouldNotThrow()
+    {
+
+        await DeleteAssessments();
+        await Model.Init(1);
+        Model.DeleteAssessmentCommand.Execute();
+        await Model.SaveCommand.Awaiting(x => x.ExecuteAsync()).Should().NotThrowAsync();
+
+    }
+
+    [Test]
+    public async Task SaveAsync_NoItems_ShouldNotThrow()
+    {
+
+        await DeleteAssessments();
+        await Model.Init(1);
+        await Model.SaveCommand.Awaiting(x => x.ExecuteAsync()).Should().NotThrowAsync();
+
+    }
+
+    [Test]
     public async Task AddAssessmentTest()
     {
         await DeleteAssessments();
