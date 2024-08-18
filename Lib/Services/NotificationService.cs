@@ -1,8 +1,8 @@
-﻿using Lib.Interfaces;
+﻿using System.Linq.Expressions;
+using Lib.Interfaces;
 using Lib.Models;
 using Lib.Utils;
 using Microsoft.EntityFrameworkCore;
-using static Lib.Interfaces.INotification;
 
 namespace Lib.Services;
 
@@ -11,7 +11,7 @@ public class NotificationService(IDbContextFactory<LocalDbCtx> factory)
     public async Task<IList<NotificationResult>> GetNotifications()
     {
         await using var db = await factory.CreateDbContextAsync();
-        var now = DateTime.Now;
+        var now = DateTime.Now.Date;
         var queryFactory = new NotificationQueryFactory(now);
         var assessments = queryFactory.CreateUpcomingNotificationQuery(db.Assessments)
            .ToListAsync();
@@ -31,6 +31,19 @@ public class NotificationService(IDbContextFactory<LocalDbCtx> factory)
                .Where(x => x.ShouldNotify)
                .Where(IsUpcomingExpr<INotification>(now));
     }
+
+    public static Expression<Func<T, bool>> IsUpcomingExpr<T>(DateTime time) where T : INotification
+    {
+        var oneDay = TimeSpan.FromDays(1);
+
+        return item => item.ShouldNotify &&
+                       (
+                           (item.Start >= time && item.Start <= time + oneDay) ||
+                           (item.End >= time && item.End <= time + oneDay)
+                       );
+    }
+
+
 }
 
 
@@ -72,9 +85,20 @@ public record NotificationResult
         var now = DateTime.Now;
         return new NotificationResult
         {
-            Entity = item, StartIsUpcoming = IsUpcoming(now, item.Start), EndIsUpcoming = IsUpcoming(now, item.End),
+            Entity = item, StartIsUpcoming = IsUpcomingImpl(now, item.Start), EndIsUpcoming = IsUpcomingImpl(now, item.End),
         };
     }
+    private static bool IsUpcomingImpl(DateTime time, DateTime target)
+    {
+
+        var oneDay = TimeSpan.FromDays(1);
+        var zero = TimeSpan.Zero;
+
+        var res = target - time;
+        return res >= zero && res <= oneDay;
+    }
+
+
 }
 
 public static class NotificationResultExtensions
