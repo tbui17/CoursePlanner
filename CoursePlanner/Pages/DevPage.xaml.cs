@@ -42,20 +42,37 @@ public partial class DevPage
 
     private async void Button_OnClicked(object? sender, EventArgs e)
     {
-        var text = (string)Input.SelectedItem;
+        string text;
+        try
+        {
+            text = (string)Input.SelectedItem;
+        }
+        catch (Exception ex)
+        {
+            await ApplicationService.AlertAsync("Error parsing command: " + ex.Message);
+            return;
+        }
+
 
         if (Actions.TryGetValue(text, out var action))
         {
-            await action();
+            try
+            {
+                await action();
+            }
+            catch (Exception exc)
+            {
+                await ApplicationService.AlertAsync("Error executing command: " + exc.Message);
+                return;
+            }
         }
-        else
-        {
-            await ApplicationService.AlertAsync("Command not found.");
-        }
+
+        await ApplicationService.AlertAsync($"Command not found. {text}");
     }
 
     private Dictionary<string, Func<Task>> CreateActions()
     {
+        // must restart after resetting in MAUI; ID sequence is not reset without app restart
         return new()
         {
             ["Reset"] = async () =>
@@ -83,30 +100,32 @@ public partial class DevPage
             ["Set Notification Data"] = async () =>
             {
                 await using var db = await Factory.CreateDbContextAsync();
-                var course = await db
-                    .Courses
-                    .AsTracking()
-                    .OrderBy(x => x.Id)
-                    .FirstAsync();
 
-                course.ShouldNotify = true;
-                course.Start = DateTime.Now.AddHours(3);
-                course.End = DateTime.Now.AddHours(6);
 
-                var success = false;
                 try
                 {
+                    var course = await db
+                        .Courses
+                        .AsTracking()
+                        .OrderBy(x => x.Id)
+                        .FirstOrDefaultAsync();
+
+                    if (course is null)
+                    {
+                        await ApplicationService.AlertAsync(
+                            "No courses found. Did you forget to create test data in the database?");
+                        return;
+                    }
+
+                    course.ShouldNotify = true;
+                    course.Start = DateTime.Now.AddHours(3);
+                    course.End = DateTime.Now.AddHours(6);
                     await db.SaveChangesAsync();
-                    success = true;
+                    await ApplicationService.AlertAsync("Notification data has been set.");
                 }
                 catch (Exception e)
                 {
                     await ApplicationService.AlertAsync("Error setting notification data: " + e.Message);
-                }
-
-                if (success)
-                {
-                    await ApplicationService.AlertAsync("Notification data has been set.");
                 }
             },
             ["Share"] = async () =>
@@ -176,18 +195,24 @@ public partial class DevPage
                         Environment.NewLine + e.Message);
                 }
             },
-            ["Create Test Data"] = async () =>
+            ["Create C6 Test Data"] = async () =>
             {
                 try
                 {
                     await using var db = await Factory.CreateDbContextAsync();
                     await db.Database.EnsureCreatedAsync();
 
-                    await new TestDataFactory().SeedDatabase(db);
+                    var factory = new TestDataFactory();
+                    var data = factory.CreateC6Data();
+                    db.Terms.Add(data);
+                    await db.SaveChangesAsync();
+                    await ApplicationService.AlertAsync("Test data has been created.");
                 }
                 catch (Exception e)
                 {
-                    await ApplicationService.AlertAsync("Error creating test data: " + e.Message);
+                    await ApplicationService.AlertAsync(
+                        "There was an error creating the test data. Did you forget to reset the database? " +
+                        e.Message);
                 }
             }
         };
