@@ -11,6 +11,7 @@ bin/
 CoursePlanner.sln.DotSettings.user
 /packages/
 riderModule.iml
+**/*.csproj.user
 /_ReSharper.Caches/
 .idea/.idea.Scheduling/.idea/dataSources.xml
 .idea/.idea.Scheduling/.idea/encodings.xml
