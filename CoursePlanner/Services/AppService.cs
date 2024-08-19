@@ -84,7 +84,11 @@ public class AppService : IAppService, INavigationService
 
     public async Task<string?> DisplayNamePromptAsync()
     {
-        return await Current.CurrentPage.DisplayPromptAsync("Enter name", "");
+        return await Current.CurrentPage.DisplayPromptAsync("Enter name", "") switch
+        {
+            { } name when !string.IsNullOrWhiteSpace(name) => name,
+            _ => null
+        };
     }
 
     public async Task GoToDetailedCoursesPageAsync(int id)
