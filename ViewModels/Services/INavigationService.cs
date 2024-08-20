@@ -3,19 +3,19 @@
 public enum NavigationTarget
 {
     MainPage,
-    TermDetailsPage,
-    CourseDetailsPage,
-    InstructorDetailsPage,
+    DetailedTermPage,
+    EditTermPage,
+    DetailedCoursePage,
+    EditCoursePage,
     InstructorFormPage,
-    CourseFormPage,
-    TermFormPage,
-    AssessmentDetailsPage,
-    NoteDetailsPage
+    EditNotePage,
+    EditAssessmentPage,
+    DevPage
 }
 
 public interface INavigationService
 {
-    Task GoToPageAsync(NavigationTarget target);
+    Task GoToAsync(NavigationTarget target);
     Task GoToDetailedTermPageAsync(int termId);
     Task GoToDetailedCoursesPageAsync(int id);
     Task GoToEditTermPageAsync(int id);
