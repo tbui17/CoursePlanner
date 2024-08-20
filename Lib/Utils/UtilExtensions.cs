@@ -29,6 +29,15 @@ public static class UtilExtensions
         }
     }
 
+    public static IEnumerable<T> Times<T>(this int num, Func<int, T> func)
+    {
+        for (var i = 0; i < num; i++)
+        {
+            yield return func(i);
+        }
+    }
+
+
     public static void Times(this int num, Action<int> action)
     {
         for (var i = 0; i < num; i++)

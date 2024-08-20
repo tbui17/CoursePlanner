@@ -29,6 +29,6 @@ public static class ResultExtensions
 
     public static string ToErrorString<T>(this Result<T> result)
     {
-        return string.Join(Environment.NewLine, result.Errors);
+        return result.Errors.Select(x => x.Message).StringJoin(Environment.NewLine);
     }
 }
