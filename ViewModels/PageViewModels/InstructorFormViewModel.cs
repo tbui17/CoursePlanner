@@ -13,7 +13,7 @@ public partial class InstructorFormViewModel(
     ILocalDbCtxFactory factory,
     INavigationService navService,
     IAppService appService)
-    : ObservableObject, IUser
+    : ObservableObject, IContact
 {
     [ObservableProperty]
     private string _title = "Instructor Form";
@@ -40,7 +40,7 @@ public partial class InstructorFormViewModel(
             throw new InvalidOperationException($"{nameof(InstructorPersistence)} is not set");
         }
 
-        var message = await InstructorPersistence(new Instructor().SetFromUser(this));
+        var message = await InstructorPersistence(new Instructor().SetFromContact(this));
 
         if (message is not null)
         {
@@ -66,7 +66,7 @@ public partial class InstructorFormViewModel(
                              .FirstOrDefaultAsync(x => x.Id == id) ??
                          new();
 
-        this.SetFromUser(instructor);
+        this.SetFromContact(instructor);
     }
 
     public async Task RefreshAsync()
@@ -96,7 +96,7 @@ public partial class InstructorFormViewModel(
 
             var editModel = await db.Instructors.FirstAsync(x => x.Id == instructorId);
 
-            editModel.SetFromUserField(editModel);
+            editModel.SetFromContactField(editModel);
             await db.SaveChangesAsync();
             return null;
         };

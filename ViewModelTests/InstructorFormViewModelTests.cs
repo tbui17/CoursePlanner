@@ -48,7 +48,7 @@ public class InstructorFormViewModelTests : BaseDbTest
         AppMock.Verify(x => x.ShowErrorAsync(It.IsAny<string>()), Times.Once);
     }
 
-    private static void SetValidValues(IUserField fields)
+    private static void SetValidValues(IContactField fields)
     {
         fields.Name = "Name Abcd";
         fields.Phone = "(555) 123-4567";

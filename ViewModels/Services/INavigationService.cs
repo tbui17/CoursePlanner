@@ -1,8 +1,21 @@
 ﻿namespace ViewModels.Services;
 
+public enum NavigationTarget
+{
+    MainPage,
+    TermDetailsPage,
+    CourseDetailsPage,
+    InstructorDetailsPage,
+    InstructorFormPage,
+    CourseFormPage,
+    TermFormPage,
+    AssessmentDetailsPage,
+    NoteDetailsPage
+}
+
 public interface INavigationService
 {
-    Task GoToMainPageAsync();
+    Task GoToPageAsync(NavigationTarget target);
     Task GoToDetailedTermPageAsync(int termId);
     Task GoToDetailedCoursesPageAsync(int id);
     Task GoToEditTermPageAsync(int id);

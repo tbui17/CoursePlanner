@@ -18,17 +18,17 @@ public static class AssignmentTrait
         return self;
     }
 
-    public static T SetFromUser<T, T2>(this T self, T2 other)
-        where T : IUser where T2 : IUser
+    public static T SetFromContact<T, T2>(this T self, T2 other)
+        where T : IContact where T2 : IContact
     {
         self.Id = other.Id;
-        self.SetFromUserField(other);
+        self.SetFromContactField(other);
 
         return self;
     }
 
-    public static T SetFromUserField<T, T2>(this T self, T2 other)
-        where T : IUserField where T2 : IUserField
+    public static T SetFromContactField<T, T2>(this T self, T2 other)
+        where T : IContactField where T2 : IContactField
     {
         self.Name = other.Name;
         self.Email = other.Email;
