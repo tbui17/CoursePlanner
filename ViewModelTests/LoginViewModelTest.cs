@@ -1,7 +1,7 @@
-﻿
-using FluentAssertions;
+﻿using FluentAssertions;
 using Lib.Models;
 using Lib.Services;
+using Lib.Utils;
 using Microsoft.Extensions.Logging;
 using Moq;
 using ViewModels.PageViewModels;
@@ -9,11 +9,8 @@ using ViewModels.Services;
 
 namespace ViewModelTests;
 
-
 public class LoginViewModelTest : BasePageViewModelTest
 {
-
-
     private ILogin _loginInfo;
 
     [SetUp]
@@ -32,12 +29,9 @@ public class LoginViewModelTest : BasePageViewModelTest
         var res = await accountService.CreateAsync(_loginInfo);
 
         res.IsFailed.Should().BeFalse();
-
-
-
     }
-    private LoginViewModel Model { get; set; }
 
+    private LoginViewModel Model { get; set; }
 
 
     [Test]
@@ -48,17 +42,39 @@ public class LoginViewModelTest : BasePageViewModelTest
         await Model.RegisterAsync();
 
         AppMock.VerifyReceivedError(0);
-        NavMock.Verify(x => x.GoToPageAsync(NavigationTarget.MainPage), Times.Once);
+        NavMock.Verify(x => x.GoToAsync(NavigationTarget.MainPage), Times.Once);
     }
 
     [Test]
     public async Task LoginAsync_Valid_NavigatesToMainPage()
     {
-
         Model.Username = _loginInfo.Username;
         Model.Password = _loginInfo.Password;
         await Model.LoginAsync();
         AppMock.VerifyReceivedError(0);
-        NavMock.Verify(x => x.GoToPageAsync(NavigationTarget.MainPage), Times.Once);
+        NavMock.Verify(x => x.GoToAsync(NavigationTarget.MainPage), Times.Once);
+    }
+
+
+    [Test]
+    public async Task LoginAsync_Invalid_ShowsError()
+    {
+        Model.Username = _loginInfo.Username;
+        Model.Password = _loginInfo.Password + "a";
+
+        await Model.LoginAsync();
+        AppMock.VerifyReceivedError();
+        NavMock.Verify(x => x.GoToAsync(It.IsAny<NavigationTarget>()), Times.Never);
+    }
+
+
+    [Test]
+    public async Task RegisterAsync_Invalid_ShowsError()
+    {
+        Model.Username = 1000.Times(_ => _loginInfo.Username).StringJoin();
+        Model.Password = "";
+        await Model.RegisterAsync();
+        AppMock.VerifyReceivedError();
+        NavMock.Verify(x => x.GoToAsync(It.IsAny<NavigationTarget>()), Times.Never);
     }
 }
