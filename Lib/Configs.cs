@@ -13,7 +13,8 @@ public class Configs
            .AddTransient<NotificationService>()
            .AddTransient<ICourseService, CourseService>()
            .AddTransient<AccountService>()
-           .AddValidatorsFromAssemblyContaining<LoginFieldValidator>();
+           .AddValidatorsFromAssemblyContaining<LoginFieldValidator>(ServiceLifetime.Transient)
+           ;
         return b;
     }
 }
