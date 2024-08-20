@@ -16,6 +16,7 @@ public class LocalDbCtx : DbContext
     public DbSet<Course> Courses { get; set; }
     public DbSet<Note> Notes { get; set; }
     public DbSet<Assessment> Assessments { get; set; }
+    public DbSet<User> Accounts { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Lib.Models;
 
 [Index(nameof(Email), IsUnique = true)]
-public partial class Instructor : IUser
+public partial class Instructor : IContact
 {
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
@@ -29,7 +29,7 @@ public partial class Instructor : IUser
         return Name;
     }
 
-    Dictionary<string, string> Fields() =>
+    private Dictionary<string, string> Fields() =>
         new()
         {
             [nameof(Name)] = Name, [nameof(Email)] = Email, [nameof(Phone)] = Phone,

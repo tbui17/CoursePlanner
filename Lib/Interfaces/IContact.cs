@@ -1,6 +1,6 @@
 ﻿namespace Lib.Interfaces;
 
-public interface IUser : IEntity, IUserField
+public interface IContact : IEntity, IContactField
 {
     public new string Name { get; set; }
 }
