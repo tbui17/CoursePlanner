@@ -1,4 +1,6 @@
-﻿using Lib.Services;
+﻿using FluentValidation;
+using Lib.Services;
+using Lib.Validators;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Lib;
@@ -9,7 +11,9 @@ public class Configs
     {
         b
            .AddTransient<NotificationService>()
-           .AddTransient<ICourseService, CourseService>();
+           .AddTransient<ICourseService, CourseService>()
+           .AddTransient<AccountService>()
+           .AddValidatorsFromAssemblyContaining<LoginFieldValidator>();
         return b;
     }
 }
