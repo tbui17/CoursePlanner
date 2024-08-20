@@ -25,28 +25,37 @@ public partial class LoginViewModel(
     [RelayCommand]
     public async Task LoginAsync()
     {
+        logger.LogInformation("Login attempt: {Username}", Username);
         var res = await accountService.LoginAsync(new LoginDetails(this));
 
         if (res.IsFailed)
         {
+            logger.LogInformation("Login failed: {Error}", res.ToErrorString());
             await appService.ShowErrorAsync(res.ToErrorString());
+            return;
         }
 
-        await navService.GoToPageAsync(NavigationTarget.MainPage);
+        await navService.GoToAsync(NavigationTarget.MainPage);
     }
 
 
     [RelayCommand]
     public async Task RegisterAsync()
     {
+        logger.LogInformation("Register attempt: {Username}", Username);
         var res = await accountService.CreateAsync(new LoginDetails(this));
+
 
         if (res.IsFailed)
         {
+            logger.LogInformation("Register failed: {Error}", res.ToErrorString());
             await appService.ShowErrorAsync(res.ToErrorString());
+            return;
         }
 
-        await navService.GoToPageAsync(NavigationTarget.MainPage);
+        logger.LogInformation("Register success: {Id} {Username}", res.Value.Id, Username);
+
+        await navService.GoToAsync(NavigationTarget.MainPage);
     }
 
 }

@@ -2,6 +2,8 @@
 using Microsoft.Extensions.Logging;
 using ViewModels.Services;
 
+#pragma warning disable CS8524 // The switch expression does not handle some values of its input type (it is not exhaustive) involving an unnamed enum value.
+
 namespace CoursePlanner.Services;
 
 public class AppService : IAppService, INavigationService
@@ -24,8 +26,6 @@ public class AppService : IAppService, INavigationService
         _logger = logger;
         _localNotificationService.StartListening();
     }
-
-
 
 
     public async Task ShareAsync(ShareTextRequest request)
@@ -70,6 +70,23 @@ public class AppService : IAppService, INavigationService
         {
             await Current.GoToAsync(route);
         }
+    }
+
+    public async Task GoToAsync(NavigationTarget target)
+    {
+        Page page = target switch
+        {
+            NavigationTarget.MainPage => Resolve<MainPage>(),
+            NavigationTarget.DetailedTermPage => Resolve<DetailedTermPage>(),
+            NavigationTarget.EditTermPage => Resolve<EditTermPage>(),
+            NavigationTarget.DetailedCoursePage => Resolve<DetailedCoursePage>(),
+            NavigationTarget.EditCoursePage => Resolve<EditCoursePage>(),
+            NavigationTarget.InstructorFormPage => Resolve<InstructorFormPage>(),
+            NavigationTarget.EditNotePage => Resolve<EditNotePage>(),
+            NavigationTarget.EditAssessmentPage => Resolve<EditAssessmentPage>(),
+            NavigationTarget.DevPage => Resolve<DevPage>()
+        };
+        await Navigation.PushAsync(page);
     }
 
     public async Task GoToDetailedTermPageAsync(int termId)
