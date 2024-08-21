@@ -9,6 +9,7 @@ public partial class TermListView : ContentView, IPageModel<TermViewModel>
     {
         Model = model;
         InitializeComponent();
+        BindingContext = model;
     }
 
     public TermViewModel Model { get; set; }

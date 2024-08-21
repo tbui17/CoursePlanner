@@ -49,6 +49,15 @@ public static class MauiProgram
             .AddSingleton<IAppService, AppService>()
             .AddSingleton<ILocalNotificationService, LocalNotificationService>()
             .AddTransient<MainPage, MainViewModel>()
+            .AddKeyedTransient<MainPage>(nameof(NavigationTarget.TermListPage), (x, _) =>
+            {
+                var page = x.CreateInstance<MainPage>();
+                var view = x.GetRequiredService<TermListView>();
+                page.SetView(view);
+                return page;
+
+
+            })
             .AddTransient<DetailedTermPage, DetailedTermViewModel>()
             .AddTransient<EditTermPage, EditTermViewModel>()
             .AddTransient<DetailedCoursePage, DetailedCourseViewModel>()
@@ -57,28 +66,9 @@ public static class MauiProgram
             .AddTransient<EditNotePage, EditNoteViewModel>()
             .AddTransient<EditAssessmentPage, EditAssessmentViewModel>()
             .AddTransient<PageResolver>()
-            .AddTransient2<LoginView>(ctx =>
-            {
-                var (page, _) = ctx;
-                page.BindingContext = page.Model;
-                // page.Appearing += async (_, _) => await page.Model.Refresh();
-                return page;
-            })
             .AddTransient<LoginViewModel>()
             .AddTransient<TermViewModel>()
-            .AddTransient2<TermListView>(ctx =>
-            {
-                var (view, _) = ctx;
-                view.BindingContext = view.Model;
-                return view;
-            })
-            .AddTransient<TermListView>(x =>
-            {
-                var view = ActivatorUtilities.CreateInstance<TermListView>(x);
-                // var view = x.GetRequiredKeyedService<TermListView>(nameof(TermViewModel));
-                view.BindingContext = view.Model;
-                return view;
-            })
+            .AddTransient<TermListView>()
             .AddTransient<DevPage>()
             .AddTransient<DbSetup>();
 

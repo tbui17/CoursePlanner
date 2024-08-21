@@ -20,13 +20,10 @@ public class LoginView : ContentView, IPageModel<LoginViewModel>
     {
         var grid = new AutoGrid
         {
-            new Label().Text("Username:"),
+            new Label().Text("Username"),
             new Entry().Bind(Entry.TextProperty, nameof(Model.Username)),
-            new Label().Text("Password:"),
-            new Entry
-            {
-                IsPassword = true
-            }.Bind(Entry.TextProperty, nameof(Model.Password)),
+            new Label().Text("Password"),
+            new Entry { IsPassword = true }.Bind(Entry.TextProperty, nameof(Model.Password))
         };
         Content = new VerticalStackLayout
         {
@@ -35,7 +32,12 @@ public class LoginView : ContentView, IPageModel<LoginViewModel>
             {
                 Text = "Login",
                 Command = Model.LoginCommand
-            }
+            },
+            new Button
+            {
+                Text = "Register",
+                Command = Model.RegisterCommand
+            },
         };
     }
 }

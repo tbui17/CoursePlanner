@@ -11,7 +11,8 @@ public enum NavigationTarget
     EditNotePage,
     EditAssessmentPage,
     DevPage,
-    LoginPage
+    LoginPage,
+    TermListPage,
 }
 
 public interface INavigationService

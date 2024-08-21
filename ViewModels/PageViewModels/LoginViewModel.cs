@@ -27,7 +27,6 @@ public partial class LoginViewModel(
     {
         logger.LogInformation("Login attempt: {Username}", Username);
         var res = await accountService.LoginAsync(new LoginDetails(this));
-
         if (res.IsFailed)
         {
             logger.LogInformation("Login failed: {Error}", res.ToErrorString());
@@ -35,7 +34,7 @@ public partial class LoginViewModel(
             return;
         }
 
-        await navService.GoToAsync(NavigationTarget.MainPage);
+        await navService.GoToAsync(NavigationTarget.TermListPage);
     }
 
 
@@ -55,7 +54,7 @@ public partial class LoginViewModel(
 
         logger.LogInformation("Register success: {Id} {Username}", res.Value.Id, Username);
 
-        await navService.GoToAsync(NavigationTarget.MainPage);
+        await navService.GoToAsync(NavigationTarget.TermListPage);
     }
 
     public Task Refresh()

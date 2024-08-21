@@ -23,7 +23,8 @@ public class PageResolver(IServiceProvider provider)
             NavigationTarget.EditNotePage => Resolve<EditNotePage>(),
             NavigationTarget.EditAssessmentPage => Resolve<EditAssessmentPage>(),
             NavigationTarget.DevPage => Resolve<DevPage>(),
-            NavigationTarget.LoginPage => Resolve<MainPage>()
+            NavigationTarget.LoginPage => Resolve<MainPage>(),
+            NavigationTarget.TermListPage => provider.GetRequiredKeyedService<MainPage>(nameof(NavigationTarget.TermListPage)),
         };
     }
 }
