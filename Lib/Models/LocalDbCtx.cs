@@ -27,4 +27,9 @@ public class LocalDbCtx : DbContext
            .HasForeignKey(x => x.InstructorId)
            .OnDelete(DeleteBehavior.SetNull);
     }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder.UseSqlite("DataSource=database.db");
+    }
 }

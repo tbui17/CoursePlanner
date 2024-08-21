@@ -1,14 +1,21 @@
 ﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Maui.Core.Extensions;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using Lib.Models;
 using Microsoft.EntityFrameworkCore;
-using ViewModels.Services;
 
 namespace ViewModels.PageViewModels;
 
-public partial class MainViewModel(ILocalDbCtxFactory factory, INavigationService navService, IAppService appService) : ObservableObject
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Lib.Models;
+using Services;
+
+public interface IRefresh
+{
+    Task Refresh();
+}
+
+public partial class TermViewModel(ILocalDbCtxFactory factory, INavigationService navService, IAppService appService)
+    : ObservableObject, IRefresh
 {
     [ObservableProperty]
     private ObservableCollection<Term> _terms = [];
@@ -20,11 +27,16 @@ public partial class MainViewModel(ILocalDbCtxFactory factory, INavigationServic
     {
         await using var db = await factory.CreateDbContextAsync();
         var res = await db
-           .Terms
-           .Include(x => x.Courses)
-           .ToListAsync();
+            .Terms
+            .Include(x => x.Courses)
+            .ToListAsync();
 
         Terms = res.ToObservableCollection();
+    }
+
+    public async Task Refresh()
+    {
+        await Init();
     }
 
     [RelayCommand]
@@ -43,7 +55,7 @@ public partial class MainViewModel(ILocalDbCtxFactory factory, INavigationServic
     }
 
     [RelayCommand]
-    public async Task DetailedTermAsync()
+    private async Task DetailedTermAsync()
     {
         if (SelectedTerm is null)
         {
@@ -55,7 +67,7 @@ public partial class MainViewModel(ILocalDbCtxFactory factory, INavigationServic
 
 
     [RelayCommand]
-    public async Task DeleteTermAsync()
+    private async Task DeleteTermAsync()
     {
         if (SelectedTerm is null)
         {
@@ -63,9 +75,9 @@ public partial class MainViewModel(ILocalDbCtxFactory factory, INavigationServic
         }
 
         await using var db = await factory.CreateDbContextAsync();
-        await Queryable.Where(db
-               .Terms, x => x.Id == SelectedTerm.Id)
-           .ExecuteDeleteAsync();
+        await db
+            .Terms.Where(x => x.Id == SelectedTerm.Id)
+            .ExecuteDeleteAsync();
         await Init();
     }
 }

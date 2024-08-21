@@ -1,4 +1,5 @@
 ﻿
+using CoursePlanner.Views;
 using Plugin.LocalNotification;
 using ViewModels.PageViewModels;
 
@@ -8,11 +9,13 @@ public partial class MainPage : ContentPage
 {
     public MainViewModel Model { get; set; }
 
-    public MainPage(MainViewModel model)
+    public MainPage(MainViewModel model, LoginView view)
     {
         Model = model;
         InitializeComponent();
         BindingContext = this;
+        MainLayout.Children.Add(view);
+
     }
 
     protected override async void OnAppearing()

@@ -7,7 +7,7 @@
 
     <ShellContent ContentTemplate="{DataTemplate local:MainPage}" Title="Terms" Route="MainPage" />
     <ShellContent ContentTemplate="{DataTemplate pages:DevPage}" Title="Developer Util" Route="DevPage" />
-    
+
 
 
 </Shell>

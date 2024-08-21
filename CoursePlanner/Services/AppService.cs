@@ -1,4 +1,6 @@
 ﻿using CoursePlanner.Pages;
+using CoursePlanner.Utils;
+using CoursePlanner.Views;
 using Microsoft.Extensions.Logging;
 using ViewModels.Services;
 
@@ -14,17 +16,20 @@ public class AppService : IAppService, INavigationService
 
     // ReSharper disable once NotAccessedField.Local
     private readonly ILogger<AppService> _logger;
+    private readonly PageResolver _pageResolver;
 
     public AppService(
         IServiceProvider provider,
         ILocalNotificationService localNotificationService,
-        ILogger<AppService> logger
+        ILogger<AppService> logger,
+        PageResolver pageResolver
     )
     {
         _provider = provider;
         _localNotificationService = localNotificationService;
         _logger = logger;
         _localNotificationService.StartListening();
+        _pageResolver = pageResolver;
     }
 
 
@@ -74,18 +79,7 @@ public class AppService : IAppService, INavigationService
 
     public async Task GoToAsync(NavigationTarget target)
     {
-        Page page = target switch
-        {
-            NavigationTarget.MainPage => Resolve<MainPage>(),
-            NavigationTarget.DetailedTermPage => Resolve<DetailedTermPage>(),
-            NavigationTarget.EditTermPage => Resolve<EditTermPage>(),
-            NavigationTarget.DetailedCoursePage => Resolve<DetailedCoursePage>(),
-            NavigationTarget.EditCoursePage => Resolve<EditCoursePage>(),
-            NavigationTarget.InstructorFormPage => Resolve<InstructorFormPage>(),
-            NavigationTarget.EditNotePage => Resolve<EditNotePage>(),
-            NavigationTarget.EditAssessmentPage => Resolve<EditAssessmentPage>(),
-            NavigationTarget.DevPage => Resolve<DevPage>()
-        };
+        var page = _pageResolver.GetPage(target);
         await Navigation.PushAsync(page);
     }
 

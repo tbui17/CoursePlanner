@@ -13,7 +13,7 @@ public partial class LoginViewModel(
     AccountService accountService,
     IAppService appService,
     INavigationService navService,
-    ILogger<DetailedCourseViewModel> logger) : ObservableObject, ILogin
+    ILogger<DetailedCourseViewModel> logger) : ObservableObject, ILogin, IRefresh
 {
     [ObservableProperty]
     private string _username = "";
@@ -58,4 +58,11 @@ public partial class LoginViewModel(
         await navService.GoToAsync(NavigationTarget.MainPage);
     }
 
+    public Task Refresh()
+    {
+
+        Username = "";
+        Password = "";
+        return Task.CompletedTask;
+    }
 }

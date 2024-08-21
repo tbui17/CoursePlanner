@@ -10,7 +10,8 @@ public enum NavigationTarget
     InstructorFormPage,
     EditNotePage,
     EditAssessmentPage,
-    DevPage
+    DevPage,
+    LoginPage
 }
 
 public interface INavigationService
