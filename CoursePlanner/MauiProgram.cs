@@ -55,8 +55,6 @@ public static class MauiProgram
                 var view = x.GetRequiredService<TermListView>();
                 page.SetView(view);
                 return page;
-
-
             })
             .AddTransient<DetailedTermPage, DetailedTermViewModel>()
             .AddTransient<EditTermPage, EditTermViewModel>()
