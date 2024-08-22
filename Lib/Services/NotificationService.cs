@@ -66,14 +66,6 @@ public class NotificationService(ILocalDbCtxFactory factory)
     }
 }
 
-public interface INotificationDataResult
-{
-    bool StartIsUpcoming { get; }
-    bool EndIsUpcoming { get; }
-    bool IsUpcoming { get; }
-    INotification Entity { get; }
-}
-
 public record NotificationResult : INotificationDataResult
 {
     public required INotification Entity { get; init; }
@@ -118,11 +110,7 @@ public record NotificationResult : INotificationDataResult
 
     private static bool IsUpcomingImpl(DateTime time, DateTime target)
     {
-        var oneDay = TimeSpan.FromDays(1);
-        var zero = TimeSpan.Zero;
-
-        var res = target - time;
-        return res >= zero && res <= oneDay;
+        return time.Date == target.Date;
     }
 }
 
