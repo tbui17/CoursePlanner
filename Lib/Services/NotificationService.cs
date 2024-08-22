@@ -6,33 +6,55 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Lib.Services;
 
-public class NotificationService(IDbContextFactory<LocalDbCtx> factory)
+using NotificationQuery = Func<IQueryable<INotification>, IQueryable<INotification>>;
+
+public class NotificationService(ILocalDbCtxFactory factory)
 {
-    public async Task<IList<NotificationResult>> GetNotifications()
+    public async Task<IList<NotificationResult>> GetUpcomingNotifications()
     {
         await using var db = await factory.CreateDbContextAsync();
         var now = DateTime.Now.Date;
         var queryFactory = new NotificationQueryFactory(now);
-        var assessments = queryFactory.CreateUpcomingNotificationQuery(db.Assessments)
-           .ToListAsync();
-        var courses = queryFactory.CreateUpcomingNotificationQuery(db.Courses)
-           .ToListAsync();
-        var tasks = await Task.WhenAll(assessments, courses);
-        var notifications = tasks
-           .SelectMany(x => x)
-           .Select(NotificationResult.From);
+        var assessments = await queryFactory.CreateUpcomingNotificationQuery(db.Assessments)
+            .ToListAsync();
+        var courses = await queryFactory.CreateUpcomingNotificationQuery(db.Courses)
+            .ToListAsync();
+
+        var notifications = new[] { assessments, courses }
+            .SelectMany(x => x)
+            .Select(NotificationResult.From);
         return notifications.ToList();
     }
+
+    public async Task<IReadOnlyList<INotificationDataResult>> GetNotifications(NotificationQuery query)
+    {
+        await using var db = await factory.CreateDbContextAsync();
+
+        var list = new List<List<INotification>>();
+
+
+        foreach (var set in db.GetImplementingSets<INotification>())
+        {
+            var n = await query(set).ToListAsync();
+            list.Add(n);
+        }
+
+        return list.SelectMany(x => x).Select(NotificationResult.From).ToList();
+    }
+
+    public async Task<IReadOnlyList<INotificationDataResult>> GetNotificationsForMonth(int month) =>
+        await GetNotifications(q => q.Where(x => x.Start.Month == month || x.End.Month == month));
+
 
     private class NotificationQueryFactory(DateTime now)
     {
         public IQueryable<INotification> CreateUpcomingNotificationQuery(IQueryable<INotification> queryable) =>
             queryable
-               .Where(x => x.ShouldNotify)
-               .Where(IsUpcomingExpr<INotification>(now));
+                .Where(x => x.ShouldNotify)
+                .Where(IsUpcomingExpr<INotification>(now));
     }
 
-    public static Expression<Func<T, bool>> IsUpcomingExpr<T>(DateTime time) where T : INotification
+    private static Expression<Func<T, bool>> IsUpcomingExpr<T>(DateTime time) where T : INotification
     {
         var oneDay = TimeSpan.FromDays(1);
 
@@ -42,13 +64,17 @@ public class NotificationService(IDbContextFactory<LocalDbCtx> factory)
                            (item.End >= time && item.End <= time + oneDay)
                        );
     }
-
-
 }
 
+public interface INotificationDataResult
+{
+    bool StartIsUpcoming { get; }
+    bool EndIsUpcoming { get; }
+    bool IsUpcoming { get; }
+    INotification Entity { get; }
+}
 
-
-public record NotificationResult
+public record NotificationResult : INotificationDataResult
 {
     public required INotification Entity { get; init; }
 
@@ -85,27 +111,26 @@ public record NotificationResult
         var now = DateTime.Now;
         return new NotificationResult
         {
-            Entity = item, StartIsUpcoming = IsUpcomingImpl(now, item.Start), EndIsUpcoming = IsUpcomingImpl(now, item.End),
+            Entity = item, StartIsUpcoming = IsUpcomingImpl(now, item.Start),
+            EndIsUpcoming = IsUpcomingImpl(now, item.End),
         };
     }
+
     private static bool IsUpcomingImpl(DateTime time, DateTime target)
     {
-
         var oneDay = TimeSpan.FromDays(1);
         var zero = TimeSpan.Zero;
 
         var res = target - time;
         return res >= zero && res <= oneDay;
     }
-
-
 }
 
 public static class NotificationResultExtensions
 {
     public static string ToMessage(this IEnumerable<NotificationResult> results) =>
         results
-           .Select(x => x.ToMessage())
-           .Where(x => !string.IsNullOrEmpty(x))
-           .StringJoin(Environment.NewLine);
+            .Select(x => x.ToMessage())
+            .Where(x => !string.IsNullOrEmpty(x))
+            .StringJoin(Environment.NewLine);
 }
