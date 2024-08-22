@@ -42,17 +42,17 @@ public class LoginViewModelTest : BasePageViewModelTest
         await Model.RegisterAsync();
 
         AppMock.VerifyReceivedError(0);
-        NavMock.Verify(x => x.GoToAsync(NavigationTarget.MainPage), Times.Once);
+        NavMock.Verify(x => x.GoToAsync(NavigationTarget.TermListPage), Times.Once);
     }
 
     [Test]
-    public async Task LoginAsync_Valid_NavigatesToMainPage()
+    public async Task LoginAsync_Valid_NavigatesToTermListPage()
     {
         Model.Username = _loginInfo.Username;
         Model.Password = _loginInfo.Password;
         await Model.LoginAsync();
         AppMock.VerifyReceivedError(0);
-        NavMock.Verify(x => x.GoToAsync(NavigationTarget.MainPage), Times.Once);
+        NavMock.Verify(x => x.GoToAsync(NavigationTarget.TermListPage), Times.Once);
     }
 
 

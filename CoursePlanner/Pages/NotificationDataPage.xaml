@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="CoursePlanner.Pages.NotificationDataPage"
+             xmlns:pageViewModels="clr-namespace:ViewModels.PageViewModels;assembly=ViewModels"
+             xmlns:controls="clr-namespace:CoursePlanner.Controls"
+             xmlns:interfaces="clr-namespace:Lib.Interfaces;assembly=Lib"
+             x:DataType="pageViewModels:NotificationDataViewModel">
+    <ContentPage.Content>
+        <ScrollView>
+        <VerticalStackLayout x:Name="MainLayout" Margin="10">
+               <Border Style="{StaticResource CollectionBorder}">
+                    <ScrollView Style="{StaticResource CollectionScrollView}" >
+                        <CollectionView ItemsSource="{Binding NotificationItems}" SelectionMode="None" HorizontalOptions="Center"
+                             >
+                            <CollectionView.ItemsLayout>
+                                <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
+                            </CollectionView.ItemsLayout>
+
+
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="interfaces:INotification" >
+                                    <Border>
+                                        <controls:FieldContainer>
+
+                                            <HorizontalStackLayout>
+                                                <Label Text="Name:" />
+                                                <Label Text="{Binding Name}" />
+                                            </HorizontalStackLayout>
+
+                                            <HorizontalStackLayout>
+                                                <Label Text="Start Date:" />
+                                                <Label Text="{Binding Start, Converter={StaticResource DateConverter}}" />
+                                            </HorizontalStackLayout>
+                                            <HorizontalStackLayout>
+                                                <Label Text="End Date:" />
+                                                <Label Text="{Binding End, Converter={StaticResource DateConverter}}" />
+                                            </HorizontalStackLayout>
+
+                                            <HorizontalStackLayout>
+                                                <Label Text="Notifications" />
+                                                <Label Text="{Binding ShouldNotify}" />
+                                            </HorizontalStackLayout>
+
+                                            <HorizontalStackLayout>
+                                                <Label Text="Type" />
+                                                <Label Text="{Binding ItemType}" />
+                                            </HorizontalStackLayout>
+
+                                        </controls:FieldContainer>
+
+                                    </Border>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </ScrollView></Border>
+
+        </VerticalStackLayout>
+        </ScrollView>
+
+    </ContentPage.Content>
+</ContentPage>

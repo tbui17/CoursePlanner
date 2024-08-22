@@ -26,7 +26,7 @@ public class NotificationService(ILocalDbCtxFactory factory)
         return notifications.ToList();
     }
 
-    public async Task<IReadOnlyList<INotificationDataResult>> GetNotifications(NotificationQuery query)
+    public async Task<List<INotification>> GetNotifications(NotificationQuery query)
     {
         await using var db = await factory.CreateDbContextAsync();
 
@@ -39,11 +39,17 @@ public class NotificationService(ILocalDbCtxFactory factory)
             list.Add(n);
         }
 
-        return list.SelectMany(x => x).Select(NotificationResult.From).ToList();
+        return list.SelectMany(x => x).ToList();
     }
 
-    public async Task<IReadOnlyList<INotificationDataResult>> GetNotificationsForMonth(int month) =>
-        await GetNotifications(q => q.Where(x => x.Start.Month == month || x.End.Month == month));
+    public async Task<List<INotification>> GetNotificationsForMonth(DateTime monthDate) =>
+        await GetNotifications(q => q
+            .Where(x => x.ShouldNotify)
+            .Where(x =>
+                (x.Start.Month == monthDate.Month && x.Start.Year == monthDate.Year) ||
+                x.End.Month == monthDate.Month && x.End.Year == monthDate.Year)
+
+        );
 
 
     private class NotificationQueryFactory(DateTime now)
@@ -68,12 +74,16 @@ public class NotificationService(ILocalDbCtxFactory factory)
 
 public record NotificationResult : INotificationDataResult
 {
-    public required INotification Entity { get; init; }
+    private NotificationResult()
+    {
+    }
+
+    public INotification Entity { get; private init; } = null!;
 
 
-    public bool StartIsUpcoming { get; init; }
+    public bool StartIsUpcoming { get; private init; }
 
-    public bool EndIsUpcoming { get; init; }
+    public bool EndIsUpcoming { get; private init; }
 
     public bool IsUpcoming => StartIsUpcoming || EndIsUpcoming;
 

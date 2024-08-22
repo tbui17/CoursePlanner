@@ -26,7 +26,7 @@ public class LocalNotificationService(
     public async Task<int> SendUpcomingNotifications()
     {
         logger.LogInformation("Retrieving notifications.");
-        var notifications = (await notificationService.GetNotifications()).ToList();
+        var notifications = (await notificationService.GetUpcomingNotifications()).ToList();
 
         var notificationCount = notifications.Count;
 

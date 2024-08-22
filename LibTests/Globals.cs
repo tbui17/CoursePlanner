@@ -26,4 +26,8 @@ public static class Globals
            .AddTransient<NotificationSetupUtil>();
         return services.BuildServiceProvider();
     }
+
+    public static T Resolve<T>() where T : notnull => Provider.GetRequiredService<T>();
+
+    public static async Task<LocalDbCtx> GetDb() => await Resolve<IDbContextFactory<LocalDbCtx>>().CreateDbContextAsync();
 }

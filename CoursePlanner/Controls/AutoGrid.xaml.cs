@@ -6,6 +6,9 @@ public partial class AutoGrid
 {
     private const int DefaultColumnCount = 2;
 
+    public GridLength DefaultHeight { get; init; } = GridLength.Star;
+    public GridLength DefaultWidth { get; init; } = GridLength.Star;
+
     public AutoGrid()
     {
         InitializeComponent();
@@ -21,9 +24,9 @@ public partial class AutoGrid
         if (ColumnDefinitions.Count == 0) ColumnCount.Times(AddColumnDefinition);
     }
 
-    private void AddRowDefinition() => RowDefinitions.Add(new RowDefinition(GridLength.Star));
+    private void AddRowDefinition() => RowDefinitions.Add(new RowDefinition(DefaultHeight));
 
-    private void AddColumnDefinition() => ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
+    private void AddColumnDefinition() => ColumnDefinitions.Add(new ColumnDefinition(DefaultWidth));
 
     private AutoGridState CreateAutoGridState() =>
         new() { Columns = ColumnDefinitions.Count, ChildCount = () => Children.Count };

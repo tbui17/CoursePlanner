@@ -54,6 +54,7 @@ public static class MauiProgram
                 var page = x.CreateInstance<MainPage>();
                 var view = x.GetRequiredService<TermListView>();
                 page.SetView(view);
+                page.Appearing += async (_, _) => await view.Model.Refresh();
                 return page;
             })
             .AddTransient<DetailedTermPage, DetailedTermViewModel>()
@@ -68,7 +69,10 @@ public static class MauiProgram
             .AddTransient<TermViewModel>()
             .AddTransient<TermListView>()
             .AddTransient<DevPage>()
-            .AddTransient<DbSetup>();
+            .AddTransient<DbSetup>()
+            .AddTransient<LoginView>()
+            .AddTransient<NotificationDataPage>()
+            .AddTransient<NotificationDataViewModel>();
 
         builder.Logging.AddConsole();
 
