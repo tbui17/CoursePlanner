@@ -17,7 +17,7 @@ public class LocalNotificationServiceTests
 
         await using var db = GetDb();
         var course = db.Courses.First();
-        course.Start = DateTime.Now.AddHours(5);
+        course.Start = DateTime.Now.Date;
         course.ShouldNotify = true;
         await db.SaveChangesAsync();
         _course = course;
