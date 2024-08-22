@@ -42,12 +42,6 @@
                                                 <Label Text="Notifications" />
                                                 <Label Text="{Binding ShouldNotify}" />
                                             </HorizontalStackLayout>
-
-                                            <HorizontalStackLayout>
-                                                <Label Text="Type" />
-                                                <Label Text="{Binding ItemType}" />
-                                            </HorizontalStackLayout>
-
                                         </controls:FieldContainer>
 
                                     </Border>
