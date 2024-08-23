@@ -160,8 +160,17 @@ public class InstructorFormViewModelTests : BaseDbTest
     [TestCaseSource(nameof(InstructorEdit))]
     public async Task SaveAsync_Edit_Valid_PersistsChanges(int id)
     {
+        var initial = await Db.Instructors.AsNoTracking().FirstAsync(x => x.Id == id);
+        var unexpected = new { initial.Name, initial.Email, initial.Phone };
+
         Model.SetEditing(id);
         await Model.Init(id);
+
+        const string name = "Amnfoiwjefi2";
+
+        Model.Name = name;
+        Model.Email = "abcde@mail.com";
+        Model.Phone = "(888) 123-4567";
 
 
         using var scope = new AssertionScope();
@@ -169,8 +178,10 @@ public class InstructorFormViewModelTests : BaseDbTest
 
         await Model.SaveAsync();
 
-        var res = await Db.Instructors.Where(x => x.Name == Model.Name).ToListAsync();
-        res.Should().ContainSingle();
+        var res = await Db.Instructors.Where(x => x.Name == name).ToListAsync();
+        var subj = res.Should().ContainSingle().Subject;
+        subj.Should().NotBeEquivalentTo(unexpected);
+
 
         AppMock.Verify(x => x.ShowErrorAsync(It.IsAny<string>()), Times.Never);
         NavMock.Verify(x => x.PopAsync(), Times.Once);

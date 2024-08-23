@@ -96,7 +96,7 @@ public partial class InstructorFormViewModel(
 
             var editModel = await db.Instructors.FirstAsync(x => x.Id == instructorId);
 
-            editModel.SetFromContactField(editModel);
+            editModel.SetFromContactField(this);
             await db.SaveChangesAsync();
             return null;
         };
