@@ -11,6 +11,7 @@ public interface ILocalNotificationService
     Task Notify(NotificationRequest request);
     void StartListening();
     event EventHandler<NotificationEventArgs>? NotificationReceived;
+    Task RequestNotificationPermissions();
 }
 
 public class LocalNotificationService(
@@ -95,5 +96,21 @@ public class LocalNotificationService(
         );
         return;
         async void NotifyTask(object? _) => await SendUpcomingNotifications();
+    }
+
+    public async Task RequestNotificationPermissions()
+    {
+        if (LocalNotificationCenter.Current is not { } c)
+        {
+            logger.LogWarning("LocalNotificationCenter.Current is null. Cannot request permissions.");
+            return;
+        }
+        if (await c.AreNotificationsEnabled())
+        {
+            logger.LogInformation("Notifications are already enabled.");
+            return;
+        }
+        logger.LogInformation("Requesting notification permissions.");
+        await c.RequestNotificationPermission();
     }
 }
