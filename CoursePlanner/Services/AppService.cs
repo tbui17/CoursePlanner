@@ -56,24 +56,6 @@ public class AppService : IAppService, INavigationService
     }
 
 
-    public async Task GoToMainPageAsync()
-    {
-        await Current.GoToAsync($"///{nameof(MainPage)}");
-    }
-
-    private static async Task GoToAsync<T>(IDictionary<string, object>? query = null) where T : ContentPage
-    {
-        var route = $"{typeof(T).Name}";
-        if (query is not null)
-        {
-            await Current.GoToAsync(route, query);
-        }
-        else
-        {
-            await Current.GoToAsync(route);
-        }
-    }
-
     public async Task GoToAsync(NavigationTarget target)
     {
         var page = _pageResolver.GetPage(target);
