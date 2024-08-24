@@ -13,8 +13,9 @@ public class Configs
            .AddTransient<NotificationService>()
            .AddTransient<ICourseService, CourseService>()
            .AddTransient<AccountService>()
-           .AddValidatorsFromAssemblyContaining<LoginFieldValidator>(ServiceLifetime.Transient)
-           ;
+           .AddSingleton<ISessionService, SessionService>()
+           .AddKeyedTransient<ISessionService, SessionService>("Transient")
+           .AddValidatorsFromAssemblyContaining<LoginFieldValidator>(ServiceLifetime.Transient);
         return b;
     }
 }
