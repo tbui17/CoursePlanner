@@ -1,6 +1,5 @@
 ﻿using CoursePlanner.Pages;
 using CoursePlanner.Utils;
-using CoursePlanner.Views;
 using Microsoft.Extensions.Logging;
 using ViewModels.Services;
 

@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Lib.Models;
+﻿using Lib.Models;
 
 namespace Lib.Utils;
 

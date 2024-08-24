@@ -1,6 +1,5 @@
 ﻿
 using CoursePlanner.Views;
-using Plugin.LocalNotification;
 using ViewModels.PageViewModels;
 using ViewModels.Services;
 
