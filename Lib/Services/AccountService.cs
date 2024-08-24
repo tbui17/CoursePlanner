@@ -16,9 +16,9 @@ public class AccountService(
     ILocalDbCtxFactory factory,
     [FromKeyedServices(nameof(LoginFieldValidator))]
     IValidator<ILogin> fieldValidator
-    )
+)
 {
-    public async Task<Result<int>> LoginAsync(ILogin login)
+    public async Task<Result<User>> LoginAsync(ILogin login)
     {
         return await fieldValidator.Check(login)
             .Map(HashedLogin.Create)
@@ -27,12 +27,13 @@ public class AccountService(
                 await using var db = await factory.CreateDbContextAsync();
                 var res = await db.Accounts
                     .Where(x => x.Username == hashedLogin.Username && x.Password == hashedLogin.Password)
-                    .Select(x => x.Id)
+                    .Select(x => new User { Id = x.Id, Username = x.Username })
+                    .AsNoTracking()
                     .ToListAsync();
 
                 return res switch
                 {
-                    [var id] => id.ToResult(),
+                    [var user] => user.ToResult(),
                     [] => Result.Fail("Invalid username or password"),
                     var entries => throw new UnreachableException($"Unexpected duplicate entries: {entries}")
                     {
@@ -51,6 +52,7 @@ public class AccountService(
         {
             return exc.ToResult();
         }
+
         var hashedLogin = HashedLogin.Create(login);
 
         await using var db = await factory.CreateDbContextAsync();
@@ -73,8 +75,12 @@ public class AccountService(
 
         await db.Accounts.AddAsync(account);
         await db.SaveChangesAsync();
+        var created = await db.Accounts.Where(x => x.Username == hashedLogin.Username)
+            .Select(x => new User { Id = x.Id, Username = x.Username })
+            .AsNoTracking()
+            .SingleAsync();
         await tx.CommitAsync();
-        return account;
+        return created;
     }
 
     private record HashedLogin
@@ -89,7 +95,7 @@ public class AccountService(
 
         public static HashedLogin Create(ILogin login) => new()
         {
-            Username = login.Username.ToLowerInvariant().Trim(),
+            Username = login.Username,
             Password = Hash(login.Password)
         };
 

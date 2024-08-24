@@ -8,7 +8,6 @@ public static class ValidatorExtensions
     public static IRuleBuilderOptionsConditions<T, string> Alphanumeric<T>(
         this IRuleBuilder<T, string> builder)
     {
-
         return builder.Custom((x, ctx) =>
         {
             if (!x.All(char.IsLetterOrDigit))
@@ -17,6 +16,19 @@ public static class ValidatorExtensions
             }
         });
     }
+
+    public static IRuleBuilderOptionsConditions<T, string> Lower<T>(
+        this IRuleBuilder<T, string> builder)
+    {
+        return builder.Custom((x, ctx) =>
+        {
+            if (!x.All(char.IsLower))
+            {
+                ctx.AddFailure($"{ctx.DisplayName} must have lowercase letters.");
+            }
+        });
+    }
+
 
     public static Result<T> Check<T>(this IValidator<T> validator, T obj)
     {

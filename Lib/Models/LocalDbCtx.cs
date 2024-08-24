@@ -28,6 +28,10 @@ public class LocalDbCtx : DbContext
             .WithMany(x => x.Courses)
             .HasForeignKey(x => x.InstructorId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<User>()
+            .Property(x => x.Username)
+            .UseCollation(Collation.CaseInsensitive);
     }
 
 
@@ -45,6 +49,9 @@ public class LocalDbCtx : DbContext
 
 
 
+}
 
-
+file static class Collation
+{
+    public const string CaseInsensitive = "NOCASE";
 }

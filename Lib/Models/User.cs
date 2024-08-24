@@ -1,4 +1,5 @@
 ﻿using Lib.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace Lib.Models;
 
@@ -8,6 +9,7 @@ public interface ILogin
     public string Password { get; }
 }
 
+[Index(nameof(Username), IsUnique = true)]
 public class User : ILogin, IEntity
 {
     public int Id { get; set; }
