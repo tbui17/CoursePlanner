@@ -91,7 +91,7 @@ public class NotificationItemsTest : BaseDbTest
     public async Task GetNotificationsForMonth_ReturnsStartDatesWithinMonth()
     {
         await using var db = await GetDb();
-        await db.Assessments.Take(2).ExecuteUpdateAsync(p => p.SetProperty(x => x.Start, _now));
+        await db.Assessments.Take(2).ExecuteUpdateAsync(p => p.SetProperty(x => x.Start, _now).SetProperty(x => x.ShouldNotify, true));
 
         var res = await _notificationService.GetNotificationsForMonth(_now);
 
@@ -113,6 +113,8 @@ public class NotificationItemsTest : BaseDbTest
         a1.End = _now.AddYears(1);
         a2.Start = _now.AddYears(1);
         a2.End = _now;
+        a2.ShouldNotify = true;
+        a1.ShouldNotify = true;
 
         await db.SaveChangesAsync();
 

@@ -2,11 +2,13 @@
 using CoursePlanner.Views;
 using Plugin.LocalNotification;
 using ViewModels.PageViewModels;
+using ViewModels.Services;
 
 namespace CoursePlanner;
 
 public partial class MainPage : ContentPage
 {
+    private readonly LocalNotificationService _localNotificationService;
     public MainViewModel Model { get; set; }
 
     public void SetView(IView view)
@@ -15,8 +17,9 @@ public partial class MainPage : ContentPage
         MainLayout.Children.Add(view);
     }
 
-    public MainPage(MainViewModel model, LoginView view)
+    public MainPage(MainViewModel model, LoginView view, LocalNotificationService localNotificationService)
     {
+        _localNotificationService = localNotificationService;
         Model = model;
         InitializeComponent();
         BindingContext = this;
@@ -29,10 +32,6 @@ public partial class MainPage : ContentPage
     {
         base.OnAppearing();
         await Model.Init();
-
-        if (!await LocalNotificationCenter.Current.AreNotificationsEnabled())
-        {
-            await LocalNotificationCenter.Current.RequestNotificationPermission();
-        }
+        await _localNotificationService.RequestNotificationPermissions();
     }
 }
