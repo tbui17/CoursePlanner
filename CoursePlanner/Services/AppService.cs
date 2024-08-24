@@ -10,7 +10,6 @@ namespace CoursePlanner.Services;
 public class AppService : IAppService, INavigationService
 {
     private readonly IServiceProvider _provider;
-    private readonly ILocalNotificationService _localNotificationService;
 
 
     // ReSharper disable once NotAccessedField.Local
@@ -25,9 +24,8 @@ public class AppService : IAppService, INavigationService
     )
     {
         _provider = provider;
-        _localNotificationService = localNotificationService;
         _logger = logger;
-        _localNotificationService.StartListening();
+        localNotificationService.StartListening();
         _pageResolver = pageResolver;
     }
 
