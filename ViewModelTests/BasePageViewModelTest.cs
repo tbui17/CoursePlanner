@@ -19,7 +19,7 @@ public abstract class BasePageViewModelTest : BaseDbTest
 
 
     [TearDown]
-    public void TearDown()
+    public virtual void TearDown()
     {
         Db.Dispose();
     }

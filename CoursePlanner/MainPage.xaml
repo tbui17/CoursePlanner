@@ -5,7 +5,7 @@
     xmlns:models="clr-namespace:Lib.Models;assembly=Lib"
     xmlns:controls="clr-namespace:CoursePlanner.Controls"
     xmlns:pages="clr-namespace:CoursePlanner.Pages"
-    Title="Terms"
+    Title="Main"
     x:DataType="local:MainPage" x:Class="CoursePlanner.MainPage" >
 
 

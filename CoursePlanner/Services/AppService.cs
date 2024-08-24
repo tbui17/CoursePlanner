@@ -58,6 +58,15 @@ public class AppService : IAppService, INavigationService
 
     public async Task GoToAsync(NavigationTarget target)
     {
+        if (target == NavigationTarget.MainPage)
+        {
+            // temp bandaid until class is refactored
+            // removes extra stack in nav history
+            // trigger main page rerender
+            await Navigation.PushAsync(new ContentPage());
+            await Navigation.PopAsync();
+            return;
+        }
         var page = _pageResolver.GetPage(target);
         await Navigation.PushAsync(page);
     }

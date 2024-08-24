@@ -2,7 +2,6 @@
 using Lib.Models;
 using Lib.Services;
 using Lib.Utils;
-using Microsoft.Extensions.Logging;
 using Moq;
 using ViewModels.PageViewModels;
 using ViewModels.Services;
@@ -12,17 +11,20 @@ namespace ViewModelTests;
 public class LoginViewModelTest : BasePageViewModelTest
 {
     private ILogin _loginInfo;
+    private ISessionService _sessionService;
+    private AppShellViewModel _appShellViewModel;
 
     [SetUp]
     public override async Task Setup()
     {
         await base.Setup();
+        _sessionService = Resolve<ISessionService>();
+        _appShellViewModel = Resolve<AppShellViewModel>();
         _loginInfo = new LoginDetails("Test", "Test12345678");
         Model = new LoginViewModel(
             appService: AppMock.Object,
             navService: NavMock.Object,
-            accountService: Resolve<AccountService>(),
-            logger: Resolve<ILogger<DetailedCourseViewModel>>()
+            sessionService: _sessionService
         );
 
         var accountService = Resolve<AccountService>();
@@ -42,7 +44,7 @@ public class LoginViewModelTest : BasePageViewModelTest
         await Model.RegisterAsync();
 
         AppMock.VerifyReceivedError(0);
-        NavMock.Verify(x => x.GoToAsync(NavigationTarget.TermListPage), Times.Once);
+        NavMock.Verify(x => x.GoToAsync(NavigationTarget.MainPage), Times.Once);
     }
 
     [Test]
@@ -52,7 +54,21 @@ public class LoginViewModelTest : BasePageViewModelTest
         Model.Password = _loginInfo.Password;
         await Model.LoginAsync();
         AppMock.VerifyReceivedError(0);
-        NavMock.Verify(x => x.GoToAsync(NavigationTarget.TermListPage), Times.Once);
+        NavMock.Verify(x => x.GoToAsync(NavigationTarget.MainPage), Times.Once);
+    }
+
+    [Test]
+    public async Task LoginAsync_Valid_PersistsSignInState()
+    {
+        _appShellViewModel.IsLoggedIn.Should().BeFalse();
+        _sessionService.IsLoggedIn.Should().BeFalse();
+        Model.Username = _loginInfo.Username;
+        Model.Password = _loginInfo.Password;
+        await Model.LoginAsync();
+        AppMock.VerifyReceivedError(0);
+        NavMock.Verify(x => x.GoToAsync(NavigationTarget.MainPage), Times.Once);
+        _sessionService.IsLoggedIn.Should().BeTrue();
+        _appShellViewModel.IsLoggedIn.Should().BeTrue();
     }
 
 
