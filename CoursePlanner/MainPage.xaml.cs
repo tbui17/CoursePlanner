@@ -7,30 +7,47 @@ namespace CoursePlanner;
 
 public partial class MainPage : ContentPage
 {
-    private readonly LocalNotificationService _localNotificationService;
+    private readonly ILocalNotificationService _localNotificationService;
+
     public MainViewModel Model { get; set; }
 
-    public void SetView(IView view)
-    {
-        MainLayout.Children.Clear();
-        MainLayout.Children.Add(view);
-    }
+    private readonly ISessionService _sessionService;
+    private readonly IServiceProvider _provider;
 
-    public MainPage(MainViewModel model, LoginView view, LocalNotificationService localNotificationService)
+    public MainPage(MainViewModel model, IServiceProvider provider, ILocalNotificationService localNotificationService, ISessionService sessionService)
     {
+
         _localNotificationService = localNotificationService;
         Model = model;
         InitializeComponent();
         BindingContext = this;
+        _sessionService = sessionService;
+        _provider = provider;
 
-        MainLayout.Children.Add(view);
 
+
+    }
+
+    private void SetView(IView view)
+    {
+        MainLayout.Clear();
+        MainLayout.Add(view);
     }
 
     protected override async void OnAppearing()
     {
+        if (_sessionService.IsLoggedIn)
+        {
+            var view = _provider.GetRequiredService<TermListView>();
+            await view.Model.Refresh();
+            SetView(view);
+        }
+        else
+        {
+            SetView( _provider.GetRequiredService<LoginView>());
+
+        }
         base.OnAppearing();
-        await Model.Init();
         await _localNotificationService.RequestNotificationPermissions();
     }
 }

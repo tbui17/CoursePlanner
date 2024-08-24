@@ -1,5 +1,6 @@
 ﻿using Lib;
 using Lib.Models;
+using Lib.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -37,7 +38,10 @@ public static class Globals
            .AddTransient<EditTermViewModel>()
            .AddTransient<InstructorFormViewModel>()
            .AddTransient<MainViewModel>()
-           .AddSingleton<ILocalNotificationService, LocalNotificationService>();
+
+           .AddSingleton<ILocalNotificationService, LocalNotificationService>()
+           .AddTransient<ISessionService, SessionService>()
+           .AddTransient<AppShellViewModel>();
 
         services.AddLogging(b => b.AddConsole());
 

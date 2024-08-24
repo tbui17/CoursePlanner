@@ -48,13 +48,12 @@ public static class MauiProgram
             .AddSingleton<INavigationService, AppService>()
             .AddSingleton<IAppService, AppService>()
             .AddSingleton<ILocalNotificationService, LocalNotificationService>()
-            .AddTransient<MainPage, MainViewModel>()
-            .AddKeyedTransient<MainPage>(nameof(NavigationTarget.TermListPage), (x, _) =>
+            .AddTransient<MainViewModel>()
+            .AddTransient<MainPage>()
+            .AddSingleton<AppShell>()
+            .AddKeyedTransient<MainPage>(nameof(NavigationTarget.MainPage), (x, _) =>
             {
                 var page = x.CreateInstance<MainPage>();
-                var view = x.GetRequiredService<TermListView>();
-                page.SetView(view);
-                page.Appearing += async (_, _) => await view.Model.Refresh();
                 return page;
             })
             .AddTransient<DetailedTermPage, DetailedTermViewModel>()
@@ -72,7 +71,9 @@ public static class MauiProgram
             .AddTransient<DbSetup>()
             .AddTransient<LoginView>()
             .AddTransient<NotificationDataPage>()
-            .AddTransient<NotificationDataViewModel>();
+            .AddTransient<NotificationDataViewModel>()
+            .AddSingleton<ISessionService, SessionService>()
+            .AddTransient<AppShellViewModel>();
 
         builder.Logging.AddConsole();
 
