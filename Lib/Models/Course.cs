@@ -3,7 +3,16 @@ using Lib.Utils;
 
 namespace Lib.Models;
 
-public class Course : INotification
+public interface ICourseForm : INotification
+{
+    new DateTime Start { get; set; }
+    new DateTime End { get; set; }
+    new bool ShouldNotify { get; set; }
+
+    string Status { get; set; }
+}
+
+public class Course : ICourseForm
 {
     public const string PlanToTake = "Plan to Take";
     public const string InProgress = "In Progress";

@@ -1,4 +1,5 @@
 ﻿using Lib.Interfaces;
+using Lib.Models;
 
 namespace Lib.Traits;
 
@@ -14,6 +15,19 @@ public static class AssignmentTrait
         self.ShouldNotify = other.ShouldNotify;
         self.Type = other.Type;
         self.CourseId = other.CourseId;
+
+        return self;
+    }
+
+    public static T SetFromCourseForm<T, T2>(this T self, T2 other)
+        where T : ICourseForm where T2 : ICourseForm
+    {
+        self.Status = other.Status;
+        self.Start = other.Start;
+        self.End = other.End;
+        self.Id = other.Id;
+        self.Name = other.Name;
+        self.ShouldNotify = other.ShouldNotify;
 
         return self;
     }
@@ -36,4 +50,6 @@ public static class AssignmentTrait
 
         return self;
     }
+
+
 }

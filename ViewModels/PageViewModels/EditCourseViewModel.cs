@@ -2,7 +2,6 @@
 using CommunityToolkit.Maui.Core.Extensions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Lib.Interfaces;
 using Lib.Models;
 using Lib.Traits;
 using Microsoft.EntityFrameworkCore;
@@ -10,8 +9,11 @@ using ViewModels.Services;
 
 namespace ViewModels.PageViewModels;
 
-public partial class EditCourseViewModel(ILocalDbCtxFactory factory, INavigationService navService, IAppService appService)
-    : ObservableObject, IDateTimeEntity
+public partial class EditCourseViewModel(
+    ILocalDbCtxFactory factory,
+    INavigationService navService,
+    IAppService appService)
+    : ObservableObject, ICourseForm
 {
     public ObservableCollection<string> Statuses { get; } = Course.Statuses.ToObservableCollection();
 
@@ -33,26 +35,29 @@ public partial class EditCourseViewModel(ILocalDbCtxFactory factory, INavigation
     [ObservableProperty]
     private string _selectedStatus = Course.Statuses.First();
 
+    string ICourseForm.Status
+    {
+        get => SelectedStatus;
+        set => SelectedStatus = value;
+    }
+
 
     [RelayCommand]
     public async Task SaveAsync()
     {
-        if (this.ValidateNameAndDates() is {} exc)
+        if (this.ValidateNameAndDates() is { } exc)
         {
             await appService.ShowErrorAsync(exc.Message);
             return;
         }
+
         await using var db = await factory.CreateDbContextAsync();
         var course = await db
-           .Courses
-           .AsTracking()
-           .FirstAsync(x => x.Id == Id);
+            .Courses
+            .AsTracking()
+            .FirstAsync(x => x.Id == Id);
 
-        course.Name = Name;
-        course.Start = Start;
-        course.End = End;
-        course.ShouldNotify = ShouldNotify;
-        course.Status = SelectedStatus;
+        course.SetFromCourseForm(this);
         await db.SaveChangesAsync();
         await BackAsync();
     }
@@ -68,16 +73,11 @@ public partial class EditCourseViewModel(ILocalDbCtxFactory factory, INavigation
         await using var db = await factory.CreateDbContextAsync();
 
         var course = await db
-               .Courses
-               .FirstOrDefaultAsync(x => x.Id == id) ??
-            new();
+                         .Courses
+                         .FirstOrDefaultAsync(x => x.Id == id) ??
+                     new();
 
-        Id = course.Id;
-        Name = course.Name;
-        Start = course.Start;
-        End = course.End;
-        ShouldNotify = course.ShouldNotify;
-        SelectedStatus = course.Status;
+        this.SetFromCourseForm(course);
     }
 
     public async Task RefreshAsync()
