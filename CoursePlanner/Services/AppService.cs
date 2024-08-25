@@ -48,10 +48,10 @@ public class AppService : IAppService, INavigationService
     }
 
 
-    private async Task GoToAsync<T>(Func<T, int> setter) where T : Page
+    private async Task GoToAsync<T>(Func<T,Task> setter) where T : Page
     {
         var page = Resolve<T>();
-        setter(page);
+        await setter(page);
         await Navigation.PushAsync(page);
     }
 
@@ -71,14 +71,9 @@ public class AppService : IAppService, INavigationService
         await Navigation.PushAsync(page);
     }
 
-    public async Task GoToDetailedTermPageAsync(int termId)
+    public async Task GoToDetailedTermPageAsync(int id)
     {
-        await GoToAsync<DetailedTermPage>(x => x.Model.Id = termId);
-    }
-
-    public async Task GoBackToDetailedTermPageAsync()
-    {
-        await Navigation.PopAsync();
+        await GoToAsync<DetailedTermPage>(async x => await x.Model.Init(id));
     }
 
     public async Task<string?> DisplayNamePromptAsync()
@@ -92,17 +87,17 @@ public class AppService : IAppService, INavigationService
 
     public async Task GoToDetailedCoursesPageAsync(int id)
     {
-        await GoToAsync<DetailedCoursePage>(x => x.Model.Id = id);
+        await GoToAsync<DetailedCoursePage>(x => x.Model.Init(id));
     }
 
     public async Task GoToEditTermPageAsync(int id)
     {
-        await GoToAsync<EditTermPage>(x => x.Model.Id = id);
+        await GoToAsync<EditTermPage>(x => x.Model.Init(id));
     }
 
-    public async Task GoToEditCoursePageAsync(int courseId)
+    public async Task GoToEditCoursePageAsync(int id)
     {
-        await GoToAsync<EditCoursePage>(x => x.Model.Id = courseId);
+        await GoToAsync<EditCoursePage>(x => x.Model.Init(id));
     }
 
     public async Task GoToAddInstructorPageAsync()
@@ -113,23 +108,23 @@ public class AppService : IAppService, INavigationService
         await Navigation.PushAsync(page);
     }
 
-    public async Task GotoEditInstructorPageAsync(int instructorId)
+    public async Task GotoEditInstructorPageAsync(int id)
     {
         var page = Resolve<InstructorFormPage>();
 
-        page.Model.SetEditing(instructorId);
+        page.Model.SetEditing(id);
 
         await Navigation.PushAsync(page);
     }
 
-    public async Task GoToAssessmentDetailsPageAsync(int assessmentId)
+    public async Task GoToAssessmentDetailsPageAsync(int id)
     {
-        await GoToAsync<EditAssessmentPage>(x => x.Model.Id = assessmentId);
+        await GoToAsync<EditAssessmentPage>(x => x.Model.Init(id));
     }
 
-    public async Task GoToNoteDetailsPageAsync(int noteId)
+    public async Task GoToNoteDetailsPageAsync(int id)
     {
-        await GoToAsync<EditNotePage>(x => x.Model.Id = noteId);
+        await GoToAsync<EditNotePage>(x => x.Model.Init(id));
     }
 
     public async Task PopAsync()
