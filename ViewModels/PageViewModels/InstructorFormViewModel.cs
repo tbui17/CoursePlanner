@@ -49,10 +49,6 @@ public partial class InstructorFormViewModel(
     [RelayCommand]
     public async Task SaveAsync()
     {
-        if (InstructorPersistence is null)
-        {
-            throw new InvalidOperationException($"{nameof(InstructorPersistence)} is not set");
-        }
 
         var message = await InstructorPersistence(new Instructor().SetFromContact(this));
 
