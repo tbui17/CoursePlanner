@@ -17,14 +17,14 @@ public enum NavigationTarget
 public interface INavigationService
 {
     Task GoToAsync(NavigationTarget target);
-    Task GoToDetailedTermPageAsync(int termId);
+    Task GoToDetailedTermPageAsync(int id);
     Task GoToDetailedCoursesPageAsync(int id);
     Task GoToEditTermPageAsync(int id);
-    Task GoToEditCoursePageAsync(int courseId);
+    Task GoToEditCoursePageAsync(int id);
     Task GoToAddInstructorPageAsync();
-    Task GotoEditInstructorPageAsync(int instructorId);
-    Task GoToAssessmentDetailsPageAsync(int assessmentId);
-    Task GoToNoteDetailsPageAsync(int noteId);
-    Task GoBackToDetailedTermPageAsync();
+    Task GotoEditInstructorPageAsync(int id);
+    Task GoToAssessmentDetailsPageAsync(int id);
+    Task GoToNoteDetailsPageAsync(int id);
+
     Task PopAsync();
 }

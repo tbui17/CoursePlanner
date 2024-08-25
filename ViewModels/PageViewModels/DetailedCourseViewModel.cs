@@ -189,7 +189,7 @@ public partial class DetailedCourseViewModel(
     [RelayCommand]
     public async Task BackAsync()
     {
-        await navService.GoBackToDetailedTermPageAsync();
+        await navService.PopAsync();
     }
 
     public async Task RefreshAsync()
