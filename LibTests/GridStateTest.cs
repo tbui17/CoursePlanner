@@ -16,7 +16,7 @@ public class GridStateTests
         var elements = new List<int>();
 
 
-        var gridState = new AutoGridState
+        IAutoGridState gridState = new AutoGridState
         {
             Columns = 2,
             ChildCount = () => elements.Count
@@ -24,96 +24,112 @@ public class GridStateTests
 
         using var _ = new AssertionScope();
 
-        var test = new GridPropertyTest(0, 0, false, 0);
+        var test = new GridPropertyTest(0, 0, 0, 0, 0, false);
 
         test.AssertGridState(gridState);
     }
 
     [TestCaseSource(nameof(GridStateTestCases))]
-    public void Properties_ShouldBeCongruentWithElementCount(int columns, List<GridPropertyTest> tests)
+    public void Properties_ShouldBeCongruentWithElementCount(GridTestCase testCase)
     {
         var elements = new List<int>();
         var gridState = new AutoGridState
         {
-            Columns = columns,
+            Columns = testCase.Columns,
             ChildCount = () => elements.Count
         };
 
         using var scope = new AssertionScope();
 
-        foreach (var test in tests)
+        foreach (var test in testCase.Tests)
         {
             elements.Add(1);
             test.AssertGridState(gridState);
         }
     }
 
-    public static IEnumerable<TestCaseData> GridStateTestCases()
+    private static IEnumerable<TestCaseData> GridStateTestCases()
     {
-        List<GridPropertyTest> oneColumnCaseData = new List<GridPropertyTest>
+        var zeroColumnTestData = new GridTestCase
         {
-            new(0, 0, true, 1),
-            new(0, 1, true, 2),
-            new(0, 2, true, 3),
-            new(0, 3, true, 4),
-            new(0, 4, true, 5),
-            new(0, 5, true, 6),
-            new(0, 6, true, 7),
-            new(0, 7, true, 8),
-            new(0, 8, true, 9)
+            Columns = 0,
+            Tests =
+            [
+                new(Count: 1, Index: 0, Column: 0, Row: 0, Rows: 1, ShouldAddRowDefinition: true),
+                new(Count: 2, Index: 1, Column: 0, Row: 1, Rows: 2, ShouldAddRowDefinition: true),
+                new(Count: 3, Index: 2, Column: 0, Row: 2, Rows: 3, ShouldAddRowDefinition: true),
+                new(Count: 4, Index: 3, Column: 0, Row: 3, Rows: 4, ShouldAddRowDefinition: true),
+                new(Count: 5, Index: 4, Column: 0, Row: 4, Rows: 5, ShouldAddRowDefinition: true),
+                new(Count: 6, Index: 5, Column: 0, Row: 5, Rows: 6, ShouldAddRowDefinition: true),
+                new(Count: 7, Index: 6, Column: 0, Row: 6, Rows: 7, ShouldAddRowDefinition: true),
+                new(Count: 8, Index: 7, Column: 0, Row: 7, Rows: 8, ShouldAddRowDefinition: true),
+                new(Count: 9, Index: 8, Column: 0, Row: 8, Rows: 9, ShouldAddRowDefinition: true),
+            ]
         };
-
-        yield return new TestCaseData(0, oneColumnCaseData);
-        yield return new TestCaseData(1, oneColumnCaseData);
-
-        yield return new TestCaseData(2, new List<GridPropertyTest>
+        IEnumerable<GridTestCase> cases =
+        [
+            zeroColumnTestData,
+            new() { Columns = 1, Tests = zeroColumnTestData.Tests },
+            new()
             {
-                new(0, 0, true, 1),
-                new(1, 0, false, 1),
-                new(0, 1, true, 2),
-                new(1, 1, false, 2),
-                new(0, 2, true, 3),
-                new(1, 2, false, 3),
-                new(0, 3, true, 4),
-                new(1, 3, false, 4),
-                new(0, 4, true, 5)
-            }
-        );
-
-        yield return new TestCaseData(3, new List<GridPropertyTest>
+                Columns = 2,
+                Tests =
+                [
+                    new(Count: 1, Index: 0, Column: 0, Row: 0, Rows: 1, ShouldAddRowDefinition: true),
+                    new(Count: 2, Index: 1, Column: 1, Row: 0, Rows: 1, ShouldAddRowDefinition: false),
+                    new(Count: 3, Index: 2, Column: 0, Row: 1, Rows: 2, ShouldAddRowDefinition: true),
+                    new(Count: 4, Index: 3, Column: 1, Row: 1, Rows: 2, ShouldAddRowDefinition: false),
+                    new(Count: 5, Index: 4, Column: 0, Row: 2, Rows: 3, ShouldAddRowDefinition: true),
+                    new(Count: 6, Index: 5, Column: 1, Row: 2, Rows: 3, ShouldAddRowDefinition: false),
+                    new(Count: 7, Index: 6, Column: 0, Row: 3, Rows: 4, ShouldAddRowDefinition: true),
+                    new(Count: 8, Index: 7, Column: 1, Row: 3, Rows: 4, ShouldAddRowDefinition: false),
+                    new(Count: 9, Index: 8, Column: 0, Row: 4, Rows: 5, ShouldAddRowDefinition: true)
+                ]
+            },
+            new()
             {
-                new(0, 0, true, 1),
-                new(1, 0, false, 1),
-                new(2, 0, false, 1),
-                new(0, 1, true, 2),
-                new(1, 1, false, 2),
-                new(2, 1, false, 2),
-                new(0, 2, true, 3),
-                new(1, 2, false, 3),
-                new(2, 2, false, 3)
+                Columns = 3,
+                Tests =
+                [
+                    new(Count: 1, Index: 0, Column: 0, Row: 0, Rows: 1, ShouldAddRowDefinition: true),
+                    new(Count: 2, Index: 1, Column: 1, Row: 0, Rows: 1, ShouldAddRowDefinition: false),
+                    new(Count: 3, Index: 2, Column: 2, Row: 0, Rows: 1, ShouldAddRowDefinition: false),
+                    new(Count: 4, Index: 3, Column: 0, Row: 1, Rows: 2, ShouldAddRowDefinition: true),
+                    new(Count: 5, Index: 4, Column: 1, Row: 1, Rows: 2, ShouldAddRowDefinition: false),
+                    new(Count: 6, Index: 5, Column: 2, Row: 1, Rows: 2, ShouldAddRowDefinition: false),
+                    new(Count: 7, Index: 6, Column: 0, Row: 2, Rows: 3, ShouldAddRowDefinition: true),
+                    new(Count: 8, Index: 7, Column: 1, Row: 2, Rows: 3, ShouldAddRowDefinition: false),
+                    new(Count: 9, Index: 8, Column: 2, Row: 2, Rows: 3, ShouldAddRowDefinition: false)
+                ]
             }
-        );
+        ];
+
+        return cases.Select(x => new TestCaseData(x));
     }
 }
 
-public record GridPropertyTest(int Column, int Row, bool ShouldAddRowDefinition, int Rows) : IAutoGridState
+public record GridPropertyTest(int Count, int Index, int Column, int Row, int Rows, bool ShouldAddRowDefinition)
+    : IAutoGridState
 {
-    public void AssertGridState(AutoGridState gridState)
+    public void AssertGridState(IAutoGridState gridState)
     {
         using var scope = new AssertionScope();
-        var data = new
-        {
-            Id = Guid
-               .NewGuid()
-               .ToString(),
-            GridState = gridState.ToString(),
-            TestData = ToString(),
-        };
 
-        scope.AddReportable(data.Id, data.ToString);
+        IAutoGridState self = this;
 
         gridState
-           .Should()
-           .BeEquivalentTo(this);
+            .Should()
+            .BeEquivalentTo(self);
+
+        if (scope.HasFailures())
+        {
+            scope.FailWith("Expected: {0}\nReceived: {1}", self, gridState);
+        }
     }
+}
+
+public record GridTestCase
+{
+    public required int Columns { get; set; }
+    public ICollection<GridPropertyTest> Tests { get; set; } = [];
 }
