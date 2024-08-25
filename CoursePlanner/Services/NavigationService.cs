@@ -28,9 +28,11 @@ public class NavigationService(
     {
         if (Current.CurrentPage is MainPage)
         {
+            logger.LogInformation("Already on main page. Creating dummy page to force navigation.");
             var dummy = new ContentPage();
             await Navigation.PushAsync(dummy);
         }
+        logger.LogInformation("Navigating to main page");
 
         await GoToAsync(nameof(MainPage));
     }
