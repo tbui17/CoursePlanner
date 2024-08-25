@@ -30,7 +30,7 @@ public partial class LoginViewModel(
             return;
         }
 
-        await navService.GoToAsync(NavigationTarget.MainPage);
+        await navService.GoToMainPageAsync();
     }
 
 
@@ -43,7 +43,7 @@ public partial class LoginViewModel(
             await appService.ShowErrorAsync(res.ToErrorString());
             return;
         }
-        await navService.GoToAsync(NavigationTarget.MainPage);
+        await navService.GoToMainPageAsync();
     }
 
     public async Task Refresh()

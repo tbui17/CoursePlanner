@@ -44,7 +44,7 @@ public class LoginViewModelTest : BasePageViewModelTest
         await Model.RegisterAsync();
 
         AppMock.VerifyReceivedError(0);
-        NavMock.Verify(x => x.GoToAsync(NavigationTarget.MainPage), Times.Once);
+        NavMock.Verify(x => x.GoToMainPageAsync(), Times.Once);
     }
 
     [Test]
@@ -54,7 +54,7 @@ public class LoginViewModelTest : BasePageViewModelTest
         Model.Password = _loginInfo.Password;
         await Model.LoginAsync();
         AppMock.VerifyReceivedError(0);
-        NavMock.Verify(x => x.GoToAsync(NavigationTarget.MainPage), Times.Once);
+        NavMock.Verify(x => x.GoToMainPageAsync(), Times.Once);
     }
 
     [Test]
@@ -66,7 +66,7 @@ public class LoginViewModelTest : BasePageViewModelTest
         Model.Password = _loginInfo.Password;
         await Model.LoginAsync();
         AppMock.VerifyReceivedError(0);
-        NavMock.Verify(x => x.GoToAsync(NavigationTarget.MainPage), Times.Once);
+        NavMock.Verify(x => x.GoToMainPageAsync(), Times.Once);
         _sessionService.IsLoggedIn.Should().BeTrue();
         _appShellViewModel.IsLoggedIn.Should().BeTrue();
     }
@@ -80,7 +80,7 @@ public class LoginViewModelTest : BasePageViewModelTest
 
         await Model.LoginAsync();
         AppMock.VerifyReceivedError();
-        NavMock.Verify(x => x.GoToAsync(It.IsAny<NavigationTarget>()), Times.Never);
+        NavMock.Verify(x => x.GoToMainPageAsync(), Times.Never);
     }
 
 
@@ -91,6 +91,6 @@ public class LoginViewModelTest : BasePageViewModelTest
         Model.Password = "";
         await Model.RegisterAsync();
         AppMock.VerifyReceivedError();
-        NavMock.Verify(x => x.GoToAsync(It.IsAny<NavigationTarget>()), Times.Never);
+        NavMock.Verify(x => x.GoToMainPageAsync(), Times.Never);
     }
 }

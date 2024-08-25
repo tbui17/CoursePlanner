@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Lib.Exceptions;
 using Lib.Interfaces;
@@ -6,14 +7,26 @@ using Lib.Models;
 using Lib.Traits;
 using Microsoft.EntityFrameworkCore;
 using ViewModels.Services;
+using PropertyChangingEventHandler = System.ComponentModel.PropertyChangingEventHandler;
 
 namespace ViewModels.PageViewModels;
+
+public interface IInstructorFormViewModel : IContact
+{
+    Task SaveAsync();
+    Task Init(int id);
+    Task RefreshAsync();
+    IAsyncRelayCommand SaveCommand { get; }
+    IAsyncRelayCommand BackCommand { get; }
+    event PropertyChangedEventHandler? PropertyChanged;
+    event PropertyChangingEventHandler? PropertyChanging;
+}
 
 public partial class InstructorFormViewModel(
     ILocalDbCtxFactory factory,
     INavigationService navService,
     IAppService appService)
-    : ObservableObject, IContact
+    : ObservableObject, IInstructorFormViewModel
 {
     [ObservableProperty]
     private string _title = "Instructor Form";
@@ -30,7 +43,8 @@ public partial class InstructorFormViewModel(
     [ObservableProperty]
     private string _phone = "";
 
-    public Func<Instructor, Task<DomainException?>>? InstructorPersistence;
+    public Func<Instructor, Task<DomainException?>> InstructorPersistence { get; set; } =
+        _ => Task.FromResult<DomainException?>(null);
 
     [RelayCommand]
     public async Task SaveAsync()
@@ -73,57 +87,91 @@ public partial class InstructorFormViewModel(
     {
         await Init(Id);
     }
+}
 
-    public void SetEditing(int instructorId)
+public class InstructorFormViewModelFactory(
+    ILocalDbCtxFactory factory,
+    INavigationService navService,
+    IAppService appService
+)
+{
+    public IInstructorFormViewModel CreateAddingModel()
     {
-        Title = "Edit Instructor";
-        Id = instructorId;
+        var model = CreateModel();
+        SetAdding();
 
-        InstructorPersistence = async instructor =>
+        return model;
+
+        void SetAdding()
         {
-            if (instructor.Validate() is { } e)
+            model.Title = "Add Instructor";
+            model.InstructorPersistence = async instructor =>
             {
-                return e;
-            }
+                if (instructor.Validate() is { } e)
+                {
+                    return e;
+                }
 
+                await using var db = await factory.CreateDbContextAsync();
 
-            await using var db = await factory.CreateDbContextAsync();
+                if (await ValidateNoDuplicateEmail(db, instructor.Email) is { } exc)
+                {
+                    return exc;
+                }
 
-            if (await ValidateNoDuplicateEmail(db, instructor.Email, instructorId) is { } exc)
-            {
-                return exc;
-            }
+                db.Instructors.Add(instructor);
+                await db.SaveChangesAsync();
 
-            var editModel = await db.Instructors.FirstAsync(x => x.Id == instructorId);
-
-            editModel.SetFromContactField(this);
-            await db.SaveChangesAsync();
-            return null;
-        };
+                return null;
+            };
+        }
     }
 
-    public void SetAdding()
+    private InstructorFormViewModel CreateModel()
     {
-        Title = "Add Instructor";
-        InstructorPersistence = async instructor =>
+        return new InstructorFormViewModel(factory, navService, appService);
+    }
+
+    public IInstructorFormViewModel CreateEditingModel(int instructorId)
+    {
+        var model = CreateModel();
+        SetEditing();
+        return model;
+
+        void SetEditing()
         {
-            if (instructor.Validate() is { } e)
+            model.Title = "Edit Instructor";
+            model.Id = instructorId;
+
+            model.InstructorPersistence = async instructor =>
             {
-                return e;
-            }
+                if (instructor.Validate() is { } e)
+                {
+                    return e;
+                }
 
-            await using var db = await factory.CreateDbContextAsync();
 
-            if (await ValidateNoDuplicateEmail(db, instructor.Email) is { } exc)
-            {
-                return exc;
-            }
+                await using var db = await factory.CreateDbContextAsync();
 
-            db.Instructors.Add(instructor);
-            await db.SaveChangesAsync();
+                if (await ValidateNoDuplicateEmail(db, instructor.Email, instructorId) is { } exc)
+                {
+                    return exc;
+                }
 
-            return null;
-        };
+                var editModel = await db.Instructors.FirstAsync(x => x.Id == instructorId);
+
+                editModel.SetFromContactField(model);
+                await db.SaveChangesAsync();
+                return null;
+            };
+        }
+    }
+
+    public async Task<IInstructorFormViewModel> CreateInitializedEditingModel(int instructorId)
+    {
+        var model = CreateEditingModel(instructorId);
+        await model.Init(instructorId);
+        return model;
     }
 
     private static async Task<DomainException?> ValidateNoDuplicateEmail(LocalDbCtx db, string email, int? id = null)
@@ -136,12 +184,12 @@ public partial class InstructorFormViewModel(
             baseQuery = baseQuery.Where(x => x.Id != instructorId);
         }
 
-        var maybeDuplicateEmail = await baseQuery
-            .Select(x => x.Email)
-            .FirstOrDefaultAsync();
-
-        return maybeDuplicateEmail is not null
-            ? new DomainException("Email already exists.")
-            : null;
+        return await baseQuery
+                .Select(x => x.Email)
+                .FirstOrDefaultAsync() switch
+            {
+                not null => new DomainException("Email already exists."),
+                _ => null
+            };
     }
 }

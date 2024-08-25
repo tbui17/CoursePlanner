@@ -45,25 +45,33 @@ public static class MauiProgram
             )
             .AddDbContextFactory<LocalDbCtx>(lifetime: ServiceLifetime.Transient)
             .AddSingleton<AppService>()
-            .AddSingleton<INavigationService, AppService>()
+            .AddSingleton<INavigationService, NavigationService>()
             .AddSingleton<IAppService, AppService>()
-            .AddSingleton<ILocalNotificationService, LocalNotificationService>()
+            .AddSingleton<ILocalNotificationService, LocalNotificationService>(x =>
+            {
+                var instance = x.CreateInstance<LocalNotificationService>();
+                instance.StartListening();
+                return instance;
+            })
+            .AddSingleton<AppShell>()
+            .AddSingleton<ISessionService, SessionService>()
             .AddTransient<MainViewModel>()
             .AddTransient<MainPage>()
-            .AddSingleton<AppShell>()
-            .AddKeyedTransient<MainPage>(nameof(NavigationTarget.MainPage), (x, _) =>
-            {
-                var page = x.CreateInstance<MainPage>();
-                return page;
-            })
-            .AddTransient<DetailedTermPage, DetailedTermViewModel>()
-            .AddTransient<EditTermPage, EditTermViewModel>()
-            .AddTransient<DetailedCoursePage, DetailedCourseViewModel>()
-            .AddTransient<EditCoursePage, EditCourseViewModel>()
-            .AddTransient<InstructorFormPage, InstructorFormViewModel>()
-            .AddTransient<EditNotePage, EditNoteViewModel>()
-            .AddTransient<EditAssessmentPage, EditAssessmentViewModel>()
-            .AddTransient<PageResolver>()
+            .AddTransient<DetailedTermViewModel>()
+            .AddTransient<DetailedTermPage>()
+            .AddTransient<EditTermPage>()
+            .AddTransient<EditTermViewModel>()
+            .AddTransient<DetailedCoursePage>()
+            .AddTransient<DetailedCourseViewModel>()
+            .AddTransient<EditCoursePage>()
+            .AddTransient<EditCourseViewModel>()
+            .AddTransient<InstructorFormViewModelFactory>()
+            // .AddTransient<InstructorFormViewModel>() // see InstructorFormViewModelFactory
+            // .AddTransient<InstructorFormPage>()
+            .AddTransient<EditNotePage>()
+            .AddTransient<EditNoteViewModel>()
+            .AddTransient<EditAssessmentPage>()
+            .AddTransient<EditAssessmentViewModel>()
             .AddTransient<LoginViewModel>()
             .AddTransient<TermViewModel>()
             .AddTransient<TermListView>()
@@ -72,7 +80,6 @@ public static class MauiProgram
             .AddTransient<LoginView>()
             .AddTransient<NotificationDataPage>()
             .AddTransient<NotificationDataViewModel>()
-            .AddSingleton<ISessionService, SessionService>()
             .AddTransient<AppShellViewModel>();
 
         builder.Logging.AddConsole();
@@ -95,7 +102,8 @@ public static class MauiProgram
     }
 }
 
-public static class ContainerExtensions
+
+file static class ContainerExtensions
 {
     public static T CreateInstance<T>(this IServiceProvider provider)
     {

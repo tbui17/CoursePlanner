@@ -19,7 +19,6 @@ public class LocalNotificationService(
     ILogger<ILocalNotificationService> logger)
     : ILocalNotificationService
 {
-    // ReSharper disable once NotAccessedField.Local Avoid losing reference to timer
     private Timer? _notificationJob;
 
     public event EventHandler<NotificationEventArgs>? NotificationReceived;
@@ -86,6 +85,11 @@ public class LocalNotificationService(
 
     public void StartListening()
     {
+        if (_notificationJob is not null)
+        {
+            logger.LogInformation("Notification timer already exists. Refusing to create another.");
+            return;
+        }
         var time = TimeSpan.FromDays(1);
         logger.LogInformation("Created notification timer with {Time}", time);
         _notificationJob = new Timer(
