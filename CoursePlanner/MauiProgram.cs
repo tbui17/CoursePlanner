@@ -36,11 +36,16 @@ public static class MauiProgram
 
         Configs
             .ConfigBackendServices(builder.Services)
-            .AddDbContext<LocalDbCtx>(x => x
-                    .UseSqlite($"DataSource={FileSystem.Current.AppDataDirectory}/database.db")
-                    // .EnableSensitiveDataLogging()
-                    // .EnableDetailedErrors()
-                    .LogTo(Console.WriteLine),
+            .AddDbContext<LocalDbCtx>(b =>
+                {
+                    b
+                        .UseSqlite($"DataSource={FileSystem.Current.AppDataDirectory}/database.db")
+                        .LogTo(Console.WriteLine);
+#if DEBUG
+                    b.EnableSensitiveDataLogging();
+                    b.EnableDetailedErrors();
+#endif
+                },
                 ServiceLifetime.Transient
             )
             .AddDbContextFactory<LocalDbCtx>(lifetime: ServiceLifetime.Transient)
@@ -101,7 +106,6 @@ public static class MauiProgram
         return app;
     }
 }
-
 
 file static class ContainerExtensions
 {
