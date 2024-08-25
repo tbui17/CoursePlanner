@@ -36,9 +36,8 @@ public static class Globals
            .AddTransient<EditAssessmentViewModel>()
            .AddTransient<EditCourseViewModel>()
            .AddTransient<EditTermViewModel>()
-           .AddTransient<InstructorFormViewModel>()
            .AddTransient<MainViewModel>()
-
+           .AddTransient<InstructorFormViewModelFactory>()
            .AddSingleton<ILocalNotificationService, LocalNotificationService>()
            .AddTransient<ISessionService, SessionService>()
            .AddTransient<AppShellViewModel>();

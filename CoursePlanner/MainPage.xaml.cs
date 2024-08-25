@@ -1,5 +1,4 @@
-﻿
-using CoursePlanner.Views;
+﻿using CoursePlanner.Views;
 using ViewModels.PageViewModels;
 using ViewModels.Services;
 
@@ -14,18 +13,15 @@ public partial class MainPage : ContentPage
     private readonly ISessionService _sessionService;
     private readonly IServiceProvider _provider;
 
-    public MainPage(MainViewModel model, IServiceProvider provider, ILocalNotificationService localNotificationService, ISessionService sessionService)
+    public MainPage(MainViewModel model, IServiceProvider provider, ILocalNotificationService localNotificationService,
+        ISessionService sessionService)
     {
-
+        _sessionService = sessionService;
+        _provider = provider;
         _localNotificationService = localNotificationService;
         Model = model;
         InitializeComponent();
         BindingContext = this;
-        _sessionService = sessionService;
-        _provider = provider;
-
-
-
     }
 
     private void SetView(IView view)
@@ -44,9 +40,9 @@ public partial class MainPage : ContentPage
         }
         else
         {
-            SetView( _provider.GetRequiredService<LoginView>());
-
+            SetView(_provider.GetRequiredService<LoginView>());
         }
+
         base.OnAppearing();
         await _localNotificationService.RequestNotificationPermissions();
     }

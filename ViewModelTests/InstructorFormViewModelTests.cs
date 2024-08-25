@@ -6,45 +6,30 @@ using Lib.Utils;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using ViewModels.PageViewModels;
-using ViewModels.Services;
 
 namespace ViewModelTests;
 
-public class InstructorFormViewModelTests : BaseDbTest
+public class InstructorFormViewModelTests : BasePageViewModelTest
 {
     [SetUp]
     public override async Task Setup()
     {
         await base.Setup();
-        Db = GetDb();
-        NavMock = new Mock<INavigationService>();
-        AppMock = new Mock<IAppService>();
-        Model = new InstructorFormViewModel(factory: Resolve<ILocalDbCtxFactory>(), NavMock.Object, AppMock.Object);
+
+        ViewModelFactory =
+            new InstructorFormViewModelFactory(factory: Resolve<ILocalDbCtxFactory>(), NavMock.Object, AppMock.Object);
     }
 
-    public Mock<IAppService> AppMock { get; set; }
-
-    public Mock<INavigationService> NavMock { get; set; }
-
-    public InstructorFormViewModel Model { get; set; }
-
-    public LocalDbCtx Db { get; set; }
-
-    [TearDown]
-    public async Task TearDown()
-    {
-        await Db.DisposeAsync();
-    }
-
+    private InstructorFormViewModelFactory ViewModelFactory { get; set; }
 
     [Test]
     public async Task SaveAsync_InvalidPhone_AlertsApp()
     {
-        Model.SetAdding();
-        Model.Name = "Test 123";
-        Model.Email = "asdjqisfj@mail.com";
-        Model.Phone = "aaaaaa";
-        await Model.SaveAsync();
+        var model = ViewModelFactory.CreateAddingModel();
+        model.Name = "Test 123";
+        model.Email = "asdjqisfj@mail.com";
+        model.Phone = "aaaaaa";
+        await model.SaveAsync();
         AppMock.Verify(x => x.ShowErrorAsync(It.IsAny<string>()), Times.Once);
     }
 
@@ -58,22 +43,22 @@ public class InstructorFormViewModelTests : BaseDbTest
     [Test]
     public async Task SaveAsync_DuplicateEmailAdding_AlertsApp()
     {
+        var model = ViewModelFactory.CreateAddingModel();
         var first = Db.Instructors.First();
-        Model.SetAdding();
-        SetValidValues(Model);
-        Model.Email = first.Email;
-        await Model.SaveAsync();
+        SetValidValues(model);
+        model.Email = first.Email;
+        await model.SaveAsync();
         AppMock.Verify(x => x.ShowErrorAsync(It.IsAny<string>()));
     }
 
     [Test]
     public async Task SaveAsync_DuplicateEmailEditing_AlertsApp()
     {
-        var first = Db.Instructors.First();
-        Model.SetEditing(3);
-        SetValidValues(Model);
-        Model.Email = first.Email;
-        await Model.SaveAsync();
+        var model = await ViewModelFactory.CreateInitializedEditingModel(3);
+        var first = Db.Instructors.First(x => x.Id == 1);
+        SetValidValues(model);
+        model.Email = first.Email;
+        await model.SaveAsync();
         AppMock.Verify(x => x.ShowErrorAsync(It.IsAny<string>()));
     }
 
@@ -84,11 +69,11 @@ public class InstructorFormViewModelTests : BaseDbTest
     [TestCase("", "abc@mail.com", "2222222")]
     public async Task SaveAsync_AnyEmptyFields_AlertsApp(string name, string email, string phone)
     {
-        Model.SetAdding();
-        Model.Name = name;
-        Model.Email = email;
-        Model.Phone = phone;
-        await Model.SaveAsync();
+        var model = ViewModelFactory.CreateAddingModel();
+        model.Name = name;
+        model.Email = email;
+        model.Phone = phone;
+        await model.SaveAsync();
         AppMock.Verify(x => x.ShowErrorAsync(It.IsAny<string>()), Times.Once);
     }
 
@@ -140,15 +125,15 @@ public class InstructorFormViewModelTests : BaseDbTest
     [TestCaseSource(nameof(InstructorAdd))]
     public async Task SaveAsync_Add_Valid_PersistsChanges(Instructor arg)
     {
-        Model.SetAdding();
-        Model.Name = arg.Name;
-        Model.Email = arg.Email;
-        Model.Phone = arg.Phone;
+        var model = ViewModelFactory.CreateAddingModel();
+        model.Name = arg.Name;
+        model.Email = arg.Email;
+        model.Phone = arg.Phone;
 
         using var scope = new AssertionScope();
 
 
-        await Model.SaveAsync();
+        await model.SaveAsync();
 
         var res = await Db.Instructors.Where(x => x.Name == arg.Name).ToListAsync();
         res.Should().ContainSingle();
@@ -162,21 +147,19 @@ public class InstructorFormViewModelTests : BaseDbTest
     {
         var initial = await Db.Instructors.AsNoTracking().FirstAsync(x => x.Id == id);
         var unexpected = new { initial.Name, initial.Email, initial.Phone };
-
-        Model.SetEditing(id);
-        await Model.Init(id);
+        var model = await ViewModelFactory.CreateInitializedEditingModel(id);
 
         const string name = "Amnfoiwjefi2";
 
-        Model.Name = name;
-        Model.Email = "abcde@mail.com";
-        Model.Phone = "(888) 123-4567";
+        model.Name = name;
+        model.Email = "abcde@mail.com";
+        model.Phone = "(888) 123-4567";
 
 
         using var scope = new AssertionScope();
 
 
-        await Model.SaveAsync();
+        await model.SaveAsync();
 
         var res = await Db.Instructors.Where(x => x.Name == name).ToListAsync();
         var subj = res.Should().ContainSingle().Subject;

@@ -4,7 +4,7 @@ namespace CoursePlanner.Pages;
 
 public partial class InstructorFormPage : ContentPage
 {
-    public InstructorFormPage(InstructorFormViewModel model)
+    public InstructorFormPage(IInstructorFormViewModel model)
     {
         Model = model;
         InitializeComponent();
@@ -12,7 +12,7 @@ public partial class InstructorFormPage : ContentPage
         BindingContext = Model;
     }
 
-    public InstructorFormViewModel Model { get; set; }
+    public IInstructorFormViewModel Model { get; set; }
 
     protected override async void OnAppearing()
     {
