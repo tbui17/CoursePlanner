@@ -1,4 +1,6 @@
-﻿using Lib;
+﻿using AutoFixture;
+using AutoFixture.AutoMoq;
+using Lib;
 using Lib.Models;
 using Lib.Utils;
 using Microsoft.EntityFrameworkCore;
@@ -41,12 +43,13 @@ public static class Globals
             .AddTransient<EditCourseViewModel>()
             .AddTransient<EditTermViewModel>()
             .AddTransient<MainViewModel>()
+            .AddTransient<AppShellViewModel>()
             .AddTransient<InstructorFormViewModelFactory>()
             .AddSingleton<ILocalNotificationService, LocalNotificationService>()
             .AddTransient<ISessionService, SessionService>()
             .AddTransientRefreshable<TermViewModel>()
-            .AddTransient<ReflectionUtil>(_ => new ReflectionUtil{AssemblyNames = [nameof(ViewModelTests),nameof(ViewModels)]})
-            .AddTransient<AppShellViewModel>();
+            .AddTransient<ReflectionUtil>(_ => new ReflectionUtil
+                { AssemblyNames = [nameof(ViewModelTests), nameof(ViewModels)] });
 
         services.AddLogging(b => b.AddConsole());
 
@@ -70,4 +73,16 @@ public static class Globals
         Provider
             .GetRequiredService<ILocalDbCtxFactory>()
             .CreateDbContext();
+
+    public static IFixture CreateFixture()
+    {
+        var fixture = new Fixture().Customize(new AutoMoqCustomization());
+        fixture.Behaviors.OfType<ThrowingRecursionBehavior>()
+            .ToList()
+            .ForEach(b => fixture.Behaviors.Remove(b));
+        fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+        return fixture;
+    }
+
+    public static T CreateMock<T>() where T : class => CreateFixture().Create<T>();
 }
