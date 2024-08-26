@@ -46,7 +46,7 @@ public static class UtilExtensions
         }
     }
 
-    public static string SpaceBetweenUppers(this string text)
+    public static string PascalCaseToPascalSentence(this string text)
     {
         var sb = new StringBuilder();
 
