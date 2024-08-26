@@ -30,11 +30,14 @@ public partial class DetailedTermViewModel(ILocalDbCtxFactory factory, INavigati
     public async Task Init(int id)
     {
         Id = id;
+        SelectedCourse = null;
         await using var db = await factory.CreateDbContextAsync();
         var res = await db
                .Terms
                .Include(x => x.Courses)
                .ThenInclude(x => x.Instructor)
+               .AsNoTracking()
+               .AsSplitQuery()
                .FirstOrDefaultAsync(x => x.Id == id) ??
             new();
         Term = res;
