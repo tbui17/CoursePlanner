@@ -17,6 +17,7 @@
       </PackageReference>
       <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.6" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.6" />
+      <PackageReference Include="TaskTupleAwaiter" Version="2.1.0" />
     </ItemGroup>
 
     <ItemGroup>

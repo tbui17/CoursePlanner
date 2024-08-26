@@ -96,10 +96,10 @@ public partial class DetailedCourseViewModel : ObservableObject, IRefresh
     {
         Id = id;
         SelectedNote = null;
+        SelectedInstructor = null;
         await using var db = await _factory.CreateDbContextAsync();
-        var course = await _courseService.GetFullCourse(id) ?? new();
-
-        var instructors = await db.Instructors.ToListAsync();
+        var (maybeCourse, instructors) = await _courseService.GetDetailedCourseViewData(id);
+        var course = maybeCourse ?? new();
         SetInstructors();
 
         Course = course;
@@ -110,8 +110,6 @@ public partial class DetailedCourseViewModel : ObservableObject, IRefresh
         void SetInstructors()
         {
             var instructorCollection = instructors.ToObservableCollection();
-            // must deselect or MAUI will throw unexpected range exception.
-            SelectedInstructor = null;
             Instructors = instructorCollection;
             SelectedInstructor = instructorCollection.FirstOrDefault(x => x.Id == course.Instructor?.Id);
         }
