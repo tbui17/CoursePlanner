@@ -1,8 +1,5 @@
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.Mvvm.Messaging.Messages;
 using Lib.Models;
-using ViewModels.PageViewModels;
 
 namespace ViewModels.Events;
 
