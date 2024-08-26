@@ -8,9 +8,7 @@ namespace ViewModels.Events;
 
 public record NavigationEventArg(Page Page, int Id = 0);
 
-public class NavigationEvent(NavigationEventArg arg) : ValueChangedMessage<NavigationEventArg>(arg)
-{
-}
+public class NavigationEvent(NavigationEventArg arg) : ValueChangedMessage<NavigationEventArg>(arg);
 
 public class NavigationSubject(ReflectionUtil util, ILogger<NavigationSubject> logger)
 {
