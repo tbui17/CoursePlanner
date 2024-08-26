@@ -2,7 +2,7 @@
 
 namespace Lib.Models;
 
-public class Note : IEntity
+public class Note : INoteField
 {
     public int Id { get; set; }
 
