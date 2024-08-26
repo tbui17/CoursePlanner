@@ -3,7 +3,7 @@ using Lib.Utils;
 
 namespace Lib.Models;
 
-public interface ICourseForm : INotification
+public interface ICourseField : INotification
 {
     new DateTime Start { get; set; }
     new DateTime End { get; set; }
@@ -12,7 +12,7 @@ public interface ICourseForm : INotification
     string Status { get; set; }
 }
 
-public class Course : ICourseForm
+public class Course : ICourseField
 {
     public const string PlanToTake = "Plan to Take";
     public const string InProgress = "In Progress";

@@ -19,8 +19,8 @@ public static class AssignmentTrait
         return self;
     }
 
-    public static T SetFromCourseForm<T, T2>(this T self, T2 other)
-        where T : ICourseForm where T2 : ICourseForm
+    public static T SetFromCourseField<T, T2>(this T self, T2 other)
+        where T : ICourseField where T2 : ICourseField
     {
         self.Status = other.Status;
         self.Start = other.Start;
