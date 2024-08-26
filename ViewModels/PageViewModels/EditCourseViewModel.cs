@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using Lib.Models;
 using Lib.Traits;
 using Microsoft.EntityFrameworkCore;
+using ViewModels.Interfaces;
 using ViewModels.Services;
 
 namespace ViewModels.PageViewModels;
@@ -13,7 +14,7 @@ public partial class EditCourseViewModel(
     ILocalDbCtxFactory factory,
     INavigationService navService,
     IAppService appService)
-    : ObservableObject, ICourseForm
+    : ObservableObject, ICourseForm, IRefresh
 {
     public ObservableCollection<string> Statuses { get; } = Course.Statuses.ToObservableCollection();
 

@@ -6,16 +6,16 @@ using Lib.Interfaces;
 using Lib.Models;
 using Lib.Traits;
 using Microsoft.EntityFrameworkCore;
+using ViewModels.Interfaces;
 using ViewModels.Services;
 using PropertyChangingEventHandler = System.ComponentModel.PropertyChangingEventHandler;
 
 namespace ViewModels.PageViewModels;
 
-public interface IInstructorFormViewModel : IContact
+public interface IInstructorFormViewModel : IContact, IRefresh
 {
     Task SaveAsync();
     Task Init(int id);
-    Task RefreshAsync();
     IAsyncRelayCommand SaveCommand { get; }
     IAsyncRelayCommand BackCommand { get; }
     event PropertyChangedEventHandler? PropertyChanged;

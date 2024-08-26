@@ -35,7 +35,7 @@ public partial class MainPage : ContentPage
         if (_sessionService.IsLoggedIn)
         {
             var view = _provider.GetRequiredService<TermListView>();
-            await view.Model.Refresh();
+            await view.Model.RefreshAsync();
             SetView(view);
         }
         else

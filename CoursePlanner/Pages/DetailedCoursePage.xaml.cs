@@ -1,8 +1,9 @@
-﻿using ViewModels.PageViewModels;
+﻿using ViewModels.Interfaces;
+using ViewModels.PageViewModels;
 
 namespace CoursePlanner.Pages;
 
-public partial class DetailedCoursePage
+public partial class DetailedCoursePage : IRefreshableView<DetailedCourseViewModel>
 {
     public DetailedCourseViewModel Model { get; }
 

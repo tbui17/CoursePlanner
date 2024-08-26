@@ -7,7 +7,7 @@
     x:DataType="pageViewModels:AppShellViewModel"
     FlyoutBehavior="Flyout" Title="CoursePlanner" >
 
-    <ShellContent ContentTemplate="{DataTemplate local:MainPage}" Title="Terms" Route="MainPage" />
+    <ShellContent ContentTemplate="{DataTemplate local:MainPage}" Title="Main" Route="MainPage" />
     <ShellContent ContentTemplate="{DataTemplate pages:DevPage}" Title="Developer Util" Route="DevPage" />
     <ShellContent ContentTemplate="{DataTemplate pages:NotificationDataPage}" Title="Notification Data" Route="NotificationData" IsVisible="{Binding IsLoggedIn}"  />
 
