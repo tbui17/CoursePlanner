@@ -14,7 +14,7 @@ public partial class EditCourseViewModel(
     ILocalDbCtxFactory factory,
     INavigationService navService,
     IAppService appService)
-    : ObservableObject, ICourseForm, IRefresh
+    : ObservableObject, ICourseField, IRefresh
 {
     public ObservableCollection<string> Statuses { get; } = Course.Statuses.ToObservableCollection();
 
@@ -36,7 +36,7 @@ public partial class EditCourseViewModel(
     [ObservableProperty]
     private string _selectedStatus = Course.Statuses.First();
 
-    string ICourseForm.Status
+    string ICourseField.Status
     {
         get => SelectedStatus;
         set => SelectedStatus = value;
@@ -58,7 +58,7 @@ public partial class EditCourseViewModel(
             .AsTracking()
             .FirstAsync(x => x.Id == Id);
 
-        course.SetFromCourseForm(this);
+        course.SetFromCourseField(this);
         await db.SaveChangesAsync();
         await BackAsync();
     }
@@ -78,7 +78,7 @@ public partial class EditCourseViewModel(
                          .FirstOrDefaultAsync(x => x.Id == id) ??
                      new();
 
-        this.SetFromCourseForm(course);
+        this.SetFromCourseField(course);
     }
 
     public async Task RefreshAsync()

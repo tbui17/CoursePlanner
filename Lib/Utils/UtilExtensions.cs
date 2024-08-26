@@ -49,6 +49,7 @@ public static class UtilExtensions
     public static string PascalCaseToPascalSentence(this string text)
     {
         var sb = new StringBuilder();
+        sb.Append(char.ToUpper(text[0]));
 
         foreach (var c in text)
         {
