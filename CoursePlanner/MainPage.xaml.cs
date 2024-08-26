@@ -45,5 +45,6 @@ public partial class MainPage
 
         base.OnAppearing();
         await _localNotificationService.RequestNotificationPermissions();
+
     }
 }

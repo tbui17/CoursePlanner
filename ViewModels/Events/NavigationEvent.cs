@@ -6,7 +6,7 @@ using ViewModels.Utils;
 
 namespace ViewModels.Events;
 
-public record NavigationEventArg(Page Page, int Id = 0);
+public record NavigationEventArg(Type Page, int Id = 0);
 
 public class NavigationEvent(NavigationEventArg arg) : ValueChangedMessage<NavigationEventArg>(arg);
 
@@ -14,7 +14,7 @@ public class NavigationSubject(ReflectionUtil util, ILogger<NavigationSubject> l
 {
     public void Publish(NavigationEventArg arg)
     {
-        logger.LogInformation("Publishing navigation event for {PageTitle}", arg.Page.Title);
+        logger.LogInformation("Publishing navigation event for {PageTitle}", arg.Page.Name);
         new NavigationEvent(arg).Publish();
     }
 
@@ -28,7 +28,7 @@ public class NavigationSubject(ReflectionUtil util, ILogger<NavigationSubject> l
 
         WeakReferenceMessenger.Default.Register<NavigationEvent>(obj, (_, message) =>
         {
-            var pageType = message.Value.Page.GetType();
+            var pageType = message.Value.Page;
             var isFound = util
                 .GetRefreshableViewsContainingTarget(obj.GetType())
                 .Any(x => x == pageType);

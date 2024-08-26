@@ -14,10 +14,4 @@ public partial class EditCoursePage : IRefreshableView<EditCourseViewModel>
         HideSoftInputOnTapped = true;
         BindingContext = Model;
     }
-
-    protected override async void OnAppearing()
-    {
-        base.OnAppearing();
-        await Model.RefreshAsync();
-    }
 }
