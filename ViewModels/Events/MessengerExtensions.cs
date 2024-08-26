@@ -14,31 +14,4 @@ public static class MessengerExtensions
     {
         WeakReferenceMessenger.Default.Send(message);
     }
-
-    public static void SubscribeNavigation(this ObservableObject observableObject, Action<NavigationEvent> action)
-    {
-        WeakReferenceMessenger.Default.Register<NavigationEvent>(observableObject, (_, message) =>
-        {
-            var observableType = observableObject.GetType();
-            var type = message.Value.GetType();
-            var constructors = type.GetConstructors();
-            var res = constructors
-                .SelectMany(x => x.GetParameters())
-                .Select(x => x.ParameterType)
-                .FirstOrDefault(x =>
-                {
-                    if (x.IsInterface)
-                    {
-                        return x.IsAssignableFrom(observableType);
-                    }
-
-                    return x == observableType;
-                });
-
-            if (res is not null)
-            {
-                action(message);
-            }
-        });
-    }
 }

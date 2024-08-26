@@ -2,7 +2,7 @@
 using Moq;
 using ViewModels.Services;
 
-namespace ViewModelTests;
+namespace ViewModelTests.TestSetup;
 
 public abstract class BasePageViewModelTest : BaseDbTest
 {

@@ -6,11 +6,13 @@ using CoursePlanner.Utils;
 using CoursePlanner.Views;
 using Lib;
 using Lib.Models;
+using Lib.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Plugin.LocalNotification;
 using ViewModels.PageViewModels;
 using ViewModels.Services;
+using ViewModels.Utils;
 
 namespace CoursePlanner;
 
@@ -85,7 +87,8 @@ public static class MauiProgram
             .AddTransient<DbSetup>()
             .AddTransient<LoginView>()
             .AddTransient<NotificationDataPage>()
-            .AddTransient<NotificationDataViewModel>();
+            .AddTransient<NotificationDataViewModel>()
+            .AddTransient<ReflectionUtil>(_ => new ReflectionUtil { AssemblyNames = [nameof(CoursePlanner)] });
 
         builder.Logging.AddConsole();
 
@@ -105,28 +108,4 @@ public static class MauiProgram
 
         return app;
     }
-}
-
-file static class ContainerExtensions
-{
-    public static T CreateInstance<T>(this IServiceProvider provider)
-    {
-        return ActivatorUtilities.CreateInstance<T>(provider);
-    }
-
-    public static IServiceCollection AddTransient2<T>(this IServiceCollection services, Func<AddTransientCtx<T>, T> fn)
-        where T : class
-    {
-        services.AddTransient(provider =>
-        {
-            var instance = fn(new AddTransientCtx<T>(provider.CreateInstance<T>(), provider));
-            return instance;
-        });
-        return services;
-    }
-
-    public record AddTransientCtx<T>(T Instance, IServiceProvider Provider)
-    {
-        public static implicit operator T(AddTransientCtx<T> ctx) => ctx.Instance;
-    };
 }

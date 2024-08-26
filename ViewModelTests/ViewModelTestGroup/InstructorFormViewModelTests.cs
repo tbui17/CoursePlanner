@@ -6,8 +6,9 @@ using Lib.Utils;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using ViewModels.PageViewModels;
+using ViewModelTests.TestSetup;
 
-namespace ViewModelTests;
+namespace ViewModelTests.ViewModelTestGroup;
 
 public class InstructorFormViewModelTests : BasePageViewModelTest
 {

@@ -2,9 +2,7 @@
 using CommunityToolkit.Maui.Core.Extensions;
 using Microsoft.EntityFrameworkCore;
 using ViewModels.Interfaces;
-
 namespace ViewModels.PageViewModels;
-
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Lib.Models;
@@ -19,6 +17,7 @@ public partial class TermViewModel(ILocalDbCtxFactory factory, INavigationServic
     [ObservableProperty]
     private Term? _selectedTerm;
 
+
     public async Task Init()
     {
         await using var db = await factory.CreateDbContextAsync();
@@ -26,13 +25,17 @@ public partial class TermViewModel(ILocalDbCtxFactory factory, INavigationServic
             .Terms
             .Include(x => x.Courses)
             .ToListAsync();
-
         Terms = res.ToObservableCollection();
     }
 
     public async Task RefreshAsync()
     {
         await Init();
+    }
+
+    public Task Init(int _)
+    {
+        return Init();
     }
 
     [RelayCommand]
@@ -76,4 +79,6 @@ public partial class TermViewModel(ILocalDbCtxFactory factory, INavigationServic
             .ExecuteDeleteAsync();
         await Init();
     }
+
+
 }
