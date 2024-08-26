@@ -4,7 +4,7 @@ using ViewModels.Services;
 
 namespace CoursePlanner;
 
-public partial class MainPage : ContentPage
+public partial class MainPage
 {
     private readonly ILocalNotificationService _localNotificationService;
 
