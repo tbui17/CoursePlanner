@@ -14,7 +14,7 @@ public class NavigationEventTest
         var model2 = Resolve<TermViewModel>();
         model.Terms.Should().BeEmpty();
         var subj = Resolve<NavigationSubject>();
-        subj.Publish(new NavigationEventArg(new TestPage(), 1));
+        subj.Publish(new NavigationEventArg(typeof(TestPage), 1));
         await Task.Delay(200);
         var model3 = Resolve<TermViewModel>();
         model3.Terms.Should().BeEmpty();
@@ -23,7 +23,7 @@ public class NavigationEventTest
         model3.Terms.Clear();
         model.Terms.Clear();
         model2.Terms.Clear();
-        subj.Publish(new NavigationEventArg(new TestPage(), 2));
+        subj.Publish(new NavigationEventArg(typeof(TestPage), 2));
         await Task.Delay(200);
         model3.Terms.Should().NotBeEmpty();
         model.Terms.Should().NotBeEmpty();
@@ -37,10 +37,10 @@ public class NavigationEventTest
         var model = Resolve<TermViewModel>();
         model.Terms.Should().BeEmpty();
         var subj = Resolve<NavigationSubject>();
-        subj.Publish(new NavigationEventArg(new TestPage2(), 1));
+        subj.Publish(new NavigationEventArg(typeof(TestPage2), 1));
         await Task.Delay(200);
         model.Terms.Should().BeEmpty();
-        subj.Publish(new NavigationEventArg(new TestPage(), 1));
+        subj.Publish(new NavigationEventArg(typeof(TestPage), 1));
         await Task.Delay(200);
         model.Terms.Should().NotBeEmpty();
 

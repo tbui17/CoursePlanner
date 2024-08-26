@@ -46,16 +46,6 @@ public static class Globals
         return services.BuildServiceProvider();
     }
 
-    private static IServiceCollection AddTransientRefreshable<T>(this IServiceCollection services)
-        where T : class, IRefresh =>
-        services.AddTransient<T>(x =>
-        {
-            var subj = x.GetRequiredService<NavigationSubject>();
-            var instance = x.CreateInstance<T>();
-            subj.Subscribe(instance);
-            return instance;
-        });
-
     public static T Resolve<T>() where T : notnull => Provider.GetRequiredService<T>();
 
 

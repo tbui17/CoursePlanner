@@ -14,10 +14,4 @@ public partial class EditNotePage : IRefreshableView<EditNoteViewModel>
     }
 
     public EditNoteViewModel Model { get; set; }
-
-    protected override async void OnAppearing()
-    {
-        base.OnAppearing();
-        await Model.RefreshAsync();
-    }
 }

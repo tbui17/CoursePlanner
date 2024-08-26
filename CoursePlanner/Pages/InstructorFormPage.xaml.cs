@@ -14,10 +14,4 @@ public partial class InstructorFormPage : IRefreshableView<IInstructorFormViewMo
     }
 
     public IInstructorFormViewModel Model { get; set; }
-
-    protected override async void OnAppearing()
-    {
-        base.OnAppearing();
-        await Model.RefreshAsync();
-    }
 }

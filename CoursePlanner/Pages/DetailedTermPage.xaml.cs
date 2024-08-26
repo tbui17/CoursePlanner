@@ -14,11 +14,4 @@ public partial class DetailedTermPage : IRefreshableView<DetailedTermViewModel>
         HideSoftInputOnTapped = true;
         BindingContext = model;
     }
-
-
-    protected override async void OnAppearing()
-    {
-        base.OnAppearing();
-        await Model.RefreshAsync();
-    }
 }
