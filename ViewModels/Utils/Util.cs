@@ -5,20 +5,20 @@ namespace ViewModels.Utils;
 
 public interface IRefreshableViewCache
 {
-    IReadOnlyCollection<Type>? Get(Type target);
-    void Add(Type target, IReadOnlyCollection<Type> views);
+    ICollection<Type>? Get(Type target);
+    void Add(Type target, ICollection<Type> views);
 }
 
 public class RefreshableViewCache : IRefreshableViewCache
 {
-    private Dictionary<Type, IReadOnlyCollection<Type>> Cache { get; } = new();
+    private Dictionary<Type, ICollection<Type>> Cache { get; } = new();
 
-    public IReadOnlyCollection<Type>? Get(Type target)
+    public ICollection<Type>? Get(Type target)
     {
         return Cache.TryGetValue(target, out var cached) ? cached : null;
     }
 
-    public void Add(Type target, IReadOnlyCollection<Type> views)
+    public void Add(Type target, ICollection<Type> views)
     {
         Cache[target] = views;
     }
@@ -26,7 +26,7 @@ public class RefreshableViewCache : IRefreshableViewCache
 
 public class ReflectionUtil
 {
-    public IReadOnlyCollection<string> AssemblyNames { get; set; } = [];
+    public ICollection<string> AssemblyNames { get; set; } = [];
 
     public IRefreshableViewCache Cache { get; set; } = new RefreshableViewCache();
 
