@@ -2,7 +2,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.Mvvm.Messaging.Messages;
 using Microsoft.Extensions.Logging;
 using ViewModels.Interfaces;
-using ViewModels.Utils;
+using ViewModels.Utils.ReflectUtils;
 
 namespace ViewModels.Events;
 
