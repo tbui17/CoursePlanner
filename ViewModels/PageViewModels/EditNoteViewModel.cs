@@ -12,7 +12,7 @@ public partial class EditNoteViewModel(
     ILocalDbCtxFactory factory,
     INavigationService navService,
     IAppService appService)
-    : ObservableObject, IEntity, IRefresh
+    : ObservableObject, INoteField, IRefresh
 {
     [ObservableProperty]
     private int _id;
@@ -22,6 +22,12 @@ public partial class EditNoteViewModel(
 
     [ObservableProperty]
     private string _text = "";
+
+    string INoteField.Value
+    {
+        get => Text;
+        set => Text = value;
+    }
 
     [RelayCommand]
     public async Task SaveAsync()
@@ -38,8 +44,7 @@ public partial class EditNoteViewModel(
            .AsTracking()
            .FirstAsync(x => x.Id == Id);
 
-        note.Name = Name;
-        note.Value = Text;
+        note.SetFromNoteField(this);
 
 
         await db.SaveChangesAsync();
@@ -62,8 +67,7 @@ public partial class EditNoteViewModel(
                .FirstOrDefaultAsync(x => x.Id == noteId) ??
             new();
 
-        Name = note.Name;
-        Text = note.Value;
+        this.SetFromNoteField(note);
     }
 
     public async Task RefreshAsync()
