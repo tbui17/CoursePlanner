@@ -1,11 +1,8 @@
-﻿namespace Lib.Interfaces;
+﻿using Lib.Models;
 
-public interface IAssessmentForm : INotification, IAssessmentType
+namespace Lib.Interfaces;
+
+public interface IAssessmentForm : INotificationField, IAssessmentType
 {
-    new int Id { get; set; }
-    new string Name { get; set; }
-    new DateTime Start { get; set; }
-    new DateTime End { get; set; }
-    new bool ShouldNotify { get; set; }
     public int CourseId { get; set; }
 }
