@@ -2,13 +2,10 @@
 using AutoFixture.AutoMoq;
 using Lib;
 using Lib.Models;
-using Lib.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using ViewModels.Config;
-using ViewModels.Events;
-using ViewModels.Interfaces;
 using ViewModels.PageViewModels;
 using ViewModels.Services;
 

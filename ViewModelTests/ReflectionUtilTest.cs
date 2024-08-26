@@ -1,6 +1,6 @@
 using FluentAssertions;
 using ViewModels.PageViewModels;
-using ViewModels.Utils;
+using ViewModels.Utils.ReflectUtils;
 using ViewModelTests.TestData;
 
 namespace ViewModelTests;

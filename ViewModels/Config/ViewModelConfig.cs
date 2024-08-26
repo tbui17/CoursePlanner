@@ -3,7 +3,7 @@ using ViewModels.Events;
 using ViewModels.Interfaces;
 using ViewModels.PageViewModels;
 using ViewModels.Services;
-using ViewModels.Utils;
+using ViewModels.Utils.ReflectUtils;
 
 namespace ViewModels.Config;
 

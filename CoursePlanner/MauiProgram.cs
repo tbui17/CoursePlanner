@@ -6,15 +6,11 @@ using CoursePlanner.Utils;
 using CoursePlanner.Views;
 using Lib;
 using Lib.Models;
-using Lib.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Plugin.LocalNotification;
 using ViewModels.Config;
-using ViewModels.Events;
-using ViewModels.PageViewModels;
 using ViewModels.Services;
-using ViewModels.Utils;
 
 namespace CoursePlanner;
 
