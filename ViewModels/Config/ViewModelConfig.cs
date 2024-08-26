@@ -30,7 +30,7 @@ public static class ViewModelConfig
             .AddTransient<EditNoteViewModel>()
             .AddTransient<EditAssessmentViewModel>()
             .AddTransient<LoginViewModel>()
-            .AddTransient<TermViewModel>()
+            .AddTransientRefreshable<TermViewModel>()
             .AddTransient<NotificationDataViewModel>()
             .AddTransient<InstructorFormViewModelFactory>()
             .AddSingleton<AppShellViewModel>();
