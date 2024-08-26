@@ -42,9 +42,7 @@ public partial class EditTermViewModel(
            .AsTracking()
            .FirstAsync(x => x.Id == Id);
 
-        term.Name = Name;
-        term.Start = Start;
-        term.End = End;
+        term.SetFromDateTimeEntity(this);
 
         await db.SaveChangesAsync();
         await BackAsync();
@@ -66,10 +64,7 @@ public partial class EditTermViewModel(
                .FirstOrDefaultAsync(x => x.Id == termId) ??
             new();
 
-        Id = term.Id;
-        Name = term.Name;
-        Start = term.Start;
-        End = term.End;
+        this.SetFromDateTimeEntity(term);
     }
 
     public async Task RefreshAsync()

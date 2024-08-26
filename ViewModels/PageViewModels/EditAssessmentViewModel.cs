@@ -24,7 +24,6 @@ public interface IEditAssessmentViewModel : IRefresh
 {
     int Id { get; set; }
     IEnumerable<Assessment> GetDbModels();
-    Task Init(int courseId);
     ObservableCollection<AssessmentItemViewModel> Assessments { get; set; }
     AssessmentItemViewModel? SelectedAssessment { get; set; }
     IAsyncRelayCommand BackCommand { get; }

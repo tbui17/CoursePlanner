@@ -61,5 +61,28 @@ public static class AssignmentTrait
         return self;
     }
 
+    public static T SetFromDateTimeEntity<T, T2>(this T self, T2 other)
+        where T : IDateTimeEntity where T2 : IDateTimeEntity
+    {
+        self.Id = other.Id;
+        self.Name = other.Name;
+        self.Start = other.Start;
+        self.End = other.End;
+
+        return self;
+    }
+
+    public static T SetFromNotificationField<T, T2>(this T self, T2 other)
+        where T : INotificationField where T2 : INotificationField
+    {
+        self.Id = other.Id;
+        self.Name = other.Name;
+        self.Start = other.Start;
+        self.End = other.End;
+        self.ShouldNotify = other.ShouldNotify;
+
+        return self;
+    }
+
 
 }
