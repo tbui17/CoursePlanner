@@ -1,15 +1,9 @@
 using FluentAssertions;
-using Moq;
-using ViewModels.Interfaces;
 using ViewModels.PageViewModels;
 using ViewModels.Utils;
+using ViewModelTests.TestData;
 
 namespace ViewModelTests;
-
-file class TestPage : ContentPage, IRefreshableView<TermViewModel>
-{
-    public TermViewModel Model { get; } = new Mock<TermViewModel>().Object;
-}
 
 public class ReflectionUtilTest
 {
@@ -18,9 +12,9 @@ public class ReflectionUtilTest
     {
         var util = new ReflectionUtil
         {
-            AssemblyNames = ["ViewModels", "ViewModelTests"]
+            AssemblyNames = [nameof(ViewModels), nameof(ViewModelTests)]
         };
-        var res = util.GetRefreshableViews(typeof(TermViewModel));
+        var res = util.GetRefreshableViewsContainingTarget(typeof(TermViewModel));
         res.Should().Contain(typeof(TestPage)).And.ContainSingle();
     }
 }

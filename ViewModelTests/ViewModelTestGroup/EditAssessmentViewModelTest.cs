@@ -6,8 +6,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using ViewModels.PageViewModels;
+using ViewModelTests.TestSetup;
 
-namespace ViewModelTests;
+namespace ViewModelTests.ViewModelTestGroup;
 
 public class EditAssessmentViewModelTest : BasePageViewModelTest
 {

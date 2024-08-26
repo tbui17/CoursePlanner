@@ -5,8 +5,9 @@ using Lib.Utils;
 using Moq;
 using ViewModels.PageViewModels;
 using ViewModels.Services;
+using ViewModelTests.TestSetup;
 
-namespace ViewModelTests;
+namespace ViewModelTests.ViewModelTestGroup;
 
 public class LoginViewModelTest : BasePageViewModelTest
 {

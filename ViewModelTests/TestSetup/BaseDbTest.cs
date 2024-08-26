@@ -1,6 +1,6 @@
 ﻿using Lib.Utils;
 
-namespace ViewModelTests;
+namespace ViewModelTests.TestSetup;
 
 public abstract class BaseDbTest
 {

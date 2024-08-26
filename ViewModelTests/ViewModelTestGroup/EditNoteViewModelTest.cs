@@ -2,8 +2,9 @@
 using FluentAssertions.Execution;
 using Microsoft.EntityFrameworkCore;
 using ViewModels.PageViewModels;
+using ViewModelTests.TestSetup;
 
-namespace ViewModelTests;
+namespace ViewModelTests.ViewModelTestGroup;
 
 public class EditNoteViewModelTest : BasePageViewModelTest
 {

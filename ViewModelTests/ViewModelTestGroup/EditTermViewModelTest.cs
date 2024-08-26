@@ -3,8 +3,9 @@ using FluentAssertions.Execution;
 using Microsoft.EntityFrameworkCore;
 using ViewModels.PageViewModels;
 using ViewModelTests.TestData;
+using ViewModelTests.TestSetup;
 
-namespace ViewModelTests;
+namespace ViewModelTests.ViewModelTestGroup;
 
 public class EditTermViewModelTest : BasePageViewModelTest
 {

@@ -7,8 +7,3 @@ using ViewModels.PageViewModels;
 namespace ViewModels.Events;
 
 public class LoginEvent(User? value) : ValueChangedMessage<User?>(value);
-
-public class NavigationEvent(Page page) : ValueChangedMessage<Page>(page)
-{
-
-}

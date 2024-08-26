@@ -44,6 +44,7 @@ public partial class LoginViewModel(
             await appService.ShowErrorAsync(res.ToErrorString());
             return;
         }
+
         await navService.GoToMainPageAsync();
     }
 
@@ -54,4 +55,6 @@ public partial class LoginViewModel(
         await sessionService.LogoutAsync();
         await Task.CompletedTask;
     }
+
+    public Task Init(int _) => RefreshAsync();
 }
