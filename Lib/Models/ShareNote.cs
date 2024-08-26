@@ -1,10 +1,10 @@
-﻿using Lib.Utils;
+﻿using Lib.Interfaces;
 
 namespace Lib.Models;
 
-public record ShareNote
+public record ShareNote : IFriendlyText
 {
-    
+
     public ShareNote(){}
 
     public ShareNote(Note note)
@@ -17,7 +17,7 @@ public record ShareNote
         NoteId = note.Id;
         NoteText = note.Value;
     }
-    
+
     public int CourseId { get; init; }
     public string CourseName { get; init; } = "";
     public string InstructorName { get; init; } = "";
@@ -26,24 +26,4 @@ public record ShareNote
     public int NoteId { get; init; }
     public string NoteText { get; init; } = "";
 
-    public string ToFriendlyText() =>
-        GetType()
-           .GetProperties()
-           .Select(prop =>
-                {
-                    var key = prop.Name.SpaceBetweenUppers();
-                    var value = prop.GetValue(this) switch
-                    {
-                        DateTime date => date.ToShortDateString(),
-                        var x => x
-                    };
-
-                    var msg = $"{key}: {value}";
-
-                    return msg;
-                }
-            )
-           .StringJoin("\n");
-
-   
 }
