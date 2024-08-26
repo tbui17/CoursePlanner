@@ -2,7 +2,8 @@
 
 namespace Lib.Models;
 
-public class Term : IEntity, IDateTimeRange
+
+public class Term : IDateTimeEntity
 {
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;

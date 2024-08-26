@@ -3,12 +3,13 @@ using Lib.Utils;
 
 namespace Lib.Models;
 
-public interface ICourseField : INotification
+public interface INotificationField : IDateTimeEntity, INotification
 {
-    new DateTime Start { get; set; }
-    new DateTime End { get; set; }
     new bool ShouldNotify { get; set; }
+}
 
+public interface ICourseField : INotificationField
+{
     string Status { get; set; }
 }
 
