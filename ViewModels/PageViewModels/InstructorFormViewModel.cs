@@ -156,7 +156,7 @@ public class InstructorFormViewModelFactory(
 
                 var editModel = await db.Instructors.FirstAsync(x => x.Id == instructorId);
 
-                editModel.SetFromContactField(model);
+                editModel.SetFromContactForm(model);
                 await db.SaveChangesAsync();
                 return null;
             };
