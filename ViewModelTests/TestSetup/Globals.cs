@@ -6,11 +6,11 @@ using Lib.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
+using ViewModels.Config;
 using ViewModels.Events;
 using ViewModels.Interfaces;
 using ViewModels.PageViewModels;
 using ViewModels.Services;
-using ViewModels.Utils;
 
 namespace ViewModelTests.TestSetup;
 
@@ -27,6 +27,8 @@ public static class Globals
         var services = new ServiceCollection();
         Configs
             .ConfigBackendServices(services)
+            .ConfigServices()
+            .ConfigAssemblyNames([nameof(ViewModelTests), nameof(ViewModels)])
             .AddDbContext<LocalDbCtx>(x => x
                 .UseSqlite("DataSource=database.db")
                 .EnableDetailedErrors()
@@ -36,20 +38,8 @@ public static class Globals
             .AddDbContextFactory<LocalDbCtx>()
             .AddSingleton(mockNavigation.Object)
             .AddSingleton(mockAppService.Object)
-            .AddSingleton<NavigationSubject>()
-            .AddTransient<DetailedCourseViewModel>()
-            .AddTransient<DetailedTermViewModel>()
-            .AddTransient<EditAssessmentViewModel>()
-            .AddTransient<EditCourseViewModel>()
-            .AddTransient<EditTermViewModel>()
-            .AddTransient<MainViewModel>()
-            .AddTransient<AppShellViewModel>()
-            .AddTransient<InstructorFormViewModelFactory>()
-            .AddSingleton<ILocalNotificationService, LocalNotificationService>()
             .AddTransient<ISessionService, SessionService>()
-            .AddTransientRefreshable<TermViewModel>()
-            .AddTransient<ReflectionUtil>(_ => new ReflectionUtil
-                { AssemblyNames = [nameof(ViewModelTests), nameof(ViewModels)] });
+            .AddTransient<AppShellViewModel>();
 
         services.AddLogging(b => b.AddConsole());
 
