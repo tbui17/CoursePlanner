@@ -36,13 +36,13 @@ public static class AssignmentTrait
         where T : IContact where T2 : IContact
     {
         self.Id = other.Id;
-        self.SetFromContactField(other);
+        self.SetFromContactForm(other);
 
         return self;
     }
 
-    public static T SetFromContactField<T, T2>(this T self, T2 other)
-        where T : IContactField where T2 : IContactField
+    public static T SetFromContactForm<T, T2>(this T self, T2 other)
+        where T : IContactForm where T2 : IContactForm
     {
         self.Name = other.Name;
         self.Email = other.Email;

@@ -1,6 +1,6 @@
 ﻿namespace Lib.Interfaces;
 
-public interface IContactField
+public interface IContactForm
 {
     string Name { get; set; }
     string Phone { get; set; }
