@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using Lib.Interfaces;
 using Lib.Traits;
 using Microsoft.EntityFrameworkCore;
+using ViewModels.Interfaces;
 using ViewModels.Services;
 
 namespace ViewModels.PageViewModels;
@@ -11,7 +12,7 @@ public partial class EditNoteViewModel(
     ILocalDbCtxFactory factory,
     INavigationService navService,
     IAppService appService)
-    : ObservableObject, IEntity
+    : ObservableObject, IEntity, IRefresh
 {
     [ObservableProperty]
     private int _id;

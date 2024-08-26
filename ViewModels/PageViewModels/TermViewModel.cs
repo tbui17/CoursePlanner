@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Maui.Core.Extensions;
 using Microsoft.EntityFrameworkCore;
+using ViewModels.Interfaces;
 
 namespace ViewModels.PageViewModels;
 
@@ -8,11 +9,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Lib.Models;
 using Services;
-
-public interface IRefresh
-{
-    Task Refresh();
-}
 
 public partial class TermViewModel(ILocalDbCtxFactory factory, INavigationService navService, IAppService appService)
     : ObservableObject, IRefresh
@@ -34,7 +30,7 @@ public partial class TermViewModel(ILocalDbCtxFactory factory, INavigationServic
         Terms = res.ToObservableCollection();
     }
 
-    public async Task Refresh()
+    public async Task RefreshAsync()
     {
         await Init();
     }

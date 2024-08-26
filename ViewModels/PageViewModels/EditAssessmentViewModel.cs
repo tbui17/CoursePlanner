@@ -14,17 +14,17 @@ using Lib.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Logging;
+using ViewModels.Interfaces;
 using ViewModels.Services;
 using PropertyChangingEventHandler = System.ComponentModel.PropertyChangingEventHandler;
 
 namespace ViewModels.PageViewModels;
 
-public interface IEditAssessmentViewModel
+public interface IEditAssessmentViewModel : IRefresh
 {
     int Id { get; set; }
     IEnumerable<Assessment> GetDbModels();
     Task Init(int courseId);
-    Task RefreshAsync();
     ObservableCollection<AssessmentItemViewModel> Assessments { get; set; }
     AssessmentItemViewModel? SelectedAssessment { get; set; }
     IAsyncRelayCommand BackCommand { get; }

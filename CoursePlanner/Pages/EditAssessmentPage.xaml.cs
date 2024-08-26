@@ -1,8 +1,9 @@
-﻿using ViewModels.PageViewModels;
+﻿using ViewModels.Interfaces;
+using ViewModels.PageViewModels;
 
 namespace CoursePlanner.Pages;
 
-public partial class EditAssessmentPage : ContentPage
+public partial class EditAssessmentPage : IRefreshableView<EditAssessmentViewModel>
 {
     public EditAssessmentPage(EditAssessmentViewModel model)
     {

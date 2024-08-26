@@ -6,16 +6,12 @@ using Lib.Models;
 using Lib.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using ViewModels.Interfaces;
 using ViewModels.Services;
 
 namespace ViewModels.PageViewModels;
 
-public partial class DetailedCourseViewModel(
-    ILocalDbCtxFactory factory,
-    IAppService appService,
-    INavigationService navService,
-    ICourseService courseService,
-    ILogger<DetailedCourseViewModel> logger) : ObservableObject
+public partial class DetailedCourseViewModel : ObservableObject, IRefresh
 {
     [ObservableProperty]
     private int _id;
@@ -39,39 +35,59 @@ public partial class DetailedCourseViewModel(
     [ObservableProperty]
     private Note? _selectedNote;
 
+    private readonly ILocalDbCtxFactory _factory;
+    private readonly IAppService _appService;
+    private readonly INavigationService _navService;
+    private readonly ICourseService _courseService;
+    private readonly ILogger<DetailedCourseViewModel> _logger;
+
+    /// <inheritdoc/>
+    public DetailedCourseViewModel(ILocalDbCtxFactory factory,
+        IAppService appService,
+        INavigationService navService,
+        ICourseService courseService,
+        ILogger<DetailedCourseViewModel> logger)
+    {
+        _factory = factory;
+        _appService = appService;
+        _navService = navService;
+        _courseService = courseService;
+        _logger = logger;
+    }
+
 
     async partial void OnSelectedInstructorChanged(Instructor? oldValue, Instructor? newValue)
     {
-        logger.LogInformation("Selected Instructor Changed: {NewId}, {OldId}", newValue?.Id, oldValue?.Id);
+        _logger.LogInformation("Selected Instructor Changed: {NewId}, {OldId}", newValue?.Id, oldValue?.Id);
         if (newValue is not { Id: > 0 })
         {
-            logger.LogInformation("Selected Instructor is null or has no id.");
+            _logger.LogInformation("Selected Instructor is null or has no id.");
             return;
         }
 
         if (oldValue?.Id == newValue.Id)
         {
-            logger.LogInformation("Selected Instructor is the same as the old value.");
+            _logger.LogInformation("Selected Instructor is the same as the old value.");
             return;
         }
 
         var oldId = Course.InstructorId;
-        logger.LogInformation("Old Instructor: {InstructorId} {InstructorName}", oldId, Course.Instructor?.Name);
+        _logger.LogInformation("Old Instructor: {InstructorId} {InstructorName}", oldId, Course.Instructor?.Name);
         var newInstructor = Instructors.First(x => x.Id == newValue.Id);
-        logger.LogInformation("New Instructor: {InstructorId} {InstructorName}", newInstructor.Id, newInstructor.Name);
+        _logger.LogInformation("New Instructor: {InstructorId} {InstructorName}", newInstructor.Id, newInstructor.Name);
 
-        logger.LogInformation("Course State: {CourseId} {CourseInstructorId} {CourseInstructorName}", Course.Id, Course.InstructorId, Course.Instructor?.Name);
-        logger.LogInformation("Setting Course Instructor to {InstructorId} {InstructorName}", newInstructor.Id, newInstructor.Name);
+        _logger.LogInformation("Course State: {CourseId} {CourseInstructorId} {CourseInstructorName}", Course.Id, Course.InstructorId, Course.Instructor?.Name);
+        _logger.LogInformation("Setting Course Instructor to {InstructorId} {InstructorName}", newInstructor.Id, newInstructor.Name);
         Course.Instructor = newInstructor;
         Course.InstructorId = newValue.Id;
-        logger.LogInformation("Updated Course State: {CourseId} {CourseInstructorId} {CourseInstructorName}", Course.Id, Course.InstructorId, Course.Instructor?.Name);
+        _logger.LogInformation("Updated Course State: {CourseId} {CourseInstructorId} {CourseInstructorName}", Course.Id, Course.InstructorId, Course.Instructor?.Name);
 
-        await using var db = await factory.CreateDbContextAsync();
+        await using var db = await _factory.CreateDbContextAsync();
         var res = await db
            .Courses
            .Where(x => x.Id == Course.Id)
            .ExecuteUpdateAsync(x => x.SetProperty(p => p.InstructorId, newValue.Id));
-        logger.LogInformation("Updated Instructor in database: {UpdateCount}",res);
+        _logger.LogInformation("Updated Instructor in database: {UpdateCount}",res);
     }
 
 
@@ -79,8 +95,8 @@ public partial class DetailedCourseViewModel(
     {
         Id = id;
         SelectedNote = null;
-        await using var db = await factory.CreateDbContextAsync();
-        var course = await courseService.GetFullCourse(id) ?? new();
+        await using var db = await _factory.CreateDbContextAsync();
+        var course = await _courseService.GetFullCourse(id) ?? new();
 
         var instructors = await db.Instructors.ToListAsync();
         SetInstructors();
@@ -103,27 +119,27 @@ public partial class DetailedCourseViewModel(
     [RelayCommand]
     public async Task EditAsync()
     {
-        await navService.GoToEditCoursePageAsync(Course.Id);
+        await _navService.GoToEditCoursePageAsync(Course.Id);
     }
 
     [RelayCommand]
     public async Task AddInstructorAsync()
     {
-        await navService.GoToAddInstructorPageAsync();
+        await _navService.GoToAddInstructorPageAsync();
     }
 
     [RelayCommand]
     public async Task EditInstructorAsync()
     {
         if (SelectedInstructor is not { Id: var id and > 0 }) return;
-        await navService.GotoEditInstructorPageAsync(id);
+        await _navService.GotoEditInstructorPageAsync(id);
     }
 
     [RelayCommand]
     public async Task DeleteInstructorAsync()
     {
         if (SelectedInstructor is not { Id: var id and > 0 }) return;
-        await using var db = await factory.CreateDbContextAsync();
+        await using var db = await _factory.CreateDbContextAsync();
         await db
            .Instructors
            .Where(x => x.Id == id)
@@ -134,17 +150,17 @@ public partial class DetailedCourseViewModel(
     [RelayCommand]
     public async Task DetailedAssessmentAsync()
     {
-        await navService.GoToAssessmentDetailsPageAsync(Id);
+        await _navService.GoToAssessmentDetailsPageAsync(Id);
     }
 
     [RelayCommand]
     public async Task AddNoteAsync()
     {
-        var name = await appService.DisplayNamePromptAsync();
+        var name = await _appService.DisplayNamePromptAsync();
 
         if (name is null) return;
 
-        await using var db = await factory.CreateDbContextAsync();
+        await using var db = await _factory.CreateDbContextAsync();
         var note = Course.CreateNote();
         note.Name = name;
         db.Notes.Add(note);
@@ -156,14 +172,14 @@ public partial class DetailedCourseViewModel(
     public async Task DetailedNoteAsync()
     {
         if (SelectedNote is not { Id: var id and > 0 }) return;
-        await navService.GoToNoteDetailsPageAsync(id);
+        await _navService.GoToNoteDetailsPageAsync(id);
     }
 
     [RelayCommand]
     public async Task DeleteNoteAsync()
     {
         if (SelectedNote is not { Id: > 0 }) return;
-        await using var db = await factory.CreateDbContextAsync();
+        await using var db = await _factory.CreateDbContextAsync();
         await db
            .Notes
            .Where(x => x.Id == SelectedNote.Id)
@@ -183,13 +199,13 @@ public partial class DetailedCourseViewModel(
             Text = new ShareNote(SelectedNote).ToFriendlyText()
         };
 
-        await appService.ShareAsync(request);
+        await _appService.ShareAsync(request);
     }
 
     [RelayCommand]
     public async Task BackAsync()
     {
-        await navService.PopAsync();
+        await _navService.PopAsync();
     }
 
     public async Task RefreshAsync()

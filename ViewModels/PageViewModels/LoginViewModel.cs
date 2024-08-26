@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using Lib.Models;
 using Lib.Utils;
+using ViewModels.Interfaces;
 using ViewModels.Services;
 
 
@@ -46,7 +47,7 @@ public partial class LoginViewModel(
         await navService.GoToMainPageAsync();
     }
 
-    public async Task Refresh()
+    public async Task RefreshAsync()
     {
         Username = "";
         Password = "";

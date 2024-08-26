@@ -5,7 +5,7 @@ using ViewModels.PageViewModels;
 
 namespace CoursePlanner.Pages;
 
-public partial class NotificationDataPage : ContentPage, IPageModel<NotificationDataViewModel>
+public partial class NotificationDataPage : IPageModel<NotificationDataViewModel>
 {
     public NotificationDataPage(NotificationDataViewModel model)
     {

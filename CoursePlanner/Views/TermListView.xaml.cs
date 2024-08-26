@@ -3,7 +3,7 @@ using ViewModels.PageViewModels;
 
 namespace CoursePlanner.Views;
 
-public partial class TermListView : ContentView, IPageModel<TermViewModel>
+public partial class TermListView : IRefreshableView<TermViewModel>
 {
     public TermListView(TermViewModel model)
     {

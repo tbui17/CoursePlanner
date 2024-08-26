@@ -8,7 +8,7 @@ using ViewModels.Services;
 
 namespace ViewModels.PageViewModels;
 
-public partial class MainViewModel(ILocalDbCtxFactory factory, INavigationService navService, IAppService appService) : ObservableObject
+public partial class MainViewModel() : ObservableObject
 {
 
 }

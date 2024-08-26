@@ -1,8 +1,9 @@
+using ViewModels.Interfaces;
 using ViewModels.PageViewModels;
 
 namespace CoursePlanner.Pages;
 
-public partial class DetailedTermPage
+public partial class DetailedTermPage : IRefreshableView<DetailedTermViewModel>
 {
     public DetailedTermViewModel Model { get; set; }
 

@@ -1,8 +1,9 @@
-﻿using ViewModels.PageViewModels;
+﻿using ViewModels.Interfaces;
+using ViewModels.PageViewModels;
 
 namespace CoursePlanner.Pages;
 
-public partial class EditCoursePage : ContentPage
+public partial class EditCoursePage : IRefreshableView<EditCourseViewModel>
 {
     public EditCourseViewModel Model { get; set; }
 
