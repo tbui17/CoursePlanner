@@ -51,5 +51,15 @@ public static class AssignmentTrait
         return self;
     }
 
+    public static T SetFromNoteField<T, T2>(this T self, T2 other)
+        where T : INoteField where T2 : INoteField
+    {
+        self.Id = other.Id;
+        self.Name = other.Name;
+        self.Value = other.Value;
+
+        return self;
+    }
+
 
 }
