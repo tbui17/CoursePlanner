@@ -11,7 +11,7 @@ public static class FriendlyTextExtensions
             .GetProperties()
             .Select(prop =>
                 {
-                    var key = prop.Name.SpaceBetweenUppers();
+                    var key = prop.Name.PascalCaseToPascalSentence();
                     var value = prop.GetValue(self) switch
                     {
                         DateTime date => date.ToShortDateString(),
