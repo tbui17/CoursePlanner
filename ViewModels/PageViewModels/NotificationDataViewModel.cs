@@ -39,7 +39,6 @@ public partial class NotificationDataViewModel : ReactiveObject
 
         _notificationItemsHelper = monthS
             .CombineLatest(filterS)
-            // .ForkJoin(filterS, (x, y) => (Notifications: x, Filter: y))
             .Select(p => p.First.Where(x => x.Name.Contains(p.Second)))
             .Select(x => x.ToObservableCollection())
             .ToProperty(this, x => x.NotificationItems);
