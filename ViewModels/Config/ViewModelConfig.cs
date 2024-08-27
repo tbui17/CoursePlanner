@@ -1,9 +1,9 @@
+using Lib.Services;
 using Lib.Utils;
 using ViewModels.Events;
 using ViewModels.Interfaces;
 using ViewModels.PageViewModels;
 using ViewModels.Services;
-using ViewModels.Utils.ReflectUtils;
 
 namespace ViewModels.Config;
 
@@ -41,7 +41,6 @@ public static class ViewModelConfig
         services
             .ConfigViewModels()
             .AddSingleton<NavigationSubject>()
-            .AddSingleton<RefreshableViewCache>()
             .AddSingleton<ILocalNotificationService, LocalNotificationService>(x =>
             {
                 var instance = x.CreateInstance<LocalNotificationService>();
@@ -49,10 +48,12 @@ public static class ViewModelConfig
                 return instance;
             })
             .AddSingleton<ISessionService, SessionService>()
-            .AddTransient<ReflectionUtil>(x => new ReflectionUtil
+            .AddTransient<RefreshableViewService>(provider =>
             {
-                AssemblyNames = x.GetRequiredKeyedService<ICollection<string>>(nameof(ConfigAssemblyNames)),
-                Cache = x.GetRequiredService<RefreshableViewCache>()
+                var x = provider.CreateInstance<RefreshableViewService>();
+                x.RefreshableViewType = typeof(IRefreshableView<IRefresh>);
+                x.AssemblyNames = provider.GetRequiredKeyedService<ICollection<string>>(nameof(ConfigAssemblyNames));
+                return x;
             });
         return services;
     }

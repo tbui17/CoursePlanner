@@ -6,6 +6,8 @@ using CoursePlanner.Utils;
 using CoursePlanner.Views;
 using Lib;
 using Lib.Models;
+using Lib.Services;
+using Lib.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Plugin.LocalNotification;
@@ -19,12 +21,21 @@ public static class MauiProgram
     public static MauiApp CreateMauiApp()
     {
         var app = CreateBuilder().Build();
-        app
-            .Services
-            .GetRequiredService<DbSetup>()
-            .SetupDb();
+        var services = app.Services;
+        RunStartupActions();
 
         return app;
+
+        void RunStartupActions()
+        {
+            services
+                .GetRequiredService<DbSetup>()
+                .SetupDb();
+
+            services
+                .GetRequiredService<RefreshableViewService>()
+                .InitializeCache();
+        }
     }
 
     private static MauiAppBuilder CreateBuilder()

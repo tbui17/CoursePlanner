@@ -64,6 +64,19 @@ public static class UtilExtensions
         return sb.ToString();
     }
 
+    public static bool Contains<T>(this IEnumerable<T> collection, Func<T, bool> predicate)
+    {
+        foreach (var item in collection)
+        {
+            if (predicate(item))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public static IEnumerable<T> Tap<T>(this IEnumerable<T> collection, Action<T> action)
     {
         foreach (var item in collection)
