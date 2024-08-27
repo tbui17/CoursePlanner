@@ -9,45 +9,40 @@ using ReactiveUI.SourceGenerators;
 
 namespace ViewModels.PageViewModels;
 
-using NotificationCollection = ObservableCollection<INotification>;
+using NotificationCollection = ReadOnlyObservableCollection<INotification>;
 
 public partial class NotificationDataViewModel : ReactiveObject
 {
-    private static DateTime DefaultDate => DateTime.Now.Date;
-
-    private readonly NotificationService _service;
-
     [Reactive]
     private string _filterText = "";
 
     [Reactive]
-    private DateTime _monthDate = DefaultDate;
+    private DateTime _monthDate = DateTime.Now.Date;
 
     [ObservableAsProperty]
-    private NotificationCollection _notificationItems = [];
+    // ReSharper disable once NotAccessedField.Local
+    private NotificationCollection _notificationItems = new([]);
+
+    private IScheduler _scheduler = new NewThreadScheduler();
 
     public NotificationDataViewModel(NotificationService service)
     {
-        _service = service;
-        InitializeCommands();
+        var filterStream = this.WhenAnyValue(vm => vm.FilterText)
+            .Throttle(TimeSpan.FromMilliseconds(500))
+            .Select(text => text.Trim().ToLowerInvariant());
 
-        var filterS = this.WhenAnyValue(x => x.FilterText)
-            .Select(x => x.Trim().ToLowerInvariant());
+        var monthStream = this.WhenAnyValue(vm => vm.MonthDate)
+            .SelectMany(service.GetNotificationsForMonth);
 
-        var monthS = this.WhenAnyValue(x => x.MonthDate)
-            .SelectMany(x => _service.GetNotificationsForMonth(x));
-
-        _notificationItemsHelper = monthS
-            .CombineLatest(filterS)
-            .Select(p => p.First.Where(x => x.Name.Contains(p.Second)))
-            .Select(x => x.ToObservableCollection())
-            .ToProperty(this, x => x.NotificationItems);
-    }
-
-    [ReactiveCommand]
-    private async Task LoadNotifications()
-    {
-        var notifications = await _service.GetNotificationsForMonth(MonthDate);
-        notifications.ToObservableCollection();
+        _notificationItemsHelper = monthStream
+            .CombineLatest(filterStream)
+            .Select(pair =>
+            {
+                var (notifications, filterText) = pair;
+                return notifications.Where(item => item.Name.Contains(filterText));
+            })
+            .Select(notifications => notifications.ToObservableCollection())
+            .Select(x => new NotificationCollection(x))
+            .ToProperty(this, vm => vm.NotificationItems,scheduler: _scheduler);
     }
 }
