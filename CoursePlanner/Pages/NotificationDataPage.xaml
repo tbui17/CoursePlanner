@@ -9,18 +9,26 @@
              x:DataType="pageViewModels:NotificationDataViewModel">
     <ContentPage.Content>
         <ScrollView>
-        <VerticalStackLayout x:Name="MainLayout" Margin="10">
-               <Border Style="{StaticResource CollectionBorder}">
-                    <ScrollView Style="{StaticResource CollectionScrollView}" >
-                        <CollectionView ItemsSource="{Binding NotificationItems}" SelectionMode="None" HorizontalOptions="Center"
-                             >
+            <VerticalStackLayout x:Name="MainLayout" Margin="10">
+                <VerticalStackLayout Margin="10" Spacing="10">
+                    <controls:AutoGrid>
+                        <Label Text="Month" />
+                        <DatePicker Date="{Binding MonthDate}" />
+                        <Label Text="Filter" />
+                        <Entry Text="{Binding FilterText}" />
+                    </controls:AutoGrid>
+                </VerticalStackLayout>
+                <Border Style="{StaticResource CollectionBorder}">
+                    <ScrollView Style="{StaticResource CollectionScrollView}">
+                        <CollectionView ItemsSource="{Binding NotificationItems}" SelectionMode="None"
+                                        HorizontalOptions="Center">
                             <CollectionView.ItemsLayout>
                                 <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
                             </CollectionView.ItemsLayout>
 
 
                             <CollectionView.ItemTemplate>
-                                <DataTemplate x:DataType="interfaces:INotification" >
+                                <DataTemplate x:DataType="interfaces:INotification">
                                     <Border>
                                         <controls:FieldContainer>
 
@@ -48,9 +56,10 @@
                                 </DataTemplate>
                             </CollectionView.ItemTemplate>
                         </CollectionView>
-                    </ScrollView></Border>
+                    </ScrollView>
+                </Border>
 
-        </VerticalStackLayout>
+            </VerticalStackLayout>
         </ScrollView>
 
     </ContentPage.Content>
