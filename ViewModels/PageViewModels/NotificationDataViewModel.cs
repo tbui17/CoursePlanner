@@ -1,60 +1,54 @@
 using System.Collections.ObjectModel;
-using System.ComponentModel;
+using System.Reactive.Concurrency;
+using System.Reactive.Linq;
 using CommunityToolkit.Maui.Core.Extensions;
-using CommunityToolkit.Mvvm.ComponentModel;
 using Lib.Interfaces;
 using Lib.Services;
+using ReactiveUI;
+using ReactiveUI.SourceGenerators;
 
 namespace ViewModels.PageViewModels;
 
+using NotificationCollection = ObservableCollection<INotification>;
 
-public partial class NotificationDataViewModel : ObservableObject
+public partial class NotificationDataViewModel : ReactiveObject
 {
-    private ObservableCollection<INotification> _notificationItems = [];
-
-    public ObservableCollection<INotification> NotificationItems
-    {
-        get => _notificationItems.Where(x => x.Name.Contains(FilterText,StringComparison.InvariantCultureIgnoreCase)).ToObservableCollection();
-        set => SetProperty(ref _notificationItems, value);
-    }
-
-    [ObservableProperty]
-    private string _filterText = "";
-
-
-    [ObservableProperty]
-    private DateTime _monthDate = DefaultDate;
-
-    private readonly ILocalDbCtxFactory _factory;
-    private readonly NotificationService _service;
-
-
-    public NotificationDataViewModel(ILocalDbCtxFactory factory, NotificationService service)
-    {
-        _factory = factory;
-        _service = service;
-        PropertyChanged += OnPropertyChangedEventHandler;
-    }
-
-    private async void OnPropertyChangedEventHandler(object? _, PropertyChangedEventArgs args)
-    {
-        switch (args.PropertyName)
-        {
-            case nameof(MonthDate):
-                await LoadNotificationsAsync();
-                return;
-            case nameof(FilterText):
-                OnPropertyChanged(nameof(NotificationItems));
-                return;
-        }
-    }
-
     private static DateTime DefaultDate => DateTime.Now.Date;
 
-    private async Task LoadNotificationsAsync()
+    private readonly NotificationService _service;
+
+    [Reactive]
+    private string _filterText = "";
+
+    [Reactive]
+    private DateTime _monthDate = DefaultDate;
+
+    [ObservableAsProperty]
+    private NotificationCollection _notificationItems = [];
+
+    public NotificationDataViewModel(NotificationService service)
     {
-        await using var db = await _factory.CreateDbContextAsync();
+        _service = service;
+        InitializeCommands();
+
+        var filterS = this.WhenAnyValue(x => x.FilterText)
+            .Select(x => x.Trim().ToLowerInvariant());
+
+        var monthS = this.WhenAnyValue(x => x.MonthDate)
+            .SelectMany(x => _service.GetNotificationsForMonth(x));
+
+        _notificationItemsHelper = monthS
+            .CombineLatest(filterS)
+            // .ForkJoin(filterS, (x, y) => (Notifications: x, Filter: y))
+            .Select(p => p.First.Where(x => x.Name.Contains(p.Second)))
+            .Select(x => x.ToObservableCollection())
+            .ToProperty(this, x => x.NotificationItems);
+    }
+
+    [ReactiveCommand]
+    private async Task LoadNotifications()
+    {
         var notifications = await _service.GetNotificationsForMonth(MonthDate);
-        NotificationItems = notifications.ToObservableCollection();
+        notifications.ToObservableCollection();
     }
 }

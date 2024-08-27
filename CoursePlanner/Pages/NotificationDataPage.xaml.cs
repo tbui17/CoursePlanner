@@ -1,9 +1,8 @@
-﻿using ViewModels.Interfaces;
-using ViewModels.PageViewModels;
+﻿using ViewModels.PageViewModels;
 
 namespace CoursePlanner.Pages;
 
-public partial class NotificationDataPage : IVmView<NotificationDataViewModel>
+public partial class NotificationDataPage
 {
     public NotificationDataPage(NotificationDataViewModel model)
     {
