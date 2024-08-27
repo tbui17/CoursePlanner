@@ -1,7 +1,6 @@
 using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.Mvvm.Messaging.Messages;
 using Lib.Services;
-using Lib.Utils;
 using Microsoft.Extensions.Logging;
 using ViewModels.Interfaces;
 
@@ -19,29 +18,32 @@ public class NavigationSubject(RefreshableViewService util, ILogger<NavigationSu
         new NavigationEvent(arg).Publish();
     }
 
-    public void Subscribe(IRefresh obj, Action<NavigationEvent> handler)
+    public void Subscribe(IRefresh obj, Func<NavigationEvent, Task> handler)
     {
-        if (WeakReferenceMessenger.Default.IsRegistered<NavigationEvent>(obj))
+        var messenger = WeakReferenceMessenger.Default;
+        if (messenger.IsRegistered<NavigationEvent>(obj))
         {
-            logger.LogWarning("Object {Object} is already registered for navigation events", obj);
+            logger.LogInformation("Object {Object} is already registered for navigation events", obj);
             return;
         }
 
-        WeakReferenceMessenger.Default.Register<NavigationEvent>(obj, (_, message) =>
+        messenger.Register<NavigationEvent>(obj, Handler);
+        logger.LogInformation("Subscribed {Object} to navigation events", obj);
+        return;
+
+        async void Handler(object _, NavigationEvent message)
         {
             var pageType = message.Value.Page;
-            var isFound = util
-                .GetRefreshableViewsContainingTarget(obj.GetType())
+            var containsTarget = util.GetRefreshableViewsContainingTarget(obj.GetType())
                 .Any(x => x == pageType);
 
-            if (!isFound)
+            if (!containsTarget)
             {
                 return;
             }
 
-            handler(message);
-        });
-        logger.LogInformation("Subscribed {Object} to navigation events", obj);
+            await handler(message);
+        }
     }
 
     public void Subscribe(IRefresh obj)
