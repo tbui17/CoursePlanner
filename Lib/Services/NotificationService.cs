@@ -25,7 +25,7 @@ public class NotificationService(ILocalDbCtxFactory factory)
         return notifications.ToList();
     }
 
-    public async Task<List<INotification>> GetNotifications(NotificationQuery query)
+    private async Task<List<INotification>> GetNotifications(NotificationQuery query)
     {
         await using var db = await factory.CreateDbContextAsync();
 
@@ -41,23 +41,31 @@ public class NotificationService(ILocalDbCtxFactory factory)
         return list.SelectMany(x => x).ToList();
     }
 
-    public async Task<List<INotification>> GetNotificationsForMonth(DateTime monthDate) =>
+    public async Task<List<INotification>> GetNotificationsForMonth(DateTime monthDate)
+    {
+        var res = await GetNotificationsForMonthImpl(monthDate);
+        return res;
+    }
+
+    private async Task<List<INotification>> GetNotificationsForMonthImpl(DateTime monthDate) =>
         await GetNotifications(q => q
             .Where(x => x.ShouldNotify)
             .Where(x =>
                 (x.Start.Month == monthDate.Month && x.Start.Year == monthDate.Year) ||
                 x.End.Month == monthDate.Month && x.End.Year == monthDate.Year)
-
         );
 
 
-    private class NotificationQueryFactory(DateTime now)
-    {
-        public IQueryable<INotification> CreateUpcomingNotificationQuery(IQueryable<INotification> queryable) =>
-            queryable
-                .Where(x => x.ShouldNotify)
-                .Where(IsUpcomingExpr<INotification>(now));
-    }
+
+}
+
+file class NotificationQueryFactory(DateTime now)
+{
+    public IQueryable<INotification> CreateUpcomingNotificationQuery(IQueryable<INotification> queryable) =>
+        queryable
+            .Where(x => x.ShouldNotify)
+            .Where(IsUpcomingExpr<INotification>(now));
+
 
     private static Expression<Func<T, bool>> IsUpcomingExpr<T>(DateTime time) where T : INotification
     {

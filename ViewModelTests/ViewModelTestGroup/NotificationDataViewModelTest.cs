@@ -22,6 +22,7 @@ public class NotificationDataViewModelTest : BasePageViewModelTest
             await set.ExecuteUpdateAsync(x => x.SetProperty(y => y.ShouldNotify, true).SetProperty(y => y.Start, DateTime.Now));
         }
         Model = new NotificationDataViewModel(service:Resolve<NotificationService>());
+        await Task.Delay(600);
     }
 
     private NotificationDataViewModel Model { get; set; }

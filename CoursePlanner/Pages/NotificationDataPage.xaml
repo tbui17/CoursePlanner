@@ -39,7 +39,7 @@
                                             <Label
                                                 Text="{Binding End, Converter={StaticResource DateConverter}, StringFormat='End: {0}'}" />
                                             <Label Text="{Binding ShouldNotify, StringFormat='Notifications: {0}'}" />
-                                            <Label Text="{Binding ShouldNotify, StringFormat='Notifications: {0}'}" />
+                                            <Label Text="{Binding ., StringFormat='Type: {0}', Mode=OneWay, Converter={StaticResource TypeToStringConverter}}" />
                                         </uranium:GridLayout>
                                     </Border>
                                 </DataTemplate>
