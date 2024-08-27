@@ -2,10 +2,7 @@
 
 namespace ViewModels.Interfaces;
 
-public interface IPageModel<T> where T : ObservableObject
+public interface IVmView<T> where T : ObservableObject
 {
-
     public T Model { get; set; }
-
-
 }
