@@ -64,19 +64,6 @@ public static class UtilExtensions
         return sb.ToString();
     }
 
-    public static bool Contains<T>(this IEnumerable<T> collection, Func<T, bool> predicate)
-    {
-        foreach (var item in collection)
-        {
-            if (predicate(item))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     public static IEnumerable<T> Tap<T>(this IEnumerable<T> collection, Action<T> action)
     {
         foreach (var item in collection)
@@ -85,6 +72,8 @@ public static class UtilExtensions
             yield return item;
         }
     }
+
+    public static T2 Thru<T1, T2>(this T1 value, Func<T1, T2> func) => func(value);
 
     public static IEnumerable<IGrouping<TKey, TResult>> SelectValues<TKey, TValue, TResult>(
         this IEnumerable<IGrouping<TKey, TValue>> groups,

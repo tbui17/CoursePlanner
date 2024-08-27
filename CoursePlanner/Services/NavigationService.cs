@@ -7,8 +7,6 @@ using ViewModels.Services;
 
 namespace CoursePlanner.Services;
 
-
-
 public class NavigationService : INavigationService
 {
     private readonly IServiceProvider _provider;
@@ -23,25 +21,18 @@ public class NavigationService : INavigationService
         _logger = logger;
         _subject = subject;
         Current.Navigated += OnNavigated;
-
-
-
     }
 
-    private void OnNavigated(object? _, object? __)
+    private async void OnNavigated(object? _, ShellNavigatedEventArgs args)
     {
-        var currentPage = Current.CurrentPage;
-        if (currentPage is null)
+        if (args.Source is not ShellNavigationSource.Pop ||
+            Current.CurrentPage is not IRefreshableView<IRefresh> refreshable)
         {
-            _logger.LogWarning("Navigated to null page");
             return;
         }
-        var pageType = currentPage.GetType();
-        _logger.LogInformation("Navigated to {PageName}", pageType.Name);
-        if (currentPage is not IRefreshableView<IRefresh> refreshable) return;
-        _logger.LogInformation("Refreshing {PageName}", pageType.Name);
-        refreshable.Model.RefreshAsync();
 
+        _logger.LogInformation("Refreshing page for back navigation: {PageName}", Current.CurrentPage.Title);
+        await refreshable.Model.RefreshAsync();
     }
 
     private T Resolve<T>() where T : notnull => _provider.GetRequiredService<T>();
@@ -66,7 +57,6 @@ public class NavigationService : INavigationService
 
     private async Task GoToAsync<T>(T page, int id) where T : Page, IRefreshableView<IRefresh>
     {
-
         _subject.Publish(new NavigationEventArg(typeof(T), id));
         await PushAsync(page);
     }
@@ -91,7 +81,6 @@ public class NavigationService : INavigationService
         await Current.GoToAsync($"///{pageName}");
         _subject.Publish(new NavigationEventArg(typeof(MainPage)));
     }
-
 
 
     public async Task GoToDetailedTermPageAsync(int id)

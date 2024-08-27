@@ -7,7 +7,6 @@ using CoursePlanner.Views;
 using Lib;
 using Lib.Models;
 using Lib.Services;
-using Lib.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Plugin.LocalNotification;
