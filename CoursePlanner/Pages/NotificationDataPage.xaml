@@ -6,6 +6,7 @@
              xmlns:pageViewModels="clr-namespace:ViewModels.PageViewModels;assembly=ViewModels"
              xmlns:controls="clr-namespace:CoursePlanner.Controls"
              xmlns:interfaces="clr-namespace:Lib.Interfaces;assembly=Lib"
+             xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
              x:DataType="pageViewModels:NotificationDataViewModel">
     <ContentPage.Content>
         <ScrollView>
@@ -31,7 +32,7 @@
                             <CollectionView.ItemTemplate>
                                 <DataTemplate x:DataType="interfaces:INotification">
                                     <Border>
-                                        <controls:FieldContainer>
+                                        <uranium:GridLayout RowCount="5" ColumnCount="1" RowSpacing="5">
                                             <Label Text="{Binding Name, StringFormat='Name: {0}'}" />
                                             <Label
                                                 Text="{Binding Start, Converter={StaticResource DateConverter}, StringFormat='Start: {0}'}" />
@@ -39,7 +40,7 @@
                                                 Text="{Binding End, Converter={StaticResource DateConverter}, StringFormat='End: {0}'}" />
                                             <Label Text="{Binding ShouldNotify, StringFormat='Notifications: {0}'}" />
                                             <Label Text="{Binding ShouldNotify, StringFormat='Notifications: {0}'}" />
-                                        </controls:FieldContainer>
+                                        </uranium:GridLayout>
                                     </Border>
                                 </DataTemplate>
                             </CollectionView.ItemTemplate>
