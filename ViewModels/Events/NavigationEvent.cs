@@ -1,8 +1,9 @@
 using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.Mvvm.Messaging.Messages;
+using Lib.Services;
+using Lib.Utils;
 using Microsoft.Extensions.Logging;
 using ViewModels.Interfaces;
-using ViewModels.Utils.ReflectUtils;
 
 namespace ViewModels.Events;
 
@@ -10,7 +11,7 @@ public record NavigationEventArg(Type Page, int Id = 0);
 
 public class NavigationEvent(NavigationEventArg arg) : ValueChangedMessage<NavigationEventArg>(arg);
 
-public class NavigationSubject(ReflectionUtil util, ILogger<NavigationSubject> logger)
+public class NavigationSubject(RefreshableViewService util, ILogger<NavigationSubject> logger)
 {
     public void Publish(NavigationEventArg arg)
     {
