@@ -5,11 +5,8 @@
     Spacing="5"
     x:Class="CoursePlanner.Controls.FieldContainer" >
     <VerticalStackLayout.Resources>
-        <Style TargetType="HorizontalStackLayout" >
-            <Setter Property="Spacing" Value="5" />
-        </Style>
         <Style TargetType="Label" BasedOn="{StaticResource FieldLabel}" >
-            
+
         </Style>
 
     </VerticalStackLayout.Resources>

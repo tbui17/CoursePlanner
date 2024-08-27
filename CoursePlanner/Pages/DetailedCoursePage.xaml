@@ -16,32 +16,12 @@
             <VerticalStackLayout Spacing="50" >
                 <VerticalStackLayout Spacing="25" >
                     <Label Style="{StaticResource Subheading}" Text="Fields" />
-
                     <controls:FieldContainer>
-                        <HorizontalStackLayout>
-                            <Label Text="Name:" />
-                            <Label Text="{Binding Course.Name}" />
-                        </HorizontalStackLayout>
-
-                        <HorizontalStackLayout>
-                            <Label Text="Start:" />
-                            <Label Text="{Binding Course.Start, Converter={StaticResource DateConverter}}" />
-                        </HorizontalStackLayout>
-
-                        <HorizontalStackLayout>
-                            <Label Text="End:" />
-                            <Label Text="{Binding Course.End, Converter={StaticResource DateConverter}}" />
-                        </HorizontalStackLayout>
-
-                        <HorizontalStackLayout>
-                            <Label Text="Notifications:" />
-                            <Label Text="{Binding Course.ShouldNotify}" />
-                        </HorizontalStackLayout>
-
-                        <HorizontalStackLayout>
-                            <Label Text="Status:" />
-                            <Label Text="{Binding Course.Status}" />
-                        </HorizontalStackLayout>
+                        <Label Text="{Binding Course.Name, StringFormat='Name: {0}'}" />
+                        <Label Text="{Binding Course.Start, Converter={StaticResource DateConverter}, StringFormat='Start: {0}'}" />
+                        <Label Text="{Binding Course.End, Converter={StaticResource DateConverter}, StringFormat='End: {0}'}" />
+                        <Label Text="{Binding Course.ShouldNotify, StringFormat='Notifications: {0}'}" />
+                        <Label Text="{Binding Course.Status, StringFormat='Status: {0}'}" />
                     </controls:FieldContainer>
 
 
@@ -80,36 +60,19 @@
                                 <DataTemplate x:DataType="models:Assessment" >
                                     <Border>
                                         <controls:FieldContainer>
-                                            <HorizontalStackLayout>
-                                                <Label Text="Name:" />
-                                                <Label Text="{Binding Name}" />
-                                            </HorizontalStackLayout>
-
-                                            <HorizontalStackLayout>
-                                                <Label Text="Start Date:" />
-                                                <Label Text="{Binding Start, Converter={StaticResource DateConverter}}" />
-                                            </HorizontalStackLayout>
-                                            <HorizontalStackLayout>
-                                                <Label Text="End Date:" />
-                                                <Label Text="{Binding End, Converter={StaticResource DateConverter}}" />
-                                            </HorizontalStackLayout>
-
-                                            <HorizontalStackLayout>
-                                                <Label Text="Notifications" />
-                                                <Label Text="{Binding ShouldNotify}" />
-                                            </HorizontalStackLayout>
-
-                                            <HorizontalStackLayout>
-                                                <Label Text="Type:" />
-                                                <Label Text="{Binding Type }" />
-                                            </HorizontalStackLayout>
+                                            <Label Text="{Binding Name, StringFormat='Name: {0}'}" />
+                                            <Label Text="{Binding Start, Converter={StaticResource DateConverter}, StringFormat='Start Date: {0}'}" />
+                                            <Label Text="{Binding End, Converter={StaticResource DateConverter}, StringFormat='End Date: {0}'}" />
+                                            <Label Text="{Binding ShouldNotify, StringFormat='Notifications: {0}'}" />
+                                            <Label Text="{Binding Type, StringFormat='Type: {0}'}" />
                                         </controls:FieldContainer>
 
                                     </Border>
                                 </DataTemplate>
                             </CollectionView.ItemTemplate>
                         </CollectionView>
-                    </ScrollView></Border>
+                    </ScrollView>
+                </Border>
 
 
                 <FlexLayout Style="{StaticResource ButtonContainer}" >
@@ -141,14 +104,8 @@
                                 <DataTemplate x:DataType="models:Note" >
                                     <Border>
                                         <controls:FieldContainer>
-                                            <HorizontalStackLayout>
-                                                <Label Text="Name:" />
-                                                <Label Text="{Binding Name}" />
-                                            </HorizontalStackLayout>
-                                            <HorizontalStackLayout>
-                                                <Label Text="Text:" />
-                                                <Label Text="{Binding Value}" />
-                                            </HorizontalStackLayout>
+                                            <Label Text="{Binding Name, StringFormat='Name: {0}'}" />
+                                            <Label Text="{Binding Value, StringFormat='Text: {0}'}" />
                                         </controls:FieldContainer>
                                     </Border>
                                 </DataTemplate>

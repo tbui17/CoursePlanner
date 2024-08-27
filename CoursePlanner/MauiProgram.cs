@@ -9,6 +9,7 @@ using Lib.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Plugin.LocalNotification;
+using UraniumUI;
 using ViewModels.Config;
 using ViewModels.Services;
 
@@ -43,6 +44,8 @@ public static class MauiProgram
             .UseMauiApp<App>()
             .UseMauiCommunityToolkit()
             .UseLocalNotification()
+            .UseUraniumUI()
+            .UseUraniumUIMaterial()
             .ConfigureFonts
             (
                 fonts =>

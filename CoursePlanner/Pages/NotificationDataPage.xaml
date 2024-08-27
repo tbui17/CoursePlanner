@@ -18,6 +18,7 @@
                         <Entry Text="{Binding FilterText}" />
                     </controls:AutoGrid>
                 </VerticalStackLayout>
+
                 <Border Style="{StaticResource CollectionBorder}">
                     <ScrollView Style="{StaticResource CollectionScrollView}">
                         <CollectionView ItemsSource="{Binding NotificationItems}" SelectionMode="None"
@@ -31,27 +32,14 @@
                                 <DataTemplate x:DataType="interfaces:INotification">
                                     <Border>
                                         <controls:FieldContainer>
-
-                                            <HorizontalStackLayout>
-                                                <Label Text="Name:" />
-                                                <Label Text="{Binding Name}" />
-                                            </HorizontalStackLayout>
-
-                                            <HorizontalStackLayout>
-                                                <Label Text="Start Date:" />
-                                                <Label Text="{Binding Start, Converter={StaticResource DateConverter}}" />
-                                            </HorizontalStackLayout>
-                                            <HorizontalStackLayout>
-                                                <Label Text="End Date:" />
-                                                <Label Text="{Binding End, Converter={StaticResource DateConverter}}" />
-                                            </HorizontalStackLayout>
-
-                                            <HorizontalStackLayout>
-                                                <Label Text="Notifications" />
-                                                <Label Text="{Binding ShouldNotify}" />
-                                            </HorizontalStackLayout>
+                                            <Label Text="{Binding Name, StringFormat='Name: {0}'}" />
+                                            <Label
+                                                Text="{Binding Start, Converter={StaticResource DateConverter}, StringFormat='Start: {0}'}" />
+                                            <Label
+                                                Text="{Binding End, Converter={StaticResource DateConverter}, StringFormat='End: {0}'}" />
+                                            <Label Text="{Binding ShouldNotify, StringFormat='Notifications: {0}'}" />
+                                            <Label Text="{Binding ShouldNotify, StringFormat='Notifications: {0}'}" />
                                         </controls:FieldContainer>
-
                                     </Border>
                                 </DataTemplate>
                             </CollectionView.ItemTemplate>

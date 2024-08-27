@@ -9,62 +9,51 @@
              x:Class="CoursePlanner.Views.TermListView"
              x:DataType="pageViewModels:TermViewModel">
 
-    <VerticalStackLayout Spacing="10" Margin="10" >
+    <VerticalStackLayout Spacing="10" Margin="10">
 
-            <Border Style="{StaticResource CollectionBorder}">
-                <ScrollView Style="{StaticResource CollectionScrollView}" >
-                    <CollectionView ItemsSource="{Binding Terms}" SelectionMode="Single"
-                        SelectedItem="{Binding SelectedTerm}" >
+        <Border Style="{StaticResource CollectionBorder}">
+            <ScrollView Style="{StaticResource CollectionScrollView}">
+                <CollectionView ItemsSource="{Binding Terms}" SelectionMode="Single"
+                                SelectedItem="{Binding SelectedTerm}">
 
-                        <CollectionView.ItemsLayout>
-                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="5" />
-                        </CollectionView.ItemsLayout>
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="5" />
+                    </CollectionView.ItemsLayout>
 
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate x:DataType="models:Term" >
-                                <Border>
-                                    <controls:FieldContainer>
-                                        <HorizontalStackLayout>
-                                            <Label Text="Name:" />
-                                            <Label Text="{Binding Name}" />
-                                        </HorizontalStackLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:Term">
+                            <Border>
+                                <controls:FieldContainer>
+                                    <Label Text="{Binding Name, StringFormat='Name: {0}'}" />
+                                    <Label
+                                        Text="{Binding Start, Converter={StaticResource DateConverter}, StringFormat='Start: {0}'}" />
+                                    <Label
+                                        Text="{Binding End, Converter={StaticResource DateConverter}, StringFormat='End: {0}'}" />
+                                    <Label
+                                        Text="{Binding Courses, Converter={StaticResource CourseListToStringConverter}, StringFormat='Courses: {0}'}"
+                                        MaximumWidthRequest="400"
+                                        HorizontalOptions="Start"
+                                        LineBreakMode="TailTruncation" />
+                                </controls:FieldContainer>
+                            </Border>
 
-                                        <HorizontalStackLayout>
-                                            <Label Text="Start Date:" />
-                                            <Label Text="{Binding Start, Converter={StaticResource DateConverter}}" />
-                                        </HorizontalStackLayout>
-                                        <HorizontalStackLayout>
-                                            <Label Text="End Date:" />
-                                            <Label Text="{Binding End, Converter={StaticResource DateConverter}}" />
-                                        </HorizontalStackLayout>
-                                        <HorizontalStackLayout>
-                                            <Label Text="Courses:" />
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </ScrollView>
+        </Border>
 
-                                            <Label
-                                                Text="{Binding Courses, Converter={StaticResource CourseListToStringConverter}}"
-                                                MaximumWidthRequest="200"
-                                                LineBreakMode="TailTruncation" />
-                                        </HorizontalStackLayout>
-                                    </controls:FieldContainer>
-                                </Border>
+        <FlexLayout Style="{StaticResource ButtonContainer}">
+            <FlexLayout.Resources>
+                <Style TargetType="Button" BasedOn="{StaticResource ButtonStyle}">
+                    <Setter Property="MinimumWidthRequest" Value="75" />
 
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
-                </ScrollView></Border>
+                </Style>
+            </FlexLayout.Resources>
+            <Button Text="Add" Command="{Binding AddTermCommand}" />
+            <Button Text="Details" Command="{Binding DetailedTermCommand}" />
+            <Button Text="Delete" Command="{Binding DeleteTermCommand}" />
 
-
-            <FlexLayout Style="{StaticResource ButtonContainer}" >
-                <FlexLayout.Resources>
-                    <Style TargetType="Button" BasedOn="{StaticResource ButtonStyle}" >
-                        <Setter Property="MinimumWidthRequest" Value="75" />
-
-                    </Style>
-                </FlexLayout.Resources>
-                <Button Text="Add" Command="{Binding AddTermCommand}" />
-                <Button Text="Details" Command="{Binding DetailedTermCommand}" />
-                <Button Text="Delete" Command="{Binding DeleteTermCommand}" />
-
-            </FlexLayout>
-        </VerticalStackLayout>
+        </FlexLayout>
+    </VerticalStackLayout>
 </ContentView>
