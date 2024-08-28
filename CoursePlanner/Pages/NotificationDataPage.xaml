@@ -6,47 +6,99 @@
              xmlns:pageViewModels="clr-namespace:ViewModels.PageViewModels;assembly=ViewModels"
              xmlns:controls="clr-namespace:CoursePlanner.Controls"
              xmlns:interfaces="clr-namespace:Lib.Interfaces;assembly=Lib"
-             xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:cz="clr-namespace:FunctionZero.Maui.Controls;assembly=FunctionZero.Maui.Controls"
+             x:Name="Page"
+
              x:DataType="pageViewModels:NotificationDataViewModel">
+    <ContentPage.Resources>
+        <DataTemplate x:DataType="interfaces:INotification" x:Key="Template1">
+
+            <Border>
+                <VerticalStackLayout Spacing="5">
+                    <VerticalStackLayout.Resources>
+                        <Style TargetType="Label" BasedOn="{StaticResource BaseLabel}">
+                            <Setter Property="Margin" Value="0,0,0,5" />
+                            <Setter Property="FontAttributes" Value="Bold" />
+                        </Style>
+                    </VerticalStackLayout.Resources>
+
+                    <Label Text="{Binding Name, StringFormat='Name: {0}'}" />
+                    <Label
+                        Text="{Binding Start, Converter={StaticResource DateConverter}, StringFormat='Start: {0}'}" />
+                    <Label
+                        Text="{Binding End, Converter={StaticResource DateConverter}, StringFormat='End: {0}'}" />
+                    <Label Text="{Binding ShouldNotify, StringFormat='Notifications: {0}'}" />
+                    <Label
+                        Text="{Binding ., StringFormat='Type: {0}', Mode=OneWay, Converter={StaticResource TypeToStringConverter}}" />
+                </VerticalStackLayout>
+            </Border>
+
+
+        </DataTemplate>
+    </ContentPage.Resources>
     <ContentPage.Content>
         <ScrollView>
-            <VerticalStackLayout x:Name="MainLayout" Margin="10">
+            <VerticalStackLayout x:Name="MainLayout" Margin="10,10,10,30">
                 <VerticalStackLayout Margin="10" Spacing="10">
                     <controls:AutoGrid>
                         <Label Text="Month" />
-                        <DatePicker Date="{Binding MonthDate}" />
+                        <DatePicker Date="{Binding MonthDate}">
+                            <DatePicker.Behaviors>
+                                <toolkit:EventToCommandBehavior
+                                    EventName="DateSelected"
+                                    Command="{Binding Source={x:Reference Page}, Path=BindingContext.LoadNotificationsCommand}" />
+                            </DatePicker.Behaviors>
+                        </DatePicker>
                         <Label Text="Filter" />
                         <Entry Text="{Binding FilterText}" />
                     </controls:AutoGrid>
                 </VerticalStackLayout>
 
-                <Border Style="{StaticResource CollectionBorder}">
-                    <ScrollView Style="{StaticResource CollectionScrollView}">
-                        <CollectionView ItemsSource="{Binding NotificationItems}" SelectionMode="None"
-                                        HorizontalOptions="Center">
-                            <CollectionView.ItemsLayout>
-                                <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
-                            </CollectionView.ItemsLayout>
+                <cz:ListViewZero
+                    ItemsSource="{Binding NotificationItems}"
+                    ItemHeight="200"
+                    SelectionMode="None"
+                    ItemTemplate="{StaticResource Template1}" />
 
-
-                            <CollectionView.ItemTemplate>
-                                <DataTemplate x:DataType="interfaces:INotification">
-                                    <Border>
-                                        <uranium:GridLayout RowCount="5" ColumnCount="1" RowSpacing="5">
-                                            <Label Text="{Binding Name, StringFormat='Name: {0}'}" />
-                                            <Label
-                                                Text="{Binding Start, Converter={StaticResource DateConverter}, StringFormat='Start: {0}'}" />
-                                            <Label
-                                                Text="{Binding End, Converter={StaticResource DateConverter}, StringFormat='End: {0}'}" />
-                                            <Label Text="{Binding ShouldNotify, StringFormat='Notifications: {0}'}" />
-                                            <Label Text="{Binding ., StringFormat='Type: {0}', Mode=OneWay, Converter={StaticResource TypeToStringConverter}}" />
-                                        </uranium:GridLayout>
-                                    </Border>
-                                </DataTemplate>
-                            </CollectionView.ItemTemplate>
-                        </CollectionView>
-                    </ScrollView>
-                </Border>
+                <!-- -->
+                <!-- <Border Style="{StaticResource CollectionBorder}"> -->
+                <!--     <ScrollView Style="{StaticResource CollectionScrollView}"> -->
+                <!--         <CollectionView ItemsSource="{Binding NotificationItems}" SelectionMode="None" -->
+                <!--                         HorizontalOptions="Center"> -->
+                <!--             <CollectionView.ItemsLayout> -->
+                <!--                 <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" /> -->
+                <!--             </CollectionView.ItemsLayout> -->
+                <!-- -->
+                <!-- -->
+                <!--             <CollectionView.ItemTemplate> -->
+                <!--                 <DataTemplate x:DataType="interfaces:INotification"> -->
+                <!--                     <Border> -->
+                <!--                         <VerticalStackLayout Spacing="5"> -->
+                <!--                             <VerticalStackLayout.Resources> -->
+                <!--                                 <Style TargetType="Label" BasedOn="{StaticResource BaseLabel}"> -->
+                <!--                                     <Setter Property="FontSize" Value="16" /> -->
+                <!--                                     <Setter Property="Margin" Value="0,0,0,5" /> -->
+                <!--                                     <Setter Property="FontAttributes" Value="Bold" /> -->
+                <!--                                 </Style> -->
+                <!--                             </VerticalStackLayout.Resources> -->
+                <!-- -->
+                <!--                             <Label Text="{Binding Name, StringFormat='Name: {0}'}" /> -->
+                <!--                             <Label -->
+                <!--                                 Text="{Binding Start, Converter={StaticResource DateConverter}, StringFormat='Start: {0}'}" /> -->
+                <!--                             <Label -->
+                <!--                                 Text="{Binding End, Converter={StaticResource DateConverter}, StringFormat='End: {0}'}" /> -->
+                <!--                             <Label Text="{Binding ShouldNotify, StringFormat='Notifications: {0}'}" /> -->
+                <!--                             <Label -->
+                <!-- Text="{Binding ., StringFormat='Type: {0}', Mode=OneWay, Converter={StaticResource TypeToStringConverter}}" /> -->
+                <!--                         </VerticalStackLayout> -->
+                <!-- -->
+                <!--                     </Border> -->
+                <!--                 </DataTemplate> -->
+                <!--             </CollectionView.ItemTemplate> -->
+                <!--         </CollectionView> -->
+                <!--     </ScrollView> -->
+                <!-- </Border> -->
 
             </VerticalStackLayout>
         </ScrollView>

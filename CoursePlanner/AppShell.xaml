@@ -9,7 +9,7 @@
 
     <ShellContent ContentTemplate="{DataTemplate local:MainPage}" Title="Main" Route="MainPage" />
     <ShellContent ContentTemplate="{DataTemplate pages:DevPage}" Title="Developer Util" Route="DevPage" />
-    <ShellContent ContentTemplate="{DataTemplate pages:NotificationDataPage}" Title="Notification Data" Route="NotificationData" IsVisible="{Binding IsLoggedIn}"  />
+    <ShellContent ContentTemplate="{DataTemplate pages:NotificationDataPage}" Title="Notification Data" Route="NotificationDataPage" IsVisible="{Binding IsLoggedIn}"  />
 
 
 

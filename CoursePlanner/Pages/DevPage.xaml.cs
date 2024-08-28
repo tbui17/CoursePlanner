@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Maui.Core.Extensions;
 using Lib.Interfaces;
 using Lib.Models;
+using Lib.Services;
 using Lib.Utils;
 using Microsoft.EntityFrameworkCore;
 using ViewModels.Services;
@@ -13,12 +14,20 @@ public partial class DevPage
         IServiceProvider provider,
         ILocalDbCtxFactory factory,
         IAppService appService,
-        ILocalNotificationService notificationService)
+        INavigationService navService,
+        ILocalNotificationService notificationService,
+        ISessionService sessionService,
+        AccountService accountService
+        )
     {
         Provider = provider;
         Factory = factory;
         ApplicationService = appService;
         NotificationService = notificationService;
+        SessionService = sessionService;
+        AccountService = accountService;
+        NavService = navService;
+
 
         Actions = CreateActions();
 
@@ -29,6 +38,12 @@ public partial class DevPage
         Input.ItemsSource = Actions.Keys.ToObservableCollection();
         Input.SelectedIndex = 0;
     }
+
+    public INavigationService NavService { get; set; }
+
+    public AccountService AccountService { get; set; }
+
+    public ISessionService SessionService { get; set; }
 
     public ILocalNotificationService NotificationService { get; set; }
 
@@ -216,6 +231,15 @@ public partial class DevPage
                         "There was an error creating the test data. Did you forget to reset the database? " +
                         e.Message);
                 }
+            },
+            ["Nav Data Page"] = async () =>
+            {
+                var login = new LoginDetails("testaccount", "testpass");
+                await AccountService.CreateAsync(login);
+                await SessionService.LoginAsync(login);
+                await Shell.Current.GoToAsync($"///{nameof(NotificationDataPage)}");
+                var page = (NotificationDataPage)Shell.Current.CurrentPage;
+                page.Model.MonthDate = new DateTime(2023, 9, 1);
             }
         };
     }

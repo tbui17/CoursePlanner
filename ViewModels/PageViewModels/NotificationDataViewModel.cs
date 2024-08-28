@@ -1,7 +1,5 @@
-using System.Collections.ObjectModel;
-using System.Reactive.Concurrency;
+using System.Collections.Immutable;
 using System.Reactive.Linq;
-using CommunityToolkit.Maui.Core.Extensions;
 using Lib.Interfaces;
 using Lib.Services;
 using ReactiveUI;
@@ -9,7 +7,7 @@ using ReactiveUI.SourceGenerators;
 
 namespace ViewModels.PageViewModels;
 
-using NotificationCollection = ReadOnlyObservableCollection<INotification>;
+using NotificationCollection = ImmutableArray<INotification>;
 
 public partial class NotificationDataViewModel : ReactiveObject
 {
@@ -21,9 +19,7 @@ public partial class NotificationDataViewModel : ReactiveObject
 
     [ObservableAsProperty]
     // ReSharper disable once NotAccessedField.Local
-    private NotificationCollection _notificationItems = new([]);
-
-    private IScheduler _scheduler = new NewThreadScheduler();
+    private NotificationCollection _notificationItems = [];
 
     public NotificationDataViewModel(NotificationService service)
     {
@@ -41,8 +37,8 @@ public partial class NotificationDataViewModel : ReactiveObject
                 var (notifications, filterText) = pair;
                 return notifications.Where(item => item.Name.Contains(filterText));
             })
-            .Select(notifications => notifications.ToObservableCollection())
-            .Select(x => new NotificationCollection(x))
-            .ToProperty(this, vm => vm.NotificationItems,scheduler: _scheduler);
+            .Select(x => x.ToImmutableArray())
+            .LoggedCatch(this,Observable.Return(NotificationCollection.Empty))
+            .ToProperty(this, vm => vm.NotificationItems);
     }
 }

@@ -7,11 +7,12 @@ public class TypeToStringConverter : IValueConverter
 {
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        if (value is Assessment a)
+        return value switch
         {
-            return $"{a.Type} Assessment";
-        }
-        return value?.GetType().Name ?? "No type";
+            Assessment x => $"{x.Type} Assessment",
+            Course => "Course",
+            _ => value?.GetType().Name ?? "No type"
+        };
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
