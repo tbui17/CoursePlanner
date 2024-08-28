@@ -8,6 +8,7 @@ public partial class NotificationDataPage
     {
         Model = model;
         InitializeComponent();
+        HideSoftInputOnTapped = true;
         BindingContext = model;
     }
 
