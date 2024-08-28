@@ -7,7 +7,7 @@ using ReactiveUI.SourceGenerators;
 
 namespace ViewModels.PageViewModels;
 
-using NotificationCollection = ImmutableArray<INotification>;
+using NotificationCollection = List<INotification>;
 
 public partial class NotificationDataViewModel : ReactiveObject
 {
@@ -37,8 +37,8 @@ public partial class NotificationDataViewModel : ReactiveObject
                 var (notifications, filterText) = pair;
                 return notifications.Where(item => item.Name.Contains(filterText));
             })
-            .Select(x => x.ToImmutableArray())
-            .LoggedCatch(this,Observable.Return(NotificationCollection.Empty))
+            .Select(x => x.ToList())
+            .LoggedCatch(this,Observable.Return(new NotificationCollection()))
             .ToProperty(this, vm => vm.NotificationItems);
     }
 }
