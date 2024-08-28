@@ -2,10 +2,11 @@ using FluentAssertions;
 using ViewModels.Events;
 using ViewModels.PageViewModels;
 using ViewModelTests.TestData;
+using ViewModelTests.TestSetup;
 
 namespace ViewModelTests;
 
-public class NavigationEventTest
+public class NavigationEventTest : BaseDbTest
 {
     [Test]
     public async Task NavigationSubjectBehaviorTest()
