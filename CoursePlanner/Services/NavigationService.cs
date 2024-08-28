@@ -1,6 +1,5 @@
 using CoursePlanner.Pages;
 using Microsoft.Extensions.Logging;
-using ViewModels.Events;
 using ViewModels.Interfaces;
 using ViewModels.PageViewModels;
 using ViewModels.Services;
@@ -11,29 +10,30 @@ public class NavigationService : INavigationService
 {
     private readonly IServiceProvider _provider;
     private readonly ILogger<AppService> _logger;
-    private readonly NavigationSubject _subject;
 
-    public NavigationService(
-        IServiceProvider provider,
-        ILogger<AppService> logger,
-        NavigationSubject subject)
+    public NavigationService(IServiceProvider provider, ILogger<AppService> logger)
     {
         _provider = provider;
         _logger = logger;
-        _subject = subject;
         Current.Navigating += OnNavigating;
     }
 
     private void OnNavigating(object? _, ShellNavigatingEventArgs args)
     {
-        if (args.Source is not ShellNavigationSource.Pop ||
-            Current.CurrentPage is not IRefreshableView<IRefresh> refreshable)
+        if (args.Source is not ShellNavigationSource.Pop || GetRefreshableView() is not { } refreshable)
         {
             return;
         }
 
         _logger.LogInformation("Refreshing page for back navigation: {PageName}", Current.CurrentPage.Title);
         refreshable.Model.RefreshAsync();
+
+        return;
+
+        static IRefreshableView<IRefresh>? GetRefreshableView() =>
+            Navigation.NavigationStack is not [.., IRefreshableView<IRefresh> view, not null]
+                ? null
+                : view;
     }
 
     private T Resolve<T>() where T : notnull => _provider.GetRequiredService<T>();
@@ -44,21 +44,20 @@ public class NavigationService : INavigationService
 
     private async Task PushAsync(Page page)
     {
-        _logger.LogInformation("Navigating to page {PageName}", page.GetType().Name);
+        _logger.LogInformation("Navigating to page {PageName}", page.Title);
         await Navigation.PushAsync(page);
     }
 
     private async Task GoToAsync<T>(int id) where T : Page, IRefreshableView<IRefresh>
     {
-        _logger.LogInformation("Navigating to {PageName}", typeof(T).Name);
         var page = Resolve<T>();
-
+        _logger.LogInformation("Navigating to {PageName}", page.Title);
         await GoToAsync(page, id);
     }
 
     private async Task GoToAsync<T>(T page, int id) where T : Page, IRefreshableView<IRefresh>
     {
-        _subject.Publish(new NavigationEventArg(typeof(T), id));
+        await page.Model.Init(id);
         await PushAsync(page);
     }
 
@@ -80,7 +79,6 @@ public class NavigationService : INavigationService
         const string pageName = nameof(MainPage);
         _logger.LogInformation("Navigating to main page");
         await Current.GoToAsync($"///{pageName}");
-        _subject.Publish(new NavigationEventArg(typeof(MainPage)));
     }
 
 
