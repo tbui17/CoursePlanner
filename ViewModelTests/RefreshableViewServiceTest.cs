@@ -3,11 +3,12 @@ using Lib.Services;
 using Microsoft.Extensions.Caching.Memory;
 using ViewModels.PageViewModels;
 using ViewModelTests.TestData;
+using ViewModelTests.TestSetup;
 
 
 namespace ViewModelTests;
 
-public class RefreshableViewServiceTest
+public class RefreshableViewServiceTest : BaseTest
 {
     [Test]
     public void GetRefreshableViews_TermViewModel_ReturnsTestPage()

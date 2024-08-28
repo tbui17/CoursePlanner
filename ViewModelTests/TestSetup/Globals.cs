@@ -13,44 +13,44 @@ namespace ViewModelTests.TestSetup;
 
 public static class Globals
 {
-    private static IServiceProvider? _provider;
-    public static IServiceProvider Provider => _provider ??= CreateProvider();
-
-
-    private static IServiceProvider CreateProvider()
-    {
-        var mockNavigation = new Mock<INavigationService>();
-        var mockAppService = new Mock<IAppService>();
-        var services = new ServiceCollection();
-        Configs
-            .ConfigBackendServices(services)
-            .ConfigServices()
-            .ConfigAssemblyNames([nameof(ViewModelTests), nameof(ViewModels)])
-            .AddDbContext<LocalDbCtx>(x => x
-                .UseSqlite("DataSource=database.db")
-                .EnableDetailedErrors()
-                .EnableSensitiveDataLogging()
-                .LogTo(Console.WriteLine)
-            )
-            .AddDbContextFactory<LocalDbCtx>()
-            .AddSingleton(mockNavigation.Object)
-            .AddSingleton(mockAppService.Object)
-            .AddTransient<ISessionService, SessionService>()
-            .AddTransient<AppShellViewModel>();
-
-        services.AddLogging(b => b.AddConsole());
-
-        return services.BuildServiceProvider();
-    }
-
-    public static T Resolve<T>() where T : notnull => Provider.GetRequiredService<T>();
-
-
-    public static LocalDbCtx GetDb() =>
-        Provider
-            .GetRequiredService<ILocalDbCtxFactory>()
-            .CreateDbContext();
-
+    // private static IServiceProvider? _provider;
+    // public static IServiceProvider Provider => _provider ??= CreateProvider();
+    //
+    //
+    // private static IServiceProvider CreateProvider()
+    // {
+    //     var mockNavigation = new Mock<INavigationService>();
+    //     var mockAppService = new Mock<IAppService>();
+    //     var services = new ServiceCollection();
+    //     Configs
+    //         .ConfigBackendServices(services)
+    //         .ConfigServices()
+    //         .ConfigAssemblyNames([nameof(ViewModelTests), nameof(ViewModels)])
+    //         .AddDbContext<LocalDbCtx>(x => x
+    //             .UseSqlite("DataSource=database.db")
+    //             .EnableDetailedErrors()
+    //             .EnableSensitiveDataLogging()
+    //             .LogTo(Console.WriteLine)
+    //         )
+    //         .AddDbContextFactory<LocalDbCtx>()
+    //         .AddSingleton(mockNavigation.Object)
+    //         .AddSingleton(mockAppService.Object)
+    //         .AddTransient<ISessionService, SessionService>()
+    //         .AddTransient<AppShellViewModel>();
+    //
+    //     services.AddLogging(b => b.AddConsole());
+    //
+    //     return services.BuildServiceProvider();
+    // }
+    //
+    // public static T Resolve<T>() where T : notnull => Provider.GetRequiredService<T>();
+    //
+    //
+    // public static LocalDbCtx GetDb() =>
+    //     Provider
+    //         .GetRequiredService<ILocalDbCtxFactory>()
+    //         .CreateDbContext();
+    //
     public static IFixture CreateFixture()
     {
         var fixture = new Fixture().Customize(new AutoMoqCustomization());
