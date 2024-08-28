@@ -13,17 +13,18 @@ public class NavigationService : INavigationService
     private readonly ILogger<AppService> _logger;
     private readonly NavigationSubject _subject;
 
-    public NavigationService(IServiceProvider provider,
+    public NavigationService(
+        IServiceProvider provider,
         ILogger<AppService> logger,
         NavigationSubject subject)
     {
         _provider = provider;
         _logger = logger;
         _subject = subject;
-        Current.Navigated += OnNavigated;
+        Current.Navigating += OnNavigating;
     }
 
-    private async void OnNavigated(object? _, ShellNavigatedEventArgs args)
+    private void OnNavigating(object? _, ShellNavigatingEventArgs args)
     {
         if (args.Source is not ShellNavigationSource.Pop ||
             Current.CurrentPage is not IRefreshableView<IRefresh> refreshable)
@@ -32,7 +33,7 @@ public class NavigationService : INavigationService
         }
 
         _logger.LogInformation("Refreshing page for back navigation: {PageName}", Current.CurrentPage.Title);
-        await refreshable.Model.RefreshAsync();
+        refreshable.Model.RefreshAsync();
     }
 
     private T Resolve<T>() where T : notnull => _provider.GetRequiredService<T>();
