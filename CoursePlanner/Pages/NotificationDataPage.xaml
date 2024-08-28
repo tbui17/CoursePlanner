@@ -12,30 +12,7 @@
 
              x:DataType="pageViewModels:NotificationDataViewModel">
     <ContentPage.Resources>
-        <DataTemplate x:DataType="interfaces:INotification" x:Key="Template1">
 
-            <Border>
-                <VerticalStackLayout Spacing="5">
-                    <VerticalStackLayout.Resources>
-                        <Style TargetType="Label" BasedOn="{StaticResource BaseLabel}">
-                            <Setter Property="Margin" Value="0,0,0,5" />
-                            <Setter Property="FontAttributes" Value="Bold" />
-                        </Style>
-                    </VerticalStackLayout.Resources>
-
-                    <Label Text="{Binding Name, StringFormat='Name: {0}'}" />
-                    <Label
-                        Text="{Binding Start, Converter={StaticResource DateConverter}, StringFormat='Start: {0}'}" />
-                    <Label
-                        Text="{Binding End, Converter={StaticResource DateConverter}, StringFormat='End: {0}'}" />
-                    <Label Text="{Binding ShouldNotify, StringFormat='Notifications: {0}'}" />
-                    <Label
-                        Text="{Binding ., StringFormat='Type: {0}', Mode=OneWay, Converter={StaticResource TypeToStringConverter}}" />
-                </VerticalStackLayout>
-            </Border>
-
-
-        </DataTemplate>
     </ContentPage.Resources>
     <ContentPage.Content>
         <ScrollView>
@@ -51,9 +28,8 @@
 
                 <cz:ListViewZero
                     ItemsSource="{Binding NotificationItems}"
-                    ItemHeight="200"
                     SelectionMode="None"
-                    ItemTemplate="{StaticResource Template1}" />
+                    ItemTemplate="{StaticResource NotificationCard}" />
 
             </VerticalStackLayout>
         </ScrollView>
