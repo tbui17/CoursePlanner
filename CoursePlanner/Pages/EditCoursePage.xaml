@@ -5,7 +5,7 @@
 
 
     xmlns:controls="clr-namespace:CoursePlanner.Controls"
-    xmlns:Domain="clr-namespace:ViewModels.Domain;assembly=ViewModels"
+
     xmlns:domain="clr-namespace:ViewModels.Domain;assembly=ViewModels"
 
     x:Class="CoursePlanner.Pages.EditCoursePage"
