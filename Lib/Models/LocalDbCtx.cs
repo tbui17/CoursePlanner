@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+﻿using Lib.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace Lib.Models;
@@ -35,20 +35,10 @@ public class LocalDbCtx : DbContext
     }
 
 
-    public IEnumerable<IQueryable<T>> GetImplementingSets<T>() where T : class =>
-        GetImplementingSetsBase<T>()
+    public IEnumerable<IQueryable<T>> GetDbSets<T>() where T : class =>
+        DbContextUtil.GetDbSets<LocalDbCtx, T>()
             .Select(x => x.GetValue(this))
             .Cast<IQueryable<T>>();
-
-    private static IEnumerable<PropertyInfo> GetImplementingSetsBase<T>() where T : class =>
-        typeof(LocalDbCtx)
-            .GetProperties()
-            .Where(x => x.PropertyType.IsGenericType)
-            .Where(x => x.PropertyType.GetGenericTypeDefinition() == typeof(DbSet<>))
-            .Where(x => x.PropertyType.GenericTypeArguments[0].IsAssignableTo(typeof(T)));
-
-
-
 }
 
 file static class Collation
