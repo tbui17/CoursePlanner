@@ -32,11 +32,11 @@ public class NotificationService(MultiLocalDbContextFactory dbFactory)
 
     public async Task<IList<INotification>> GetNotificationsForMonth(DateTime monthDate)
     {
-        var monthF = NotificationPredicateFactory.Create(x => x.Month, monthDate);
-        var yearF = NotificationPredicateFactory.Create(x => x.Year, monthDate);
+        var monthPf = NotificationPredicateFactory.Create(x => x.Month, monthDate);
+        var yearPf = NotificationPredicateFactory.Create(x => x.Year, monthDate);
 
-        var startPred = monthF.StartEqual().And(yearF.StartEqual());
-        var endPred = monthF.EndEqual().And(yearF.EndEqual());
+        var startPred = monthPf.StartEqual().And(yearPf.StartEqual());
+        var endPred = monthPf.EndEqual().And(yearPf.EndEqual());
 
         var pred = startPred.Or(endPred);
 

@@ -2,7 +2,7 @@ using System.Linq.Expressions;
 using Lib.Interfaces;
 using LinqKit;
 
-namespace Lib.Services;
+namespace Lib.Services.NotificationService;
 
 internal static class NotificationPredicateFactory
 {
