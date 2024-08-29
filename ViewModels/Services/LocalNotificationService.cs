@@ -10,18 +10,17 @@ public interface ILocalNotificationService
     Task<int> SendUpcomingNotifications();
     Task Notify(NotificationRequest request);
     void StartListening();
-    event EventHandler<NotificationEventArgs>? NotificationReceived;
     Task RequestNotificationPermissions();
 }
 
 public class LocalNotificationService(
     NotificationService notificationService,
-    ILogger<ILocalNotificationService> logger)
+    ILogger<ILocalNotificationService> logger,
+    Func<INotificationService?> localNotificationServiceFactory
+    )
     : ILocalNotificationService
 {
     private Timer? _notificationJob;
-
-    public event EventHandler<NotificationEventArgs>? NotificationReceived;
 
     public async Task<int> SendUpcomingNotifications()
     {
@@ -65,10 +64,10 @@ public class LocalNotificationService(
 
     public async Task Notify(NotificationRequest request)
     {
-        NotificationReceived?.Invoke(this, new NotificationEventArgs { Request = request });
-        if (LocalNotificationCenter.Current is { } c)
+        var impl = localNotificationServiceFactory();
+        if (impl is not null)
         {
-            await c.Show(request);
+            await impl.Show(request);
             return;
         }
 
@@ -104,7 +103,7 @@ public class LocalNotificationService(
 
     public async Task RequestNotificationPermissions()
     {
-        if (LocalNotificationCenter.Current is not { } c)
+        if (localNotificationServiceFactory() is not { } c)
         {
             logger.LogWarning("LocalNotificationCenter.Current is null. Cannot request permissions.");
             return;

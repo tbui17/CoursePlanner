@@ -15,7 +15,7 @@ public sealed class MultiDbContext<TDbContext, T>(
 {
     private readonly IReadOnlyList<(TDbContext DbContext, PropertyInfo Property)> _pairs = pairs;
 
-    public async Task<IList<TResult>> QueryMany<TResult>(Func<IQueryable<T>, IQueryable<TResult>> query)
+    public async Task<IList<TResult>> Query<TResult>(Func<IQueryable<T>, IQueryable<TResult>> query)
     {
         var results = await _pairs
             .Select(p => p.Property.GetValue(p.DbContext))
