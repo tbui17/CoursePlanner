@@ -1,6 +1,6 @@
 using Lib.Utils;
 
-namespace Lib.Services;
+namespace Lib.Services.NotificationService;
 
 public static class NotificationResultExtensions
 {

@@ -1,7 +1,7 @@
 using Lib.Interfaces;
 using LinqKit;
 
-namespace Lib.Services;
+namespace Lib.Services.NotificationService;
 
 public record NotificationResult : INotificationDataResult
 {
