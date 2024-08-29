@@ -2,6 +2,7 @@ using FluentAssertions;
 using Lib.Interfaces;
 using Lib.Models;
 using Lib.Services;
+using Lib.Services.NotificationService;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Reactive.Testing;
