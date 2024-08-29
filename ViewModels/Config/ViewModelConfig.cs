@@ -1,5 +1,6 @@
 using Lib.Services;
 using Lib.Utils;
+using Plugin.LocalNotification;
 using ViewModels.Events;
 using ViewModels.Interfaces;
 using ViewModels.PageViewModels;
@@ -41,6 +42,7 @@ public static class ViewModelConfig
         services
             .ConfigViewModels()
             .AddSingleton<NavigationSubject>()
+            .AddSingleton(LocalNotificationServiceFactory)
             .AddSingleton<ILocalNotificationService, LocalNotificationService>(x =>
             {
                 var instance = x.CreateInstance<LocalNotificationService>();
@@ -56,6 +58,8 @@ public static class ViewModelConfig
                 return x;
             });
         return services;
+
+        INotificationService? LocalNotificationServiceFactory() => LocalNotificationCenter.Current;
     }
 
     public static IServiceCollection ConfigAssemblyNames(this IServiceCollection services, ICollection<string> names)

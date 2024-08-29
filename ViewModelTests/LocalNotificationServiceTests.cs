@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using FluentAssertions.Execution;
-using Lib.Models;
+using Lib.Services;
+using Microsoft.Extensions.Logging;
 using Plugin.LocalNotification;
 using ViewModels.Services;
 using ViewModelTests.TestSetup;
@@ -9,8 +10,6 @@ namespace ViewModelTests;
 
 public class LocalNotificationServiceTests : BaseDbTest
 {
-    private Course _course;
-
     private string _courseName;
 
     [SetUp]
@@ -26,37 +25,38 @@ public class LocalNotificationServiceTests : BaseDbTest
         course.ShouldNotify = true;
         course.Name = _courseName;
         await db.SaveChangesAsync();
-        _course = course;
     }
 
-    [Ignore("Flaky")]
+
+    [Test]
     public async Task SendUpcomingNotifications_1UpcomingEvent_MessageShouldContainNotificationNameAndCount()
     {
-
-        // subscribe to notifications
-
-        var service = Resolve<ILocalNotificationService>();
-        List<NotificationRequest> requests = [];
-        service.NotificationReceived += (_, args) => requests.Add(args.Request);
+        var mock = CreateMock<INotificationService>();
+        var service = new LocalNotificationService(
+            notificationService: Resolve<NotificationService>(),
+            logger: Resolve<ILogger<ILocalNotificationService>>(),
+            localNotificationServiceFactory: () => mock.Object
+        );
 
         // check db for upcoming notifications and publish
 
-        await service.SendUpcomingNotifications();
+        var count = await service.SendUpcomingNotifications();
 
-        using var _ = new AssertionScope();
+        using var scope = new AssertionScope();
 
-        var req = requests
-            .Should()
+        count.Should().Be(1);
+
+        var subj = mock.Invocations.Should()
             .ContainSingle()
+            .Which.Arguments.Should()
+            .ContainSingle()
+            .Which.Should()
+            .BeOfType<NotificationRequest>()
             .Subject;
 
-        req
-            .Title
-            .Should()
-            .Contain("1");
-        req
-            .Description
-            .Should()
-            .Contain(_course.Name);
+        subj.Description.Should().Contain(_courseName);
+
+        subj.Title.Should().Contain("1");
+
     }
 }
