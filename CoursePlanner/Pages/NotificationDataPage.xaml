@@ -3,14 +3,15 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="CoursePlanner.Pages.NotificationDataPage"
-             xmlns:pageViewModels="clr-namespace:ViewModels.PageViewModels;assembly=ViewModels"
+             xmlns:Domain="clr-namespace:ViewModels.Domain;assembly=ViewModels"
              xmlns:controls="clr-namespace:CoursePlanner.Controls"
              xmlns:interfaces="clr-namespace:Lib.Interfaces;assembly=Lib"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:cz="clr-namespace:FunctionZero.Maui.Controls;assembly=FunctionZero.Maui.Controls"
+             xmlns:domain="clr-namespace:ViewModels.Domain;assembly=ViewModels"
              x:Name="Page"
 
-             x:DataType="pageViewModels:NotificationDataViewModel">
+             x:DataType="domain:NotificationDataViewModel">
     <ContentPage.Resources>
 
     </ContentPage.Resources>

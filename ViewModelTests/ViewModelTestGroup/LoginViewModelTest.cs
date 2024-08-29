@@ -3,7 +3,8 @@ using Lib.Models;
 using Lib.Services;
 using Lib.Utils;
 using Moq;
-using ViewModels.PageViewModels;
+using ViewModels.Domain;
+using ViewModels.Domain;
 using ViewModels.Services;
 using ViewModelTests.TestSetup;
 

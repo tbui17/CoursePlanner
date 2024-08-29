@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace ViewModels.PageViewModels;
+namespace ViewModels.Domain;
 
 public partial class MainViewModel() : ObservableObject
 {

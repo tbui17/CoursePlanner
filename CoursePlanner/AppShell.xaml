@@ -3,8 +3,9 @@
 <Shell x:Class="CoursePlanner.AppShell" xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:local="clr-namespace:CoursePlanner"
     xmlns:pages="clr-namespace:CoursePlanner.Pages"
-    xmlns:pageViewModels="clr-namespace:ViewModels.PageViewModels;assembly=ViewModels"
-    x:DataType="pageViewModels:AppShellViewModel"
+    xmlns:Domain="clr-namespace:ViewModels.Domain;assembly=ViewModels"
+    xmlns:domain="clr-namespace:ViewModels.Domain;assembly=ViewModels"
+    x:DataType="domain:AppShellViewModel"
     FlyoutBehavior="Flyout" Title="CoursePlanner" >
 
     <ShellContent ContentTemplate="{DataTemplate local:MainPage}" Title="Main" Route="MainPage" />

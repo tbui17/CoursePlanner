@@ -10,7 +10,7 @@ using ViewModels.Interfaces;
 using ViewModels.Services;
 using PropertyChangingEventHandler = System.ComponentModel.PropertyChangingEventHandler;
 
-namespace ViewModels.PageViewModels;
+namespace ViewModels.Domain;
 
 public interface IInstructorFormViewModel : IContact, IRefresh
 {

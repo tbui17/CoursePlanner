@@ -1,7 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using ViewModels.Events;
 
-namespace ViewModels.PageViewModels;
+namespace ViewModels.Domain;
 
 public partial class AppShellViewModel : ObservableObject
 {

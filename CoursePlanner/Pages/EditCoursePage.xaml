@@ -5,10 +5,11 @@
 
 
     xmlns:controls="clr-namespace:CoursePlanner.Controls"
-    xmlns:pageViewModels="clr-namespace:ViewModels.PageViewModels;assembly=ViewModels"
+    xmlns:Domain="clr-namespace:ViewModels.Domain;assembly=ViewModels"
+    xmlns:domain="clr-namespace:ViewModels.Domain;assembly=ViewModels"
 
     x:Class="CoursePlanner.Pages.EditCoursePage"
-    x:DataType="pageViewModels:EditCourseViewModel" Title="Edit Course" >
+    x:DataType="domain:EditCourseViewModel" Title="Edit Course" >
 
     <ContentPage.Resources>
         <Style TargetType="Label" BasedOn="{StaticResource FieldLabel}" ></Style>

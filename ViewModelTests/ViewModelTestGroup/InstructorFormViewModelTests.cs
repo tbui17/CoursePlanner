@@ -5,7 +5,8 @@ using Lib.Models;
 using Lib.Utils;
 using Microsoft.EntityFrameworkCore;
 using Moq;
-using ViewModels.PageViewModels;
+using ViewModels.Domain;
+using ViewModels.Domain;
 using ViewModelTests.TestSetup;
 
 namespace ViewModelTests.ViewModelTestGroup;

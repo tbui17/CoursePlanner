@@ -4,9 +4,10 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:models="clr-namespace:Lib.Models;assembly=Lib"
     xmlns:controls="clr-namespace:CoursePlanner.Controls"
-    xmlns:pageViewModels="clr-namespace:ViewModels.PageViewModels;assembly=ViewModels"
+    xmlns:Domain="clr-namespace:ViewModels.Domain;assembly=ViewModels"
+    xmlns:domain="clr-namespace:ViewModels.Domain;assembly=ViewModels"
     Title="Course Details"
-    x:DataType="pageViewModels:DetailedCourseViewModel"
+    x:DataType="domain:DetailedCourseViewModel"
 
     x:Class="CoursePlanner.Pages.DetailedCoursePage" >
     <ContentPage.Content>

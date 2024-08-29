@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using ViewModels.Interfaces;
 using ViewModels.Services;
 
-namespace ViewModels.PageViewModels;
+namespace ViewModels.Domain;
 
 public partial class EditCourseViewModel(
     ILocalDbCtxFactory factory,

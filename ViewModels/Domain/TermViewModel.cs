@@ -1,12 +1,13 @@
 ﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Maui.Core.Extensions;
-using Microsoft.EntityFrameworkCore;
-using ViewModels.Interfaces;
-namespace ViewModels.PageViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Lib.Models;
-using Services;
+using Microsoft.EntityFrameworkCore;
+using ViewModels.Interfaces;
+using ViewModels.Services;
+
+namespace ViewModels.Domain;
 
 public partial class TermViewModel(ILocalDbCtxFactory factory, INavigationService navService, IAppService appService)
     : ObservableObject, IRefresh
@@ -74,8 +75,8 @@ public partial class TermViewModel(ILocalDbCtxFactory factory, INavigationServic
         }
 
         await using var db = await factory.CreateDbContextAsync();
-        await db
-            .Terms.Where(x => x.Id == SelectedTerm.Id)
+        await Queryable.Where(db
+                .Terms, x => x.Id == SelectedTerm.Id)
             .ExecuteDeleteAsync();
         await Init();
     }
