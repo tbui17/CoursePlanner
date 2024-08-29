@@ -4,12 +4,6 @@ using LinqKit;
 
 namespace Lib.Services.NotificationService;
 
-internal static class NotificationPredicateFactory
-{
-    internal static NotificationPredicateFactory<T> Create<T>(Expression<Func<DateTime, T>> select, DateTime date)
-        where T : struct => new(select) { Date = date };
-}
-
 internal class NotificationPredicateFactory<T>
 {
     private readonly Expression<Func<DateTime, T>> _select;
@@ -28,4 +22,10 @@ internal class NotificationPredicateFactory<T>
 
     public Expression<Func<INotification, bool>> EndEqual() => PredicateBuilder.New<INotification>()
         .Start(x => Equals(_select.Invoke(x.End), _select.Invoke(Date)));
+}
+
+internal static class NotificationPredicateFactory
+{
+    internal static NotificationPredicateFactory<T> Create<T>(Expression<Func<DateTime, T>> select, DateTime date)
+        where T : struct => new(select) { Date = date };
 }
