@@ -3,10 +3,11 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:controls="clr-namespace:CoursePlanner.Controls"
-    xmlns:pageViewModels="clr-namespace:ViewModels.PageViewModels;assembly=ViewModels"
+    xmlns:Domain="clr-namespace:ViewModels.Domain;assembly=ViewModels"
+    xmlns:domain="clr-namespace:ViewModels.Domain;assembly=ViewModels"
 
     x:Class="CoursePlanner.Pages.InstructorFormPage"
-    x:DataType="pageViewModels:InstructorFormViewModel" Title="{Binding Title}" >
+    x:DataType="domain:InstructorFormViewModel" Title="{Binding Title}" >
 
     <ContentPage.Resources>
         <Style TargetType="Label" BasedOn="{StaticResource FieldLabel}" ></Style>

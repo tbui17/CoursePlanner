@@ -1,7 +1,7 @@
 using CoursePlanner.Pages;
 using Microsoft.Extensions.Logging;
+using ViewModels.Domain;
 using ViewModels.Interfaces;
-using ViewModels.PageViewModels;
 using ViewModels.Services;
 
 namespace CoursePlanner.Services;

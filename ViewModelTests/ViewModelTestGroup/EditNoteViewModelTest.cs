@@ -1,7 +1,8 @@
 ﻿using FluentAssertions;
 using FluentAssertions.Execution;
 using Microsoft.EntityFrameworkCore;
-using ViewModels.PageViewModels;
+using ViewModels.Domain;
+using ViewModels.Domain;
 using ViewModelTests.TestSetup;
 
 namespace ViewModelTests.ViewModelTestGroup;

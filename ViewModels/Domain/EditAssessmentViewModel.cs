@@ -18,7 +18,7 @@ using ViewModels.Interfaces;
 using ViewModels.Services;
 using PropertyChangingEventHandler = System.ComponentModel.PropertyChangingEventHandler;
 
-namespace ViewModels.PageViewModels;
+namespace ViewModels.Domain;
 
 public interface IEditAssessmentViewModel : IRefresh
 {
@@ -57,8 +57,8 @@ public partial class EditAssessmentViewModel(
 
 
     public IEnumerable<Assessment> GetDbModels() =>
-        Assessments
-            .Select(x => new Assessment().SetFromAssessmentForm(x));
+        Enumerable
+            .Select<AssessmentItemViewModel, Assessment>(Assessments, x => new Assessment().SetFromAssessmentForm<Assessment, AssessmentItemViewModel>(x));
 
 
     private static IEnumerable<DomainException> Validate(ICollection<Assessment> assessments)

@@ -1,10 +1,9 @@
 using System.Reactive.Linq;
 using Lib.Interfaces;
-using Lib.Services;
 using Lib.Services.NotificationService;
 using ReactiveUI;
 
-namespace ViewModels.PageViewModels;
+namespace ViewModels.Domain;
 
 using NotificationCollection = List<INotification>;
 

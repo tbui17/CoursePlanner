@@ -5,7 +5,8 @@ using Lib.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
-using ViewModels.PageViewModels;
+using ViewModels.Domain;
+using ViewModels.Domain;
 using ViewModels.Services;
 using ViewModelTests.TestSetup;
 

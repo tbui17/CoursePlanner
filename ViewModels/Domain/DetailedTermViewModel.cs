@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using ViewModels.Interfaces;
 using ViewModels.Services;
 
-namespace ViewModels.PageViewModels;
+namespace ViewModels.Domain;
 
 
 public partial class DetailedTermViewModel(ILocalDbCtxFactory factory, INavigationService navService, IAppService appService)
@@ -92,8 +92,8 @@ public partial class DetailedTermViewModel(ILocalDbCtxFactory factory, INavigati
     {
         if (SelectedCourse is null) return;
         await using var db = await factory.CreateDbContextAsync();
-        await db
-           .Courses.Where(x => x.Id == SelectedCourse.Id)
+        await Queryable.Where(db
+               .Courses, x => x.Id == SelectedCourse.Id)
            .ExecuteDeleteAsync();
         await RefreshAsync();
     }

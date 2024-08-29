@@ -4,9 +4,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:l="clr-namespace:CoursePlanner.Views"
              xmlns:controls="clr-namespace:CoursePlanner.Controls"
-             xmlns:pageViewModels="clr-namespace:ViewModels.PageViewModels;assembly=ViewModels"
+             xmlns:Domain="clr-namespace:ViewModels.Domain;assembly=ViewModels"
+             xmlns:domain="clr-namespace:ViewModels.Domain;assembly=ViewModels"
              x:Class="CoursePlanner.Views.LoginView"
-             x:DataType="pageViewModels:LoginViewModel">
+             x:DataType="domain:LoginViewModel">
     <VerticalStackLayout>
         <controls:AutoGrid>
             <Label Text="Username" />

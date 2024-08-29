@@ -5,7 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using ViewModels.Config;
-using ViewModels.PageViewModels;
+using ViewModels.Domain;
+using ViewModels.Domain;
 using ViewModels.Services;
 using ServiceCollection = Microsoft.Extensions.DependencyInjection.ServiceCollection;
 

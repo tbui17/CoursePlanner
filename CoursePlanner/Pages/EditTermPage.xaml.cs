@@ -1,7 +1,8 @@
 
 
+using ViewModels.Domain;
 using ViewModels.Interfaces;
-using ViewModels.PageViewModels;
+using ViewModels.Domain;
 
 namespace CoursePlanner.Pages;
 

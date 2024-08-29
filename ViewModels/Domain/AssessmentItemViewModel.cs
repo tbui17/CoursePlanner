@@ -5,7 +5,7 @@ using Lib.Interfaces;
 using Lib.Models;
 using Lib.Traits;
 
-namespace ViewModels.PageViewModels;
+namespace ViewModels.Domain;
 
 public partial class AssessmentItemViewModel
     : ObservableObject, IAssessmentForm

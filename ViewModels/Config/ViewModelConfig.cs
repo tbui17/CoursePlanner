@@ -1,10 +1,20 @@
 using Lib.Services;
 using Lib.Utils;
 using Plugin.LocalNotification;
+using ViewModels.Domain;
 using ViewModels.Events;
 using ViewModels.Interfaces;
-using ViewModels.PageViewModels;
+using ViewModels.Domain;
 using ViewModels.Services;
+using AppShellViewModel = ViewModels.Domain.AppShellViewModel;
+using DetailedCourseViewModel = ViewModels.Domain.DetailedCourseViewModel;
+using DetailedTermViewModel = ViewModels.Domain.DetailedTermViewModel;
+using EditAssessmentViewModel = ViewModels.Domain.EditAssessmentViewModel;
+using EditCourseViewModel = ViewModels.Domain.EditCourseViewModel;
+using EditNoteViewModel = ViewModels.Domain.EditNoteViewModel;
+using EditTermViewModel = ViewModels.Domain.EditTermViewModel;
+using LoginViewModel = ViewModels.Domain.LoginViewModel;
+using TermViewModel = ViewModels.Domain.TermViewModel;
 
 namespace ViewModels.Config;
 

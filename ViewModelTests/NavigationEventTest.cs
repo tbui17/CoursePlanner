@@ -1,6 +1,7 @@
 using FluentAssertions;
+using ViewModels.Domain;
 using ViewModels.Events;
-using ViewModels.PageViewModels;
+using ViewModels.Domain;
 using ViewModelTests.TestData;
 using ViewModelTests.TestSetup;
 
