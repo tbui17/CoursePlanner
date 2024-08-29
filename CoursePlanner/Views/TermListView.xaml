@@ -5,7 +5,7 @@
              xmlns:l="clr-namespace:CoursePlanner.Views"
              xmlns:models="clr-namespace:Lib.Models;assembly=Lib"
              xmlns:controls="clr-namespace:CoursePlanner.Controls"
-             xmlns:Domain="clr-namespace:ViewModels.Domain;assembly=ViewModels"
+
              xmlns:domain="clr-namespace:ViewModels.Domain;assembly=ViewModels"
              x:Class="CoursePlanner.Views.TermListView"
              x:DataType="domain:TermViewModel">
