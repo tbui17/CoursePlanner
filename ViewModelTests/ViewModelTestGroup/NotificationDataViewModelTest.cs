@@ -17,7 +17,7 @@ public class NotificationDataViewModelTest : BasePageViewModelTest
     public override async Task Setup()
     {
         await base.Setup();
-        foreach (var set in Db.GetImplementingSets<INotification>())
+        foreach (var set in Db.GetDbSets<INotification>())
         {
             await set.ExecuteUpdateAsync(x => x.SetProperty(y => y.ShouldNotify, true).SetProperty(y => y.Start, DateTime.Now));
         }
