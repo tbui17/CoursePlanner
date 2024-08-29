@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Lib.Models;
 using Lib.Services;
+using Lib.Services.NotificationService;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
