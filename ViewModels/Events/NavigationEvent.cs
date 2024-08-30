@@ -18,7 +18,7 @@ public class NavigationSubject(RefreshableViewService util, ILogger<NavigationSu
         new NavigationEvent(arg).Publish();
     }
 
-    public void Subscribe(IRefresh obj, Func<NavigationEvent, Task> handler)
+    public void Subscribe(IRefreshId obj, Func<NavigationEvent, Task> handler)
     {
         var messenger = WeakReferenceMessenger.Default;
         if (messenger.IsRegistered<NavigationEvent>(obj))
@@ -46,7 +46,7 @@ public class NavigationSubject(RefreshableViewService util, ILogger<NavigationSu
         }
     }
 
-    public void Subscribe(IRefresh obj)
+    public void Subscribe(IRefreshId obj)
     {
         Subscribe(obj, x => obj.Init(x.Value.Id));
     }

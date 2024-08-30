@@ -12,7 +12,7 @@ using ViewModels.Services;
 
 namespace ViewModels.Domain;
 
-public partial class DetailedCourseViewModel : ObservableObject, IRefresh
+public partial class DetailedCourseViewModel : ObservableObject, IRefreshId
 {
     [ObservableProperty]
     private int _id;

@@ -16,11 +16,25 @@ public class NavigationService : INavigationService
         _provider = provider;
         _logger = logger;
         Current.Navigating += OnNavigating;
+        Current.Navigated += OnNavigated;
+    }
+
+    private async void OnNavigated(object? _, ShellNavigatedEventArgs args)
+    {
+        if (args.Source is not ShellNavigationSource.ShellItemChanged ||
+            Current.CurrentPage is not IRefreshableView<IRefresh> refreshable)
+        {
+            return;
+        }
+
+        _logger.LogInformation("Refreshing page for shell navigation: {PageName}", Current.CurrentPage.Title);
+        await refreshable.Model.RefreshAsync();
     }
 
     private async void OnNavigating(object? _, ShellNavigatingEventArgs args)
     {
-        if (args.Source is not ShellNavigationSource.Pop || GetRefreshableView() is not { } refreshable)
+        if (args.Source is not ShellNavigationSource.Pop || Navigation.NavigationStack is not
+                [.., IRefreshableView<IRefresh> refreshable, not null])
         {
             return;
         }
@@ -28,13 +42,6 @@ public class NavigationService : INavigationService
 
         _logger.LogInformation("Refreshing page for back navigation: {PageName}", Current.CurrentPage.Title);
         await refreshable.Model.RefreshAsync();
-
-        return;
-
-        static IRefreshableView<IRefresh>? GetRefreshableView() =>
-            Navigation.NavigationStack is not [.., IRefreshableView<IRefresh> view, not null]
-                ? null
-                : view;
     }
 
     private T Resolve<T>() where T : notnull => _provider.GetRequiredService<T>();
@@ -49,14 +56,14 @@ public class NavigationService : INavigationService
         await Navigation.PushAsync(page);
     }
 
-    private async Task GoToAsync<T>(int id) where T : Page, IRefreshableView<IRefresh>
+    private async Task GoToAsync<T>(int id) where T : Page, IRefreshableView<IRefreshId>
     {
         var page = Resolve<T>();
         _logger.LogInformation("Navigating to {PageName}", page.Title);
         await GoToAsync(page, id);
     }
 
-    private async Task GoToAsync<T>(T page, int id) where T : Page, IRefreshableView<IRefresh>
+    private async Task GoToAsync<T>(T page, int id) where T : Page, IRefreshableView<IRefreshId>
     {
         await page.Model.Init(id);
         await PushAsync(page);
@@ -68,6 +75,7 @@ public class NavigationService : INavigationService
         {
             await refreshable.Model.RefreshAsync();
         }
+
         await PushAsync(page);
     }
 

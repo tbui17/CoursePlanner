@@ -12,7 +12,7 @@ using PropertyChangingEventHandler = System.ComponentModel.PropertyChangingEvent
 
 namespace ViewModels.Domain;
 
-public interface IInstructorFormViewModel : IContact, IRefresh
+public interface IInstructorFormViewModel : IContact, IRefreshId
 {
     Task SaveAsync();
     Task Init(int id);

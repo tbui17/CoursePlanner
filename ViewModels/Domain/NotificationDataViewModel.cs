@@ -1,5 +1,5 @@
-using System.ComponentModel;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using Lib.Interfaces;
 using Lib.Services.NotificationService;
 using ReactiveUI;
@@ -9,7 +9,7 @@ namespace ViewModels.Domain;
 
 using NotificationCollection = List<INotification>;
 
-public class NotificationDataViewModel : ReactiveObject, IRefresh0
+public class NotificationDataViewModel : ReactiveObject, IRefresh
 {
     private string _filterText = "";
 
@@ -40,25 +40,24 @@ public class NotificationDataViewModel : ReactiveObject, IRefresh0
 
     public NotificationDataViewModel(NotificationService service)
     {
-        var refreshStream = MessageBus.Current.Listen<RefreshEventArg>();
-        var filterStream = this.WhenAnyValue(vm => vm.FilterText)
+        var refreshSource = _refreshSubject;
+        var filterSource = this.WhenAnyValue(vm => vm.FilterText)
             .Throttle(TimeSpan.FromMilliseconds(500));
 
-        var monthStream = this.WhenAnyValue(vm => vm.MonthDate)
+        var monthSource = this.WhenAnyValue(vm => vm.MonthDate)
             .SelectMany(service.GetNotificationsForMonth);
 
-        _totalItemsHelper = refreshStream
+        _totalItemsHelper = refreshSource
             .SelectMany(_ => service.GetTotalItems())
             .ToProperty(this, vm => vm.TotalItems);
 
 
-
-        var dataStream = monthStream
+        var dataStream = monthSource
             .ObserveOn(RxApp.TaskpoolScheduler)
-            .CombineLatest(filterStream)
+            .CombineLatest(filterSource, refreshSource)
             .Select(x =>
             {
-                var (notifications, filterText) = x;
+                var (notifications, filterText, _) = x;
                 return notifications
                     .AsParallel()
                     .Where(item => item.Name.Contains(filterText, StringComparison.CurrentCultureIgnoreCase));
@@ -68,7 +67,7 @@ public class NotificationDataViewModel : ReactiveObject, IRefresh0
         _itemCountHelper = dataStream
             .ObserveOn(RxApp.MainThreadScheduler)
             .Select(x => x.Count)
-            .ToProperty(this, vm => vm.TotalItems);
+            .ToProperty(this, vm => vm.ItemCount);
 
         _notificationItemsHelper = dataStream
             .ObserveOn(RxApp.MainThreadScheduler)
@@ -76,11 +75,11 @@ public class NotificationDataViewModel : ReactiveObject, IRefresh0
             .ToProperty(this, vm => vm.NotificationItems);
     }
 
+    private readonly BehaviorSubject<object?> _refreshSubject = new(new object());
+
     public Task RefreshAsync()
     {
-        MessageBus.Current.SendMessage(new RefreshEventArg());
+        _refreshSubject.OnNext(new object());
         return Task.CompletedTask;
     }
 }
-
-file class RefreshEventArg : EventArgs;

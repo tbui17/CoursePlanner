@@ -1,10 +1,9 @@
 ﻿using ViewModels.Domain;
-using ViewModels.Domain;
 using ViewModels.Interfaces;
 
 namespace CoursePlanner.Pages;
 
-public partial class NotificationDataPage : IRefreshableView0<NotificationDataViewModel>
+public partial class NotificationDataPage : IRefreshableView<NotificationDataViewModel>
 {
     public NotificationDataPage(NotificationDataViewModel model)
     {

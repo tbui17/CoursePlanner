@@ -27,12 +27,21 @@ public class NotificationDataViewModelTest : BasePageViewModelTest
 
     private NotificationDataViewModel Model { get; set; }
 
+    [Test]
+    public async Task Properties_Initialize_UpdateWithDbValues()
+    {
+        Model.NotificationItems.Should()
+            .NotBeNull()
+            .And.ContainItemsAssignableTo<Assessment>();
+        await Task.CompletedTask;
+    }
+
 
     [Test]
-    public async Task PropertiesTest()
+    public async Task Properties_UserInput_UpdateWithDbValues()
     {
-        Model.NotificationItems.Should().NotBeNull();
-        Model.NotificationItems.OfType<Assessment>().Should().NotBeEmpty();
+
+        await Model.RefreshAsync();
         Model.MonthDate = DateTime.Now.AddMinutes(2);
         Model.FilterText = "Course";
         await Task.Delay(1000);

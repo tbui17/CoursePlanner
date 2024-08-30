@@ -3,7 +3,7 @@ using ViewModels.Interfaces;
 
 namespace CoursePlanner.Views;
 
-public partial class LoginView : IRefreshableView0<LoginViewModel>
+public partial class LoginView : IRefreshableView<LoginViewModel>
 {
     public LoginView(LoginViewModel model)
     {
