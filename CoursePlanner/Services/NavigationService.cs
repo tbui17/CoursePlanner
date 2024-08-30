@@ -33,8 +33,9 @@ public class NavigationService : INavigationService
 
     private async void OnNavigating(object? _, ShellNavigatingEventArgs args)
     {
-        if (args.Source is not ShellNavigationSource.Pop || Navigation.NavigationStack is not
-                [.., IRefreshableView<IRefresh> refreshable, not null])
+        if (args.Source is not ShellNavigationSource.Pop
+            || Navigation.NavigationStack is not [.., IRefreshableView<IRefresh> refreshable, not null]
+           )
         {
             return;
         }

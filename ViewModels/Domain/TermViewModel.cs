@@ -75,8 +75,8 @@ public partial class TermViewModel(ILocalDbCtxFactory factory, INavigationServic
         }
 
         await using var db = await factory.CreateDbContextAsync();
-        await Queryable.Where(db
-                .Terms, x => x.Id == SelectedTerm.Id)
+        await db
+            .Terms.Where(x => x.Id == SelectedTerm.Id)
             .ExecuteDeleteAsync();
         await Init();
     }
