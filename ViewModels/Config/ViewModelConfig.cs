@@ -34,14 +34,14 @@ public static class ViewModelConfig
     {
         return services
             .AddTransient<MainViewModel>()
-            .AddTransientRefreshable<DetailedTermViewModel>()
-            .AddTransientRefreshable<EditTermViewModel>()
-            .AddTransientRefreshable<DetailedCourseViewModel>()
-            .AddTransientRefreshable<EditCourseViewModel>()
-            .AddTransientRefreshable<EditNoteViewModel>()
-            .AddTransientRefreshable<EditAssessmentViewModel>()
-            .AddTransientRefreshable<LoginViewModel>()
-            .AddTransientRefreshable<TermViewModel>()
+            .AddTransient<DetailedTermViewModel>()
+            .AddTransient<EditTermViewModel>()
+            .AddTransient<DetailedCourseViewModel>()
+            .AddTransient<EditCourseViewModel>()
+            .AddTransient<EditNoteViewModel>()
+            .AddTransient<EditAssessmentViewModel>()
+            .AddTransient<LoginViewModel>()
+            .AddTransient<TermViewModel>()
             .AddTransient<NotificationDataViewModel>()
             .AddTransient<InstructorFormViewModelFactory>()
             .AddSingleton<AppShellViewModel>();
