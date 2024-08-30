@@ -20,7 +20,7 @@ using PropertyChangingEventHandler = System.ComponentModel.PropertyChangingEvent
 
 namespace ViewModels.Domain;
 
-public interface IEditAssessmentViewModel : IRefresh
+public interface IEditAssessmentViewModel : IRefreshId
 {
     int Id { get; set; }
     IEnumerable<Assessment> GetDbModels();

@@ -10,7 +10,7 @@ using ViewModels.Services;
 namespace ViewModels.Domain;
 
 public partial class TermViewModel(ILocalDbCtxFactory factory, INavigationService navService, IAppService appService)
-    : ObservableObject, IRefresh
+    : ObservableObject, IRefreshId
 {
     [ObservableProperty]
     private ObservableCollection<Term> _terms = [];

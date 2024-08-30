@@ -11,7 +11,7 @@ namespace ViewModels.Domain;
 
 
 public partial class DetailedTermViewModel(ILocalDbCtxFactory factory, INavigationService navService, IAppService appService)
-    : ObservableObject, IRefresh
+    : ObservableObject, IRefreshId
 {
     [ObservableProperty]
     private int _id;

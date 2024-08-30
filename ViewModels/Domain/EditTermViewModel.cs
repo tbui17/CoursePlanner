@@ -12,7 +12,7 @@ public partial class EditTermViewModel(
     ILocalDbCtxFactory factory,
     INavigationService navService,
     IAppService appService)
-    : ObservableObject, IDateTimeEntity, IRefresh
+    : ObservableObject, IDateTimeEntity, IRefreshId
 {
     [ObservableProperty]
     private int _id;

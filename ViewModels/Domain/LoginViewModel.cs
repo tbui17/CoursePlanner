@@ -10,7 +10,7 @@ namespace ViewModels.Domain;
 public partial class LoginViewModel(
     IAppService appService,
     INavigationService navService,
-    ISessionService sessionService) : ObservableObject, ILogin, IRefresh
+    ISessionService sessionService) : ObservableObject, ILogin, IRefreshId
 {
     [ObservableProperty]
     private string _username = "";

@@ -14,7 +14,7 @@ public partial class EditCourseViewModel(
     ILocalDbCtxFactory factory,
     INavigationService navService,
     IAppService appService)
-    : ObservableObject, ICourseField, IRefresh
+    : ObservableObject, ICourseField, IRefreshId
 {
     public ObservableCollection<string> Statuses { get; } = Course.Statuses.ToObservableCollection();
 

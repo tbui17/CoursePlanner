@@ -12,7 +12,7 @@ public partial class EditNoteViewModel(
     ILocalDbCtxFactory factory,
     INavigationService navService,
     IAppService appService)
-    : ObservableObject, INoteField, IRefresh
+    : ObservableObject, INoteField, IRefreshId
 {
     [ObservableProperty]
     private int _id;

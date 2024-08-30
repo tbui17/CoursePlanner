@@ -1,11 +1,11 @@
 namespace ViewModels.Interfaces;
 
-public interface IRefresh0
+public interface IRefresh
 {
     Task RefreshAsync();
 }
 
-public interface IRefresh : IRefresh0
+public interface IRefreshId : IRefresh
 {
     Task Init(int id);
 }

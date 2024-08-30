@@ -21,7 +21,7 @@ namespace ViewModels.Config;
 public static class ViewModelConfig
 {
     public static IServiceCollection AddTransientRefreshable<T>(this IServiceCollection services)
-        where T : class, IRefresh =>
+        where T : class, IRefreshId =>
         services.AddTransient<T>(x =>
         {
             var subj = x.GetRequiredService<NavigationSubject>();
@@ -63,7 +63,7 @@ public static class ViewModelConfig
             .AddTransient<RefreshableViewService>(provider =>
             {
                 var x = provider.CreateInstance<RefreshableViewService>();
-                x.RefreshableViewType = typeof(IRefreshableView<IRefresh>);
+                x.RefreshableViewType = typeof(IRefreshableView<IRefreshId>);
                 x.AssemblyNames = provider.GetRequiredKeyedService<ICollection<string>>(nameof(AddAssemblyNames));
                 return x;
             });
