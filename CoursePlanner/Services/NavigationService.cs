@@ -18,15 +18,16 @@ public class NavigationService : INavigationService
         Current.Navigating += OnNavigating;
     }
 
-    private void OnNavigating(object? _, ShellNavigatingEventArgs args)
+    private async void OnNavigating(object? _, ShellNavigatingEventArgs args)
     {
         if (args.Source is not ShellNavigationSource.Pop || GetRefreshableView() is not { } refreshable)
         {
             return;
         }
 
+
         _logger.LogInformation("Refreshing page for back navigation: {PageName}", Current.CurrentPage.Title);
-        refreshable.Model.RefreshAsync();
+        await refreshable.Model.RefreshAsync();
 
         return;
 
@@ -63,6 +64,10 @@ public class NavigationService : INavigationService
 
     private async Task GoToAsync<T>(T page) where T : Page
     {
+        if (page is IRefreshableView<IRefresh> refreshable)
+        {
+            await refreshable.Model.RefreshAsync();
+        }
         await PushAsync(page);
     }
 

@@ -81,5 +81,6 @@ public abstract class BaseTest
     [TearDown]
     protected virtual async Task TearDown()
     {
+        await Task.CompletedTask;
     }
 }

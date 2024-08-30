@@ -1,13 +1,9 @@
 using FluentAssertions;
+using FluentAssertions.Execution;
 using Lib.Interfaces;
 using Lib.Models;
-using Lib.Services;
 using Lib.Services.NotificationService;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Microsoft.Reactive.Testing;
-using ReactiveUI.Testing;
-using ViewModels.Domain;
 using ViewModels.Domain;
 using ViewModelTests.TestSetup;
 
@@ -21,9 +17,11 @@ public class NotificationDataViewModelTest : BasePageViewModelTest
         await base.Setup();
         foreach (var set in Db.GetDbSets<INotification>())
         {
-            await set.ExecuteUpdateAsync(x => x.SetProperty(y => y.ShouldNotify, true).SetProperty(y => y.Start, DateTime.Now));
+            await set.ExecuteUpdateAsync(x =>
+                x.SetProperty(y => y.ShouldNotify, true).SetProperty(y => y.Start, DateTime.Now));
         }
-        Model = new NotificationDataViewModel(service:Resolve<NotificationService>());
+
+        Model = new NotificationDataViewModel(service: Resolve<NotificationService>());
         await Task.Delay(600);
     }
 
@@ -31,15 +29,18 @@ public class NotificationDataViewModelTest : BasePageViewModelTest
 
 
     [Test]
-    public async Task METHOD()
+    public async Task PropertiesTest()
     {
         Model.NotificationItems.Should().NotBeNull();
         Model.NotificationItems.OfType<Assessment>().Should().NotBeEmpty();
         Model.MonthDate = DateTime.Now.AddMinutes(2);
         Model.FilterText = "Course";
         await Task.Delay(1000);
-        Model.NotificationItems.OfType<Assessment>().Should().BeEmpty();
-
-
+        using var scope = new AssertionScope();
+        Model.NotificationItems.Should()
+            .NotContainItemsAssignableTo<Assessment>()
+            .And.ContainItemsAssignableTo<Course>();
+        Model.TotalItems.Should().BeGreaterThan(0);
+        Model.ItemCount.Should().BeGreaterThan(0);
     }
 }

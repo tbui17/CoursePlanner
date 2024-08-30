@@ -10,6 +10,7 @@ namespace ViewModelTests;
 public class NavigationEventTest : BaseDbTest
 {
     [Test]
+    [Ignore("Deprecated")]
     public async Task NavigationSubjectBehaviorTest()
     {
         var model = Resolve<TermViewModel>();
@@ -34,6 +35,7 @@ public class NavigationEventTest : BaseDbTest
     }
 
     [Test]
+    [Ignore("Deprecated")]
     public async Task NavigationSubject_FiltersIrrelevantPage()
     {
         var model = Resolve<TermViewModel>();

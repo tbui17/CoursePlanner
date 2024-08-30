@@ -1,6 +1,7 @@
 ﻿using Lib.Interfaces;
 using Lib.Services.MultiDbContext;
 using LinqKit;
+using Microsoft.EntityFrameworkCore;
 
 namespace Lib.Services.NotificationService;
 
@@ -42,5 +43,14 @@ public class NotificationService(MultiLocalDbContextFactory dbFactory)
 
 
         return await GetNotifications(x => x.AsExpandableEFCore().Where(pred));
+    }
+
+    public async Task<int> GetTotalItems()
+    {
+        await using var db = await dbFactory.CreateAsync<INotification>();
+        var results = await db.Query(x => x.CountAsync());
+
+        return results.Sum();
+
     }
 }
