@@ -30,7 +30,7 @@ public static class ViewModelConfig
             return instance;
         });
 
-    private static IServiceCollection ConfigViewModels(this IServiceCollection services)
+    private static IServiceCollection AddViewModels(this IServiceCollection services)
     {
         return services
             .AddTransient<MainViewModel>()
@@ -50,7 +50,7 @@ public static class ViewModelConfig
     public static IServiceCollection AddServices(this IServiceCollection services)
     {
         services
-            .ConfigViewModels()
+            .AddViewModels()
             .AddSingleton<NavigationSubject>()
             .AddSingleton(LocalNotificationServiceFactory)
             .AddSingleton<ILocalNotificationService, LocalNotificationService>(x =>
