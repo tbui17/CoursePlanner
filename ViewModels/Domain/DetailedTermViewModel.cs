@@ -70,6 +70,7 @@ public partial class DetailedTermViewModel(ILocalDbCtxFactory factory, INavigati
         if (courseCount >= 6)
         {
             await appService.ShowErrorAsync("You can only have up to 6 courses per term");
+            await RefreshAsync();
             return;
         }
 
