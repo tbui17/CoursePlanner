@@ -4,13 +4,15 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Serilog;
+using Serilog.Formatting.Json;
 using ViewModels.Config;
-using ViewModels.Domain;
 using ViewModels.Domain;
 using ViewModels.Services;
 using ServiceCollection = Microsoft.Extensions.DependencyInjection.ServiceCollection;
 
 [assembly: NonParallelizable]
+
 // [assembly:Parallelizable(ParallelScope.All)]
 namespace ViewModelTests.TestSetup;
 
@@ -19,7 +21,6 @@ public abstract class BaseTest
     [SetUp]
     public virtual Task Setup()
     {
-
         Connection = new SqliteConnectionStringBuilder
         {
             DataSource = $"{FileName}.db"
@@ -37,18 +38,26 @@ public abstract class BaseTest
 
     private IServiceProvider CreateProvider()
     {
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Debug()
+            .WriteTo.Console()
+            .WriteTo.Debug()
+            .WriteTo.File(new JsonFormatter(), "logs/log.json")
+            .Enrich.FromLogContext()
+            .CreateLogger();
+
         var mockNavigation = new Mock<INavigationService>();
         var mockAppService = new Mock<IAppService>();
         var services = new ServiceCollection();
         Configs
             .ConfigBackendServices(services)
             .ConfigServices()
+            .AddSerilog()
             .ConfigAssemblyNames([nameof(ViewModelTests), nameof(ViewModels)])
             .AddDbContext<LocalDbCtx>(x => x
                 .UseSqlite(Connection.ToString())
                 .EnableDetailedErrors()
                 .EnableSensitiveDataLogging()
-                .LogTo(Console.WriteLine)
             )
             .AddDbContextFactory<LocalDbCtx>()
             .AddSingleton(mockNavigation.Object)
@@ -72,7 +81,5 @@ public abstract class BaseTest
     [TearDown]
     protected virtual async Task TearDown()
     {
-
     }
-
 }
