@@ -59,35 +59,35 @@ public partial class DetailedCourseViewModel : ObservableObject, IRefreshId
 
     async partial void OnSelectedInstructorChanged(Instructor? oldValue, Instructor? newValue)
     {
-        _logger.LogInformation("Selected Instructor Changed: {NewId}, {OldId}", newValue?.Id, oldValue?.Id);
+        _logger.LogDebug("Selected Instructor Changed: {NewId}, {OldId}", newValue?.Id, oldValue?.Id);
         if (newValue is not { Id: > 0 })
         {
-            _logger.LogInformation("Selected Instructor is null or has no id.");
+            _logger.LogDebug("Selected Instructor is null or has no id.");
             return;
         }
 
         if (oldValue?.Id == newValue.Id)
         {
-            _logger.LogInformation("Selected Instructor is the same as the old value.");
+            _logger.LogDebug("Selected Instructor is the same as the old value.");
             return;
         }
 
         var oldId = Course.InstructorId;
-        _logger.LogInformation("Old Instructor: {InstructorId} {InstructorName}", oldId, Course.Instructor?.Name);
+        _logger.LogDebug("Old Instructor: {InstructorId} {InstructorName}", oldId, Course.Instructor?.Name);
         var newInstructor = Instructors.First(x => x.Id == newValue.Id);
-        _logger.LogInformation("New Instructor: {InstructorId} {InstructorName}", newInstructor.Id, newInstructor.Name);
+        _logger.LogDebug("New Instructor: {InstructorId} {InstructorName}", newInstructor.Id, newInstructor.Name);
 
-        _logger.LogInformation("Course State: {CourseId} {CourseInstructorId} {CourseInstructorName}", Course.Id, Course.InstructorId, Course.Instructor?.Name);
-        _logger.LogInformation("Setting Course Instructor to {InstructorId} {InstructorName}", newInstructor.Id, newInstructor.Name);
+        _logger.LogDebug("Course State: {CourseId} {CourseInstructorId} {CourseInstructorName}", Course.Id, Course.InstructorId, Course.Instructor?.Name);
+        _logger.LogDebug("Setting Course Instructor to {InstructorId} {InstructorName}", newInstructor.Id, newInstructor.Name);
         Course.Instructor = newInstructor;
         Course.InstructorId = newValue.Id;
-        _logger.LogInformation("Updated Course State: {CourseId} {CourseInstructorId} {CourseInstructorName}", Course.Id, Course.InstructorId, Course.Instructor?.Name);
+        _logger.LogDebug("Updated Course State: {CourseId} {CourseInstructorId} {CourseInstructorName}", Course.Id, Course.InstructorId, Course.Instructor?.Name);
 
         await using var db = await _factory.CreateDbContextAsync();
         var res = await db
             .Courses.Where(x => x.Id == Course.Id)
            .ExecuteUpdateAsync(x => x.SetProperty(p => p.InstructorId, newValue.Id));
-        _logger.LogInformation("Updated Instructor in database: {UpdateCount}",res);
+        _logger.LogDebug("Updated Instructor in database: {UpdateCount}",res);
     }
 
 
