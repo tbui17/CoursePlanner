@@ -5,15 +5,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Serilog;
-using Serilog.Formatting.Json;
 using ViewModels.Config;
 using ViewModels.Domain;
 using ViewModels.Services;
 using ServiceCollection = Microsoft.Extensions.DependencyInjection.ServiceCollection;
 
-[assembly: NonParallelizable]
+[assembly: Parallelizable(ParallelScope.Fixtures)]
 
-// [assembly:Parallelizable(ParallelScope.All)]
 namespace ViewModelTests.TestSetup;
 
 public abstract class BaseTest
@@ -30,7 +28,7 @@ public abstract class BaseTest
         return Task.CompletedTask;
     }
 
-    protected string FileName { get; private init; } = "database";
+    protected string FileName { get; private init; } = Guid.NewGuid().ToString();
 
     protected IServiceProvider Provider { get; private set; }
 
@@ -42,7 +40,6 @@ public abstract class BaseTest
             .MinimumLevel.Debug()
             .WriteTo.Console()
             .WriteTo.Debug()
-            .WriteTo.File(new JsonFormatter(), "logs/log.json")
             .Enrich.FromLogContext()
             .CreateLogger();
 
