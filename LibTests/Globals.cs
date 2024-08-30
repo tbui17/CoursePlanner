@@ -15,7 +15,7 @@ public static class Globals
     {
         var services = new ServiceCollection();
         Configs
-           .ConfigBackendServices(services)
+           .AddBackendServices(services)
            .AddDbContext<LocalDbCtx>(x => x
                .UseSqlite("DataSource=database.db")
                .EnableDetailedErrors()

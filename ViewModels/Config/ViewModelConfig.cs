@@ -47,7 +47,7 @@ public static class ViewModelConfig
             .AddSingleton<AppShellViewModel>();
     }
 
-    public static IServiceCollection ConfigServices(this IServiceCollection services)
+    public static IServiceCollection AddServices(this IServiceCollection services)
     {
         services
             .ConfigViewModels()
@@ -64,7 +64,7 @@ public static class ViewModelConfig
             {
                 var x = provider.CreateInstance<RefreshableViewService>();
                 x.RefreshableViewType = typeof(IRefreshableView<IRefresh>);
-                x.AssemblyNames = provider.GetRequiredKeyedService<ICollection<string>>(nameof(ConfigAssemblyNames));
+                x.AssemblyNames = provider.GetRequiredKeyedService<ICollection<string>>(nameof(AddAssemblyNames));
                 return x;
             });
         return services;
@@ -72,8 +72,8 @@ public static class ViewModelConfig
         INotificationService? LocalNotificationServiceFactory() => LocalNotificationCenter.Current;
     }
 
-    public static IServiceCollection ConfigAssemblyNames(this IServiceCollection services, ICollection<string> names)
+    public static IServiceCollection AddAssemblyNames(this IServiceCollection services, ICollection<string> names)
     {
-        return services.AddKeyedSingleton(nameof(ConfigAssemblyNames), names);
+        return services.AddKeyedSingleton(nameof(AddAssemblyNames), names);
     }
 }

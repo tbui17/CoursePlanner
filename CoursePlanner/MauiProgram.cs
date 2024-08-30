@@ -7,8 +7,9 @@ using Lib;
 using Lib.Models;
 using Lib.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Plugin.LocalNotification;
+using Serilog;
+using Serilog.Formatting.Json;
 using UraniumUI;
 using ViewModels.Config;
 using ViewModels.Services;
@@ -39,6 +40,19 @@ public static class MauiProgram
 
     private static MauiAppBuilder CreateBuilder()
     {
+
+        var config = new LoggerConfiguration()
+            .WriteTo.Console()
+            .WriteTo.File(new JsonFormatter(), FileSystem.AppDataDirectory + "/logs/log.json")
+            .Enrich.FromLogContext();
+
+        #if DEBUG
+        config = config.MinimumLevel.Debug().WriteTo.Debug();
+        #elif RELEASE
+        config = config.MinimumLevel.Information();
+        #endif
+
+        Log.Logger = config.CreateLogger();
         var builder = MauiApp.CreateBuilder();
         builder
             .UseMauiApp<App>()
@@ -57,14 +71,12 @@ public static class MauiProgram
 
 
         Configs
-            .ConfigBackendServices(builder.Services)
-            .ConfigServices()
-            .ConfigAssemblyNames([nameof(CoursePlanner)])
+            .AddBackendServices(builder.Services)
+            .AddServices()
+            .AddAssemblyNames([nameof(CoursePlanner)])
             .AddDbContext<LocalDbCtx>(b =>
                 {
-                    b
-                        .UseSqlite($"DataSource={FileSystem.Current.AppDataDirectory}/database.db")
-                        .LogTo(Console.WriteLine);
+                    b.UseSqlite($"DataSource={FileSystem.Current.AppDataDirectory}/database.db");
 #if DEBUG
                     b.EnableSensitiveDataLogging();
                     b.EnableDetailedErrors();
@@ -89,14 +101,6 @@ public static class MauiProgram
             .AddTransient<DbSetup>()
             .AddTransient<LoginView>()
             .AddTransient<NotificationDataPage>();
-
-        builder.Logging.AddConsole();
-
-#if DEBUG
-        builder
-            .Logging
-            .AddDebug();
-#endif
 
 
         return builder;

@@ -10,7 +10,7 @@ namespace Lib;
 
 public static class Configs
 {
-    public static IServiceCollection ConfigBackendServices(IServiceCollection b)
+    public static IServiceCollection AddBackendServices(IServiceCollection b)
     {
         b
             .AddTransient<NotificationService>()
