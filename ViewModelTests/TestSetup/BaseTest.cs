@@ -50,10 +50,10 @@ public abstract class BaseTest
         var mockAppService = new Mock<IAppService>();
         var services = new ServiceCollection();
         Configs
-            .ConfigBackendServices(services)
-            .ConfigServices()
+            .AddBackendServices(services)
+            .AddServices()
             .AddSerilog()
-            .ConfigAssemblyNames([nameof(ViewModelTests), nameof(ViewModels)])
+            .AddAssemblyNames([nameof(ViewModelTests), nameof(ViewModels)])
             .AddDbContext<LocalDbCtx>(x => x
                 .UseSqlite(Connection.ToString())
                 .EnableDetailedErrors()
