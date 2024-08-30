@@ -2,7 +2,6 @@ using FluentAssertions;
 using FluentAssertions.Execution;
 using Microsoft.EntityFrameworkCore;
 using ViewModels.Domain;
-using ViewModels.Domain;
 using ViewModelTests.TestData;
 using ViewModelTests.TestSetup;
 

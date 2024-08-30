@@ -1,11 +1,10 @@
 using FluentAssertions;
 using Lib.Models;
-using Lib.Services;
 using Lib.Services.NotificationService;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-[assembly: NonParallelizable]
+
 
 namespace LibTests;
 
@@ -90,13 +89,13 @@ public class NotificationItemsTest : BaseDbTest
     public async Task GetNotificationsForMonth_ReturnsStartDatesWithinMonth()
     {
         await using var db = await GetDb();
-        await db.Assessments.Take(2).ExecuteUpdateAsync(p => p.SetProperty(x => x.Start, _now).SetProperty(x => x.ShouldNotify, true));
+        await db.Assessments.Take(2)
+            .ExecuteUpdateAsync(p => p.SetProperty(x => x.Start, _now).SetProperty(x => x.ShouldNotify, true));
 
         var res = await _notificationService.GetNotificationsForMonth(_now);
 
         res.Should().HaveCount(2);
     }
-
 
 
     [Test]
@@ -120,6 +119,22 @@ public class NotificationItemsTest : BaseDbTest
         var res = await _notificationService.GetNotificationsForMonth(_now);
 
         res.Should().HaveCount(count);
+    }
+}
+
+public class NotificationDataFetchingTest : BaseDbTest
+{
+    [Test]
+    public async Task GetTotalItems_ReturnsCountOfAllNotifications()
+    {
+        await using var db = await GetDb();
+        // course is 1 type of notification class
+        var courseCount = await db.Courses.CountAsync();
+        var notificationService = Provider.GetRequiredService<NotificationService>();
+        var result = await notificationService.GetTotalItems();
+        result.Should()
+            .BeGreaterThan(0)
+            .And.BeGreaterThan(courseCount);
     }
 }
 

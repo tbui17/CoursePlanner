@@ -20,6 +20,13 @@ public sealed class MultiDbContext<TDbContext, T>(
         return results.SelectMany(x => x).ToList();
     }
 
+    public async Task<IList<TResult>> Query<TResult>(Func<IQueryable<T>, Task<TResult>> query)
+    {
+        return await dbSets
+            .Select(query)
+            .Thru(Task.WhenAll);
+    }
+
     public async ValueTask DisposeAsync()
     {
         await contexts

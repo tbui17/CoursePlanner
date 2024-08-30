@@ -1,6 +1,5 @@
 ﻿using CoursePlanner.Views;
 using ViewModels.Domain;
-using ViewModels.Domain;
 using ViewModels.Services;
 
 namespace CoursePlanner;

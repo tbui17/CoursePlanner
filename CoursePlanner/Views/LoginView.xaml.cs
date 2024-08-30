@@ -1,10 +1,9 @@
 using ViewModels.Domain;
 using ViewModels.Interfaces;
-using ViewModels.Domain;
 
 namespace CoursePlanner.Views;
 
-public partial class LoginView : IVmView<LoginViewModel>
+public partial class LoginView : IRefreshableView0<LoginViewModel>
 {
     public LoginView(LoginViewModel model)
     {
