@@ -74,7 +74,7 @@ public partial class DetailedCourseViewModel : ObservableObject, IRefreshId
 
         var oldId = Course.InstructorId;
         _logger.LogInformation("Old Instructor: {InstructorId} {InstructorName}", oldId, Course.Instructor?.Name);
-        var newInstructor = Enumerable.First<Instructor>(Instructors, x => x.Id == newValue.Id);
+        var newInstructor = Instructors.First(x => x.Id == newValue.Id);
         _logger.LogInformation("New Instructor: {InstructorId} {InstructorName}", newInstructor.Id, newInstructor.Name);
 
         _logger.LogInformation("Course State: {CourseId} {CourseInstructorId} {CourseInstructorName}", Course.Id, Course.InstructorId, Course.Instructor?.Name);
@@ -84,8 +84,8 @@ public partial class DetailedCourseViewModel : ObservableObject, IRefreshId
         _logger.LogInformation("Updated Course State: {CourseId} {CourseInstructorId} {CourseInstructorName}", Course.Id, Course.InstructorId, Course.Instructor?.Name);
 
         await using var db = await _factory.CreateDbContextAsync();
-        var res = await Queryable.Where(db
-               .Courses, x => x.Id == Course.Id)
+        var res = await db
+            .Courses.Where(x => x.Id == Course.Id)
            .ExecuteUpdateAsync(x => x.SetProperty(p => p.InstructorId, newValue.Id));
         _logger.LogInformation("Updated Instructor in database: {UpdateCount}",res);
     }
@@ -178,8 +178,8 @@ public partial class DetailedCourseViewModel : ObservableObject, IRefreshId
     {
         if (SelectedNote is not { Id: > 0 }) return;
         await using var db = await _factory.CreateDbContextAsync();
-        await Queryable.Where(db
-               .Notes, x => x.Id == SelectedNote.Id)
+        await db
+            .Notes.Where(x => x.Id == SelectedNote.Id)
            .ExecuteDeleteAsync();
         await RefreshAsync();
     }
