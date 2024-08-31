@@ -3,13 +3,15 @@ namespace Lib.Interfaces;
 public interface IDurationReport
 {
 
-    TimeSpan TotalTime { get; init; }
-    TimeSpan RemainingTime { get; init; }
-    TimeSpan CompletedTime { get; init; }
-    TimeSpan AverageDuration { get; init; }
-    int TotalItems { get; init; }
-    int CompletedItems { get; init; }
-    int RemainingItems { get; init; }
-    double PercentComplete { get; init; }
-    double PercentRemaining { get; init; }
+    TimeSpan TotalTime { get; }
+    TimeSpan CompletedTime { get; }
+    TimeSpan RemainingTime { get; }
+    TimeSpan AverageDuration { get; }
+    DateTime MinDate { get; }
+    DateTime MaxDate { get; }
+    int TotalItems { get; }
+    int CompletedItems { get; }
+    int RemainingItems => TotalItems - CompletedItems;
+    double PercentComplete => (double) CompletedItems / TotalItems;
+    double PercentRemaining => (double) RemainingItems / TotalItems;
 }

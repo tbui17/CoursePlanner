@@ -7,3 +7,12 @@ public interface IDateTimeRange
 
 
 }
+
+public static class DateTimeRangeExtensions
+{
+
+    public static TimeSpan Duration(this IDateTimeRange range)
+    {
+        return range.End - range.Start;
+    }
+}

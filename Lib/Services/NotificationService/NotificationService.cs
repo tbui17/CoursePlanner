@@ -125,10 +125,4 @@ public class NotificationService(MultiLocalDbContextFactory dbFactory)
             Total = total
         };
     }
-
-    public async Task GetStats()
-    {
-        var today = DateTime.Now.Date;
-
-    }
 }

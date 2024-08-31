@@ -75,13 +75,12 @@ public static class UtilExtensions
 
     public static T2 Thru<T1, T2>(this T1 value, Func<T1, T2> func) => func(value);
 
-    public static IEnumerable<IGrouping<TKey, TResult>> SelectValues<TKey, TValue, TResult>(
+    public static IEnumerable<Grouping<TKey, TResult>> SelectValues<TKey, TValue, TResult>(
         this IEnumerable<IGrouping<TKey, TValue>> groups,
-        Func<(TKey Key, TValue Value), TResult> selector
+        Func<IGrouping<TKey, TValue>, IEnumerable<TResult>> selector
     ) =>
         from g in groups
-        let value = g.Select(x => selector((g.Key, x)))
-        select new Grouping<TKey, TResult>(g.Key, value);
+        select new Grouping<TKey, TResult>(g.Key, selector(g));
 }
 
 public static class Grouping
