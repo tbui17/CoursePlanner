@@ -1,3 +1,4 @@
+using BaseTestSetup;
 using Lib;
 using Lib.Models;
 using Microsoft.EntityFrameworkCore;
@@ -8,7 +9,7 @@ using Serilog;
 
 namespace LibTests;
 
-public abstract class BaseTest
+public abstract class BaseTest : IBaseTest
 {
     public IServiceProvider Provider { get; set; }
 
@@ -21,32 +22,17 @@ public abstract class BaseTest
 
     private IServiceProvider CreateProvider()
     {
-        Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Debug()
-            .WriteTo.Console()
-            .WriteTo.Debug()
-            .Enrich.FromLogContext()
-            .CreateLogger();
-
-        var guid = Guid.NewGuid().ToString();
         var services = new ServiceCollection();
-        Configs
-            .AddBackendServices(services)
-            .AddSerilog()
-            .AddDbContext<LocalDbCtx>(x => x
-                .UseSqlite($"DataSource={guid}")
-                .EnableDetailedErrors()
-                .EnableSensitiveDataLogging()
-            )
-            .AddDbContextFactory<LocalDbCtx>()
+        Configs.AddBackendServices(services)
+            .AddLogger(x => Log.Logger = x)
+            .AddTestDatabase()
             .AddTransient<NotificationSetupUtil>();
 
-        services.AddLogging();
         return services.BuildServiceProvider();
     }
 
     [TearDown]
-    protected virtual async Task TearDown()
+    public virtual async Task TearDown()
     {
         await Task.CompletedTask;
     }
