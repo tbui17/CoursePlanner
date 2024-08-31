@@ -62,7 +62,7 @@ public abstract class BaseTest
             .AddTransient<ISessionService, SessionService>()
             .AddTransient<AppShellViewModel>();
 
-        services.AddLogging(b => b.AddConsole());
+        services.AddLogging();
 
         return services.BuildServiceProvider();
     }
