@@ -5,7 +5,7 @@ namespace Lib.Models;
 
 public record AggregateDurationReport : IDurationReport
 {
-    public IEnumerable<IGrouping<Type, IDurationReport>> SubReports { get; init; } = ImmutableArray<IGrouping<Type, IDurationReport>>.Empty;
+    public IDictionary<Type, IDurationReport> SubReports { get; init; } = ImmutableDictionary<Type, IDurationReport>.Empty;
 
     public TimeSpan TotalTime { get; init; }
     public TimeSpan RemainingTime { get; init; }
