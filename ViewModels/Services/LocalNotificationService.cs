@@ -1,4 +1,5 @@
-﻿using Lib.Services;
+﻿using Lib.Interfaces;
+using Lib.Services;
 using Lib.Services.NotificationService;
 using Microsoft.Extensions.Logging;
 using Plugin.LocalNotification;
@@ -47,7 +48,7 @@ public class LocalNotificationService(
 
         return notificationCount;
 
-        static NotificationRequest CreateNotificationRequest(IReadOnlyList<NotificationResult> notifications)
+        static NotificationRequest CreateNotificationRequest(IReadOnlyList<INotificationDataResult> notifications)
         {
             var title = $"{notifications.Count} upcoming events.";
             var description = title + "\n" + notifications.ToMessage();

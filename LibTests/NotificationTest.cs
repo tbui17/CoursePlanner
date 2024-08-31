@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Lib.Interfaces;
 using Lib.Models;
 using Lib.Services.NotificationService;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +11,7 @@ namespace LibTests;
 
 public class NotificationUpcomingTest : BaseDbTest
 {
-    private IList<NotificationResult> Result { get; set; }
+    private IList<INotificationDataResult> Result { get; set; }
 
 
     [OneTimeSetUp]
