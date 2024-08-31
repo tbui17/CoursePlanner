@@ -29,7 +29,7 @@ public class DurationReportFactory
     private TimeSpan RemainingTime() => new[] { MaxDate() - Date, TimeSpan.Zero }.Max();
 
     private TimeSpan AverageDuration() =>
-        Entities.Count > 0 ? Entities.Average(x => x.Duration()) : TimeSpan.Zero;
+        Entities.AverageOrDefault(x => x.Duration());
 
     private Type Type() => Entities.FirstOrDefault()?.GetType() ?? typeof(IDateTimeEntity);
 
