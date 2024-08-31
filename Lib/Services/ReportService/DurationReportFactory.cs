@@ -17,13 +17,13 @@ public class DurationReportFactory
 
     private TimeSpan CompletedTime()
     {
-        var beforeToday = BeforeToday();
-        return beforeToday.MaxOrDefault(x => x.End)
+        var beforeDate = BeforeDate();
+        return beforeDate.MaxOrDefault(x => x.End)
                -
-               beforeToday.MinOrDefault(x => x.Start);
+               beforeDate.MinOrDefault(x => x.Start);
     }
 
-    private List<IDateTimeEntity> BeforeToday() => Entities.Where(x => x.End < Date).ToList();
+    private List<IDateTimeEntity> BeforeDate() => Entities.Where(x => x.End < Date).ToList();
 
 
     private TimeSpan RemainingTime() => new[] { MaxDate() - Date, TimeSpan.Zero }.Max();
