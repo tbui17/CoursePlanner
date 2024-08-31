@@ -19,6 +19,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\BaseTestSetup\BaseTestSetup.csproj" />
       <ProjectReference Include="..\Lib\Lib.csproj" />
     </ItemGroup>
 
