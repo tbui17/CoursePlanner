@@ -15,19 +15,20 @@ public class ReportTest
         var service = Resolve<ReportService>();
 
         var res = await service.GetDurationReport();
-        AssertIDuration(res);
+        AssertIDurationBoundaries(res);
     }
 
-    private void AssertIDuration(IDurationReport report)
+    private static void AssertIDurationBoundaries(IDurationReport report)
     {
         var s = report.Should().BeAssignableTo<IDurationReport>().Subject;
         using var scope = new AssertionScope();
 
-        s.CompletedItems.Should().BeGreaterThan(0).And.BeLessThanOrEqualTo(s.TotalItems);
+        s.CompletedItems.Should().BeGreaterThanOrEqualTo(0).And.BeLessThanOrEqualTo(s.TotalItems);
         s.AverageDuration.Should().BeLessThanOrEqualTo(s.TotalTime);
+        s.CompletedTime.Should().BeLessThanOrEqualTo(s.TotalTime);
         s.MaxDate.Should().BeOnOrAfter(s.MinDate);
         s.RemainingTime.Should().BeGreaterThanOrEqualTo(TimeSpan.Zero);
-        new[] { s.PercentComplete, s.PercentRemaining }.Sum().Should().Be(100);
+        new[] { s.PercentComplete, s.PercentRemaining }.Sum().Should().BeOneOf(0,100);
     }
 
     [Test]
@@ -43,6 +44,25 @@ public class ReportTest
             .And.Subject.Values.Should()
             .AllBeAssignableTo<IDurationReport>()
             .Which.Should()
-            .AllSatisfy(AssertIDuration);
+            .AllSatisfy(AssertIDurationBoundaries);
+    }
+
+
+}
+
+public class ReportFactoryTest
+{
+    [Test]
+    public void AggregateFactoryCreate_Empty_ShouldNotThrow()
+    {
+        var fac = new AggregateDurationReportFactory();
+        fac.Invoking(x => x.Create()).Should().NotThrow();
+    }
+
+    [Test]
+    public void DurationReportCreate_Empty_ShouldNotThrow()
+    {
+        var fac = new DurationReportFactory();
+        fac.Invoking(x => x.Create()).Should().NotThrow();
     }
 }

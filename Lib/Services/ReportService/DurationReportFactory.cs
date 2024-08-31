@@ -4,7 +4,7 @@ using Lib.Utils;
 
 namespace Lib.Services.ReportService;
 
-internal class DurationReportFactory
+public class DurationReportFactory
 {
     public IList<IDateTimeEntity> Entities { get; set; } = [];
     public DateTime Date { get; set; } = DateTime.Now.Date;
@@ -15,28 +15,26 @@ internal class DurationReportFactory
 
     private TimeSpan TotalTime() => MaxDate() - MinDate();
 
-    private TimeSpan CompletedTime() =>
-        BeforeToday().Sum(x => x.Duration());
+    private TimeSpan CompletedTime()
+    {
+        var beforeToday = BeforeToday();
+        return beforeToday.MaxOrDefault(x => x.End)
+               -
+               beforeToday.MinOrDefault(x => x.Start);
+    }
 
-    private IEnumerable<IDateTimeEntity> BeforeToday() => Entities.Where(x => x.End < Date);
+    private List<IDateTimeEntity> BeforeToday() => Entities.Where(x => x.End < Date).ToList();
 
-    private TimeSpan RemainingTime() =>
-        MaxDate() - Date is var res
-        && res > TimeSpan.Zero
-            ? res
-            : TimeSpan.Zero;
+
+    private TimeSpan RemainingTime() => new[] { MaxDate() - Date, TimeSpan.Zero }.Max();
 
     private TimeSpan AverageDuration() =>
-        Entities.Average(x => x.Duration());
+        Entities.Count > 0 ? Entities.Average(x => x.Duration()) : TimeSpan.Zero;
 
-    private Type Type() => Entities.FirstOrDefault() switch
-    {
-        { } x => x.GetType(),
-        _ => typeof(IDateTimeEntity)
-    };
+    private Type Type() => Entities.FirstOrDefault()?.GetType() ?? typeof(IDateTimeEntity);
 
-    private DateTime MinDate() => Entities.Min(x => x.Start);
-    private DateTime MaxDate() => Entities.Max(x => x.End);
+    private DateTime MinDate() => Entities.MinOrDefault(x => x.Start);
+    private DateTime MaxDate() => Entities.MaxOrDefault(x => x.End);
 
     public DurationReport Create() => new()
     {
