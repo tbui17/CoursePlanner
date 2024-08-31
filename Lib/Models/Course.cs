@@ -3,16 +3,6 @@ using Lib.Utils;
 
 namespace Lib.Models;
 
-public interface INotificationField : IDateTimeEntity, INotification
-{
-    new bool ShouldNotify { get; set; }
-}
-
-public interface ICourseField : INotificationField
-{
-    string Status { get; set; }
-}
-
 public class Course : ICourseField
 {
     public const string PlanToTake = "Plan to Take";

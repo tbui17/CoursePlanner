@@ -1,6 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Immutable;
-using Lib.Interfaces;
+﻿using Lib.Interfaces;
+using Lib.Models;
 using Lib.Services.MultiDbContext;
 using LinqKit;
 using Microsoft.EntityFrameworkCore;
@@ -132,71 +131,4 @@ public class NotificationService(MultiLocalDbContextFactory dbFactory)
         var today = DateTime.Now.Date;
 
     }
-}
-
-public interface INotificationRatio
-{
-    public int Total { get; }
-    public int Active { get; }
-    public int Inactive => Total - Active;
-    public double Percentage => (double)Active / Total * 100;
-}
-
-public record NotificationRatio : INotificationRatio
-{
-    public int Total { get; init; }
-    public int Active { get; init; }
-
-    public override string ToString()
-    {
-        return $"{Active} / {Total}";
-    }
-}
-
-public record StatReport
-{
-    public DateTime CreatedAt { get; init; } = DateTime.Now;
-    public IReadOnlyDictionary<string, DurationReport> Durations { get; init; } = ImmutableDictionary<string, DurationReport>.Empty;
-    public IReadOnlyDictionary<string, int> Counts { get; init; } = ImmutableDictionary<string, int>.Empty;
-}
-
-public record AggregateDurationReport : IDurationReport
-{
-    public TimeSpan TotalTime { get; init; }
-    public TimeSpan RemainingTime { get; init; }
-    public TimeSpan CompletedTime { get; init; }
-    public TimeSpan AverageDuration { get; init; }
-    public int TotalItems { get; init; }
-    public int CompletedItems { get; init; }
-    public int RemainingItems { get; init; }
-    public double PercentComplete { get; init; }
-    public double PercentRemaining { get; init; }
-}
-
-public interface IDurationReport
-{
-
-    TimeSpan TotalTime { get; init; }
-    TimeSpan RemainingTime { get; init; }
-    TimeSpan CompletedTime { get; init; }
-    TimeSpan AverageDuration { get; init; }
-    int TotalItems { get; init; }
-    int CompletedItems { get; init; }
-    int RemainingItems { get; init; }
-    double PercentComplete { get; init; }
-    double PercentRemaining { get; init; }
-}
-
-public record DurationReport : IDurationReport
-{
-    public Type Type { get; init; } = typeof(object);
-    public TimeSpan TotalTime { get; init; }
-    public TimeSpan RemainingTime { get; init; }
-    public TimeSpan CompletedTime { get; init; }
-    public TimeSpan AverageDuration { get; init; }
-    public int TotalItems { get; init; }
-    public int CompletedItems { get; init; }
-    public int RemainingItems { get; init; }
-    public double PercentComplete { get; init; }
-    public double PercentRemaining { get; init; }
 }
