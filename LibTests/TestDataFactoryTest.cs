@@ -6,11 +6,12 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace LibTests;
 
-public class TestDataFactoryTest
+public class TestDataFactoryTest : BaseTest
 {
     [SetUp]
-    public async Task Setup()
+    public override async Task Setup()
     {
+        await base.Setup();
         var factory = Provider.GetRequiredService<IDbContextFactory<LocalDbCtx>>();
         await using var db = await factory.CreateDbContextAsync();
         await new DbUtil(db).ResetAndSeedDb();
