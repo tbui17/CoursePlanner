@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using Lib.Interfaces;
@@ -7,7 +9,7 @@ using Lib.Services.ReportService;
 namespace LibTests;
 
 [TestFixture]
-public class ReportTest
+public class ReportTest : BaseDbTest
 {
     [Test]
     public async Task GetDurationReport_IDurationReport_HasValidProperties()
@@ -15,39 +17,9 @@ public class ReportTest
         var service = Resolve<ReportService>();
 
         var res = await service.GetDurationReport();
-        AssertIDurationBoundaries(res);
+        new ReportBoundaryUtil(res).AssertIDurationBoundaries();
     }
 
-    private static void AssertIDurationBoundaries(IDurationReport report)
-    {
-        var s = report.Should().BeAssignableTo<IDurationReport>().Subject;
-        using var _ = new AssertionScope();
-        AssertIDurationMinBoundaries(report);
-        s.CompletedItems.Should().BeGreaterThanOrEqualTo(default).And.BeLessThanOrEqualTo(s.TotalItems);
-        s.AverageDuration.Should().BeLessThanOrEqualTo(s.TotalTime);
-        s.CompletedTime.Should().BeLessThanOrEqualTo(s.TotalTime);
-        s.MaxDate.Should().BeOnOrAfter(s.MinDate);
-        s.RemainingTime.Should().BeGreaterThanOrEqualTo(default);
-        new[] { s.PercentComplete, s.PercentRemaining }.Sum().Should().BeOneOf(default, 100);
-    }
-
-    private static void AssertIDurationMinBoundaries(IDurationReport report)
-    {
-        var s = report.Should().BeAssignableTo<IDurationReport>().Subject;
-        using var _ = new AssertionScope();
-        s.CompletedTime.Should().BeGreaterThanOrEqualTo(default);
-        s.AverageDuration.Should().BeGreaterThanOrEqualTo(default);
-        s.RemainingTime.Should().BeGreaterThanOrEqualTo(default);
-        s.TotalTime.Should().BeGreaterThanOrEqualTo(default);
-        s.CompletedItems.Should().BeGreaterThanOrEqualTo(default);
-        s.PercentComplete.Should().BeGreaterThanOrEqualTo(default);
-        s.PercentRemaining.Should().BeGreaterThanOrEqualTo(default);
-        s.RemainingItems.Should().BeGreaterThanOrEqualTo(default);
-        s.TotalItems.Should().BeGreaterThanOrEqualTo(default);
-        s.MaxDate.Should().BeOnOrAfter(default);
-        s.MinDate.Should().BeOnOrAfter(default);
-
-    }
 
     [Test]
     public async Task GetDurationReport_SubReports_HasValidProperties()
@@ -63,7 +35,7 @@ public class ReportTest
             .And.Subject.Values.Should()
             .AllBeAssignableTo<IDurationReport>()
             .Which.Should()
-            .AllSatisfy(AssertIDurationBoundaries);
+            .AllSatisfy(x => new ReportBoundaryUtil(x).AssertIDurationBoundaries());
     }
 }
 
@@ -81,5 +53,75 @@ public class ReportFactoryTest
     {
         var fac = new DurationReportFactory();
         fac.Invoking(x => x.Create()).Should().NotThrow();
+    }
+
+    [Test]
+    public void Reports_Empty_ShouldBeWithinBounds()
+    {
+
+        var aggFac = new AggregateDurationReportFactory();
+        var fac = new DurationReportFactory();
+
+        var aggReportEmpty = aggFac.Create();
+
+        var report = fac.Create();
+        aggFac.Reports.Add(report);
+
+        var aggReport = aggFac.Create();
+
+        using var _ = new AssertionScope();
+
+        new ReportBoundaryUtil(report).AssertIDurationBoundaries();
+        new ReportBoundaryUtil(aggReport).AssertIDurationBoundaries();
+        new ReportBoundaryUtil(aggReportEmpty).AssertIDurationBoundaries();
+
+    }
+}
+
+[SuppressMessage("ReSharper", "UnusedMember.Local")]
+file class ReportBoundaryUtil(IDurationReport report)
+{
+    private readonly IDurationReport _report = report.Should().BeAssignableTo<IDurationReport>().Subject;
+
+    [AttributeUsage(AttributeTargets.Method)]
+    private class SubAssertionAttribute : Attribute;
+
+    [SubAssertion]
+    private void AssertIDurationMinBoundaries()
+    {
+        using var _ = new AssertionScope();
+        _report.CompletedTime.Should().BeGreaterThanOrEqualTo(default);
+        _report.AverageDuration.Should().BeGreaterThanOrEqualTo(default);
+        _report.RemainingTime.Should().BeGreaterThanOrEqualTo(default);
+        _report.TotalTime.Should().BeGreaterThanOrEqualTo(default);
+        _report.CompletedItems.Should().BeGreaterThanOrEqualTo(default);
+        _report.PercentComplete.Should().BeGreaterThanOrEqualTo(default);
+        _report.PercentRemaining.Should().BeGreaterThanOrEqualTo(default);
+        _report.RemainingItems.Should().BeGreaterThanOrEqualTo(default);
+        _report.TotalItems.Should().BeGreaterThanOrEqualTo(default);
+        _report.MaxDate.Should().BeOnOrAfter(default);
+        _report.MinDate.Should().BeOnOrAfter(default);
+    }
+
+    [SubAssertion]
+    private void AssertIDurationRelationalBoundaries()
+    {
+        using var _ = new AssertionScope();
+        _report.CompletedItems.Should().BeLessThanOrEqualTo(_report.TotalItems);
+        _report.AverageDuration.Should().BeLessThanOrEqualTo(_report.TotalTime);
+        _report.CompletedTime.Should().BeLessThanOrEqualTo(_report.TotalTime);
+        _report.MaxDate.Should().BeOnOrAfter(_report.MinDate);
+        new[] { _report.PercentComplete, _report.PercentRemaining }.Sum().Should().BeOneOf(default, 100);
+    }
+
+    public void AssertIDurationBoundaries()
+    {
+        foreach (var method in GetType()
+                     .GetMethods()
+                     .Where(x => x.GetCustomAttribute<SubAssertionAttribute>() is not null)
+                )
+        {
+            method.Invoke(this, null);
+        }
     }
 }
