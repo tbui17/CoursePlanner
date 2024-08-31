@@ -12,6 +12,6 @@ public interface IDurationReport
     int TotalItems { get; }
     int CompletedItems { get; }
     int RemainingItems => TotalItems - CompletedItems;
-    double PercentComplete => (double) CompletedItems / TotalItems;
-    double PercentRemaining => (double) RemainingItems / TotalItems;
+    double PercentComplete => (double) CompletedItems / TotalItems * 100;
+    double PercentRemaining => (double) RemainingItems / TotalItems * 100;
 }

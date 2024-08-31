@@ -16,7 +16,8 @@ public class AggregateDurationReportFactory
     private DateTime MaxDate() => Reports.Max(x => x.MaxDate);
     private int TotalItems() => Reports.Sum(x => x.TotalItems);
     private int CompletedItems() => Reports.Sum(x => x.CompletedItems);
-    private IEnumerable<IGrouping<Type, IDurationReport>> SubReports() => Reports.GroupBy(x => x.Type);
+
+    private IDictionary<Type, IDurationReport> SubReports() => Reports.ToDictionary(x => x.Type, x => x as IDurationReport);
 
     public AggregateDurationReport Create() => new()
     {
