@@ -35,59 +35,59 @@ public class DetailedCourseViewModelTest : BasePageViewModelTest
 
         var res = await courseService.GetFullCourse(id);
         res
-           .Should()
-           .NotBeNull();
+            .Should()
+            .NotBeNull();
         var expected = res!;
         var expectedInstructors = await Db.Instructors.ToListAsync();
 
         expectedInstructors
-           .Should()
-           .NotBeEmpty();
+            .Should()
+            .NotBeEmpty();
 
         using var _ = new AssertionScope();
 
         Model
-           .Instructors
-           .Select(x => x.Name)
-           .Should()
-           .BeEquivalentTo(expectedInstructors.Select(x => x.Name));
+            .Instructors
+            .Select(x => x.Name)
+            .Should()
+            .BeEquivalentTo(expectedInstructors.Select(x => x.Name));
 
         Model
-           .Assessments
-           .Select(x => x.Name)
-           .Should()
-           .BeEquivalentTo(expected.Assessments.Select(x => x.Name));
-
-
-        Model
-           .Course
-           .Id
-           .Should()
-           .Be(expected.Id);
-
-        Model
-           .SelectedInstructor!
-           .Name
-           .Should()
-           .Be(expected.Instructor!.Name);
-
-        Model
-           .Course
-           .Name
-           .Should()
-           .Be(expected.Name);
-
-        Model
-           .Notes
-           .Select(x => x.Value)
-           .Should()
-           .BeEquivalentTo(expected.Notes.Select(x => x.Value));
+            .Assessments
+            .Select(x => x.Name)
+            .Should()
+            .BeEquivalentTo(expected.Assessments.Select(x => x.Name));
 
 
         Model
-           .SelectedNote
-           .Should()
-           .BeNull();
+            .Course
+            .Id
+            .Should()
+            .Be(expected.Id);
+
+        Model
+            .SelectedInstructor!
+            .Name
+            .Should()
+            .Be(expected.Instructor!.Name);
+
+        Model
+            .Course
+            .Name
+            .Should()
+            .Be(expected.Name);
+
+        Model
+            .Notes
+            .Select(x => x.Value)
+            .Should()
+            .BeEquivalentTo(expected.Notes.Select(x => x.Value));
+
+
+        Model
+            .SelectedNote
+            .Should()
+            .BeNull();
     }
 
     [Test]
@@ -105,19 +105,19 @@ public class DetailedCourseViewModelTest : BasePageViewModelTest
         using var _ = new AssertionScope();
 
         var request = args
-           .Should()
-           .ContainSingle()
-           .Subject;
+            .Should()
+            .ContainSingle()
+            .Subject;
 
         request
-           .Text
-           .Should()
-           .NotBeNullOrEmpty();
+            .Text
+            .Should()
+            .NotBeNullOrEmpty();
 
         request
-           .Title
-           .Should()
-           .NotBeNullOrEmpty();
+            .Title
+            .Should()
+            .NotBeNullOrEmpty();
     }
 
     [Test]
@@ -136,14 +136,14 @@ public class DetailedCourseViewModelTest : BasePageViewModelTest
 
 
         var textRequest = args
-           .Should()
-           .ContainSingle()
-           .Subject;
+            .Should()
+            .ContainSingle()
+            .Subject;
 
         textRequest
-           .Text
-           .Should()
-           .Contain(note.Value);
+            .Text
+            .Should()
+            .Contain(note.Value);
     }
 
 
@@ -151,9 +151,9 @@ public class DetailedCourseViewModelTest : BasePageViewModelTest
     public async Task DeleteNoteAsync_DbAndModelStateUpdated()
     {
         var initialDbNotes = await Db
-           .Notes
-           .AsNoTracking()
-           .ToListAsync();
+            .Notes
+            .AsNoTracking()
+            .ToListAsync();
         await Model.Init(1);
         var note = Model.Notes.First();
         var noteId = note.Id;
@@ -167,30 +167,30 @@ public class DetailedCourseViewModelTest : BasePageViewModelTest
         await Model.DeleteNoteAsync();
 
         var dbNotes = await Db
-           .Notes
-           .AsNoTracking()
-           .ToListAsync();
+            .Notes
+            .AsNoTracking()
+            .ToListAsync();
 
         using var scope = new AssertionScope();
         scope.FormattingOptions.MaxLines = 0;
 
         dbNotes
-           .Should()
-           .NotContain(x => x.Id == noteId)
-           .And
-           .HaveCount(expectedDbNoteCount);
+            .Should()
+            .NotContain(x => x.Id == noteId)
+            .And
+            .HaveCount(expectedDbNoteCount);
 
         Model
-           .Notes
-           .Should()
-           .NotContain(x => x.Id == noteId)
-           .And
-           .HaveCount(expectedNoteCount);
+            .Notes
+            .Should()
+            .NotContain(x => x.Id == noteId)
+            .And
+            .HaveCount(expectedNoteCount);
 
         Model
-           .SelectedNote
-           .Should()
-           .BeNull();
+            .SelectedNote
+            .Should()
+            .BeNull();
     }
 
 
@@ -199,30 +199,30 @@ public class DetailedCourseViewModelTest : BasePageViewModelTest
     {
         const string newNoteName = "My New Note ABC";
         AppMock
-           .Setup(x => x.DisplayNamePromptAsync())
-           .ReturnsAsync(newNoteName);
+            .Setup(x => x.DisplayNamePromptAsync())
+            .ReturnsAsync(newNoteName);
 
         await Model.Init(1);
         await Model.AddNoteAsync();
 
 
         var dbNotes = await Db
-           .Courses
-           .Where(x => x.Id == 1)
-           .Include(x => x.Notes)
-           .Select(x => x.Notes)
-           .FirstAsync();
+            .Courses
+            .Where(x => x.Id == 1)
+            .Include(x => x.Notes)
+            .Select(x => x.Notes)
+            .FirstAsync();
 
         using var _ = new AssertionScope();
 
         dbNotes
-           .Should()
-           .ContainSingle(x => x.Name == newNoteName);
+            .Should()
+            .ContainSingle(x => x.Name == newNoteName);
 
         Model
-           .Notes
-           .Should()
-           .ContainSingle(x => x.Name == newNoteName);
+            .Notes
+            .Should()
+            .ContainSingle(x => x.Name == newNoteName);
     }
 
 
@@ -236,7 +236,7 @@ public class DetailedCourseViewModelTest : BasePageViewModelTest
         public override async Task Setup()
         {
             await base.Setup();
-            Db = GetDb();
+            Db = await GetDb();
             NavMock = new Mock<INavigationService>();
             AppMock = new Mock<IAppService>();
             Model = new DetailedCourseViewModel(factory: Resolve<ILocalDbCtxFactory>(), appService: AppMock.Object,
@@ -272,25 +272,25 @@ public class DetailedCourseViewModelTest : BasePageViewModelTest
         {
             using var _ = new AssertionScope();
             Model
-               .Course
-               .Id
-               .Should()
-               .Be(CourseId);
+                .Course
+                .Id
+                .Should()
+                .Be(CourseId);
             Model
-               .Id
-               .Should()
-               .Be(CourseId);
+                .Id
+                .Should()
+                .Be(CourseId);
             Model
-               .Course
-               .InstructorId
-               .Should()
-               .Be(InstructorId);
+                .Course
+                .InstructorId
+                .Should()
+                .Be(InstructorId);
 
             Model
-               .SelectedInstructor
-              ?.Id
-               .Should()
-               .Be(InstructorId);
+                .SelectedInstructor
+                ?.Id
+                .Should()
+                .Be(InstructorId);
         }
 
 
@@ -300,26 +300,26 @@ public class DetailedCourseViewModelTest : BasePageViewModelTest
             Model.SelectedInstructor = Model.Instructors.First(x => x.Id == NewInstructorId);
 
             var updatedCourse = await Db
-               .Courses
-               .AsNoTracking()
-               .FirstAsync(x => x.Id == CourseId);
+                .Courses
+                .AsNoTracking()
+                .FirstAsync(x => x.Id == CourseId);
 
             updatedCourse
-               .InstructorId
-               .Should()
-               .Be(NewInstructorId);
+                .InstructorId
+                .Should()
+                .Be(NewInstructorId);
 
             Model
-               .SelectedInstructor
-              ?.Id
-               .Should()
-               .Be(NewInstructorId);
+                .SelectedInstructor
+                ?.Id
+                .Should()
+                .Be(NewInstructorId);
 
             Model
-               .Course
-               .InstructorId
-               .Should()
-               .Be(NewInstructorId);
+                .Course
+                .InstructorId
+                .Should()
+                .Be(NewInstructorId);
         }
 
         [Test]
@@ -328,19 +328,19 @@ public class DetailedCourseViewModelTest : BasePageViewModelTest
             await Model.DeleteInstructorAsync();
             using var _ = new AssertionScope();
             Model
-               .SelectedInstructor
-               .Should()
-               .BeNull();
+                .SelectedInstructor
+                .Should()
+                .BeNull();
             Model
-               .Course
-               .Instructor
-               .Should()
-               .BeNull();
+                .Course
+                .Instructor
+                .Should()
+                .BeNull();
             Model
-               .Course
-               .InstructorId
-               .Should()
-               .Be(null);
+                .Course
+                .InstructorId
+                .Should()
+                .Be(null);
         }
     }
 }

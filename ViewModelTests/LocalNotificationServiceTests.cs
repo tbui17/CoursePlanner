@@ -19,7 +19,7 @@ public class LocalNotificationServiceTests : BaseDbTest
         _courseName = Guid.NewGuid().ToString();
         // setup to have 1 upcoming course
 
-        await using var db = GetDb();
+        await using var db = await GetDb();
         var course = db.Courses.First();
         course.Start = DateTime.Now.Date;
         course.ShouldNotify = true;

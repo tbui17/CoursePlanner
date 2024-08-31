@@ -20,7 +20,7 @@ public abstract class BaseDbTest : BaseTest
     }
 
     [TearDown]
-    protected override async Task TearDown()
+    public override async Task TearDown()
     {
         await base.TearDown();
         var factory = Provider.GetRequiredService<ILocalDbCtxFactory>();
