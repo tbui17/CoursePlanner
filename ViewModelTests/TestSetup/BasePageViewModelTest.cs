@@ -11,7 +11,7 @@ public abstract class BasePageViewModelTest : BaseDbTest
     public override async Task Setup()
     {
         await base.Setup();
-        Db = GetDb();
+        Db = await GetDb();
         NavMock = new();
         AppMock = new();
         DbFactory = Resolve<ILocalDbCtxFactory>();

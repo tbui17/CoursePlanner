@@ -1,8 +1,8 @@
+using BaseTestSetup;
 using Lib;
 using Lib.Models;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Moq;
 using Serilog;
 using ViewModels.Config;
@@ -14,7 +14,7 @@ using ServiceCollection = Microsoft.Extensions.DependencyInjection.ServiceCollec
 
 namespace ViewModelTests.TestSetup;
 
-public abstract class BaseTest
+public abstract class BaseTest : IBaseTest
 {
     [SetUp]
     public virtual Task Setup()
@@ -30,7 +30,7 @@ public abstract class BaseTest
 
     protected string FileName { get; private init; } = Guid.NewGuid().ToString();
 
-    protected IServiceProvider Provider { get; private set; }
+    public IServiceProvider Provider { get; set; }
 
     protected SqliteConnectionStringBuilder Connection { get; private set; }
 
@@ -67,16 +67,16 @@ public abstract class BaseTest
         return services.BuildServiceProvider();
     }
 
-    protected T Resolve<T>() where T : notnull => Provider.GetRequiredService<T>();
+    public T Resolve<T>() where T : notnull => Provider.GetRequiredService<T>();
 
 
-    protected LocalDbCtx GetDb() =>
+    public Task<LocalDbCtx> GetDb() =>
         Provider
             .GetRequiredService<ILocalDbCtxFactory>()
-            .CreateDbContext();
+            .CreateDbContextAsync();
 
     [TearDown]
-    protected virtual async Task TearDown()
+    public virtual async Task TearDown()
     {
         await Task.CompletedTask;
     }
