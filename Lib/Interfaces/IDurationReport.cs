@@ -11,7 +11,14 @@ public interface IDurationReport
     DateTime MaxDate { get; }
     int TotalItems { get; }
     int CompletedItems { get; }
-    int RemainingItems => TotalItems - CompletedItems;
-    double PercentComplete => (double) CompletedItems / TotalItems * 100;
-    double PercentRemaining => (double) RemainingItems / TotalItems * 100;
+    int RemainingItems { get; }
+    double PercentComplete { get; }
+    double PercentRemaining { get; }
+}
+
+public static class DurationReportExtensions
+{
+    public static int RemainingItems(this IDurationReport report) => report.TotalItems - report.CompletedItems;
+    public static double PercentComplete(this IDurationReport report) => (double) report.CompletedItems / report.TotalItems * 100;
+    public static double PercentRemaining(this IDurationReport report) => (double) report.RemainingItems / report.TotalItems * 100;
 }
