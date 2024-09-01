@@ -2,8 +2,34 @@
 
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:CoursePlanner.Controls"
+             xmlns:domain="clr-namespace:ViewModels.Domain;assembly=ViewModels"
+             x:DataType="domain:StatsViewModel"
+             Title="Stats"
              x:Class="CoursePlanner.Pages.StatsPage">
     <ContentPage.Content>
-        
+
+        <Grid>
+            <VerticalStackLayout Spacing="5">
+                <VerticalStackLayout.Resources>
+                    <Style TargetType="Label" BasedOn="{StaticResource BaseLabel}">
+                        <Setter Property="Margin" Value="0,0,0,5" />
+                        <Setter Property="FontAttributes" Value="Bold" />
+                    </Style>
+                </VerticalStackLayout.Resources>
+
+                <Label Text="{Binding DurationReport.TotalTime, StringFormat='Total Time: {0}'}" />
+                <Label Text="{Binding DurationReport.CompletedTime, StringFormat='Completed Time: {0}'}" />
+                <Label Text="{Binding DurationReport.RemainingTime, StringFormat='Remaining Time: {0}'}" />
+                <Label Text="{Binding DurationReport.AverageDuration, StringFormat='Average Duration: {0}'}" />
+                <Label Text="{Binding DurationReport.MinDate, Converter={StaticResource DateConverter}, StringFormat='Min Date: {0}'}" />
+                <Label Text="{Binding DurationReport.MaxDate, Converter={StaticResource DateConverter}, StringFormat='Max Date: {0}'}" />
+                <Label Text="{Binding DurationReport.TotalItems, StringFormat='Total Items: {0}'}" />
+                <Label Text="{Binding DurationReport.CompletedItems, StringFormat='Completed Items: {0}'}" />
+                <Label Text="{Binding DurationReport.RemainingItems, StringFormat='Remaining Items: {0}'}" />
+                <Label Text="{Binding DurationReport.PercentComplete, StringFormat='Percent Complete: {0:F2}%'}" />
+                <Label Text="{Binding DurationReport.PercentRemaining, StringFormat='Percent Remaining: {0:F2}%'}" />
+            </VerticalStackLayout>
+        </Grid>
     </ContentPage.Content>
 </ContentPage>
