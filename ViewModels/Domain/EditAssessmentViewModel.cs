@@ -58,7 +58,7 @@ public partial class EditAssessmentViewModel(
 
     public IEnumerable<Assessment> GetDbModels() =>
         Assessments
-            .Select<AssessmentItemViewModel, Assessment>(x => new Assessment().SetFromAssessmentForm<Assessment, AssessmentItemViewModel>(x));
+            .Select<AssessmentItemViewModel, Assessment>(x => new Assessment().SetFromAssessmentForm(x));
 
 
     private static IEnumerable<DomainException> Validate(ICollection<Assessment> assessments)
