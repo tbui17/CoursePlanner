@@ -1,4 +1,5 @@
-﻿using Lib.Utils;
+﻿using Lib.Interfaces;
+using Lib.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace Lib.Models;
@@ -20,6 +21,15 @@ public class LocalDbCtx : DbContext
     public DbSet<Assessment> Assessments { get; set; }
     public DbSet<User> Accounts { get; set; }
 
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        if (!optionsBuilder.IsConfigured)
+        {
+            optionsBuilder.UseSqlite("DataSource=database.db");
+        }
+        base.OnConfiguring(optionsBuilder);
+    }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder
@@ -32,6 +42,18 @@ public class LocalDbCtx : DbContext
         modelBuilder.Entity<User>()
             .Property(x => x.Username)
             .UseCollation(Collation.CaseInsensitive);
+
+
+        var dateTimeEntities = modelBuilder.Model.GetEntityTypes()
+            .Where(x => typeof(IDateTimeEntity).IsAssignableFrom(x.ClrType));
+
+
+        foreach (var entity in dateTimeEntities)
+        {
+            modelBuilder
+                .Entity(entity.ClrType)
+                .HasIndex(nameof(IDateTimeEntity.Start), nameof(IDateTimeEntity.End));
+        }
     }
 
 
