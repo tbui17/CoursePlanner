@@ -23,7 +23,7 @@ public abstract class BaseTest : IBaseTest
     private IServiceProvider CreateProvider()
     {
         var services = new ServiceCollection();
-        Configs.AddBackendServices(services)
+        services.AddBackendServices()
             .AddLogger(x => Log.Logger = x)
             .AddTestDatabase()
             .AddTransient<NotificationSetupUtil>();
