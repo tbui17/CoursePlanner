@@ -10,6 +10,7 @@
              xmlns:cz="clr-namespace:FunctionZero.Maui.Controls;assembly=FunctionZero.Maui.Controls"
              xmlns:domain="clr-namespace:ViewModels.Domain;assembly=ViewModels"
              x:Name="Page"
+             Title="Notification Data"
 
              x:DataType="domain:NotificationDataViewModel">
     <ContentPage.Resources>

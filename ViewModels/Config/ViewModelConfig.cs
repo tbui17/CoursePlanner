@@ -5,15 +5,7 @@ using ViewModels.Domain;
 using ViewModels.Events;
 using ViewModels.Interfaces;
 using ViewModels.Services;
-using AppShellViewModel = ViewModels.Domain.AppShellViewModel;
-using DetailedCourseViewModel = ViewModels.Domain.DetailedCourseViewModel;
-using DetailedTermViewModel = ViewModels.Domain.DetailedTermViewModel;
-using EditAssessmentViewModel = ViewModels.Domain.EditAssessmentViewModel;
-using EditCourseViewModel = ViewModels.Domain.EditCourseViewModel;
-using EditNoteViewModel = ViewModels.Domain.EditNoteViewModel;
-using EditTermViewModel = ViewModels.Domain.EditTermViewModel;
-using LoginViewModel = ViewModels.Domain.LoginViewModel;
-using TermViewModel = ViewModels.Domain.TermViewModel;
+
 
 namespace ViewModels.Config;
 
@@ -43,6 +35,7 @@ public static class ViewModelConfig
             .AddTransient<TermViewModel>()
             .AddTransient<NotificationDataViewModel>()
             .AddTransient<InstructorFormViewModelFactory>()
+            .AddTransient<StatsViewModel>()
             .AddSingleton<AppShellViewModel>();
     }
 

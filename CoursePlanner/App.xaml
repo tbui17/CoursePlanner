@@ -42,6 +42,31 @@
                         </Border>
                     </DataTemplate>
 
+                    <ControlTemplate x:Key="DurationReportTemplate" x:DataType="interfaces:IDurationReport">
+                        <Border>
+                            <VerticalStackLayout Spacing="5">
+                                <VerticalStackLayout.Resources>
+                                    <Style TargetType="Label" BasedOn="{StaticResource BaseLabel}">
+                                        <Setter Property="Margin" Value="0,0,0,5" />
+                                        <Setter Property="FontAttributes" Value="Bold" />
+                                    </Style>
+                                </VerticalStackLayout.Resources>
+
+                                <Label Text="{Binding TotalTime, StringFormat='Total Time: {0}'}" />
+                                <Label Text="{Binding CompletedTime, StringFormat='Completed Time: {0}'}" />
+                                <Label Text="{Binding RemainingTime, StringFormat='Remaining Time: {0}'}" />
+                                <Label Text="{Binding AverageDuration, StringFormat='Average Duration: {0}'}" />
+                                <Label Text="{Binding MinDate, Converter={StaticResource DateConverter}, StringFormat='Min Date: {0}'}" />
+                                <Label Text="{Binding MaxDate, Converter={StaticResource DateConverter}, StringFormat='Max Date: {0}'}" />
+                                <Label Text="{Binding TotalItems, StringFormat='Total Items: {0}'}" />
+                                <Label Text="{Binding CompletedItems, StringFormat='Completed Items: {0}'}" />
+                                <Label Text="{Binding RemainingItems, StringFormat='Remaining Items: {0}'}" />
+                                <Label Text="{Binding PercentComplete, StringFormat='Percent Complete: {0:F2}%'}" />
+                                <Label Text="{Binding PercentRemaining, StringFormat='Percent Remaining: {0:F2}%'}" />
+                            </VerticalStackLayout>
+                        </Border>
+                    </ControlTemplate>
+
 
                 </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>

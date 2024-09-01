@@ -100,7 +100,8 @@ public static class MauiProgram
             .AddTransient<DevPage>()
             .AddTransient<DbSetup>()
             .AddTransient<LoginView>()
-            .AddTransient<NotificationDataPage>();
+            .AddTransient<NotificationDataPage>()
+            .AddTransient<StatsPage>();
 
 
         return builder;
