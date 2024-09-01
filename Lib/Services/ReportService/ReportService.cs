@@ -25,4 +25,24 @@ public class ReportService(MultiLocalDbContextFactory dbFactory)
             }));
         }
     }
+
+    public async Task<IDurationReport> GetDurationReport2()
+    {
+        return new AggregateDurationReportFactory { Reports = await GetReports() }.Create();
+
+        async Task<IList<DurationReport>> GetReports()
+        {
+            var now = DateTime.Now.Date;
+            await using var db = await dbFactory.CreateAsync<IDateTimeEntity>();
+
+            return await db.Query(async q =>
+            {
+                var res = await q.AsNoTracking().ToListAsync();
+                var fac = new DurationReportFactory { Entities = res, Date = now };
+                var results = fac.Create();
+                res.Clear();
+                return results;
+            });
+        }
+    }
 }

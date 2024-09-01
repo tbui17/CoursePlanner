@@ -8,6 +8,7 @@ using Serilog;
 
 public static class BaseTestConfig
 {
+
     public static IServiceCollection AddLogger(this IServiceCollection services, Action<Logger> setter)
     {
         var logger = new LoggerConfiguration()
@@ -21,11 +22,11 @@ public static class BaseTestConfig
         return services.AddSerilog().AddLogging();
     }
 
-    public static IServiceCollection AddTestDatabase(this IServiceCollection services)
+    public static IServiceCollection AddTestDatabase(this IServiceCollection services, string? fileName = null)
     {
-        var guid = Guid.NewGuid().ToString();
+        var name = fileName ?? Guid.NewGuid().ToString();
         return services.AddDbContext<LocalDbCtx>(x => x
-                .UseSqlite($"DataSource={guid}")
+                .UseSqlite($"DataSource={name}")
                 .EnableDetailedErrors()
                 .EnableSensitiveDataLogging()
             )
