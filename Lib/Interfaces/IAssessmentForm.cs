@@ -1,6 +1,4 @@
-﻿using Lib.Models;
-
-namespace Lib.Interfaces;
+﻿namespace Lib.Interfaces;
 
 public interface IAssessmentForm : INotificationField, IAssessmentType
 {

@@ -1,9 +1,7 @@
 ﻿using Lib.Interfaces;
-using Lib.Services;
 using Lib.Services.NotificationService;
 using Microsoft.Extensions.Logging;
 using Plugin.LocalNotification;
-using Plugin.LocalNotification.EventArgs;
 
 namespace ViewModels.Services;
 

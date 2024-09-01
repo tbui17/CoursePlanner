@@ -1,5 +1,4 @@
 ﻿using Lib.Interfaces;
-using Lib.Models;
 
 namespace Lib.Traits;
 
