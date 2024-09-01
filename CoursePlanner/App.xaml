@@ -6,17 +6,18 @@
              xmlns:interfaces="clr-namespace:Lib.Interfaces;assembly=Lib"
              xmlns:models="clr-namespace:Lib.Models;assembly=Lib"
              xmlns:controls="clr-namespace:CoursePlanner.Controls"
+             xmlns:u="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
              x:Class="CoursePlanner.App">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
-                <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
+                <ResourceDictionary x:Name="AppColors" Source="Resources/Styles/Colors.xaml" />
+                <ResourceDictionary x:Name="AppStyles" Source="Resources/Styles/Styles.xaml" />
                 <ResourceDictionary Source="Resources/Util/Utils.xaml" />
-                <ResourceDictionary x:Name="appColors" Source="Resources/Styles/Colors.xaml" />
-                <ResourceDictionary x:Name="appStyles" Source="Resources/Styles/Styles.xaml" />
 
-                <material:StyleResource ColorsOverride="{x:Reference appColors}" BasedOn="{x:Reference appStyles}" />
+
+                <material:StyleResource ColorsOverride="{x:Reference AppColors}" BasedOn="{x:Reference AppStyles}" />
+
 
                 <ResourceDictionary x:Name="Cards">
 

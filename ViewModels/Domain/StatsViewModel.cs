@@ -1,5 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using Lib.Interfaces;
+
 using Lib.Models;
 using Lib.Services.ReportService;
 using ViewModels.Interfaces;
@@ -10,11 +10,12 @@ public partial class StatsViewModel(ReportService reportService) : ObservableObj
 {
 
     [ObservableProperty]
-    private IDurationReport _durationReport = new AggregateDurationReport();
+    private AggregateDurationReport _durationReport = new();
 
 
     public async Task RefreshAsync()
     {
-        DurationReport = await reportService.GetDurationReport();
+        var res = await reportService.GetDurationReport();
+        DurationReport = (AggregateDurationReport)res;
     }
 }

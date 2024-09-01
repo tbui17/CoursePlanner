@@ -4,13 +4,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:controls="clr-namespace:CoursePlanner.Controls"
              xmlns:domain="clr-namespace:ViewModels.Domain;assembly=ViewModels"
+             xmlns:interfaces="clr-namespace:Lib.Interfaces;assembly=Lib"
              x:DataType="domain:StatsViewModel"
              Title="Stats"
              x:Class="CoursePlanner.Pages.StatsPage">
     <ContentPage.Content>
-
-        <Grid>
-            <VerticalStackLayout Spacing="5">
+        <ScrollView>
+            <VerticalStackLayout Spacing="5" x:Name="ReportsLayout">
                 <VerticalStackLayout.Resources>
                     <Style TargetType="Label" BasedOn="{StaticResource BaseLabel}">
                         <Setter Property="Margin" Value="0,0,0,5" />
@@ -18,36 +18,7 @@
                     </Style>
                 </VerticalStackLayout.Resources>
 
-                <TableView>
-                    <TableRoot>
-                        <TableSection Title="Aggregate Stats">
-                            <TextCell Text="Total Time"
-                                      Detail="{Binding DurationReport.TotalTime, Converter={StaticResource TimeSpanToStringConverter}}" />
-                            <TextCell Text="Completed Time"
-                                      Detail="{Binding DurationReport.CompletedTime, Converter={StaticResource TimeSpanToStringConverter}}" />
-                            <TextCell Text="Remaining Time"
-                                      Detail="{Binding DurationReport.RemainingTime, Converter={StaticResource TimeSpanToStringConverter}}" />
-                            <TextCell Text="Average Duration"
-                                      Detail="{Binding DurationReport.AverageDuration, Converter={StaticResource TimeSpanToStringConverter}}" />
-                            <TextCell Text="Min Date"
-                                      Detail="{Binding DurationReport.MinDate, Converter={StaticResource DateConverter}}" />
-                            <TextCell Text="Max Date"
-                                      Detail="{Binding DurationReport.MaxDate, Converter={StaticResource DateConverter}}" />
-                            <TextCell Text="Total Items"
-                                      Detail="{Binding DurationReport.TotalItems}" />
-                            <TextCell Text="Completed Items"
-                                      Detail="{Binding DurationReport.CompletedItems }" />
-                            <TextCell Text="Remaining Items"
-                                      Detail="{Binding DurationReport.RemainingItems }" />
-                            <TextCell Text="Percent Complete"
-                                      Detail="{Binding DurationReport.PercentComplete }" />
-                            <TextCell Text="Percent Remaining"
-                                      Detail="{Binding DurationReport.PercentRemaining }" />
-                        </TableSection>
-                    </TableRoot>
-                </TableView>
-
             </VerticalStackLayout>
-        </Grid>
+        </ScrollView>
     </ContentPage.Content>
 </ContentPage>
