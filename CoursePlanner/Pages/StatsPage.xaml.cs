@@ -20,27 +20,28 @@ public partial class StatsPage : IRefreshableView<StatsViewModel>
         {
             if (x.PropertyName is not nameof(model.DurationReport)) return;
             ReportsLayout.Children.Clear();
-            ReportsLayout.Children.Add(new ReportViewFactory(model.DurationReport).Create());
+            ReportsLayout.Children.Add(CreateContent());
         };
     }
-}
 
-file class ReportViewFactory(AggregateDurationReport report)
-{
-    public IView Create()
+    private IView CreateContent()
     {
         var border = new Border
         {
             Stroke = Palette.Primary,
             StrokeThickness = 2,
             Margin = new Thickness(20),
-            Content = CreateTableView()
+            Content = new ReportViewFactory(Model.DurationReport).CreateTableView()
         };
 
         return border;
     }
+}
 
-    private TableView CreateTableView()
+file class ReportViewFactory(AggregateDurationReport report)
+{
+
+    public TableView CreateTableView()
     {
         var tableSections = new[] { report }
             .Concat(report.SubReports.Select(x => x.Value))
@@ -88,11 +89,11 @@ file class ReportViewFactory(AggregateDurationReport report)
         Detail = detail.Match(
             date => date.ToString("MM/dd/yyyy"),
             int1 => int1.ToString(),
-            timeSpan => $"{timeSpan.TotalDays}",
+            timeSpan => timeSpan.TotalDays.ToString("N0"),
             double1 => double1.ToString("F")
         ),
-        TextColor = Palette.Primary,
-        DetailColor = Palette.Secondary
+        TextColor = Palette.Secondary,
+        DetailColor = Palette.Tertiary
     };
 }
 
