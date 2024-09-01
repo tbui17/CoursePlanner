@@ -10,5 +10,7 @@
     <converters:CourseListToStringConverter x:Key="CourseListToStringConverter" />
     <converters:DateConverter x:Key="DateConverter" />
     <converters1:TypeToStringConverter x:Key="TypeToStringConverter" />
+    <converters1:TimeSpanToStringConverter x:Key="TimeSpanToStringConverter" />
     <toolkit:EnumToIntConverter x:Key="EnumToIntConverter" />
+    <converters1:NumericToStringConverter x:Key="NumericToStringConverter" />
 </ResourceDictionary>

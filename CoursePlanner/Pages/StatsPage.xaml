@@ -18,17 +18,35 @@
                     </Style>
                 </VerticalStackLayout.Resources>
 
-                <Label Text="{Binding DurationReport.TotalTime, StringFormat='Total Time: {0}'}" />
-                <Label Text="{Binding DurationReport.CompletedTime, StringFormat='Completed Time: {0}'}" />
-                <Label Text="{Binding DurationReport.RemainingTime, StringFormat='Remaining Time: {0}'}" />
-                <Label Text="{Binding DurationReport.AverageDuration, StringFormat='Average Duration: {0}'}" />
-                <Label Text="{Binding DurationReport.MinDate, Converter={StaticResource DateConverter}, StringFormat='Min Date: {0}'}" />
-                <Label Text="{Binding DurationReport.MaxDate, Converter={StaticResource DateConverter}, StringFormat='Max Date: {0}'}" />
-                <Label Text="{Binding DurationReport.TotalItems, StringFormat='Total Items: {0}'}" />
-                <Label Text="{Binding DurationReport.CompletedItems, StringFormat='Completed Items: {0}'}" />
-                <Label Text="{Binding DurationReport.RemainingItems, StringFormat='Remaining Items: {0}'}" />
-                <Label Text="{Binding DurationReport.PercentComplete, StringFormat='Percent Complete: {0:F2}%'}" />
-                <Label Text="{Binding DurationReport.PercentRemaining, StringFormat='Percent Remaining: {0:F2}%'}" />
+                <TableView>
+                    <TableRoot>
+                        <TableSection Title="Aggregate Stats">
+                            <TextCell Text="Total Time"
+                                      Detail="{Binding DurationReport.TotalTime, Converter={StaticResource TimeSpanToStringConverter}}" />
+                            <TextCell Text="Completed Time"
+                                      Detail="{Binding DurationReport.CompletedTime, Converter={StaticResource TimeSpanToStringConverter}}" />
+                            <TextCell Text="Remaining Time"
+                                      Detail="{Binding DurationReport.RemainingTime, Converter={StaticResource TimeSpanToStringConverter}}" />
+                            <TextCell Text="Average Duration"
+                                      Detail="{Binding DurationReport.AverageDuration, Converter={StaticResource TimeSpanToStringConverter}}" />
+                            <TextCell Text="Min Date"
+                                      Detail="{Binding DurationReport.MinDate, Converter={StaticResource DateConverter}}" />
+                            <TextCell Text="Max Date"
+                                      Detail="{Binding DurationReport.MaxDate, Converter={StaticResource DateConverter}}" />
+                            <TextCell Text="Total Items"
+                                      Detail="{Binding DurationReport.TotalItems}" />
+                            <TextCell Text="Completed Items"
+                                      Detail="{Binding DurationReport.CompletedItems }" />
+                            <TextCell Text="Remaining Items"
+                                      Detail="{Binding DurationReport.RemainingItems }" />
+                            <TextCell Text="Percent Complete"
+                                      Detail="{Binding DurationReport.PercentComplete }" />
+                            <TextCell Text="Percent Remaining"
+                                      Detail="{Binding DurationReport.PercentRemaining }" />
+                        </TableSection>
+                    </TableRoot>
+                </TableView>
+
             </VerticalStackLayout>
         </Grid>
     </ContentPage.Content>
