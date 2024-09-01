@@ -2,7 +2,6 @@ using FluentAssertions;
 using Lib.Services;
 using Microsoft.Extensions.Caching.Memory;
 using ViewModels.Domain;
-using ViewModels.Domain;
 using ViewModelTests.TestData;
 using ViewModelTests.TestSetup;
 

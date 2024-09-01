@@ -1,5 +1,4 @@
 ﻿using ViewModels.Domain;
-using ViewModels.Domain;
 
 namespace CoursePlanner;
 

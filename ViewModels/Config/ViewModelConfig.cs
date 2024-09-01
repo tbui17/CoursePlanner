@@ -4,7 +4,6 @@ using Plugin.LocalNotification;
 using ViewModels.Domain;
 using ViewModels.Events;
 using ViewModels.Interfaces;
-using ViewModels.Domain;
 using ViewModels.Services;
 using AppShellViewModel = ViewModels.Domain.AppShellViewModel;
 using DetailedCourseViewModel = ViewModels.Domain.DetailedCourseViewModel;
