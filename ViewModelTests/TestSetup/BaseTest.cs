@@ -46,8 +46,8 @@ public abstract class BaseTest : IBaseTest
         var mockNavigation = new Mock<INavigationService>();
         var mockAppService = new Mock<IAppService>();
         var services = new ServiceCollection();
-        Configs
-            .AddBackendServices(services)
+        services
+            .AddBackendServices()
             .AddServices()
             .AddSerilog()
             .AddAssemblyNames([nameof(ViewModelTests), nameof(ViewModels)])

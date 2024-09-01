@@ -70,8 +70,8 @@ public static class MauiProgram
             );
 
 
-        Configs
-            .AddBackendServices(builder.Services)
+        builder.Services
+            .AddBackendServices()
             .AddServices()
             .AddAssemblyNames([nameof(CoursePlanner)])
             .AddDbContext<LocalDbCtx>(b =>
