@@ -35,7 +35,14 @@ public class ReportTest : BaseDbTest
             .And.Subject.Values.Should()
             .AllBeAssignableTo<IDurationReport>()
             .Which.Should()
-            .AllSatisfy(x => new ReportBoundaryUtil(x).AssertIDurationBoundaries());
+            .AllSatisfy(x => new ReportBoundaryUtil(x).AssertIDurationBoundaries())
+            .And.Subject.OfType<DurationReport>().Should().AllSatisfy(x =>
+            {
+                if (x.Type == typeof(Assessment))
+                {
+                    x.TotalTime.Should().BeGreaterThan(TimeSpan.Zero);
+                }
+            });
     }
 }
 
@@ -87,7 +94,7 @@ file class ReportBoundaryUtil(IDurationReport report)
     private class SubAssertionAttribute : Attribute;
 
     [SubAssertion]
-    private void AssertIDurationMinBoundaries()
+    private void AssertMinBoundaries()
     {
         using var _ = new AssertionScope();
         _report.CompletedTime.Should().BeGreaterThanOrEqualTo(default);
@@ -104,7 +111,7 @@ file class ReportBoundaryUtil(IDurationReport report)
     }
 
     [SubAssertion]
-    private void AssertIDurationRelationalBoundaries()
+    private void AssertRelationalBoundaries()
     {
         using var _ = new AssertionScope();
         _report.CompletedItems.Should().BeLessThanOrEqualTo(_report.TotalItems);
