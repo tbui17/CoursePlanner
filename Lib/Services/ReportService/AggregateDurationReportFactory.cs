@@ -9,9 +9,9 @@ public class AggregateDurationReportFactory
     public IList<DurationReport> Reports { get; set; } = [];
     public DateTime Date { get; set; } = DateTime.Now.Date;
 
-    private TimeSpan TotalTime() => Reports.MaxOrDefault(x => x.MaxDate) - Reports.MinOrDefault(x => x.MinDate);
-    private TimeSpan CompletedTime() => Date.Subtract(Reports.MinOrDefault(x => x.MinDate)).Max(default);
-    private TimeSpan RemainingTime() => (MaxDate() - Date).Max(default);
+    private TimeSpan TotalTime() => MaxDate() - MinDate();
+    private TimeSpan CompletedTime() => (Date - MinDate()).Max(default);
+    private TimeSpan RemainingTime() => (MaxDate() - Date).Clamp(default,TotalTime());
     private TimeSpan AverageDuration() => Reports.AverageOrDefault(x => x.AverageDuration);
     private DateTime MinDate() => Reports.MinOrDefault(x => x.MinDate);
     private DateTime MaxDate() => Reports.MaxOrDefault(x => x.MaxDate);
