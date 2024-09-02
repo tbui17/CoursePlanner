@@ -20,7 +20,7 @@ public class LocalDbCtx : DbContext
     public DbSet<Note> Notes { get; set; }
     public DbSet<Assessment> Assessments { get; set; }
     public DbSet<User> Accounts { get; set; }
-    public DbSet<UserSettings> UserSettings { get; set; }
+    public DbSet<UserSetting> UserSettings { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -44,7 +44,7 @@ public class LocalDbCtx : DbContext
             .Property(x => x.Username)
             .UseCollation(Collation.CaseInsensitive);
 
-        modelBuilder.Entity<UserSettings>()
+        modelBuilder.Entity<UserSetting>()
             .Property(x => x.NotificationRange)
             .HasConversion(
                 x => x.Ticks,

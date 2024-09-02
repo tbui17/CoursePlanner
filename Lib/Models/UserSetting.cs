@@ -1,7 +1,7 @@
 namespace Lib.Models;
 
 
-public class UserSettings
+public class UserSetting
 {
     public int Id { get; set; }
     public int UserId { get; set; }
