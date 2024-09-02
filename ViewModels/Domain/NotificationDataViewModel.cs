@@ -32,9 +32,6 @@ public class NotificationDataViewModel : ReactiveObject, IRefresh
 
     public NotificationCollection NotificationItems => _notificationItemsHelper.Value;
 
-    private readonly ObservableAsPropertyHelper<int> _totalItemsHelper;
-    public int TotalItems => _totalItemsHelper.Value;
-
     private readonly ObservableAsPropertyHelper<int> _itemCountHelper;
     public int ItemCount => _itemCountHelper.Value;
 
@@ -46,10 +43,6 @@ public class NotificationDataViewModel : ReactiveObject, IRefresh
 
         var monthSource = this.WhenAnyValue(vm => vm.MonthDate)
             .SelectMany(service.GetNotificationsForMonth);
-
-        _totalItemsHelper = refreshSource
-            .SelectMany(_ => service.GetTotalItems())
-            .ToProperty(this, vm => vm.TotalItems);
 
 
         var dataStream = monthSource

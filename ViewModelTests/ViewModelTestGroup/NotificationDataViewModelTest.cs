@@ -49,7 +49,6 @@ public class NotificationDataViewModelTest : BasePageViewModelTest
         Model.NotificationItems.Should()
             .NotContainItemsAssignableTo<Assessment>()
             .And.ContainItemsAssignableTo<Course>();
-        Model.TotalItems.Should().BeGreaterThan(0);
         Model.ItemCount.Should().BeGreaterThan(0);
     }
 }
