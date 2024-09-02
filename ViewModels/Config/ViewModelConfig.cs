@@ -1,3 +1,5 @@
+using Lib.Interfaces;
+using Lib.Models;
 using Lib.Services;
 using Lib.Utils;
 using Plugin.LocalNotification;
@@ -51,6 +53,7 @@ public static class ViewModelConfig
                 instance.StartListening();
                 return instance;
             })
+            .AddKeyedSingleton<IList<string>>(nameof(TypesSource), (_,_) => TypesSource.Get())
             .AddSingleton<ISessionService, SessionService>()
             .AddTransient<RefreshableViewService>(provider =>
             {
@@ -67,5 +70,21 @@ public static class ViewModelConfig
     public static IServiceCollection AddAssemblyNames(this IServiceCollection services, ICollection<string> names)
     {
         return services.AddKeyedSingleton(nameof(AddAssemblyNames), names);
+    }
+}
+
+internal static class TypesSource
+{
+    public static List<string> Get()
+    {
+        return AppDomain.CurrentDomain.GetAssemblies()
+            .SelectMany(x => x.GetTypes())
+            .Where(x => x.Namespace == Util.NameOf(nameof(Lib.Models)))
+            .Where(x => x.IsAssignableTo(typeof(INotification)))
+            .Where(x => x != typeof(Assessment))
+            .Where(x => x.IsClass)
+            .Select(x => x.Name)
+            .Concat(["Objective Assessment", "Performance Assessment"])
+            .ToList();
     }
 }
