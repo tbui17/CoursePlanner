@@ -9,6 +9,7 @@
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:cz="clr-namespace:FunctionZero.Maui.Controls;assembly=FunctionZero.Maui.Controls"
              xmlns:domain="clr-namespace:ViewModels.Domain;assembly=ViewModels"
+             xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
              x:Name="Page"
              Title="Notification Data"
 
@@ -20,16 +21,23 @@
         <ScrollView>
             <VerticalStackLayout x:Name="MainLayout" Margin="10,10,10,30">
                 <VerticalStackLayout Margin="10" Spacing="10">
-                    <controls:AutoGrid>
-                        <Label Text="Month" />
-                        <DatePicker Date="{Binding MonthDate}" />
-                        <Label Text="Filter" />
-                        <Entry Text="{Binding FilterText}" />
-                        <Label Text="Total Items" />
-                        <Label Text="{Binding TotalItems}" />
-                        <Label Text="Item Count" />
-                        <Label Text="{Binding ItemCount}" />
-                    </controls:AutoGrid>
+                    <VerticalStackLayout>
+                        <VerticalStackLayout>
+                            <material:TextField Title="Name" Text="{Binding FilterText}" />
+                            <material:AutoCompleteTextField Title="Type" ItemsSource="{Binding Types}" Text="{Binding TypeFilter}" />
+                            <material:PickerField ItemsSource="{Binding NotificationOptions}" SelectedIndex="{Binding SelectedNotificationOptionIndex}" />
+                        </VerticalStackLayout>
+                        <HorizontalStackLayout Spacing="25">
+                            <material:DatePickerField Title="Start" Date="{Binding Start}" />
+                            <material:DatePickerField Title="End" Date="{Binding End}" />
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout>
+                            <Button Text="Clear" Command="{Binding ClearCommand}" />
+                        </HorizontalStackLayout>
+                        <Label Text="{Binding ItemCount, StringFormat='Count: {0}'}"/>
+
+                    </VerticalStackLayout>
+
                 </VerticalStackLayout>
 
                 <cz:ListViewZero

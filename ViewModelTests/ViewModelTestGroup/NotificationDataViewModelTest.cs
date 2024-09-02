@@ -21,7 +21,7 @@ public class NotificationDataViewModelTest : BasePageViewModelTest
                 x.SetProperty(y => y.ShouldNotify, true).SetProperty(y => y.Start, DateTime.Now));
         }
 
-        Model = new NotificationDataViewModel(service: Resolve<NotificationService>());
+        Model = Resolve<NotificationDataViewModel>();
         await Task.Delay(600);
     }
 
@@ -49,7 +49,6 @@ public class NotificationDataViewModelTest : BasePageViewModelTest
         Model.NotificationItems.Should()
             .NotContainItemsAssignableTo<Assessment>()
             .And.ContainItemsAssignableTo<Course>();
-        Model.TotalItems.Should().BeGreaterThan(0);
         Model.ItemCount.Should().BeGreaterThan(0);
     }
 }

@@ -5,6 +5,8 @@ using FluentAssertions.Execution;
 using Lib.Interfaces;
 using Lib.Models;
 using Lib.Services.ReportService;
+using Lib.Utils;
+using NodaTime.Extensions;
 
 namespace LibTests;
 
@@ -12,7 +14,7 @@ namespace LibTests;
 public class ReportTest : BaseDbTest
 {
     [Test]
-    public async Task GetDurationReport_IDurationReport_HasValidProperties()
+    public async Task AggregateDurationReport_HasValidProperties()
     {
         var service = Resolve<ReportService>();
 
@@ -22,12 +24,14 @@ public class ReportTest : BaseDbTest
 
 
     [Test]
-    public async Task GetDurationReport_SubReports_HasValidProperties()
+    public async Task SubReports_HaveValidProperties()
     {
         var service = Resolve<ReportService>();
 
 
         var res = await service.GetDurationReport();
+        using var _ = new AssertionScope();
+
         res.Should()
             .BeAssignableTo<AggregateDurationReport>()
             .Which.SubReports.Should()
@@ -35,14 +39,30 @@ public class ReportTest : BaseDbTest
             .And.Subject.Values.Should()
             .AllBeAssignableTo<IDurationReport>()
             .Which.Should()
-            .AllSatisfy(x => new ReportBoundaryUtil(x).AssertIDurationBoundaries())
-            .And.Subject.OfType<DurationReport>().Should().AllSatisfy(x =>
-            {
-                if (x.Type == typeof(Assessment))
-                {
-                    x.TotalTime.Should().BeGreaterThan(TimeSpan.Zero);
-                }
-            });
+            .AllSatisfy(x => new ReportBoundaryUtil(x).AssertIDurationBoundaries());
+    }
+
+    [Test]
+    public async Task AggregateReportProperties_InRelationToSubReports_ShouldBeWithinBounds()
+    {
+        var service = Resolve<ReportService>();
+
+        var rep = await service.GetDurationReport();
+
+        var sub = rep.Should()
+            .BeAssignableTo<AggregateDurationReport>()
+            .Which.SubReports.Values.ToList();
+
+        using var _ = new AssertionScope();
+        rep.MaxDate.Should().Be(sub.MaxOrDefault(x => x.MaxDate));
+        rep.MinDate.Should().Be(sub.MinOrDefault(x => x.MinDate));
+        rep.RemainingItems.Should()
+            .Be(sub.SumOrDefault(x => x.RemainingItems));
+        rep.TotalItems.Should()
+            .Be(sub.SumOrDefault(x => x.TotalItems));
+        rep.RemainingTime.Should()
+            .BeLessThanOrEqualTo(sub.MaxOrDefault(x => x.RemainingTime))
+            .And.BeGreaterThanOrEqualTo(sub.MinOrDefault(x => x.RemainingTime));
     }
 }
 
@@ -65,7 +85,6 @@ public class ReportFactoryTest
     [Test]
     public void Reports_Empty_ShouldBeWithinBounds()
     {
-
         var aggFac = new AggregateDurationReportFactory();
         var fac = new DurationReportFactory();
 
@@ -81,7 +100,132 @@ public class ReportFactoryTest
         new ReportBoundaryUtil(report).AssertIDurationBoundaries();
         new ReportBoundaryUtil(aggReport).AssertIDurationBoundaries();
         new ReportBoundaryUtil(aggReportEmpty).AssertIDurationBoundaries();
+    }
+}
 
+public class AggregateReportTest
+{
+    [Test]
+    public void RemainingTime_Future_IsDifferenceBetweenPresentAndMax()
+    {
+        var fiveYears = TimeSpan.FromDays(365 * 5);
+        var twoYears = TimeSpan.FromDays(365 * 2);
+        var now = DateTime.Now.Date;
+        var fac = new AggregateDurationReportFactory
+        {
+            Reports =
+            [
+                new() { MaxDate = now.Add(fiveYears), Type = typeof(int) },
+                new() { MaxDate = now.Add(twoYears) },
+                new() { MaxDate = now.Add(-fiveYears), Type = typeof(string) },
+            ],
+            Date = now
+        };
+
+        var res = fac.Create();
+
+
+        res.RemainingTime.Should().Be(fiveYears);
+    }
+
+
+    [Test]
+    public void CompletedTime_IsDifferenceBetweenPresentAndMin()
+    {
+        var fiveYears = TimeSpan.FromDays(365 * 5);
+        var twoYears = TimeSpan.FromDays(365 * 2);
+        var now = DateTime.Now.Date;
+
+        var fac = new AggregateDurationReportFactory
+        {
+            Reports =
+            [
+                new() { MinDate = now.Add(fiveYears), Type = typeof(int) },
+                new() { MinDate = now.Add(twoYears) },
+                new() { MinDate = now.Add(-twoYears), Type = typeof(string) },
+            ],
+            Date = now
+        };
+
+        var res = fac.Create();
+
+
+        res.CompletedTime.Should().Be(twoYears);
+    }
+}
+
+public class RegularReportTest
+{
+    [Test]
+    public void RemainingTime_Future_IsDifferenceBetweenPresentAndMax()
+    {
+        var fiveYears = TimeSpan.FromDays(365 * 5);
+        var twoYears = TimeSpan.FromDays(365 * 2);
+        var now = DateTime.Now.Date;
+        var fac = new DurationReportFactory()
+        {
+            Entities =
+            [
+                new Term()
+                {
+                    Start = now.Add(-fiveYears),
+                    End = now.Add(-twoYears)
+                },
+                new Term()
+                {
+                    Start = now.Add(-twoYears),
+                    End = now.Add(twoYears)
+                },
+                new Term()
+                {
+                    Start = now.Add(twoYears),
+                    End = now.Add(fiveYears)
+                }
+            ],
+            Date = now
+        };
+
+        var res = fac.Create();
+
+
+        res.RemainingTime.Should().Be(fiveYears);
+    }
+
+
+    [Test]
+    public void CompletedTime_IsDifferenceBetweenPresentAndMin()
+    {
+        TimeSpan Year(int i) => TimeSpan.FromDays(365 * i);
+        var now = DateTime.Now.Date;
+
+        var fac = new DurationReportFactory()
+        {
+            Entities =
+            [
+                new Term()
+                {
+                    Start = now.Add(Year(-3)),
+                    End = now.Add(Year(-2))
+                },
+                new Term()
+                {
+                    Start = now.Add(Year(-2)),
+                    End = now.Add(Year(2))
+                },
+                new Term()
+                {
+                    Start = now.Add(Year(2)),
+                    End = now.Add(Year(5))
+                }
+            ],
+            Date = now
+        };
+
+
+        var res = fac.Create();
+
+
+        res.CompletedTime.Should().Be(Year(3));
     }
 }
 

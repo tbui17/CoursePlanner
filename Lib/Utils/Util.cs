@@ -5,10 +5,9 @@ namespace Lib.Utils;
 
 public static class Util
 {
-    public static string Full(string _, [CallerArgumentExpression(nameof(_))] string fullPath = default!)
-    {
-        return fullPath.Substring(fullPath.IndexOf('(') + 1, fullPath.IndexOf(')') - fullPath.IndexOf('(') - 1);
-    }
+    // ReSharper disable once EntityNameCapturedOnly.Global
+    public static string NameOf(string value, [CallerArgumentExpression(nameof(value))] string fullPath = "") =>
+        fullPath.Substring(7, fullPath.Length - 8);
 }
 
 public static class ContainerExtensions

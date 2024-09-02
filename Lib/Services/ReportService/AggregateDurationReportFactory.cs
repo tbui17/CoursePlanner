@@ -7,10 +7,11 @@ namespace Lib.Services.ReportService;
 public class AggregateDurationReportFactory
 {
     public IList<DurationReport> Reports { get; set; } = [];
+    public DateTime Date { get; set; } = DateTime.Now.Date;
 
-    private TimeSpan TotalTime() => Reports.SumOrDefault(x => x.TotalTime);
-    private TimeSpan CompletedTime() => Reports.SumOrDefault(x => x.CompletedTime);
-    private TimeSpan RemainingTime() => Reports.SumOrDefault(x => x.RemainingTime);
+    private TimeSpan TotalTime() => MaxDate() - MinDate();
+    private TimeSpan CompletedTime() => (Date - MinDate()).Max(default);
+    private TimeSpan RemainingTime() => (MaxDate() - Date).Clamp(default,TotalTime());
     private TimeSpan AverageDuration() => Reports.AverageOrDefault(x => x.AverageDuration);
     private DateTime MinDate() => Reports.MinOrDefault(x => x.MinDate);
     private DateTime MaxDate() => Reports.MaxOrDefault(x => x.MaxDate);
