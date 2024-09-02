@@ -1,7 +1,6 @@
 using Lib.Interfaces;
 using Lib.Models;
 using Lib.Utils;
-
 namespace Lib.Services.ReportService;
 
 public class DurationReportFactory
@@ -11,22 +10,13 @@ public class DurationReportFactory
 
     private int TotalItems() => Entities.Count;
 
-    private int CompletedItems() => Entities.Count(x => x.End < Date);
+    private int CompletedItems() => Entities.Count(x => x.End <= Date);
 
     private TimeSpan TotalTime() => MaxDate() - MinDate();
 
-    private TimeSpan CompletedTime()
-    {
-        var beforeDate = BeforeDate();
-        return beforeDate.MaxOrDefault(x => x.End)
-               -
-               beforeDate.MinOrDefault(x => x.Start);
-    }
+    private TimeSpan CompletedTime() => (Date - MinDate()).Clamp(default, TotalTime());
 
-    private List<IDateTimeEntity> BeforeDate() => Entities.Where(x => x.End < Date).ToList();
-
-
-    private TimeSpan RemainingTime() => new[] { MaxDate() - Date, TimeSpan.Zero }.Max();
+    private TimeSpan RemainingTime() => MaxDate().Subtract(Date).Max(default);
 
     private TimeSpan AverageDuration() =>
         Entities.AverageOrDefault(x => x.Duration());
