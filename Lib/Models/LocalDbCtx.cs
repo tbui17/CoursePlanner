@@ -43,6 +43,13 @@ public class LocalDbCtx : DbContext
             .Property(x => x.Username)
             .UseCollation(Collation.CaseInsensitive);
 
+        modelBuilder.Entity<UserSettings>()
+            .Property(x => x.NotificationRange)
+            .HasConversion(
+                x => x.Ticks,
+                x => TimeSpan.FromTicks(x)
+            );
+
 
         var dateTimeEntities = modelBuilder.Model.GetEntityTypes()
             .Where(x => typeof(IDateTimeEntity).IsAssignableFrom(x.ClrType));
