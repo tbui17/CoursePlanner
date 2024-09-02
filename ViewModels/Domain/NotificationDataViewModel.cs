@@ -140,7 +140,7 @@ public class NotificationDataViewModel : ReactiveObject, IRefresh
 
                 return notifications
                     .AsParallel()
-                    .Thru(x => ApplyNotificationFilter(x, notificationSelectedIndex))
+                    .Thru(notificationStream => ApplyNotificationFilter(notificationStream, notificationSelectedIndex))
                     .Where(item => item.Name.Contains(filterText, StringComparison.CurrentCultureIgnoreCase))
                     .Where(item =>
                         item is Assessment assessment
