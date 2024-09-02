@@ -20,6 +20,7 @@ public class LocalDbCtx : DbContext
     public DbSet<Note> Notes { get; set; }
     public DbSet<Assessment> Assessments { get; set; }
     public DbSet<User> Accounts { get; set; }
+    public DbSet<UserSettings> UserSettings { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
