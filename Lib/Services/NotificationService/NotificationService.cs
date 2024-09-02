@@ -81,7 +81,7 @@ public class NotificationService(MultiLocalDbContextFactory dbFactory)
 
         await using var db = await dbFactory.CreateAsync<INotification>();
         var res = await db.Query(q => q.AsExpandableEFCore().AsNoTracking().Where(ltDate).Take(1));
-        return res.MaxBy(x => x.Start);
+        return res.MaxBy(x => x.End);
     }
 
     private static ExpressionStarter<INotification> Builder() => PredicateBuilder.New<INotification>();
