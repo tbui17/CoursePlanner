@@ -19,11 +19,8 @@ public class ViewModelConfig(AssemblyService assemblyService, IServiceCollection
 {
     private IServiceCollection AddViewModels()
     {
-        var types = new[] { typeof(ObservableObject), typeof(ReactiveObject) };
-        foreach (var vmType in assemblyService
-                     .GetConcreteClassesInNamespace(NamespaceData.FromNameofExpression(nameof(ViewModels.Domain)))
-                     .Where(x => types.Any(x.IsAssignableTo))
-                )
+
+        foreach (var vmType in assemblyService.GetConcreteClassesInNamespace(NamespaceData.FromNameofExpression(nameof(ViewModels.Domain))))
         {
             services.AddTransient(vmType);
         }
