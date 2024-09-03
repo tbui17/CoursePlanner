@@ -15,7 +15,7 @@ public static class Configs
 {
     public static IServiceCollection AddBackendServices(this IServiceCollection b)
     {
-        foreach (var type in AppDomain.CurrentDomain.GetClassesInSameNamespace<RootReflectionService>())
+        foreach (var type in AppDomain.CurrentDomain.GetConcreteClassesInSameNameSpace<RootReflectionService>())
         {
             b.AddTransient(type);
         }

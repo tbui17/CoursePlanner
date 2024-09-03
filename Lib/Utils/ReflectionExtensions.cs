@@ -1,49 +1,16 @@
-using System.Reflection;
-
 namespace Lib.Utils;
 
 public static class ReflectionExtensions
 {
-    private static List<Type> GetTypesInSameAssembly<T>(this AppDomain currentDomain)
+    private static ParallelQuery<Type> GetTypesInSameAssembly<T>(this AppDomain currentDomain)
     {
-        var type = typeof(T);
-        var fullName = type.Assembly.FullName;
-        var assemblies = currentDomain.GetAssemblies();
+        var fullName = typeof(T).Assembly.FullName;
 
-        return assemblies
+        return currentDomain
+            .GetAssemblies()
             .AsParallel()
-            .SelectMany(x => x.ExportedTypes)
-            .Where(x => x.Assembly.FullName == fullName)
-            .ToList();
-
-
-        IEnumerable<Type> GetTypes(Assembly x)
-        {
-            // https://stackoverflow.com/questions/56254916/could-not-load-type-castle-proxies-ireadinessproxy-when-running-xunit-integratio
-            // https://github.com/castleproject/Core/issues/193
-            const int limit = 3;
-            var tryCount = 0;
-            while (tryCount < limit)
-            {
-                try
-                {
-                    tryCount++;
-                    return x.GetExportedTypes();
-                }
-                catch (ReflectionTypeLoadException e) when (IsProxyError(e))
-                {
-
-                }
-            }
-
-            throw new ReflectionTypeLoadException([type], []);
-
-            static bool IsProxyError(ReflectionTypeLoadException e)
-            {
-                const string errorMessage = "Could not load type 'Castle.Proxies";
-                return e.Message.Contains(errorMessage);
-            }
-        }
+            .Where(x => x.FullName == fullName)
+            .SelectMany(x => x.ExportedTypes);
     }
 
     private static ParallelQuery<Type> GetTypesInSameNamespace<T>(this AppDomain currentDomain)
@@ -56,11 +23,10 @@ public static class ReflectionExtensions
 
         return currentDomain
             .GetTypesInSameAssembly<T>()
-            .AsParallel()
             .Where(x => x.Namespace?.StartsWith(ns) ?? false);
     }
 
-    public static IEnumerable<Type> GetClassesInSameNamespace<T>(this AppDomain currentDomain)
+    public static IEnumerable<Type> GetConcreteClassesInSameNameSpace<T>(this AppDomain currentDomain)
     {
         return currentDomain
             .GetTypesInSameNamespace<T>()

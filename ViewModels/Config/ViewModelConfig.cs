@@ -23,7 +23,7 @@ public static class ViewModelConfig
     {
         var types = new[]{typeof (ObservableObject) , typeof(ReactiveObject)};
         foreach (var vmType in AppDomain.CurrentDomain
-                     .GetClassesInSameNamespace<MainViewModel>()
+                     .GetConcreteClassesInSameNameSpace<MainViewModel>()
                      .Where(x => types.Any(x.IsAssignableTo))
                 )
         {
@@ -67,7 +67,7 @@ internal static class TypesSource
     public static List<string> Get()
     {
         return AppDomain.CurrentDomain
-            .GetClassesInSameNamespace<MainViewModel>()
+            .GetConcreteClassesInSameNameSpace<MainViewModel>()
             .Where(x => x.IsAssignableTo(typeof(INotification)))
             .Where(x => x != typeof(Assessment))
             .Where(x => x.IsClass)

@@ -10,6 +10,6 @@ public class ReflectionTest
     [Test]
     public void GetClassesInSameNamespace_ShouldNotBeEmpty()
     {
-        AppDomain.CurrentDomain.GetClassesInSameNamespace<MainViewModel>().Should().NotBeEmpty();
+        AppDomain.CurrentDomain.GetConcreteClassesInSameNameSpace<MainViewModel>().Should().NotBeEmpty();
     }
 }
