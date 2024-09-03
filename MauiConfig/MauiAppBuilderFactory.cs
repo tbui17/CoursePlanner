@@ -15,7 +15,7 @@ public class MauiAppBuilderFactory<TApp> where TApp : class, IApplication
 {
 
     public required Func<string> AppDataDirectory { get; set; }
-    public required Func<Page?> MainPage { get; set; }
+    public required MainPageGetter MainPage { get; set; }
     public required string AssemblyName { get; set; }
     public required ServiceBuilderFactory ServiceBuilderFactory { get; set; }
     public required Action<UnhandledExceptionEventHandler> ExceptionHandlerRegistration { get; set; }
@@ -67,6 +67,7 @@ public class MauiAppBuilderFactory<TApp> where TApp : class, IApplication
         builder.Services
             .AddBackendServices()
             .AddServices()
+            .AddSingleton(MainPage)
             .AddAssemblyNames([AssemblyName])
             .AddDbContext<LocalDbCtx>(b =>
                 {
