@@ -1,10 +1,13 @@
-﻿using CoursePlanner.Exceptions;
+﻿using CommunityToolkit.Maui;
+using CoursePlanner.Exceptions;
 using CoursePlanner.Pages;
 using CoursePlanner.Services;
 using CoursePlanner.Utils;
 using CoursePlanner.Views;
 using MauiConfig;
+using Plugin.LocalNotification;
 using Serilog;
+using UraniumUI;
 using ViewModels.Services;
 
 namespace CoursePlanner;
@@ -19,21 +22,26 @@ public static class MauiProgram
             AppDataDirectory = () => FileSystem.Current.AppDataDirectory,
             MainPage = () => Application.Current?.MainPage,
             ExceptionHandlerRegistration = x => MauiExceptions.UnhandledException += x,
-            ServiceBuilderFactory = x => new MauiServiceBuilder(x.Services),
+            ServiceBuilderFactory = x => new MauiServiceBuilder(x),
         };
 
-        var app = setup.CreateBuilder().Build();
+        var app = setup.CreateBuilder()
+            .UseMauiCommunityToolkit()
+            .UseLocalNotification()
+            .UseUraniumUI()
+            .UseUraniumUIMaterial()
+            .Build();
         setup.RunStartupActions(app);
 
         return app;
     }
 }
 
-file class MauiServiceBuilder(IServiceCollection services) : IMauiServiceBuilder
+file class MauiServiceBuilder(MauiAppBuilder builder) : IMauiServiceBuilder
 {
     public void AddViews()
     {
-        services
+        builder.Services
             .AddTransient<MainPage>()
             .AddTransient<DetailedTermPage>()
             .AddTransient<EditTermPage>()
@@ -51,7 +59,7 @@ file class MauiServiceBuilder(IServiceCollection services) : IMauiServiceBuilder
 
     public void AddAppServices()
     {
-        services
+        builder.Services
             .AddSingleton<IAppService, AppService>()
             .AddSingleton<AppShell>()
             .AddSingleton<ISessionService, SessionService>()
@@ -61,5 +69,15 @@ file class MauiServiceBuilder(IServiceCollection services) : IMauiServiceBuilder
     public void SetLogger(LoggerConfiguration logger)
     {
         Log.Logger = logger.CreateLogger();
+    }
+
+    public void AddMauiDependencies()
+    {
+        builder
+            .UseMauiCommunityToolkit()
+            .UseLocalNotification()
+            .UseUraniumUI()
+            .UseUraniumUIMaterial();
+
     }
 }
