@@ -14,7 +14,7 @@ public class ClientExceptionHandler(
 )
 
 {
-    async Task OnMauiExceptionsOnUnhandledException(object _, UnhandledExceptionEventArgs args)
+    public async Task OnUnhandledException(UnhandledExceptionEventArgs args)
     {
         if (mainPageGetter() is not { } p)
         {
