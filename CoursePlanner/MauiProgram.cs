@@ -2,7 +2,7 @@
 using CoursePlanner.Exceptions;
 using CoursePlanner.Pages;
 using CoursePlanner.Services;
-using CoursePlanner.Utils;
+
 using CoursePlanner.Views;
 using MauiConfig;
 using Plugin.LocalNotification;
@@ -16,21 +16,26 @@ public static class MauiProgram
 {
     public static MauiApp CreateMauiApp()
     {
-        var setup = new MauiAppBuilderFactory<App>
+
+        var builder = MauiApp.CreateBuilder()
+            .UseMauiApp<App>()
+            .UseMauiCommunityToolkit()
+            .UseLocalNotification()
+            .UseUraniumUI()
+            .UseUraniumUIMaterial();
+        var setup = new MauiAppServiceConfiguration
         {
             AssemblyName = nameof(CoursePlanner),
             AppDataDirectory = () => FileSystem.Current.AppDataDirectory,
             MainPage = () => Application.Current?.MainPage,
             ExceptionHandlerRegistration = x => MauiExceptions.UnhandledException += x,
-            ServiceBuilderFactory = x => new MauiServiceBuilder(x),
-        };
+            Services = builder.Services,
+            ServiceBuilder = new MauiServiceBuilder(builder)
 
-        var app = setup.CreateBuilder()
-            .UseMauiCommunityToolkit()
-            .UseLocalNotification()
-            .UseUraniumUI()
-            .UseUraniumUIMaterial()
-            .Build();
+        };
+        setup.ConfigServices();
+
+        var app = builder.Build();
         setup.RunStartupActions(app);
 
         return app;
@@ -51,7 +56,6 @@ file class MauiServiceBuilder(MauiAppBuilder builder) : IMauiServiceBuilder
             .AddTransient<EditAssessmentPage>()
             .AddTransient<TermListView>()
             .AddTransient<DevPage>()
-            .AddTransient<DbSetup>()
             .AddTransient<LoginView>()
             .AddTransient<NotificationDataPage>()
             .AddTransient<StatsPage>();
@@ -71,13 +75,4 @@ file class MauiServiceBuilder(MauiAppBuilder builder) : IMauiServiceBuilder
         Log.Logger = logger.CreateLogger();
     }
 
-    public void AddMauiDependencies()
-    {
-        builder
-            .UseMauiCommunityToolkit()
-            .UseLocalNotification()
-            .UseUraniumUI()
-            .UseUraniumUIMaterial();
-
-    }
 }
