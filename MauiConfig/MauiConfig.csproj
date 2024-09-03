@@ -10,8 +10,4 @@
       <ProjectReference Include="..\ViewModels\ViewModels.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <PackageReference Include="UraniumUI.Material" Version="2.9.1" />
-    </ItemGroup>
-
 </Project>

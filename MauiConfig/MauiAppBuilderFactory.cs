@@ -2,10 +2,8 @@
 using Lib;
 using Lib.Models;
 using Microsoft.EntityFrameworkCore;
-using Plugin.LocalNotification;
 using Serilog;
 using Serilog.Formatting.Json;
-using UraniumUI;
 using ViewModels.Config;
 using ViewModels.ExceptionHandlers;
 using ViewModels.Services;
@@ -53,9 +51,9 @@ public class MauiAppBuilderFactory<TApp> where TApp : class, IApplication
         builder
             .UseMauiApp<TApp>()
             .UseMauiCommunityToolkit()
-            .UseLocalNotification()
-            .UseUraniumUI()
-            .UseUraniumUIMaterial()
+            // .UseLocalNotification()
+            // .UseUraniumUI()
+            // .UseUraniumUIMaterial()
             .ConfigureFonts
             (
                 fonts =>
@@ -98,4 +96,5 @@ public interface IMauiServiceBuilder
     void AddViews();
     void AddAppServices();
     void SetLogger(LoggerConfiguration logger);
+    void AddMauiDependencies();
 }
