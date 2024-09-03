@@ -1,60 +1,21 @@
-﻿using System.Diagnostics;
-using CommunityToolkit.Maui;
-using CoursePlanner.Exceptions;
-using CoursePlanner.Pages;
-using CoursePlanner.Services;
-using CoursePlanner.Utils;
-using CoursePlanner.Views;
-using EntityFramework.Exceptions.Common;
+﻿using CommunityToolkit.Maui;
 using Lib;
-using Lib.ExceptionHandlers;
 using Lib.Models;
-using Lib.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Plugin.LocalNotification;
 using Serilog;
 using Serilog.Formatting.Json;
-using UraniumUI;
 using ViewModels.Config;
 using ViewModels.Services;
+using ViewModels.Setup;
 
-namespace CoursePlanner;
+namespace MauiConfig;
 
 
-public static class MauiProgram
+public class MauiConfigurationBuilder
 {
-    public static MauiApp CreateMauiApp()
-    {
-        var app = CreateBuilder().Build();
-        var services = app.Services;
 
-        RunStartupActions();
-        MauiExceptions.UnhandledException += OnMauiExceptionsOnUnhandledException;
-
-        return app;
-
-
-        void RunStartupActions()
-        {
-            services
-                .GetRequiredService<DbSetup>()
-                .SetupDb();
-
-            services
-                .GetRequiredService<RefreshableViewService>()
-                .InitializeCache();
-        }
-
-        async void OnMauiExceptionsOnUnhandledException(object _, UnhandledExceptionEventArgs args)
-        {
-
-        }
-    }
-
-
-
-    private static MauiAppBuilder CreateBuilder()
+    public MauiAppBuilder CreateBuilder()
     {
         var config = new LoggerConfiguration()
             .WriteTo.Console()
@@ -120,4 +81,5 @@ public static class MauiProgram
 
         return builder;
     }
+
 }

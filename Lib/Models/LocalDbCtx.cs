@@ -1,4 +1,5 @@
-﻿using Lib.Interfaces;
+﻿using EntityFramework.Exceptions.Sqlite;
+using Lib.Interfaces;
 using Lib.Utils;
 using Microsoft.EntityFrameworkCore;
 
@@ -28,6 +29,8 @@ public class LocalDbCtx : DbContext
         {
             optionsBuilder.UseSqlite("DataSource=database.db");
         }
+
+        optionsBuilder.UseExceptionProcessor();
         base.OnConfiguring(optionsBuilder);
     }
 
