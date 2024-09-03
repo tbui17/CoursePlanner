@@ -7,6 +7,7 @@ using Serilog;
 using Serilog.Formatting.Json;
 using UraniumUI;
 using ViewModels.Config;
+using ViewModels.ExceptionHandlers;
 using ViewModels.Services;
 using ViewModels.Setup;
 
@@ -24,16 +25,13 @@ public class MauiAppBuilderFactory<TApp> where TApp : class, IApplication
 
     public void RunStartupActions(MauiApp app)
     {
+        var handler = app.Services.GetRequiredService<ClientExceptionHandler>();
+
+        ExceptionHandlerRegistration((_, e) => handler.OnUnhandledException(e).Wait());
         var client = app.Services.GetRequiredService<SetupClient>();
         client.Setup();
 
     }
-
-    public void OnMauiExceptionsOnUnhandledException(object _, UnhandledExceptionEventArgs args)
-    {
-
-    }
-
     public MauiAppBuilder CreateBuilder()
     {
 
