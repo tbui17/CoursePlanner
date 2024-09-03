@@ -15,7 +15,6 @@ namespace ViewModels.Domain;
 public interface IInstructorFormViewModel : IContact, IRefreshId
 {
     Task SaveAsync();
-    Task Init(int id);
     IAsyncRelayCommand SaveCommand { get; }
     IAsyncRelayCommand BackCommand { get; }
     event PropertyChangedEventHandler? PropertyChanged;
