@@ -22,4 +22,13 @@ public class User : ILogin, IEntity
         get => Username;
         set => Username = value;
     }
+
+    public UserSetting CreateUserSetting()
+    {
+        return new UserSetting()
+        {
+            UserId = Id,
+            User = this,
+        };
+    }
 }

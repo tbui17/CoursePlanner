@@ -1,8 +1,11 @@
-﻿using FluentValidation;
+﻿using System.Reflection;
+using FluentValidation;
+using Lib.Models;
 using Lib.Services;
 using Lib.Services.MultiDbContext;
 using Lib.Services.NotificationService;
 using Lib.Services.ReportService;
+using Lib.Utils;
 using Lib.Validators;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,14 +15,14 @@ public static class Configs
 {
     public static IServiceCollection AddBackendServices(this IServiceCollection b)
     {
+        foreach (var type in AppDomain.CurrentDomain.GetClassesInSameNamespace<RootReflectionService>())
+        {
+            b.AddTransient(type);
+        }
+
         b
-            .AddTransient<NotificationService>()
             .AddTransient<ICourseService, CourseService>()
-            .AddTransient<AccountService>()
-            .AddTransient<MultiLocalDbContextFactory>()
-            .AddTransient<ReportService>()
-            .AddValidatorsFromAssemblyContaining<LoginFieldValidator>(ServiceLifetime.Transient)
-            .AddMemoryCache(o => { o.TrackStatistics = true; });
+            .AddValidatorsFromAssemblyContaining<LoginFieldValidator>(ServiceLifetime.Transient);
         return b;
     }
 }

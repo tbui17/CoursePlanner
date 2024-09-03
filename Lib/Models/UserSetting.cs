@@ -1,7 +1,10 @@
+using Lib.Interfaces;
+using Lib.Validators;
+
 namespace Lib.Models;
 
 
-public class UserSetting
+public class UserSetting : IUserSetting
 {
     public int Id { get; set; }
     public int UserId { get; set; }

@@ -59,8 +59,8 @@ public abstract class BaseTest : IBaseTest
             .AddDbContextFactory<LocalDbCtx>()
             .AddSingleton(mockNavigation.Object)
             .AddSingleton(mockAppService.Object)
-            .AddTransient<ISessionService, SessionService>()
-            .AddTransient<AppShellViewModel>();
+            .AddTransient<ISessionService, SessionService>();
+            // .AddTransient<AppShellViewModel>();
 
         services.AddLogging();
 

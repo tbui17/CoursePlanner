@@ -1,46 +1,36 @@
+using CommunityToolkit.Mvvm.ComponentModel;
 using Lib.ExceptionHandlers;
 using Lib.Interfaces;
 using Lib.Models;
-using Lib.Services;
 using Lib.Utils;
 using Plugin.LocalNotification;
+using ReactiveUI;
 using ViewModels.Domain;
-using ViewModels.Events;
 using ViewModels.ExceptionHandlers;
-using ViewModels.Interfaces;
 using ViewModels.Services;
 using ViewModels.Setup;
+
+// ReSharper disable RedundantNameQualifier
 
 
 namespace ViewModels.Config;
 
 public static class ViewModelConfig
 {
-    public static IServiceCollection AddTransientRefreshable<T>(this IServiceCollection services)
-        where T : class, IRefreshId =>
-        services.AddTransient<T>(x =>
-        {
-            var subj = x.GetRequiredService<NavigationSubject>();
-            var instance = x.CreateInstance<T>();
-            subj.Subscribe(instance);
-            return instance;
-        });
+
 
     private static IServiceCollection AddViewModels(this IServiceCollection services)
     {
+        var types = new[]{typeof (ObservableObject) , typeof(ReactiveObject)};
+        foreach (var vmType in AppDomain.CurrentDomain
+                     .GetClassesInSameNamespace<MainViewModel>()
+                     .Where(x => types.Any(x.IsAssignableTo))
+                )
+        {
+            services.AddTransient(vmType);
+        }
+
         return services
-            .AddTransient<MainViewModel>()
-            .AddTransient<DetailedTermViewModel>()
-            .AddTransient<EditTermViewModel>()
-            .AddTransient<DetailedCourseViewModel>()
-            .AddTransient<EditCourseViewModel>()
-            .AddTransient<EditNoteViewModel>()
-            .AddTransient<EditAssessmentViewModel>()
-            .AddTransient<LoginViewModel>()
-            .AddTransient<TermViewModel>()
-            .AddTransient<NotificationDataViewModel>()
-            .AddTransient<InstructorFormViewModelFactory>()
-            .AddTransient<StatsViewModel>()
             .AddSingleton<AppShellViewModel>();
     }
 
@@ -48,7 +38,6 @@ public static class ViewModelConfig
     {
         services
             .AddViewModels()
-            .AddSingleton<NavigationSubject>()
             .AddSingleton(LocalNotificationServiceFactory)
             .AddSingleton<ILocalNotificationService, LocalNotificationService>(x =>
             {
@@ -61,14 +50,7 @@ public static class ViewModelConfig
             .AddSingleton<ClientExceptionHandler>()
             .AddSingleton<ISessionService, SessionService>()
             .AddTransient<DbSetup>()
-            .AddTransient<SetupClient>()
-            .AddTransient<RefreshableViewService>(provider =>
-            {
-                var x = provider.CreateInstance<RefreshableViewService>();
-                x.RefreshableViewType = typeof(IRefreshableView<IRefreshId>);
-                x.AssemblyNames = provider.GetRequiredKeyedService<ICollection<string>>(nameof(AddAssemblyNames));
-                return x;
-            });
+            .AddTransient<SetupClient>();
         return services;
 
         INotificationService? LocalNotificationServiceFactory() => LocalNotificationCenter.Current;
@@ -84,9 +66,8 @@ internal static class TypesSource
 {
     public static List<string> Get()
     {
-        return AppDomain.CurrentDomain.GetAssemblies()
-            .SelectMany(x => x.GetTypes())
-            .Where(x => x.Namespace == Util.NameOf(nameof(Lib.Models)))
+        return AppDomain.CurrentDomain
+            .GetClassesInSameNamespace<MainViewModel>()
             .Where(x => x.IsAssignableTo(typeof(INotification)))
             .Where(x => x != typeof(Assessment))
             .Where(x => x.IsClass)

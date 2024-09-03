@@ -29,7 +29,6 @@ public static class ValidatorExtensions
         });
     }
 
-
     public static Result<T> Check<T>(this IValidator<T> validator, T obj)
     {
         var res = validator.Validate(obj);
