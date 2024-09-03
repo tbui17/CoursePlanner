@@ -15,15 +15,13 @@ using ViewModels.Setup;
 
 namespace ViewModels.Config;
 
-public static class ViewModelConfig
+public class ViewModelConfig(AssemblyService assemblyService, IServiceCollection services)
 {
-
-
-    private static IServiceCollection AddViewModels(this IServiceCollection services)
+    private IServiceCollection AddViewModels()
     {
-        var types = new[]{typeof (ObservableObject) , typeof(ReactiveObject)};
-        foreach (var vmType in AppDomain.CurrentDomain
-                     .GetConcreteClassesInSameNameSpace<MainViewModel>()
+        var types = new[] { typeof(ObservableObject), typeof(ReactiveObject) };
+        foreach (var vmType in assemblyService
+                     .GetConcreteClassesInNamespace(NamespaceData.FromNameofExpression(nameof(ViewModels.Domain)))
                      .Where(x => types.Any(x.IsAssignableTo))
                 )
         {
@@ -34,10 +32,9 @@ public static class ViewModelConfig
             .AddSingleton<AppShellViewModel>();
     }
 
-    public static IServiceCollection AddServices(this IServiceCollection services)
+    public IServiceCollection AddServices()
     {
-        services
-            .AddViewModels()
+        AddViewModels()
             .AddSingleton(LocalNotificationServiceFactory)
             .AddSingleton<ILocalNotificationService, LocalNotificationService>(x =>
             {
@@ -45,7 +42,7 @@ public static class ViewModelConfig
                 instance.StartListening();
                 return instance;
             })
-            .AddKeyedSingleton<IList<string>>(nameof(TypesSource), (_, _) => TypesSource.Get())
+            .AddSingleton<NotificationTypes>(_ => GetNotificationTypes())
             .AddTransient<GlobalExceptionHandler>()
             .AddSingleton<ClientExceptionHandler>()
             .AddSingleton<ISessionService, SessionService>()
@@ -56,23 +53,17 @@ public static class ViewModelConfig
         INotificationService? LocalNotificationServiceFactory() => LocalNotificationCenter.Current;
     }
 
-    public static IServiceCollection AddAssemblyNames(this IServiceCollection services, ICollection<string> names)
+    private NotificationTypes GetNotificationTypes()
     {
-        return services.AddKeyedSingleton(nameof(AddAssemblyNames), names);
+        return assemblyService
+            .GetConcreteClassesInNamespace(NamespaceData.FromNameofExpression(nameof(ViewModels.Domain)))
+            .Where(x => x.IsAssignableTo(typeof(INotification)))
+            .Where(x => x != typeof(Assessment))
+            .Select(x => x.Name)
+            .Concat(["Objective Assessment", "Performance Assessment"])
+            .ToList()
+            .Thru(x => new NotificationTypes(x));
     }
 }
 
-internal static class TypesSource
-{
-    public static List<string> Get()
-    {
-        return AppDomain.CurrentDomain
-            .GetConcreteClassesInSameNameSpace<MainViewModel>()
-            .Where(x => x.IsAssignableTo(typeof(INotification)))
-            .Where(x => x != typeof(Assessment))
-            .Where(x => x.IsClass)
-            .Select(x => x.Name)
-            .Concat(["Objective Assessment", "Performance Assessment"])
-            .ToList();
-    }
-}
+public record NotificationTypes(IList<string> Value);

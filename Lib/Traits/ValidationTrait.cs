@@ -25,4 +25,15 @@ public static class ValidationTrait
         return AggregateValidation(entity.ValidateName(), entity.ValidateDates());
     }
 
+    private static DomainException? AggregateValidation(params DomainException?[] exceptions)
+    {
+        var res = exceptions.OfType<DomainException>().Select(x => x.Message).ToList();
+        if (res.Count == 0)
+        {
+            return null;
+        }
+
+        return new DomainException(string.Join(Environment.NewLine, res));
+    }
+
 }

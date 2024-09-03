@@ -27,8 +27,10 @@ public class ReportBenchmark
         {
             throw new Exception("DB_PATH environment variable not set");
         }
+        var assemblyService = new AssemblyService(AppDomain.CurrentDomain);
+        var backendConfig = new BackendConfig(assemblyService, services);
+        backendConfig.AddBackendServices();
         services
-            .AddBackendServices()
             .AddTransient<ReportServiceBenchmark>()
             .AddTestDatabase(path)
             .AddLogging(x => x.ClearProviders().SetMinimumLevel(LogLevel.Critical));

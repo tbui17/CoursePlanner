@@ -1,6 +1,7 @@
 ﻿
 using Lib;
 using Lib.Models;
+using Lib.Utils;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Formatting.Json;
@@ -51,12 +52,16 @@ public class MauiAppServiceConfiguration
         var serviceBuilder = ServiceBuilder;
         serviceBuilder.SetLogger(config);
 
+        var assemblyService = new AssemblyService(AppDomain.CurrentDomain);
+        var backendConfig = new BackendConfig(assemblyService, Services);
+        var vmConfig = new ViewModelConfig(assemblyService, Services);
+
+        backendConfig.AddBackendServices();
+        vmConfig.AddServices();
+
 
         Services
-            .AddBackendServices()
-            .AddServices()
             .AddSingleton(MainPage)
-            .AddAssemblyNames([AssemblyName])
             .AddDbContext<LocalDbCtx>(b =>
                 {
                     b.UseSqlite($"DataSource={AppDataDirectory()}/database.db");

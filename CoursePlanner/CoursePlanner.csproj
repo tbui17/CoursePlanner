@@ -61,7 +61,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="BindableProps" Version="1.4.3" />
         <PackageReference Include="FunctionZero.Maui.Controls" Version="8.0.0.5" />
         <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
         <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)"/>

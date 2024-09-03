@@ -19,9 +19,12 @@ public abstract class BasePageViewModelTest : BaseDbTest
 
 
     [TearDown]
-    public virtual void TearDown()
+    public override async Task TearDown()
     {
-        Db.Dispose();
+
+        await base.TearDown();
+        await Db.DisposeAsync();
+
     }
 
     protected LocalDbCtx Db { get; set; }
