@@ -1,109 +1,39 @@
-﻿using System.Diagnostics;
-using CommunityToolkit.Maui;
-using CoursePlanner.Exceptions;
+﻿using CoursePlanner.Exceptions;
 using CoursePlanner.Pages;
 using CoursePlanner.Services;
 using CoursePlanner.Utils;
 using CoursePlanner.Views;
-using EntityFramework.Exceptions.Common;
-using Lib;
-using Lib.ExceptionHandlers;
-using Lib.Models;
-using Lib.Services;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Plugin.LocalNotification;
+using MauiConfig;
 using Serilog;
-using Serilog.Formatting.Json;
-using UraniumUI;
-using ViewModels.Config;
 using ViewModels.Services;
 
 namespace CoursePlanner;
-
 
 public static class MauiProgram
 {
     public static MauiApp CreateMauiApp()
     {
-        var app = CreateBuilder().Build();
-        var services = app.Services;
+        var setup = new MauiAppBuilderFactory<App>
+        {
+            AssemblyName = nameof(CoursePlanner),
+            AppDataDirectory = () => FileSystem.Current.AppDataDirectory,
+            MainPage = () => Application.Current?.MainPage,
+            ExceptionHandlerRegistration = x => MauiExceptions.UnhandledException += x,
+            ServiceBuilderFactory = x => new MauiServiceBuilder(x.Services),
+        };
 
-        RunStartupActions();
-        MauiExceptions.UnhandledException += OnMauiExceptionsOnUnhandledException;
+        var app = setup.CreateBuilder().Build();
+        setup.RunStartupActions(app);
 
         return app;
-
-
-        void RunStartupActions()
-        {
-            services
-                .GetRequiredService<DbSetup>()
-                .SetupDb();
-
-            services
-                .GetRequiredService<RefreshableViewService>()
-                .InitializeCache();
-        }
-
-        async void OnMauiExceptionsOnUnhandledException(object _, UnhandledExceptionEventArgs args)
-        {
-
-        }
     }
+}
 
-
-
-    private static MauiAppBuilder CreateBuilder()
+file class MauiServiceBuilder(IServiceCollection services) : IMauiServiceBuilder
+{
+    public void AddViews()
     {
-        var config = new LoggerConfiguration()
-            .WriteTo.Console()
-            .WriteTo.File(new JsonFormatter(), FileSystem.AppDataDirectory + "/logs/log.json", buffered: true)
-            .Enrich.FromLogContext();
-
-#if DEBUG
-        config = config.MinimumLevel.Debug().WriteTo.Debug();
-#elif RELEASE
-        config = config.MinimumLevel.Information();
-#endif
-
-        Log.Logger = config.CreateLogger();
-        var builder = MauiApp.CreateBuilder();
-        builder
-            .UseMauiApp<App>()
-            .UseMauiCommunityToolkit()
-            .UseLocalNotification()
-            .UseUraniumUI()
-            .UseUraniumUIMaterial()
-            .ConfigureFonts
-            (
-                fonts =>
-                {
-                    fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
-                    fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
-                }
-            );
-
-
-        builder.Services
-            .AddBackendServices()
-            .AddServices()
-            .AddAssemblyNames([nameof(CoursePlanner)])
-            .AddDbContext<LocalDbCtx>(b =>
-                {
-                    b.UseSqlite($"DataSource={FileSystem.Current.AppDataDirectory}/database.db");
-#if DEBUG
-                    b.EnableSensitiveDataLogging();
-                    b.EnableDetailedErrors();
-#endif
-                },
-                ServiceLifetime.Transient
-            )
-            .AddDbContextFactory<LocalDbCtx>(lifetime: ServiceLifetime.Transient)
-            .AddSingleton<IAppService, AppService>()
-            .AddSingleton<AppShell>()
-            .AddSingleton<ISessionService, SessionService>()
-            .AddSingleton<INavigationService, NavigationService>()
+        services
             .AddTransient<MainPage>()
             .AddTransient<DetailedTermPage>()
             .AddTransient<EditTermPage>()
@@ -117,7 +47,19 @@ public static class MauiProgram
             .AddTransient<LoginView>()
             .AddTransient<NotificationDataPage>()
             .AddTransient<StatsPage>();
+    }
 
-        return builder;
+    public void AddAppServices()
+    {
+        services
+            .AddSingleton<IAppService, AppService>()
+            .AddSingleton<AppShell>()
+            .AddSingleton<ISessionService, SessionService>()
+            .AddSingleton<INavigationService, NavigationService>();
+    }
+
+    public void SetLogger(LoggerConfiguration logger)
+    {
+        Log.Logger = logger.CreateLogger();
     }
 }

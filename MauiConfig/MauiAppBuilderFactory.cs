@@ -5,21 +5,41 @@ using Microsoft.EntityFrameworkCore;
 using Plugin.LocalNotification;
 using Serilog;
 using Serilog.Formatting.Json;
+using UraniumUI;
 using ViewModels.Config;
 using ViewModels.Services;
 using ViewModels.Setup;
 
 namespace MauiConfig;
 
-
-public class MauiConfigurationBuilder
+public class MauiAppBuilderFactory<TApp> where TApp : class, IApplication
 {
+
+    public required Func<string> AppDataDirectory { get; set; }
+    public required Func<Page?> MainPage { get; set; }
+    public required string AssemblyName { get; set; }
+    public required ServiceBuilderFactory ServiceBuilderFactory { get; set; }
+    public required Action<UnhandledExceptionEventHandler> ExceptionHandlerRegistration { get; set; }
+
+
+    public void RunStartupActions(MauiApp app)
+    {
+        var client = app.Services.GetRequiredService<SetupClient>();
+        client.Setup();
+
+    }
+
+    public void OnMauiExceptionsOnUnhandledException(object _, UnhandledExceptionEventArgs args)
+    {
+
+    }
 
     public MauiAppBuilder CreateBuilder()
     {
+
         var config = new LoggerConfiguration()
             .WriteTo.Console()
-            .WriteTo.File(new JsonFormatter(), FileSystem.AppDataDirectory + "/logs/log.json", buffered: true)
+            .WriteTo.File(new JsonFormatter(), AppDataDirectory() + "/logs/log.json", buffered: true)
             .Enrich.FromLogContext();
 
 #if DEBUG
@@ -28,10 +48,12 @@ public class MauiConfigurationBuilder
         config = config.MinimumLevel.Information();
 #endif
 
-        Log.Logger = config.CreateLogger();
         var builder = MauiApp.CreateBuilder();
+        var serviceBuilder = ServiceBuilderFactory(builder);
+        serviceBuilder.SetLogger(config);
+
         builder
-            .UseMauiApp<App>()
+            .UseMauiApp<TApp>()
             .UseMauiCommunityToolkit()
             .UseLocalNotification()
             .UseUraniumUI()
@@ -49,10 +71,10 @@ public class MauiConfigurationBuilder
         builder.Services
             .AddBackendServices()
             .AddServices()
-            .AddAssemblyNames([nameof(CoursePlanner)])
+            .AddAssemblyNames([AssemblyName])
             .AddDbContext<LocalDbCtx>(b =>
                 {
-                    b.UseSqlite($"DataSource={FileSystem.Current.AppDataDirectory}/database.db");
+                    b.UseSqlite($"DataSource={AppDataDirectory()}/database.db");
 #if DEBUG
                     b.EnableSensitiveDataLogging();
                     b.EnableDetailedErrors();
@@ -60,26 +82,22 @@ public class MauiConfigurationBuilder
                 },
                 ServiceLifetime.Transient
             )
-            .AddDbContextFactory<LocalDbCtx>(lifetime: ServiceLifetime.Transient)
-            .AddSingleton<IAppService, AppService>()
-            .AddSingleton<AppShell>()
             .AddSingleton<ISessionService, SessionService>()
-            .AddSingleton<INavigationService, NavigationService>()
-            .AddTransient<MainPage>()
-            .AddTransient<DetailedTermPage>()
-            .AddTransient<EditTermPage>()
-            .AddTransient<DetailedCoursePage>()
-            .AddTransient<EditCoursePage>()
-            .AddTransient<EditNotePage>()
-            .AddTransient<EditAssessmentPage>()
-            .AddTransient<TermListView>()
-            .AddTransient<DevPage>()
-            .AddTransient<DbSetup>()
-            .AddTransient<LoginView>()
-            .AddTransient<NotificationDataPage>()
-            .AddTransient<StatsPage>();
+            .AddDbContextFactory<LocalDbCtx>(lifetime: ServiceLifetime.Transient);
+
+        serviceBuilder.AddViews();
+        serviceBuilder.AddAppServices();
 
         return builder;
     }
 
+}
+
+public delegate IMauiServiceBuilder ServiceBuilderFactory(MauiAppBuilder builder);
+
+public interface IMauiServiceBuilder
+{
+    void AddViews();
+    void AddAppServices();
+    void SetLogger(LoggerConfiguration logger);
 }
