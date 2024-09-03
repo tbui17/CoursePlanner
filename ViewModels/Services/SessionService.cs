@@ -10,6 +10,8 @@ namespace ViewModels.Services;
 public interface ISessionService
 {
     bool IsLoggedIn { get; }
+    User GetOrThrowUser();
+    User? User { get; }
     Task<Result<User>> LoginAsync(ILogin loginDetails);
     Task LogoutAsync();
     Task<Result<User>> RegisterAsync(ILogin loginDetails);
@@ -19,10 +21,10 @@ public class SessionService(AccountService accountService, ILogger<ISessionServi
 {
     private User? _user;
 
-    private User? User
+    public User? User
     {
         get => _user;
-        set
+        private set
         {
             new LoginEvent(value).Publish();
             _user = value;
@@ -30,6 +32,16 @@ public class SessionService(AccountService accountService, ILogger<ISessionServi
     }
 
     public bool IsLoggedIn => User is not null;
+
+    public User GetOrThrowUser()
+    {
+        if (User is null)
+        {
+            throw new InvalidOperationException("User is not logged in");
+        }
+
+        return User;
+    }
 
     public async Task<Result<User>> LoginAsync(ILogin loginDetails)
     {

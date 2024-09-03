@@ -72,6 +72,8 @@ public class AccountService(
             Username = hashedLogin.Username,
             Password = hashedLogin.Password
         };
+        var setting = account.CreateUserSetting();
+        db.Add(setting);
 
         await db.Accounts.AddAsync(account);
         await db.SaveChangesAsync();
