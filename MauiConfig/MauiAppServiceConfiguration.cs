@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Maui;
+﻿
 using Lib;
 using Lib.Models;
 using Microsoft.EntityFrameworkCore;
@@ -11,13 +11,14 @@ using ViewModels.Setup;
 
 namespace MauiConfig;
 
-public class MauiAppBuilderFactory<TApp> where TApp : class, IApplication
+public class MauiAppServiceConfiguration
 {
 
+    public required IServiceCollection Services { get; set; }
+    public required IMauiServiceBuilder ServiceBuilder { get; set; }
     public required Func<string> AppDataDirectory { get; set; }
     public required MainPageGetter MainPage { get; set; }
     public required string AssemblyName { get; set; }
-    public required ServiceBuilderFactory ServiceBuilderFactory { get; set; }
     public required Action<UnhandledExceptionEventHandler> ExceptionHandlerRegistration { get; set; }
 
 
@@ -30,7 +31,7 @@ public class MauiAppBuilderFactory<TApp> where TApp : class, IApplication
         client.Setup();
 
     }
-    public MauiAppBuilder CreateBuilder()
+    public IServiceCollection ConfigServices()
     {
 
         var config = new LoggerConfiguration()
@@ -44,27 +45,14 @@ public class MauiAppBuilderFactory<TApp> where TApp : class, IApplication
         config = config.MinimumLevel.Information();
 #endif
 
-        var builder = MauiApp.CreateBuilder();
-        var serviceBuilder = ServiceBuilderFactory(builder);
+
+
+
+        var serviceBuilder = ServiceBuilder;
         serviceBuilder.SetLogger(config);
 
-        builder
-            .UseMauiApp<TApp>()
-            .UseMauiCommunityToolkit()
-            // .UseLocalNotification()
-            // .UseUraniumUI()
-            // .UseUraniumUIMaterial()
-            .ConfigureFonts
-            (
-                fonts =>
-                {
-                    fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
-                    fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
-                }
-            );
 
-
-        builder.Services
+        Services
             .AddBackendServices()
             .AddServices()
             .AddSingleton(MainPage)
@@ -85,17 +73,14 @@ public class MauiAppBuilderFactory<TApp> where TApp : class, IApplication
         serviceBuilder.AddViews();
         serviceBuilder.AddAppServices();
 
-        return builder;
+        return Services;
     }
 
 }
-
-public delegate IMauiServiceBuilder ServiceBuilderFactory(MauiAppBuilder builder);
 
 public interface IMauiServiceBuilder
 {
     void AddViews();
     void AddAppServices();
     void SetLogger(LoggerConfiguration logger);
-    void AddMauiDependencies();
 }
