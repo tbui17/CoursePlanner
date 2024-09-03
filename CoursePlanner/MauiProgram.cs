@@ -2,7 +2,6 @@
 using CoursePlanner.Exceptions;
 using CoursePlanner.Pages;
 using CoursePlanner.Services;
-
 using CoursePlanner.Views;
 using MauiConfig;
 using Plugin.LocalNotification;
@@ -16,7 +15,6 @@ public static class MauiProgram
 {
     public static MauiApp CreateMauiApp()
     {
-
         var builder = MauiApp.CreateBuilder()
             .UseMauiApp<App>()
             .UseMauiCommunityToolkit()
@@ -30,8 +28,7 @@ public static class MauiProgram
             MainPage = () => Application.Current?.MainPage,
             ExceptionHandlerRegistration = x => MauiExceptions.UnhandledException += x,
             Services = builder.Services,
-            ServiceBuilder = new MauiServiceBuilder(builder)
-
+            ServiceBuilder = new MauiServiceBuilder(builder.Services)
         };
         setup.ConfigServices();
 
@@ -42,11 +39,11 @@ public static class MauiProgram
     }
 }
 
-file class MauiServiceBuilder(MauiAppBuilder builder) : IMauiServiceBuilder
+file class MauiServiceBuilder(IServiceCollection services) : IMauiServiceBuilder
 {
     public void AddViews()
     {
-        builder.Services
+        services
             .AddTransient<MainPage>()
             .AddTransient<DetailedTermPage>()
             .AddTransient<EditTermPage>()
@@ -63,7 +60,7 @@ file class MauiServiceBuilder(MauiAppBuilder builder) : IMauiServiceBuilder
 
     public void AddAppServices()
     {
-        builder.Services
+        services
             .AddSingleton<IAppService, AppService>()
             .AddSingleton<AppShell>()
             .AddSingleton<ISessionService, SessionService>()
@@ -74,5 +71,4 @@ file class MauiServiceBuilder(MauiAppBuilder builder) : IMauiServiceBuilder
     {
         Log.Logger = logger.CreateLogger();
     }
-
 }
