@@ -97,12 +97,10 @@ public class NotificationDataViewModel : ReactiveObject, IRefresh
     public int ItemCount => _itemCountHelper.Value;
 
     public NotificationDataViewModel(
-        NotificationService service,
-        [FromKeyedServices(nameof(TypesSource))]
-        IList<string> typesSource
+        NotificationService service, NotificationTypes types
     )
     {
-        Types = typesSource;
+        Types = types.Value;
         ClearCommand = ReactiveCommand.Create(() =>
         {
             var today = LocalDateTime.FromDateTime(DateTime.Today.Date);

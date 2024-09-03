@@ -1,6 +1,7 @@
 using BaseTestSetup;
 using Lib;
 using Lib.Models;
+using Lib.Utils;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Moq;
@@ -46,11 +47,13 @@ public abstract class BaseTest : IBaseTest
         var mockNavigation = new Mock<INavigationService>();
         var mockAppService = new Mock<IAppService>();
         var services = new ServiceCollection();
+        var assemblyService = new AssemblyService(AppDomain.CurrentDomain);
+        var backendConfig = new BackendConfig(assemblyService, services);
+        backendConfig.AddBackendServices();
+        var vmConfig = new ViewModelConfig(assemblyService, services);
+        vmConfig.AddServices();
         services
-            .AddBackendServices()
-            .AddServices()
             .AddSerilog()
-            .AddAssemblyNames([nameof(ViewModelTests), nameof(ViewModels)])
             .AddDbContext<LocalDbCtx>(x => x
                 .UseSqlite(Connection.ToString())
                 .EnableDetailedErrors()
@@ -59,8 +62,8 @@ public abstract class BaseTest : IBaseTest
             .AddDbContextFactory<LocalDbCtx>()
             .AddSingleton(mockNavigation.Object)
             .AddSingleton(mockAppService.Object)
-            .AddTransient<ISessionService, SessionService>();
-            // .AddTransient<AppShellViewModel>();
+            .AddTransient<ISessionService, SessionService>()
+            .AddTransient<AppShellViewModel>();
 
         services.AddLogging();
 
