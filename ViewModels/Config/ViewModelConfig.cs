@@ -1,10 +1,8 @@
-using CommunityToolkit.Mvvm.ComponentModel;
 using Lib.ExceptionHandlers;
 using Lib.Interfaces;
 using Lib.Models;
 using Lib.Utils;
 using Plugin.LocalNotification;
-using ReactiveUI;
 using ViewModels.Domain;
 using ViewModels.ExceptionHandlers;
 using ViewModels.Services;
