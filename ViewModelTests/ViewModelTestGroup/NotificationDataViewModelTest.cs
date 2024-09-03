@@ -2,7 +2,6 @@ using FluentAssertions;
 using FluentAssertions.Execution;
 using Lib.Interfaces;
 using Lib.Models;
-using Lib.Services.NotificationService;
 using Microsoft.EntityFrameworkCore;
 using ViewModels.Domain;
 using ViewModelTests.TestSetup;
