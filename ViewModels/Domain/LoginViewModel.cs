@@ -33,6 +33,20 @@ public partial class LoginViewModel(
         await navService.GoToMainPageAsync();
     }
 
+    [RelayCommand]
+    public async Task DeleteAsync()
+    {
+        var res = await sessionService.LoginAsync(new LoginDetails(this));
+
+        if (res.IsFailed)
+        {
+            await appService.ShowErrorAsync(res.ToErrorString());
+            return;
+        }
+
+        await navService.GoToMainPageAsync();
+    }
+
 
     [RelayCommand]
     public async Task RegisterAsync()
