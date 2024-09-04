@@ -1,4 +1,5 @@
-﻿using Lib.Interfaces;
+﻿using System.Linq.Expressions;
+using Lib.Interfaces;
 using Lib.Models;
 using Lib.Services.MultiDbContext;
 using LinqKit;
@@ -6,21 +7,23 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Lib.Services.NotificationService;
 
-public class NotificationService(MultiLocalDbContextFactory dbFactory)
+public class NotificationService(MultiLocalDbContextFactory dbFactory, ILocalDbCtxFactory localFactory)
 {
-    public async Task<IList<INotificationDataResult>> GetUpcomingNotifications()
+    public async Task<IList<INotificationDataResult>> GetUpcomingNotifications(IUserSetting settings)
     {
+        await using var singleDb = await localFactory.CreateDbContextAsync();
+
         var today = DateTime.Now.Date;
-        var sameDay = PredicateBuilder.New<INotification>()
-            .Start(x => x.Start.Date == today)
-            .Or(x => x.End.Date == today);
+        var timeAheadDate = today.Add(settings.NotificationRange);
 
         await using var db = await dbFactory.CreateAsync<INotification>();
 
         var res = await db.Query(set => set
-            .AsExpandableEFCore()
             .Where(x => x.ShouldNotify)
-            .Where(sameDay));
+            .Where(x => x.Start.Date >= today)
+            .Where(x => x.End.Date <= timeAheadDate)
+
+        );
 
 
         return res.Select(entity => new NotificationResult
@@ -49,11 +52,16 @@ public class NotificationService(MultiLocalDbContextFactory dbFactory)
         return await db.Query(q => q.AsExpandableEFCore().AsNoTracking().Where(sameMonthAndYear));
     }
 
-    public async Task<IList<INotification>> GetNotificationsWithinDateRange(IDateTimeRange dateRange)
+    private static Expression<Func<INotification, bool>> CreateDateRangePredicate(IDateTimeRange dateRange)
     {
-        var inRange = Builder()
+        return Builder()
             .Start(x => x.Start.Date >= dateRange.Start.Date)
             .And(x => x.End.Date <= dateRange.End.Date);
+    }
+
+    public async Task<IList<INotification>> GetNotificationsWithinDateRange(IDateTimeRange dateRange)
+    {
+        var inRange = CreateDateRangePredicate(dateRange);
 
 
         await using var db = await dbFactory.CreateAsync<INotification>();
