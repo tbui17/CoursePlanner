@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FluentResults;
 using FluentValidation;
+using Lib.Attributes;
 using Lib.Interfaces;
 using Lib.Utils;
 using Lib.Validators;
@@ -12,6 +13,7 @@ using ViewModels.Services;
 
 namespace ViewModels.Domain;
 
+[Inject]
 public partial class SettingsViewModel(
     ILocalDbCtxFactory factory,
     ISessionService session,

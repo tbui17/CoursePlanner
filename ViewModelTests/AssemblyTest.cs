@@ -16,21 +16,18 @@ public class AssemblyTest
         _services = new ServiceCollection();
         var assemblyService = new AssemblyService(AppDomain.CurrentDomain);
 
-        _clientConfig = new ViewModelConfig(assemblyService,_services);
-
+        _clientConfig = new ViewModelConfig(assemblyService, _services);
     }
 
     [Test]
     public void Config_ShouldRetrieveConcreteClassesFromDomainNamespace()
     {
-
         _clientConfig.AddServices();
 
         _services
             .Should()
             .ContainSingle(x => x.ServiceType == typeof(InstructorFormViewModelFactory))
-            .And.ContainSingle(x => x.ServiceType == typeof(EditAssessmentViewModel))
-            .And.NotContain(x => x.ServiceType == typeof(IEditAssessmentViewModel));
+            .And.ContainSingle(x => x.ImplementationType == typeof(EditAssessmentViewModel))
+            .And.ContainSingle(x => x.ServiceType == typeof(IEditAssessmentViewModel));
     }
-
 }

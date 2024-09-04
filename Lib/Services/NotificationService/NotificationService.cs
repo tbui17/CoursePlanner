@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using Lib.Attributes;
 using Lib.Interfaces;
 using Lib.Models;
 using Lib.Services.MultiDbContext;
@@ -7,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Lib.Services.NotificationService;
 
+[Inject]
 public class NotificationService(MultiLocalDbContextFactory dbFactory)
 {
     public async Task<IList<INotificationDataResult>> GetUpcomingNotifications(IUserSetting settings)

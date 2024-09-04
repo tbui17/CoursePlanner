@@ -3,9 +3,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Lib.Config;
 
-public abstract class ServiceConfigurator(AssemblyService assemblyService, IServiceCollection services)
+public class ServiceConfigUtil(AssemblyService assemblyService, IServiceCollection services)
 {
-    protected IServiceCollection AddClassesAndServices(NamespaceData data)
+    public IServiceCollection AddClassesAndServices(NamespaceData data)
     {
         var classes = assemblyService.GetConcreteClassesInNamespace(data);
 

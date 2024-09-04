@@ -1,11 +1,13 @@
 using System.Diagnostics;
 using EntityFramework.Exceptions.Common;
+using Lib.Attributes;
 using Lib.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Lib.ExceptionHandlers;
 
+[Inject]
 public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger)
 {
     public async Task<ExceptionResult> HandleAsync(Exception exc)
@@ -39,11 +41,11 @@ public record ExceptionResult(Exception? Exception = null, string Message = "", 
     {
         var message = exception switch
         {
-            UniqueConstraintException _ => "An entry with the same key already exists.",
-            CannotInsertNullException _ => "The input cannot be empty.",
-            MaxLengthExceededException _ => "The input exceeds the maximum length allowed.",
-            NumericOverflowException _ => "The input is too large.",
-            ReferenceConstraintException _ => "The chosen entry does not exist.",
+            UniqueConstraintException => "An entry with the same key already exists.",
+            CannotInsertNullException => "The input cannot be empty.",
+            MaxLengthExceededException => "The input exceeds the maximum length allowed.",
+            NumericOverflowException => "The input is too large.",
+            ReferenceConstraintException => "The chosen entry does not exist.",
             _ => throw new UnreachableException($"Unexpected exception type: {exception.GetType()}")
         };
         return new ExceptionResult(exception, message, true);

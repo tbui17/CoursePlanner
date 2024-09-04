@@ -1,8 +1,10 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using Lib.Attributes;
 using ViewModels.Events;
 
 namespace ViewModels.Domain;
 
+[Inject(Lifetime = ServiceLifetime.Singleton)]
 public partial class AppShellViewModel : ObservableObject
 {
     public AppShellViewModel()

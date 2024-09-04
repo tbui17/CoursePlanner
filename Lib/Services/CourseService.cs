@@ -1,4 +1,5 @@
-﻿using Lib.Models;
+﻿using Lib.Attributes;
+using Lib.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Lib.Services;
@@ -9,6 +10,7 @@ public interface ICourseService
     Task<(Course?, List<Instructor>)> GetDetailedCourseViewData(int id);
 }
 
+[Inject(typeof(ICourseService))]
 public class CourseService(ILocalDbCtxFactory factory) : ICourseService
 {
 

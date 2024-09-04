@@ -1,14 +1,15 @@
+using Lib.Attributes;
 using Lib.ExceptionHandlers;
 using Microsoft.Extensions.Logging;
-using ViewModels.Config;
 
 namespace ViewModels.ExceptionHandlers;
 
+
 public delegate Page? MainPageGetter();
 
+[Inject]
 public class ClientExceptionHandler(
     ILogger<ClientExceptionHandler> logger,
-    [FromKeyedServices(nameof(MainPageGetter))]
     MainPageGetter mainPageGetter,
     GlobalExceptionHandler globalExceptionHandler
 )

@@ -1,4 +1,5 @@
 using FluentValidation;
+using Lib.Attributes;
 using Lib.Services;
 using Lib.Utils;
 using Lib.Validators;
@@ -8,17 +9,17 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Lib.Config;
 
-public class BackendConfig(AssemblyService assemblyService, IServiceCollection services) : ServiceConfigurator(assemblyService, services)
+public class BackendConfig(AssemblyService assemblyService, IServiceCollection services)
 {
-    private readonly IServiceCollection _services = services;
-
     public IServiceCollection AddServices()
     {
         var data = NamespaceData.FromNameofExpression(nameof(Lib.Services));
-        AddClassesAndServices(data);
-        _services
+        // new ServiceConfigUtil(assemblyService, services).AddClassesAndServices(data);
+
+        services
+            .AddInjectables(AppDomain.CurrentDomain)
             .AddTransient<ICourseService, CourseService>()
             .AddValidatorsFromAssemblyContaining<LoginFieldValidator>(ServiceLifetime.Transient);
-        return _services;
+        return services;
     }
 }
