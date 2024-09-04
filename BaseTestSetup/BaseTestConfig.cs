@@ -4,10 +4,7 @@ using System.Reflection;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.Exceptions;
-
-
 namespace BaseTestSetup;
-
 using Lib.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,7 +12,7 @@ using Serilog;
 
 public static class BaseTestConfig
 {
-    public static IServiceCollection AddLogger(this IServiceCollection services, Action<Logger> setter)
+    public static IServiceCollection AddLogger(this IServiceCollection services, Action<LoggerConfiguration> setter)
     {
         var conf = new LoggerConfiguration()
             .Enrich.FromLogContext()
@@ -24,16 +21,17 @@ public static class BaseTestConfig
             .Enrich.WithProperty("FriendlyApplicationName", AppDomain.CurrentDomain.FriendlyName)
             .Enrich.With(new StackTraceEnricher())
             .WriteTo.Console(LogEventLevel.Information)
-            .WriteTo.Debug(LogEventLevel.Debug);
+            .WriteTo.Debug(LogEventLevel.Debug)
+            .MinimumLevel.Debug();
 
         AppDataRecord.Parse(AppDomain.CurrentDomain.BaseDirectory).Enrich(conf);
 
         if (Environment.GetEnvironmentVariable("SEQ_URL") is { } url)
         {
-            conf.WriteTo.Seq(url,LogEventLevel.Information);
+            conf = conf.WriteTo.Seq(url,LogEventLevel.Information);
         }
 
-        setter(conf.CreateLogger());
+        setter(conf);
 
         return services.AddSerilog().AddLogging();
     }
