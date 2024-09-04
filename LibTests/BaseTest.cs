@@ -1,7 +1,9 @@
 using BaseTestSetup;
 using Lib;
+using Lib.Config;
 using Lib.Models;
 using Lib.Utils;
+using LibTests.NotificationTests;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -26,12 +28,11 @@ public abstract class BaseTest : IBaseTest
         var services = new ServiceCollection();
         var assemblyService = new AssemblyService(AppDomain.CurrentDomain);
         var backendConfig = new BackendConfig(assemblyService, services);
-        backendConfig.AddBackendServices();
+        backendConfig.AddServices();
 
         services
             .AddLogger(x => Log.Logger = x)
-            .AddTestDatabase()
-            .AddTransient<NotificationSetupUtil>();
+            .AddTestDatabase();
 
         return services.BuildServiceProvider();
     }

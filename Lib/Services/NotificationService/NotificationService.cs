@@ -7,18 +7,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Lib.Services.NotificationService;
 
-public class NotificationService(MultiLocalDbContextFactory dbFactory, ILocalDbCtxFactory localFactory)
+public class NotificationService(MultiLocalDbContextFactory dbFactory)
 {
     public async Task<IList<INotificationDataResult>> GetUpcomingNotifications(IUserSetting settings)
     {
-        await using var singleDb = await localFactory.CreateDbContextAsync();
 
         var today = DateTime.Now.Date;
         var timeAheadDate = today.Add(settings.NotificationRange);
 
-        await using var db = await dbFactory.CreateAsync<INotification>();
+        await using var multiDb = await dbFactory.CreateAsync<INotification>();
 
-        var res = await db.Query(set => set
+        var res = await multiDb.Query(set => set
             .Where(x => x.ShouldNotify)
             .Where(x => x.Start.Date >= today)
             .Where(x => x.End.Date <= timeAheadDate)

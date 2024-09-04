@@ -35,7 +35,8 @@ public class LocalNotificationServiceTests : BaseDbTest
         var service = new LocalNotificationService(
             notificationService: Resolve<NotificationService>(),
             logger: Resolve<ILogger<ILocalNotificationService>>(),
-            localNotificationServiceFactory: () => mock.Object
+            localNotificationServiceFactory: () => mock.Object,
+            sessionService: Resolve<ISessionService>()
         );
 
         // check db for upcoming notifications and publish

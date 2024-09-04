@@ -17,7 +17,7 @@ public partial class DevPage
         INavigationService navService,
         ILocalNotificationService notificationService,
         ISessionService sessionService,
-        AccountService accountService
+        IAccountService accountService
         )
     {
         Provider = provider;
@@ -41,7 +41,7 @@ public partial class DevPage
 
     public INavigationService NavService { get; set; }
 
-    public AccountService AccountService { get; set; }
+    public IAccountService AccountService { get; set; }
 
     public ISessionService SessionService { get; set; }
 

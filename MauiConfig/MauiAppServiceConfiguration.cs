@@ -1,5 +1,6 @@
 ﻿
 using Lib;
+using Lib.Config;
 using Lib.Models;
 using Lib.Utils;
 using Microsoft.EntityFrameworkCore;
@@ -56,7 +57,7 @@ public class MauiAppServiceConfiguration
         var backendConfig = new BackendConfig(assemblyService, Services);
         var vmConfig = new ViewModelConfig(assemblyService, Services);
 
-        backendConfig.AddBackendServices();
+        backendConfig.AddServices();
         vmConfig.AddServices();
 
 

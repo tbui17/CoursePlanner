@@ -1,5 +1,7 @@
-﻿using Lib.Interfaces;
+﻿using FluentResults.Extensions;
+using Lib.Interfaces;
 using Lib.Services.NotificationService;
+using Lib.Utils;
 using Microsoft.Extensions.Logging;
 using Plugin.LocalNotification;
 
@@ -16,8 +18,9 @@ public interface ILocalNotificationService
 public class LocalNotificationService(
     NotificationService notificationService,
     ILogger<ILocalNotificationService> logger,
-    Func<INotificationService?> localNotificationServiceFactory
-    )
+    Func<INotificationService?> localNotificationServiceFactory,
+    ISessionService sessionService
+)
     : ILocalNotificationService
 {
     private Timer? _notificationJob;
@@ -25,18 +28,24 @@ public class LocalNotificationService(
     public async Task<int> SendUpcomingNotifications()
     {
         logger.LogInformation("Retrieving notifications.");
-        var notifications = (await notificationService.GetUpcomingNotifications()).ToList();
 
-        var notificationCount = notifications.Count;
 
-        logger.LogInformation("Found {NotificationsCount} notifications.", notifications.Count);
+
+        var res = await sessionService
+            .GetUserSettingsAsync()
+            .Map(notificationService.GetUpcomingNotifications)
+            .Map(x => x.Result.ToList());
+
+        var notificationCount = res.Value.Count;
+
+        logger.LogInformation("Found {NotificationsCount} notifications.", notificationCount);
 
         if (notificationCount == 0)
         {
             return notificationCount;
         }
 
-        var notificationRequest = CreateNotificationRequest(notifications);
+        var notificationRequest = CreateNotificationRequest(res.Value);
 
         logger.LogInformation("Showing notification {NotificationId}: {NotificationTitle}",
             notificationRequest.NotificationId, notificationRequest.Title
@@ -89,6 +98,7 @@ public class LocalNotificationService(
             logger.LogInformation("Notification timer already exists. Refusing to create another.");
             return;
         }
+
         var time = TimeSpan.FromDays(1);
         logger.LogInformation("Created notification timer with {Time}", time);
         _notificationJob = new Timer(
@@ -108,11 +118,13 @@ public class LocalNotificationService(
             logger.LogWarning("LocalNotificationCenter.Current is null. Cannot request permissions.");
             return;
         }
+
         if (await c.AreNotificationsEnabled())
         {
             logger.LogInformation("Notifications are already enabled.");
             return;
         }
+
         logger.LogInformation("Requesting notification permissions.");
         await c.RequestNotificationPermission();
     }

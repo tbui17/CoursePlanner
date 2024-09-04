@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using FluentResults;
 using FluentValidation;
+using Lib.Interfaces;
 using Lib.Models;
 using Lib.Utils;
 using Lib.Validators;
@@ -12,11 +13,18 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Lib.Services;
 
+public interface IAccountService
+{
+    Task<Result<User>> LoginAsync(ILogin login);
+    Task<Result<User>> CreateAsync(ILogin login);
+    Task<Result<IUserSetting>> GetUserSettingsAsync(ILogin login);
+}
+
 public class AccountService(
     ILocalDbCtxFactory factory,
     [FromKeyedServices(nameof(LoginFieldValidator))]
     IValidator<ILogin> fieldValidator
-)
+) : IAccountService
 {
     public async Task<Result<User>> LoginAsync(ILogin login)
     {
@@ -83,6 +91,11 @@ public class AccountService(
             .SingleAsync();
         await tx.CommitAsync();
         return created;
+    }
+
+    public Task<Result<IUserSetting>> GetUserSettingsAsync(ILogin login)
+    {
+        throw new NotImplementedException();
     }
 
     private record HashedLogin
