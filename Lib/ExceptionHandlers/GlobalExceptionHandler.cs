@@ -1,11 +1,13 @@
 using System.Diagnostics;
 using EntityFramework.Exceptions.Common;
+using Lib.Attributes;
 using Lib.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Lib.ExceptionHandlers;
 
+[Inject]
 public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger)
 {
     public async Task<ExceptionResult> HandleAsync(Exception exc)

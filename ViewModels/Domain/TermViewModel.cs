@@ -2,6 +2,7 @@
 using CommunityToolkit.Maui.Core.Extensions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Lib.Attributes;
 using Lib.Models;
 using Microsoft.EntityFrameworkCore;
 using ViewModels.Interfaces;
@@ -9,6 +10,7 @@ using ViewModels.Services;
 
 namespace ViewModels.Domain;
 
+[Inject]
 public partial class TermViewModel(ILocalDbCtxFactory factory, INavigationService navService, IAppService appService)
     : ObservableObject, IRefreshId
 {

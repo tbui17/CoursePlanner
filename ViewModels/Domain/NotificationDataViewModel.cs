@@ -1,6 +1,7 @@
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using Lib.Attributes;
 using Lib.Interfaces;
 using Lib.Models;
 using Lib.Services.NotificationService;
@@ -14,6 +15,7 @@ namespace ViewModels.Domain;
 
 using NotificationCollection = List<INotification>;
 
+[Inject]
 public class NotificationDataViewModel : ReactiveObject, IRefresh
 {
     private string _filterText = "";

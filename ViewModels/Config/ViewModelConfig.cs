@@ -1,3 +1,5 @@
+using Lib.Attributes;
+using Lib.Config;
 using Lib.ExceptionHandlers;
 using Lib.Interfaces;
 using Lib.Models;
@@ -17,11 +19,9 @@ public class ViewModelConfig(AssemblyService assemblyService, IServiceCollection
 {
     private IServiceCollection AddViewModels()
     {
-
-        foreach (var vmType in assemblyService.GetConcreteClassesInNamespace(NamespaceData.FromNameofExpression(nameof(ViewModels.Domain))))
-        {
-            services.AddTransient(vmType);
-        }
+        var util = new ServiceConfigUtil(assemblyService, services);
+        // util.AddClassesAndServices(NamespaceData.FromNameofExpression(nameof(ViewModels.Domain)));
+        // util.AddClassesAndServices(NamespaceData.FromNameofExpression(nameof(ViewModels.Services)));
 
         return services
             .AddSingleton<AppShellViewModel>();
@@ -42,6 +42,7 @@ public class ViewModelConfig(AssemblyService assemblyService, IServiceCollection
             .AddSingleton<ClientExceptionHandler>()
             .AddSingleton<ISessionService, SessionService>()
             .AddTransient<DbSetup>()
+            .AddInjectables(AppDomain.CurrentDomain)
             .AddTransient<SetupClient>();
         return services;
 

@@ -1,5 +1,6 @@
 using BaseTestSetup;
 using Lib;
+using Lib.Attributes;
 using Lib.Config;
 using Lib.Models;
 using Lib.Utils;
@@ -53,6 +54,7 @@ public abstract class BaseTest : IBaseTest
         backendConfig.AddServices();
         var vmConfig = new ViewModelConfig(assemblyService, services);
         vmConfig.AddServices();
+        services.AddInjectables(AppDomain.CurrentDomain);
         services
             .AddSerilog()
             .AddDbContext<LocalDbCtx>(x => x

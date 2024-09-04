@@ -1,3 +1,4 @@
+using Lib.Attributes;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -5,7 +6,7 @@ using Microsoft.Extensions.Logging;
 namespace ViewModels.Setup;
 
 
-
+[Inject]
 public class SetupClient(DbSetup dbSetup, ILogger<SetupClient> logger)
 {
     public void Setup()
@@ -16,7 +17,7 @@ public class SetupClient(DbSetup dbSetup, ILogger<SetupClient> logger)
     }
 }
 
-
+[Inject]
 public class DbSetup(ILocalDbCtxFactory factory, ILogger<DbSetup> logger)
 {
     public void SetupDb()

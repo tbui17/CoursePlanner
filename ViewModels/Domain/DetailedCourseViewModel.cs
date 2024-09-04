@@ -2,6 +2,7 @@
 using CommunityToolkit.Maui.Core.Extensions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Lib.Attributes;
 using Lib.Interfaces;
 using Lib.Models;
 using Lib.Services;
@@ -12,6 +13,7 @@ using ViewModels.Services;
 
 namespace ViewModels.Domain;
 
+[Inject]
 public partial class DetailedCourseViewModel : ObservableObject, IRefreshId
 {
     [ObservableProperty]

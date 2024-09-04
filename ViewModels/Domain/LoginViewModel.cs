@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Lib.Attributes;
 using Lib.Models;
 using Lib.Utils;
 using ViewModels.Interfaces;
@@ -7,6 +8,7 @@ using ViewModels.Services;
 
 namespace ViewModels.Domain;
 
+[Inject]
 public partial class LoginViewModel(
     IAppService appService,
     INavigationService navService,

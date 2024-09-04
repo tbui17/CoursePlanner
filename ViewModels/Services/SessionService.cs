@@ -1,4 +1,5 @@
 using FluentResults;
+using Lib.Attributes;
 using Lib.Interfaces;
 using Lib.Models;
 using Lib.Services;
@@ -18,7 +19,7 @@ public interface ISessionService
     Task<Result<User>> RegisterAsync(ILogin loginDetails);
     Task<Result<IUserSetting>> GetUserSettingsAsync();
 }
-
+[Inject(typeof(ISessionService),ServiceLifetime.Singleton)]
 public class SessionService(IAccountService accountService, ILogger<ISessionService> logger) : ISessionService
 {
     private User? _user;

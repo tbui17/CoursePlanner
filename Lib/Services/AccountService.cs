@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using FluentResults;
 using FluentValidation;
+using Lib.Attributes;
 using Lib.Interfaces;
 using Lib.Models;
 using Lib.Utils;
@@ -20,6 +21,7 @@ public interface IAccountService
     Task<Result<IUserSetting>> GetUserSettingsAsync(ILogin login);
 }
 
+[Inject(typeof(IAccountService))]
 public class AccountService(
     ILocalDbCtxFactory factory,
     [FromKeyedServices(nameof(LoginFieldValidator))]

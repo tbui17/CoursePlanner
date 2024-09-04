@@ -1,7 +1,7 @@
 ﻿using FluentResults.Extensions;
+using Lib.Attributes;
 using Lib.Interfaces;
 using Lib.Services.NotificationService;
-using Lib.Utils;
 using Microsoft.Extensions.Logging;
 using Plugin.LocalNotification;
 
@@ -14,7 +14,7 @@ public interface ILocalNotificationService
     void StartListening();
     Task RequestNotificationPermissions();
 }
-
+[Inject(typeof(ILocalNotificationService),ServiceLifetime.Singleton)]
 public class LocalNotificationService(
     NotificationService notificationService,
     ILogger<ILocalNotificationService> logger,

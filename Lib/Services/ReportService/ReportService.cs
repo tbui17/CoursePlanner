@@ -1,3 +1,4 @@
+using Lib.Attributes;
 using Lib.Interfaces;
 using Lib.Models;
 using Lib.Services.MultiDbContext;
@@ -5,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Lib.Services.ReportService;
 
+[Inject]
 public class ReportService(MultiLocalDbContextFactory dbFactory)
 {
     public async Task<IDurationReport> GetDurationReport()

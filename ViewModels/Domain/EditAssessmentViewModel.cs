@@ -6,6 +6,7 @@ using System.Diagnostics;
 using CommunityToolkit.Maui.Core.Extensions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Lib.Attributes;
 using Lib.Exceptions;
 using Lib.Interfaces;
 using Lib.Models;
@@ -33,7 +34,7 @@ public interface IEditAssessmentViewModel : IRefreshId
     event PropertyChangedEventHandler? PropertyChanged;
     event PropertyChangingEventHandler? PropertyChanging;
 }
-
+[Inject(typeof(IEditAssessmentViewModel))]
 public partial class EditAssessmentViewModel(
     ILocalDbCtxFactory factory,
     INavigationService navService,

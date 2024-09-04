@@ -1,11 +1,12 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-
+using Lib.Attributes;
 using Lib.Models;
 using Lib.Services.ReportService;
 using ViewModels.Interfaces;
 
 namespace ViewModels.Domain;
 
+[Inject]
 public partial class StatsViewModel(ReportService reportService) : ObservableObject, IRefresh
 {
 

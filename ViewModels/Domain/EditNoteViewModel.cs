@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Lib.Attributes;
 using Lib.Interfaces;
 using Lib.Traits;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +9,7 @@ using ViewModels.Services;
 
 namespace ViewModels.Domain;
 
+[Inject]
 public partial class EditNoteViewModel(
     ILocalDbCtxFactory factory,
     INavigationService navService,
