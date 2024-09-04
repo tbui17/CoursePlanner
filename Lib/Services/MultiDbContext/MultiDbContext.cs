@@ -11,6 +11,7 @@ public sealed class MultiDbContext<TDbContext, T>(
     where T : class
     where TDbContext : DbContext
 {
+
     public async Task<IList<TResult>> Query<TResult>(Func<IQueryable<T>, IQueryable<TResult>> query)
     {
         var results = await dbSets

@@ -45,7 +45,7 @@ public record NamespaceData
 
 public class AssemblyService(AppDomain currentDomain)
 {
-    private ParallelQuery<Type> GetTypesInAssembly(string assemblyName) =>
+    public ParallelQuery<Type> GetTypesInAssembly(string assemblyName) =>
         currentDomain
             .GetAssemblies()
             .AsParallel()
@@ -53,7 +53,7 @@ public class AssemblyService(AppDomain currentDomain)
             .SelectMany(x => x.ExportedTypes);
 
 
-    private ParallelQuery<Type> GetTypesInNamespace(NamespaceData data) =>
+    public ParallelQuery<Type> GetTypesInNamespace(NamespaceData data) =>
         GetTypesInAssembly(data.AssemblyName)
             .Where(x => x.Namespace?.StartsWith(data.FullNamespace) ?? false);
 

@@ -1,6 +1,7 @@
 using BaseTestSetup;
 using BenchmarkDotNet.Attributes;
 using Lib;
+using Lib.Config;
 using Lib.Interfaces;
 using Lib.Models;
 using Lib.Services.MultiDbContext;
@@ -29,7 +30,7 @@ public class ReportBenchmark
         }
         var assemblyService = new AssemblyService(AppDomain.CurrentDomain);
         var backendConfig = new BackendConfig(assemblyService, services);
-        backendConfig.AddBackendServices();
+        backendConfig.AddServices();
         services
             .AddTransient<ReportServiceBenchmark>()
             .AddTestDatabase(path)

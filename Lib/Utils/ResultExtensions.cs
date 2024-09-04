@@ -27,6 +27,17 @@ public static class ResultExtensions
         return await mapper(result.Value);
     }
 
+    public static async Task<Result<TResult>> MapAsync<T, TResult>(this Result<T> result,
+        Func<T, Task<TResult>> mapper)
+    {
+        if (result.IsFailed)
+        {
+            return result.ToResult<TResult>();
+        }
+
+        return await mapper(result.Value);
+    }
+
     public static string ToErrorString<T>(this Result<T> result)
     {
         return result.Errors.Select(x => x.Message).StringJoin(Environment.NewLine);

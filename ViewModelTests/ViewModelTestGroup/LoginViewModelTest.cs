@@ -28,7 +28,7 @@ public class LoginViewModelTest : BasePageViewModelTest
             sessionService: _sessionService
         );
 
-        var accountService = Resolve<AccountService>();
+        var accountService = Resolve<IAccountService>();
         var res = await accountService.CreateAsync(_loginInfo);
 
         res.IsFailed.Should().BeFalse();

@@ -1,4 +1,5 @@
 using FluentResults;
+using Lib.Interfaces;
 using Lib.Models;
 using Lib.Services;
 using Lib.Utils;
@@ -15,9 +16,10 @@ public interface ISessionService
     Task<Result<User>> LoginAsync(ILogin loginDetails);
     Task LogoutAsync();
     Task<Result<User>> RegisterAsync(ILogin loginDetails);
+    Task<Result<IUserSetting>> GetUserSettingsAsync();
 }
 
-public class SessionService(AccountService accountService, ILogger<ISessionService> logger) : ISessionService
+public class SessionService(IAccountService accountService, ILogger<ISessionService> logger) : ISessionService
 {
     private User? _user;
 
@@ -81,6 +83,17 @@ public class SessionService(AccountService accountService, ILogger<ISessionServi
 
 
         return res;
+    }
+
+    public async Task<Result<IUserSetting>> GetUserSettingsAsync()
+    {
+        if (User is null)
+        {
+            return Result.Fail("User is not logged in");
+        }
+
+        return await accountService.GetUserSettingsAsync(User);
+
     }
 
 

@@ -82,17 +82,23 @@ public static class UtilExtensions
         from g in groups
         select new Grouping<TKey, TResult>(g.Key, selector(g));
 
-
-    public static async Task<TResult> FlatMapAsync<T, TResult>(this Task<T> task, Func<T, Task<TResult>> func)
+    public static (IList<T>True, IList<T>False) PartitionBy<T>(this IEnumerable<T> collection, Predicate<T> predicate)
     {
-        var result = await task;
-        return await func(result);
-    }
+        var trueList = new List<T>();
+        var falseList = new List<T>();
 
-    public static async Task<TResult> MapAsync<T, TResult>(this Task<T> task, Func<T, TResult> func)
-    {
-        var result = await task;
-        return func(result);
+        foreach (var item in collection)
+        {
+            if (predicate(item))
+            {
+                trueList.Add(item);
+                continue;
+            }
+
+            falseList.Add(item);
+        }
+
+        return (trueList, falseList);
     }
 }
 

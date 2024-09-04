@@ -1,5 +1,6 @@
 using BaseTestSetup;
 using Lib;
+using Lib.Config;
 using Lib.Models;
 using Lib.Utils;
 using Microsoft.Data.Sqlite;
@@ -49,7 +50,7 @@ public abstract class BaseTest : IBaseTest
         var services = new ServiceCollection();
         var assemblyService = new AssemblyService(AppDomain.CurrentDomain);
         var backendConfig = new BackendConfig(assemblyService, services);
-        backendConfig.AddBackendServices();
+        backendConfig.AddServices();
         var vmConfig = new ViewModelConfig(assemblyService, services);
         vmConfig.AddServices();
         services

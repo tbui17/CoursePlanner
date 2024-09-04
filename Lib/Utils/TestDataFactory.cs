@@ -130,7 +130,9 @@ public class TestDataFactory
             Instructors = instructors,
             Courses = courses,
             Notes = notes,
-            Assessments = assessments
+            Assessments = assessments,
+            Users = [new User{Id = 1, Username = "TestAccount12345", Password = "TestPassword12345"}],
+            UserSettings = [new UserSetting{Id = 1, UserId = 1, NotificationRange = TimeSpan.FromDays(5)}]
         };
     }
 
@@ -234,6 +236,8 @@ public record TestDataResult
     public required List<Course> Courses { get; set; }
     public required List<Note> Notes { get; set; }
     public required List<Assessment> Assessments { get; set; }
+    public required List<User> Users { get; set; }
+    public required List<UserSetting> UserSettings { get; set; }
 
     public void Deconstruct(
         out List<Term> terms,
