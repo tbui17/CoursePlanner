@@ -81,6 +81,19 @@ public static class UtilExtensions
     ) =>
         from g in groups
         select new Grouping<TKey, TResult>(g.Key, selector(g));
+
+
+    public static async Task<TResult> FlatMapAsync<T, TResult>(this Task<T> task, Func<T, Task<TResult>> func)
+    {
+        var result = await task;
+        return await func(result);
+    }
+
+    public static async Task<TResult> MapAsync<T, TResult>(this Task<T> task, Func<T, TResult> func)
+    {
+        var result = await task;
+        return func(result);
+    }
 }
 
 public static class Grouping
