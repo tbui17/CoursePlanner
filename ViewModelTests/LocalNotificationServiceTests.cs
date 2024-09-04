@@ -1,10 +1,15 @@
 ﻿using FluentAssertions;
 using FluentAssertions.Execution;
+using FluentResults;
+using Lib.Interfaces;
+using Lib.Models;
 using Lib.Services.NotificationService;
 using Microsoft.Extensions.Logging;
+using Moq;
 using Plugin.LocalNotification;
 using ViewModels.Services;
 using ViewModelTests.TestSetup;
+using Result = FluentResults.Result;
 
 namespace ViewModelTests;
 
@@ -31,12 +36,17 @@ public class LocalNotificationServiceTests : BaseDbTest
     [Test]
     public async Task SendUpcomingNotifications_1UpcomingEvent_MessageShouldContainNotificationNameAndCount()
     {
-        var mock = CreateMock<INotificationService>();
+        IUserSetting userSetting = new UserSetting() { UserId = 1, Id = 1 };
+        var sessionMock = CreateMock<ISessionService>();
+        sessionMock
+            .Setup(x => x.GetUserSettingsAsync())
+            .ReturnsAsync(userSetting.ToResult());
+        var notificationMock = CreateMock<INotificationService>();
         var service = new LocalNotificationService(
             notificationService: Resolve<NotificationService>(),
             logger: Resolve<ILogger<ILocalNotificationService>>(),
-            localNotificationServiceFactory: () => mock.Object,
-            sessionService: Resolve<ISessionService>()
+            localNotificationServiceFactory: () => notificationMock.Object,
+            sessionService: sessionMock.Object
         );
 
         // check db for upcoming notifications and publish
@@ -47,7 +57,7 @@ public class LocalNotificationServiceTests : BaseDbTest
 
         count.Should().Be(1);
 
-        var subj = mock.Invocations.Should()
+        var subj = notificationMock.Invocations.Should()
             .ContainSingle()
             .Which.Arguments.Should()
             .ContainSingle()
@@ -58,6 +68,5 @@ public class LocalNotificationServiceTests : BaseDbTest
         subj.Description.Should().Contain(_courseName);
 
         subj.Title.Should().Contain("1");
-
     }
 }

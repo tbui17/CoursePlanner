@@ -1,5 +1,4 @@
 using FluentAssertions;
-using FluentAssertions.Execution;
 using FluentAssertions.Extensions;
 using Lib.Interfaces;
 using Lib.Models;
@@ -11,6 +10,15 @@ namespace LibTests.NotificationTests;
 
 public class NotificationUpcomingTest : BaseDbTest
 {
+    private NotificationService _notificationService;
+
+    [SetUp]
+    public override async Task Setup()
+    {
+        await base.Setup();
+        _notificationService = Provider.GetRequiredService<NotificationService>();
+    }
+
     [Test]
     public async Task GetNotifications_NoEligible_IsEmpty()
     {
@@ -40,7 +48,6 @@ public class NotificationUpcomingTest : BaseDbTest
             );
         }
     }
-
 
 
     [Test]
@@ -78,8 +85,8 @@ public class NotificationUpcomingTest : BaseDbTest
             .And.ContainItemsAssignableTo<Assessment>();
     }
 
-    [TestCaseSource(nameof(NotificationTestCaseData))]
-    public async Task GetNotifications(NotificationTestData data)
+
+    private async Task EnableNotifications(TimeSpan databaseStartTimesAheadBy, TimeSpan? databaseEndTimesAheadBy = null)
     {
         await DisableNotifications();
         await using var db = await GetDb();
@@ -87,8 +94,13 @@ public class NotificationUpcomingTest : BaseDbTest
         var today = DateTime.Now.Date;
         // time span added to start date and end date
         // end date is always 1 day after start date
-        var start = today.Add(data.DatabaseTimesAheadBy);
-        var end = start.AddDays(1);
+        var start = today.Add(databaseStartTimesAheadBy);
+
+        var end = databaseEndTimesAheadBy is not null
+            ? today.Add(databaseEndTimesAheadBy.Value)
+            : start.AddDays(1);
+
+        end.Should().BeOnOrAfter(start,"Invalid test setup");
 
         foreach (var dbSet in dbSets)
         {
@@ -99,68 +111,50 @@ public class NotificationUpcomingTest : BaseDbTest
                     .SetProperty(x => x.End, end)
                 );
         }
+    }
+
+    [Test]
+    public async Task GetNotifications_ShouldBeInclusive()
+    {
+        await DisableNotifications();
+        await EnableNotifications(0.Days());
 
         var userSetting = new UserSetting
         {
-            NotificationRange = data.NotificationRange
+            NotificationRange = 5.Days()
         };
-        var notificationService = Provider.GetRequiredService<NotificationService>();
-        var result = await notificationService.GetUpcomingNotifications(userSetting);
-        using var scope = new AssertionScope();
-        data.Assertion?.Invoke(result);
-        scope.BecauseOf(data.Description);
+
+        var result = await _notificationService.GetUpcomingNotifications(userSetting);
+        result.Should().NotBeEmpty();
     }
 
-    private static IEnumerable<TestCaseData> NotificationTestCaseData()
+    [Test]
+    public async Task GetNotifications_AllDbNotificationsGtNotificationRangeSetting_ReturnsNothing()
     {
-        List<NotificationTestData> data =
-        [
-            new()
-            {
-                Description = "The notification range should be inclusive",
-                DatabaseTimesAheadBy = 5.Days(),
-                NotificationRange = 5.Days(),
-                Assertion = x => x.Should().NotBeEmpty()
-            },
-            new()
-            {
-                DatabaseTimesAheadBy = -5.Days(),
-                NotificationRange = 5.Days(),
-                Assertion = x => x.Should().BeEmpty(),
-            },
-            new()
-            {
-                Description = "There should be no notifications when all notifications are 10 days ahead, but the setting only requests to check 5 days ahead.",
-                DatabaseTimesAheadBy = 10.Days(),
-                NotificationRange = 5.Days(),
-                Assertion = x => x.Should().BeEmpty(),
-            }
-        ];
+        await DisableNotifications();
+        await EnableNotifications(5.Days());
 
-
-        return data.Select(x =>
+        var userSetting = new UserSetting
         {
-            var testCase = new TestCaseData(x);
-            if (!string.IsNullOrWhiteSpace(x.Description))
-            {
-                testCase.SetName(x.Description);
-            }
+            NotificationRange = 10.Days()
+        };
 
-            return testCase;
-        });
+        var result = await _notificationService.GetUpcomingNotifications(userSetting);
+        result.Should().NotBeEmpty();
     }
 
+    [Test]
+    public async Task GetNotifications_AllDbNotificationsInThePast_ReturnsNothing()
+    {
+        await DisableNotifications();
+        await EnableNotifications(1.Days());
 
-    public record NotificationTestData(
-        TimeSpan NotificationRange = default,
-        TimeSpan DatabaseTimesAheadBy = default,
-        Action<IList<INotificationDataResult>>? Assertion = default,
-        string Description = ""
+        var userSetting = new UserSetting
+        {
+            NotificationRange = 10.Days()
+        };
 
-    );
-}
-
-class S : TestCaseData
-{
-
+        var result = await _notificationService.GetUpcomingNotifications(userSetting);
+        result.Should().NotBeEmpty();
+    }
 }

@@ -39,36 +39,22 @@ public abstract class BaseTest : IBaseTest
 
     private IServiceProvider CreateProvider()
     {
-        Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Debug()
-            .WriteTo.Console()
-            .WriteTo.Debug()
-            .Enrich.FromLogContext()
-            .CreateLogger();
 
-        var mockNavigation = new Mock<INavigationService>();
-        var mockAppService = new Mock<IAppService>();
+
         var services = new ServiceCollection();
         var assemblyService = new AssemblyService(AppDomain.CurrentDomain);
         var backendConfig = new BackendConfig(assemblyService, services);
         backendConfig.AddServices();
         var vmConfig = new ViewModelConfig(assemblyService, services);
         vmConfig.AddServices();
-        services.AddInjectables(AppDomain.CurrentDomain);
+
         services
-            .AddSerilog()
-            .AddDbContext<LocalDbCtx>(x => x
-                .UseSqlite(Connection.ToString())
-                .EnableDetailedErrors()
-                .EnableSensitiveDataLogging()
-            )
+            .AddInjectables(AppDomain.CurrentDomain)
+            .AddLogger(x => Log.Logger = x)
+            .AddTestDatabase()
             .AddDbContextFactory<LocalDbCtx>()
-            .AddSingleton(mockNavigation.Object)
-            .AddSingleton(mockAppService.Object)
             .AddTransient<ISessionService, SessionService>()
             .AddTransient<AppShellViewModel>();
-
-        services.AddLogging();
 
         return services.BuildServiceProvider();
     }

@@ -1,5 +1,9 @@
 using System.Reflection;
+using System.Text.Json;
+using FluentResults;
+using Lib.Utils;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 
 namespace Lib.Attributes;
 
@@ -9,8 +13,6 @@ public class InjectAttribute(Type? interfaceType = null, ServiceLifetime lifetim
 {
     public ServiceLifetime Lifetime { get; set; } = lifetime;
     public Type? Interface { get; set; } = interfaceType;
-
-
 }
 
 public static class InjectAttributeExtensions
@@ -19,7 +21,7 @@ public static class InjectAttributeExtensions
     {
         var types = appDomain.GetAssemblies()
             .AsParallel()
-            .SelectMany(x => x.ExportedTypes)
+            .SelectMany(GetTypes)
             .SelectMany(x => x.GetCustomAttribute<InjectAttribute>() is { } a ? new[] { (Type: x, Attribute: a) } : [])
             .Select(x => (x.Type, CreateAddImpl(x.Attribute)));
 
@@ -29,6 +31,30 @@ public static class InjectAttributeExtensions
         }
 
         return services;
+
+        IEnumerable<Type> GetTypes(Assembly assembly)
+        {
+            try
+            {
+                return assembly.GetTypes();
+            }
+            catch (ReflectionTypeLoadException e)
+            {
+                foreach (var loaderException in e.LoaderExceptions)
+                {
+                    Log.Error(
+                        loaderException,
+                        "Error during type loading for {Type} {Method}",
+                        nameof(InjectAttributeExtensions),
+                        nameof(AddInjectables)
+                    );
+                }
+
+                Log.Warning("Error during type loading. Returning non-null types from those that were loaded. Some data may be missing.");
+
+                return e.Types.WhereNotNull();
+            }
+        }
 
         // @formatter:off
         Action<Type> CreateAddImpl(InjectAttribute attribute) => attribute switch

@@ -100,6 +100,9 @@ public static class UtilExtensions
 
         return (trueList, falseList);
     }
+
+    public static IEnumerable<T> WhereNotNull<T>(this IEnumerable<T?> collection) where T : class =>
+        collection.OfType<T>();
 }
 
 public static class Grouping
