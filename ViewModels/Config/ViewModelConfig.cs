@@ -1,5 +1,4 @@
 using Lib.Attributes;
-using Lib.Config;
 using Lib.ExceptionHandlers;
 using Lib.Interfaces;
 using Lib.Models;
@@ -17,19 +16,9 @@ namespace ViewModels.Config;
 
 public class ViewModelConfig(AssemblyService assemblyService, IServiceCollection services)
 {
-    private IServiceCollection AddViewModels()
-    {
-        var util = new ServiceConfigUtil(assemblyService, services);
-        // util.AddClassesAndServices(NamespaceData.FromNameofExpression(nameof(ViewModels.Domain)));
-        // util.AddClassesAndServices(NamespaceData.FromNameofExpression(nameof(ViewModels.Services)));
-
-        return services
-            .AddSingleton<AppShellViewModel>();
-    }
-
     public IServiceCollection AddServices()
     {
-        AddViewModels()
+        services
             .AddSingleton(LocalNotificationServiceFactory)
             .AddSingleton<ILocalNotificationService, LocalNotificationService>(x =>
             {
@@ -43,7 +32,8 @@ public class ViewModelConfig(AssemblyService assemblyService, IServiceCollection
             .AddSingleton<ISessionService, SessionService>()
             .AddTransient<DbSetup>()
             .AddInjectables(AppDomain.CurrentDomain)
-            .AddTransient<SetupClient>();
+            .AddTransient<SetupClient>()
+            .AddSingleton<AppShellViewModel>();
         return services;
 
         INotificationService? LocalNotificationServiceFactory() => LocalNotificationCenter.Current;

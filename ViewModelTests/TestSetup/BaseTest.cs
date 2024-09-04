@@ -1,17 +1,14 @@
 using BaseTestSetup;
-using Lib;
 using Lib.Attributes;
 using Lib.Config;
 using Lib.Models;
 using Lib.Utils;
 using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
-using Moq;
 using Serilog;
 using ViewModels.Config;
 using ViewModels.Domain;
 using ViewModels.Services;
-using ServiceCollection = Microsoft.Extensions.DependencyInjection.ServiceCollection;
+
 
 [assembly: Parallelizable(ParallelScope.Fixtures)]
 
@@ -50,9 +47,8 @@ public abstract class BaseTest : IBaseTest
 
         services
             .AddInjectables(AppDomain.CurrentDomain)
-            .AddLogger(x => Log.Logger = x)
+            .AddLogger(x => Log.Logger = x.CreateLogger())
             .AddTestDatabase()
-            .AddDbContextFactory<LocalDbCtx>()
             .AddTransient<ISessionService, SessionService>()
             .AddTransient<AppShellViewModel>();
 
@@ -62,8 +58,8 @@ public abstract class BaseTest : IBaseTest
     public T Resolve<T>() where T : notnull => Provider.GetRequiredService<T>();
 
 
-    public Task<LocalDbCtx> GetDb() =>
-        Provider
+    public async Task<LocalDbCtx> GetDb() =>
+        await Provider
             .GetRequiredService<ILocalDbCtxFactory>()
             .CreateDbContextAsync();
 
