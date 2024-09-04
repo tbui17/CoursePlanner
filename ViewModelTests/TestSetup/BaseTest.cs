@@ -58,8 +58,8 @@ public abstract class BaseTest : IBaseTest
     public T Resolve<T>() where T : notnull => Provider.GetRequiredService<T>();
 
 
-    public Task<LocalDbCtx> GetDb() =>
-        Provider
+    public async Task<LocalDbCtx> GetDb() =>
+        await Provider
             .GetRequiredService<ILocalDbCtxFactory>()
             .CreateDbContextAsync();
 
