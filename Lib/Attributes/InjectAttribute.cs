@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Lib.Attributes;
 
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Delegate)]
+[AttributeUsage(AttributeTargets.Class)]
 public class InjectAttribute(Type? interfaceType = null, ServiceLifetime lifetime = ServiceLifetime.Transient)
     : Attribute
 {

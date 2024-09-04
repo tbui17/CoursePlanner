@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace ViewModels.ExceptionHandlers;
 
-[Inject]
+
 public delegate Page? MainPageGetter();
 
 [Inject]
