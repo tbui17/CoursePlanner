@@ -26,10 +26,7 @@ public static class BaseTestConfig
 
         AppDataRecord.Parse(AppDomain.CurrentDomain.BaseDirectory).Enrich(conf);
 
-        if (Environment.GetEnvironmentVariable("SEQ_URL") is { } url)
-        {
-            conf = conf.WriteTo.Seq(url,LogEventLevel.Information);
-        }
+
 
         setter(conf);
 
