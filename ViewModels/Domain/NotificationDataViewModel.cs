@@ -6,7 +6,7 @@ using Lib.Interfaces;
 using Lib.Models;
 using Lib.Services.NotificationService;
 using Lib.Utils;
-using NodaTime;
+
 using ReactiveUI;
 using ViewModels.Config;
 using ViewModels.Interfaces;
@@ -105,9 +105,9 @@ public class NotificationDataViewModel : ReactiveObject, IRefresh
         Types = types.Value;
         ClearCommand = ReactiveCommand.Create(() =>
         {
-            var today = LocalDateTime.FromDateTime(DateTime.Today.Date);
-            Start = today.With(DateAdjusters.StartOfMonth).ToDateTimeUnspecified();
-            End = today.With(DateAdjusters.EndOfMonth).ToDateTimeUnspecified();
+            var today = DateTime.Today.Date;
+            Start = new DateTime(today.Year, today.Month, today.Day);
+            End = new DateTime(today.Year, today.Month, DateTime.DaysInMonth(today.Year, today.Month));
             FilterText = "";
             TypeFilter = "";
             SelectedNotificationOptionIndex = 0;
