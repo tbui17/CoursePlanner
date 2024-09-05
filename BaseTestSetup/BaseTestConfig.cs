@@ -69,8 +69,6 @@ public static class BaseTestConfig
         var name = fileName ?? Guid.NewGuid().ToString();
         return services.AddDbContext<LocalDbCtx>(x => x
                 .UseSqlite($"DataSource={name}")
-                .EnableDetailedErrors()
-                .EnableSensitiveDataLogging()
             )
             .AddDbContextFactory<LocalDbCtx>();
     }
