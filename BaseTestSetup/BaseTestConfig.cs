@@ -27,15 +27,15 @@ public static class BaseTestConfig
             .Enrich.WithEnvironmentName()
             .Enrich.WithProperty("FriendlyApplicationName", AppDomain.CurrentDomain.FriendlyName)
             .Enrich.With(new StackTraceEnricher())
-            .WriteTo.Console(LogEventLevel.Information,template)
-            .WriteTo.Debug(LogEventLevel.Debug,template);
+            .WriteTo.Console(LogEventLevel.Information, template)
+            .WriteTo.Debug(LogEventLevel.Debug, template);
         AddFileLogging(conf);
 
         var url = Environment.GetEnvironmentVariable("SEQ_URL");
         var apiKey = Environment.GetEnvironmentVariable("SEQ_API_KEY");
         if (url is not null && apiKey is not null)
         {
-            conf = conf.WriteTo.Seq(url, LogEventLevel.Information,apiKey:apiKey);
+            conf = conf.WriteTo.Seq(url, LogEventLevel.Information, apiKey: apiKey);
         }
 
         setter(conf);
@@ -43,7 +43,7 @@ public static class BaseTestConfig
         AppDataRecord.Parse(AppDomain.CurrentDomain.BaseDirectory).Enrich(conf);
 
         return services
-            .AddSerilog(dispose:true)
+            .AddSerilog(dispose: true)
             .AddLogging();
 
         static void AddFileLogging(LoggerConfiguration conf)
