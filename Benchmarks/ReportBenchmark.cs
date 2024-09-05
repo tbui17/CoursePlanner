@@ -1,6 +1,7 @@
 using BaseTestSetup;
 using BenchmarkDotNet.Attributes;
 using Lib;
+using Lib.Attributes;
 using Lib.Config;
 using Lib.Interfaces;
 using Lib.Models;
@@ -20,18 +21,17 @@ public class ReportBenchmark
 
     private void SetupContainer()
     {
-
-
         var services = new ServiceCollection();
         var path = Environment.GetEnvironmentVariable("DB_PATH");
         if (string.IsNullOrEmpty(path))
         {
             throw new Exception("DB_PATH environment variable not set");
         }
-        var assemblyService = new AssemblyService(AppDomain.CurrentDomain);
-        var backendConfig = new BackendConfig(assemblyService, services);
-        backendConfig.AddServices();
+
+
         services
+            .AddBackendServices()
+            .AddInjectables(AppDomain.CurrentDomain)
             .AddTransient<ReportServiceBenchmark>()
             .AddTestDatabase(path)
             .AddLogging(x => x.ClearProviders().SetMinimumLevel(LogLevel.Critical));
@@ -42,7 +42,6 @@ public class ReportBenchmark
 
     private async Task SetupImpl(LocalDbCtx db)
     {
-
         var timer = new System.Diagnostics.Stopwatch();
         timer.Start();
         Console.WriteLine("Started db setup");
@@ -90,6 +89,7 @@ public class ReportBenchmark
             Console.WriteLine("Database already exists, skipping setup");
             return;
         }
+
         await SetupImpl(db);
     }
 
@@ -122,7 +122,6 @@ public class ReportBenchmark
         return res.TotalItems;
     }
 }
-
 
 public class ReportServiceBenchmark(MultiLocalDbContextFactory dbFactory)
 {
@@ -185,7 +184,6 @@ public class ReportServiceBenchmark(MultiLocalDbContextFactory dbFactory)
     }
 }
 
-
 public class DurationReportFactoryBenchmark
 {
     public IList<IDateTimeEntity> Entities { get; set; } = [];
@@ -243,7 +241,8 @@ public class DurationReportFactoryBenchmark
         var minDateTask = Task.Run(MinDate);
         var maxDateTask = Task.Run(MaxDate);
 
-        await Task.WhenAll(totalTimeTask, completedTimeTask, remainingTimeTask, averageDurationTask, totalItemsTask, completedItemsTask, typeTask, minDateTask, maxDateTask);
+        await Task.WhenAll(totalTimeTask, completedTimeTask, remainingTimeTask, averageDurationTask, totalItemsTask,
+            completedItemsTask, typeTask, minDateTask, maxDateTask);
 
         return new DurationReport
         {

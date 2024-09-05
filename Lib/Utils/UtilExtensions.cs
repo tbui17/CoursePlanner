@@ -64,16 +64,13 @@ public static class UtilExtensions
         return sb.ToString();
     }
 
-    public static IEnumerable<T> Tap<T>(this IEnumerable<T> collection, Action<T> action)
-    {
-        foreach (var item in collection)
-        {
-            action(item);
-            yield return item;
-        }
-    }
-
     public static T2 Thru<T1, T2>(this T1 value, Func<T1, T2> func) => func(value);
+
+    public static T Thru<T>(this T value, Action<T> func)
+    {
+        func(value);
+        return value;
+    }
 
     public static IEnumerable<Grouping<TKey, TResult>> SelectValues<TKey, TValue, TResult>(
         this IEnumerable<IGrouping<TKey, TValue>> groups,
@@ -103,6 +100,9 @@ public static class UtilExtensions
 
     public static IEnumerable<T> WhereNotNull<T>(this IEnumerable<T?> collection) where T : class =>
         collection.OfType<T>();
+
+    public static Func<T, bool> ToAnyPredicate<T>(this IEnumerable<Func<T, bool>> predicates) =>
+        x => predicates.Any(p => p(x));
 }
 
 public static class Grouping
