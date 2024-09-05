@@ -9,9 +9,6 @@ using ViewModels.Config;
 using ViewModels.Domain;
 using ViewModels.Services;
 
-
-[assembly: Parallelizable(ParallelScope.Fixtures)]
-
 namespace ViewModelTests.TestSetup;
 
 public abstract class BaseTest : IBaseTest

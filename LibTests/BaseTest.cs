@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
-[assembly: Parallelizable(ParallelScope.Fixtures)]
 
 namespace LibTests;
 
