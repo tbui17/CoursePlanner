@@ -16,8 +16,9 @@ public class InjectAttribute(Type? interfaceType = null, ServiceLifetime lifetim
 
 public static class InjectAttributeExtensions
 {
-    public static IServiceCollection AddInjectables(this IServiceCollection services, AppDomain appDomain)
+    public static IServiceCollection AddInjectables(this IServiceCollection services)
     {
+        var appDomain = AppDomain.CurrentDomain;
         var types = appDomain.GetAssemblies()
             .AsParallel()
             .SelectMany(GetTypes)

@@ -38,14 +38,15 @@ public abstract class BaseTest : IBaseTest
         var services = new ServiceCollection();
         var assemblyService = new AssemblyService(AppDomain.CurrentDomain);
         var vmConfig = new ViewModelConfig(assemblyService, services);
-        vmConfig.AddServices();
+
 
         services
-            .AddInjectables(AppDomain.CurrentDomain)
+            .AddInjectables()
             .AddLogger()
             .AddTestDatabase()
             .AddTransient<ISessionService, SessionService>()
             .AddTransient<AppShellViewModel>();
+        vmConfig.AddServices();
 
         return services.BuildServiceProvider();
     }
