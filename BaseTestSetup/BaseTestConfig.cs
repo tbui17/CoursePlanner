@@ -3,6 +3,8 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text;
+using Lib.Utils;
+using Serilog.Configuration;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.Exceptions;
@@ -17,51 +19,16 @@ using Serilog;
 
 public static class BaseTestConfig
 {
-    public static IServiceCollection AddLogger(this IServiceCollection services, Action<LoggerConfiguration> setter)
+    public static IServiceCollection AddLogger(this IServiceCollection services, bool useGlobalLogger = true)
     {
-        const string template = "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}";
-        var conf = new LoggerConfiguration()
-            .MinimumLevel.Debug()
-            .Enrich.FromLogContext()
-            .Enrich.WithExceptionDetails()
-            .Enrich.WithEnvironmentName()
-            .Enrich.WithProperty("FriendlyApplicationName", AppDomain.CurrentDomain.FriendlyName)
-            .Enrich.With(new StackTraceEnricher())
-            .WriteTo.Console(LogEventLevel.Information, template)
-            .WriteTo.Debug(LogEventLevel.Debug, template);
-        AddFileLogging(conf);
-
-        var url = Environment.GetEnvironmentVariable("SEQ_URL");
-        var apiKey = Environment.GetEnvironmentVariable("SEQ_API_KEY");
-        if (url is not null && apiKey is not null)
-        {
-            conf = conf.WriteTo.Seq(url, LogEventLevel.Information, apiKey: apiKey);
-        }
-
-        setter(conf);
-
-        AppDataRecord.Parse(AppDomain.CurrentDomain.BaseDirectory).Enrich(conf);
-
-        return services
-            .AddSerilog(dispose: true)
-            .AddLogging();
-
-        static void AddFileLogging(LoggerConfiguration conf)
-        {
-            var logPath = Path.Combine(Path.GetTempPath(), "TestLogs", "logs.txt");
-            conf.WriteTo.File(
-                formatter: new JsonFormatter(),
-                path: logPath,
-                restrictedToMinimumLevel: LogEventLevel.Information,
-                rollingInterval: RollingInterval.Day,
-                retainedFileCountLimit: 3,
-                rollOnFileSizeLimit: true,
-                fileSizeLimitBytes: (long)(300 * Math.Pow(1024, 2)),
-                shared: true,
-                encoding: Encoding.UTF8,
-                retainedFileTimeLimit: TimeSpan.FromDays(1)
-            );
-        }
+        return new LogConfigurationTestUseCase()
+            .SetMinimumLogLevel(x => x.Debug())
+            .AddDefaultSinks()
+            .AddDefaultEnrichments()
+            .AddFileSink()
+            .AddDatabaseInitializationFilters()
+            .AddSeq()
+            .Finalize(services, useGlobalLogger);
     }
 
     public static IServiceCollection AddTestDatabase(this IServiceCollection services, string? fileName = null)
@@ -76,6 +43,97 @@ public static class BaseTestConfig
     public static async Task GlobalTearDown()
     {
         await Log.CloseAndFlushAsync();
+    }
+}
+
+file class LogConfigurationTestUseCase
+{
+    public LoggerConfiguration Configuration { get; init; } = new();
+
+    public LogConfigurationTestUseCase SetMinimumLogLevel(Action<LoggerMinimumLevelConfiguration> setter)
+    {
+        setter(Configuration.MinimumLevel);
+        return this;
+    }
+
+    public LogConfigurationTestUseCase AddDefaultSinks()
+    {
+        const string template = "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}";
+        Configuration
+            .WriteTo.Console(LogEventLevel.Information, template)
+            .WriteTo.Debug(LogEventLevel.Debug, template);
+        return this;
+    }
+
+    public LogConfigurationTestUseCase AddDefaultEnrichments()
+    {
+        Configuration
+            .Enrich.FromLogContext()
+            .Enrich.WithExceptionDetails()
+            .Enrich.WithEnvironmentName()
+            .Enrich.WithProperty("FriendlyApplicationName", AppDomain.CurrentDomain.FriendlyName)
+            .Enrich.With(new StackTraceEnricher());
+        AppDataRecord.Parse(AppDomain.CurrentDomain.BaseDirectory).Enrich(Configuration);
+        return this;
+    }
+
+    public LogConfigurationTestUseCase AddFileSink(string? path = default)
+    {
+        var logPath = path ?? Path.Combine(Path.GetTempPath(), "TestLogs", "logs.txt");
+        Configuration.WriteTo.File(
+            formatter: new JsonFormatter(),
+            path: logPath,
+            restrictedToMinimumLevel: LogEventLevel.Information,
+            rollingInterval: RollingInterval.Day,
+            retainedFileCountLimit: 3,
+            rollOnFileSizeLimit: true,
+            fileSizeLimitBytes: (long)(300 * Math.Pow(1024, 2)),
+            shared: true,
+            encoding: Encoding.UTF8,
+            retainedFileTimeLimit: TimeSpan.FromDays(1)
+        );
+
+        return this;
+    }
+
+    public LogConfigurationTestUseCase AddDatabaseInitializationFilters()
+    {
+        var shouldExcludeMessage = new Func<string, bool>[]
+            {
+                x => x.Contains("CREATE"),
+                x => x.Contains("PRAGMA"),
+            }
+            .ToAnyPredicate();
+        Configuration.Filter.ByExcluding(x => x.RenderMessage().Thru(shouldExcludeMessage));
+        return this;
+    }
+
+    public LogConfigurationTestUseCase AddSeq()
+    {
+        var url = Environment.GetEnvironmentVariable("SEQ_URL");
+        var apiKey = Environment.GetEnvironmentVariable("SEQ_API_KEY");
+        if (url is not null && apiKey is not null)
+        {
+            Configuration.WriteTo.Seq(url, LogEventLevel.Information, apiKey: apiKey);
+        }
+
+        return this;
+    }
+
+    public IServiceCollection Finalize(IServiceCollection services, bool useGlobalLogger = true)
+    {
+        Logger? logger = null;
+        if (useGlobalLogger)
+        {
+            Log.Logger = Configuration.CreateLogger();
+        }
+        else
+        {
+            logger = Configuration.CreateLogger();
+        }
+        return services
+            .AddSerilog(logger, dispose: true)
+            .AddLogging();
     }
 }
 

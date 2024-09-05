@@ -54,10 +54,10 @@ public class MauiAppServiceConfiguration
         serviceBuilder.SetLogger(config);
 
         var assemblyService = new AssemblyService(AppDomain.CurrentDomain);
-        var backendConfig = new BackendConfig(assemblyService, Services);
+
         var vmConfig = new ViewModelConfig(assemblyService, Services);
 
-        backendConfig.AddServices();
+        Services.AddBackendServices();
         vmConfig.AddServices();
 
 
