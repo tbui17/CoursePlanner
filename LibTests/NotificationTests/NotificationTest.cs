@@ -54,23 +54,7 @@ public class NotificationUpcomingTest : BaseDbTest
     public async Task GetNotifications_HasNotifications_ReturnsPolymorphicResult()
     {
         await DisableNotifications();
-
-        await using var db = await GetDb();
-        var dbSets = db.GetDbSets<INotification>();
-        var today = DateTime.Now.Date;
-        var start = today.AddDays(5);
-        var end = start.AddDays(1);
-
-        foreach (var dbSet in dbSets)
-        {
-            await dbSet
-                .ExecuteUpdateAsync(p => p
-                    .SetProperty(x => x.ShouldNotify, true)
-                    .SetProperty(x => x.Start, start)
-                    .SetProperty(x => x.End, end)
-                );
-        }
-
+        await EnableNotifications(5.Days());
         var userSetting = new UserSetting
         {
             NotificationRange = TimeSpan.FromDays(99999)
