@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text;
-using Microsoft.Extensions.Logging;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.Exceptions;
@@ -32,9 +31,11 @@ public static class BaseTestConfig
             .WriteTo.Debug(LogEventLevel.Debug,template);
         AddFileLogging(conf);
 
-        if (Environment.GetEnvironmentVariable("SEQ_URL") is { } url)
+        var url = Environment.GetEnvironmentVariable("SEQ_URL");
+        var apiKey = Environment.GetEnvironmentVariable("SEQ_API_KEY");
+        if (url is not null && apiKey is not null)
         {
-            conf = conf.WriteTo.Seq(url, LogEventLevel.Information);
+            conf = conf.WriteTo.Seq(url, LogEventLevel.Information,apiKey:apiKey);
         }
 
         setter(conf);
