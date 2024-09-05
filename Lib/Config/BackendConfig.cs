@@ -11,8 +11,7 @@ public static class BackendConfig
 {
     public static IServiceCollection AddBackendServices(this IServiceCollection services)
     {
-        services
-            .AddValidatorsFromAssemblyContaining<LoginFieldValidator>(ServiceLifetime.Transient);
+        services.AddValidatorsFromAssemblyContaining<LoginFieldValidator>(ServiceLifetime.Transient);
         return services;
     }
 }

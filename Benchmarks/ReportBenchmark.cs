@@ -31,7 +31,7 @@ public class ReportBenchmark
 
         services
             .AddBackendServices()
-            .AddInjectables(AppDomain.CurrentDomain)
+            .AddInjectables()
             .AddTransient<ReportServiceBenchmark>()
             .AddTestDatabase(path)
             .AddLogging(x => x.ClearProviders().SetMinimumLevel(LogLevel.Critical));

@@ -25,7 +25,7 @@ public abstract class BaseTest : IBaseTest
 
         services
             .AddLogger()
-            .AddInjectables(AppDomain.CurrentDomain)
+            .AddInjectables()
             .AddBackendServices()
             .AddTestDatabase()
             .AddLogging();

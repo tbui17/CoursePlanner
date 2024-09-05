@@ -1,4 +1,5 @@
 using Lib.Attributes;
+using Lib.Config;
 using Lib.ExceptionHandlers;
 using Lib.Interfaces;
 using Lib.Models;
@@ -19,6 +20,7 @@ public class ViewModelConfig(AssemblyService assemblyService, IServiceCollection
     public IServiceCollection AddServices()
     {
         services
+            .AddBackendServices()
             .AddSingleton(LocalNotificationServiceFactory)
             .AddSingleton<ILocalNotificationService, LocalNotificationService>(x =>
             {
@@ -31,7 +33,6 @@ public class ViewModelConfig(AssemblyService assemblyService, IServiceCollection
             .AddSingleton<ClientExceptionHandler>()
             .AddSingleton<ISessionService, SessionService>()
             .AddTransient<DbSetup>()
-            .AddInjectables(AppDomain.CurrentDomain)
             .AddTransient<SetupClient>()
             .AddSingleton<AppShellViewModel>();
         return services;
