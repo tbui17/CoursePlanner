@@ -1,10 +1,16 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Text;
+using Microsoft.Extensions.Logging;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.Exceptions;
+using Serilog.Formatting.Json;
+
 namespace BaseTestSetup;
+
 using Lib.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,23 +20,47 @@ public static class BaseTestConfig
 {
     public static IServiceCollection AddLogger(this IServiceCollection services, Action<LoggerConfiguration> setter)
     {
+        const string template = "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}";
         var conf = new LoggerConfiguration()
+            .MinimumLevel.Debug()
             .Enrich.FromLogContext()
             .Enrich.WithExceptionDetails()
             .Enrich.WithEnvironmentName()
             .Enrich.WithProperty("FriendlyApplicationName", AppDomain.CurrentDomain.FriendlyName)
             .Enrich.With(new StackTraceEnricher())
-            .WriteTo.Console(LogEventLevel.Information)
-            .WriteTo.Debug(LogEventLevel.Debug)
-            .MinimumLevel.Debug();
+            .WriteTo.Console(LogEventLevel.Information,template)
+            .WriteTo.Debug(LogEventLevel.Debug,template);
+        AddFileLogging(conf);
 
-        AppDataRecord.Parse(AppDomain.CurrentDomain.BaseDirectory).Enrich(conf);
-
-
+        if (Environment.GetEnvironmentVariable("SEQ_URL") is { } url)
+        {
+            conf = conf.WriteTo.Seq(url, LogEventLevel.Information);
+        }
 
         setter(conf);
 
-        return services.AddSerilog().AddLogging();
+        AppDataRecord.Parse(AppDomain.CurrentDomain.BaseDirectory).Enrich(conf);
+
+        return services
+            .AddSerilog(dispose:true)
+            .AddLogging();
+
+        static void AddFileLogging(LoggerConfiguration conf)
+        {
+            var logPath = Path.Combine(Path.GetTempPath(), "TestLogs", "logs.txt");
+            conf.WriteTo.File(
+                formatter: new JsonFormatter(),
+                path: logPath,
+                restrictedToMinimumLevel: LogEventLevel.Information,
+                rollingInterval: RollingInterval.Day,
+                retainedFileCountLimit: 3,
+                rollOnFileSizeLimit: true,
+                fileSizeLimitBytes: (long)(300 * Math.Pow(1024, 2)),
+                shared: true,
+                encoding: Encoding.UTF8,
+                retainedFileTimeLimit: TimeSpan.FromDays(1)
+            );
+        }
     }
 
     public static IServiceCollection AddTestDatabase(this IServiceCollection services, string? fileName = null)
@@ -42,6 +72,11 @@ public static class BaseTestConfig
                 .EnableSensitiveDataLogging()
             )
             .AddDbContextFactory<LocalDbCtx>();
+    }
+
+    public static async Task GlobalTearDown()
+    {
+        await Log.CloseAndFlushAsync();
     }
 }
 
@@ -131,11 +166,20 @@ file record AppDataRecord
         return r;
     }
 
+    private static ImmutableArray<PropertyPairFactory> PropertyGetters =>
+    [
+        ..typeof(AppDataRecord)
+            .GetProperties()
+            .Select(PropertyPairFactory (x) => record => (x.Name, x.GetValue(record)!))
+    ];
+
     public void Enrich(LoggerConfiguration conf)
     {
-        foreach (var (name, val) in GetType().GetProperties().Select(x => (x.Name, x.GetValue(this))))
+        foreach (var (name, val) in PropertyGetters.Select(x => x(this)))
         {
             conf.Enrich.WithProperty(name, val);
         }
     }
+
+    private delegate (string, object) PropertyPairFactory(AppDataRecord record);
 }

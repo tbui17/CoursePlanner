@@ -1,9 +1,8 @@
 using System.Reflection;
-using System.Text.Json;
-using FluentResults;
 using Lib.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
+using Serilog.Context;
 
 namespace Lib.Attributes;
 
@@ -40,17 +39,19 @@ public static class InjectAttributeExtensions
             }
             catch (ReflectionTypeLoadException e)
             {
+                using var _ = LogContext.PushProperty("Assembly", assembly.FullName);
+                using var __ = LogContext.PushProperty("Domain", appDomain.FriendlyName);
+                var log = Log.ForContext<InjectAttribute>();
+
                 foreach (var loaderException in e.LoaderExceptions)
                 {
-                    Log.Error(
+                    log.Error(
                         loaderException,
-                        "Error during type loading for {Type} {Method}",
-                        nameof(InjectAttributeExtensions),
-                        nameof(AddInjectables)
+                        "Error during type loading"
                     );
                 }
 
-                Log.Warning("Error during type loading. Returning non-null types from those that were loaded. Some data may be missing.");
+                log.Warning(e,"Returning non-null types from those that were loaded. Some data may be missing.");
 
                 return e.Types.WhereNotNull();
             }
