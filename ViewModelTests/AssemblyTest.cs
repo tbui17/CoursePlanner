@@ -22,8 +22,19 @@ public class AssemblyTest
             .Should()
             .ContainSingle(x => x.ServiceType == typeof(InstructorFormViewModelFactory))
             .And.ContainSingle(x => x.ImplementationType == typeof(EditAssessmentViewModel))
-            .And.ContainSingle(x => x.ServiceType == typeof(IEditAssessmentViewModel))
-            .And.Subject.Where(x => x.ImplementationType == typeof(LoginFieldValidator))
+            .And.ContainSingle(x => x.ServiceType == typeof(IEditAssessmentViewModel));
+    }
+
+    [Test]
+    public void Config_ShouldInjectBackendServices()
+    {
+        var assemblyService = new AssemblyService(AppDomain.CurrentDomain);
+        var services = new ServiceCollection();
+
+        var clientConfig = new ViewModelConfig(assemblyService, services);
+        clientConfig.AddServices().AddInjectables();
+        services
+            .Where(x => x.ImplementationType == typeof(LoginFieldValidator))
             .Should()
             .HaveCount(2);
     }
