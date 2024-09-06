@@ -4,8 +4,8 @@ using CoursePlanner.Pages;
 using CoursePlanner.Services;
 using CoursePlanner.Views;
 using MauiConfig;
+using Microsoft.Extensions.Configuration;
 using Plugin.LocalNotification;
-using Serilog;
 using UraniumUI;
 using ViewModels.Services;
 
@@ -23,14 +23,13 @@ public static class MauiProgram
             .UseUraniumUIMaterial();
         var setup = new MauiAppServiceConfiguration
         {
-            AssemblyName = nameof(CoursePlanner),
             AppDataDirectory = () => FileSystem.Current.AppDataDirectory,
             MainPage = () => Application.Current?.MainPage,
             ExceptionHandlerRegistration = x => MauiExceptions.UnhandledException += x,
             Services = builder.Services,
             ServiceBuilder = new MauiServiceBuilder(builder.Services)
         };
-        setup.ConfigServices();
+        setup.AddServices();
 
         var app = builder.Build();
         setup.RunStartupActions(app);
@@ -65,10 +64,5 @@ file class MauiServiceBuilder(IServiceCollection services) : IMauiServiceBuilder
             .AddSingleton<AppShell>()
             .AddSingleton<ISessionService, SessionService>()
             .AddSingleton<INavigationService, NavigationService>();
-    }
-
-    public void SetLogger(LoggerConfiguration logger)
-    {
-        Log.Logger = logger.CreateLogger();
     }
 }

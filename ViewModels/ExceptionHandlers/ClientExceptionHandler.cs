@@ -7,13 +7,17 @@ namespace ViewModels.ExceptionHandlers;
 
 public delegate Page? MainPageGetter();
 
-[Inject]
+public interface IClientExceptionHandler
+{
+    Task OnUnhandledException(UnhandledExceptionEventArgs args);
+}
+
+[Inject(typeof(IClientExceptionHandler))]
 public class ClientExceptionHandler(
     ILogger<ClientExceptionHandler> logger,
     MainPageGetter mainPageGetter,
     GlobalExceptionHandler globalExceptionHandler
-)
-
+) : IClientExceptionHandler
 {
     public async Task OnUnhandledException(UnhandledExceptionEventArgs args)
     {
