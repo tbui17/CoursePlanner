@@ -1,4 +1,5 @@
-﻿using Lib.Config;
+﻿using Lib.Attributes;
+using Lib.Config;
 using Lib.Models;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -22,41 +23,19 @@ public class MauiAppServiceConfiguration
 
     public void RunStartupActions(MauiApp app)
     {
-        var handler = app.Services.GetRequiredService<ClientExceptionHandler>();
+        var handler = app.Services.GetRequiredService<IClientExceptionHandler>();
 
         ExceptionHandlerRegistration((_, e) => handler.OnUnhandledException(e).Wait());
-        var client = app.Services.GetRequiredService<SetupClient>();
+        var client = app.Services.GetRequiredService<ISetupClient>();
         client.Setup();
     }
 
     public void AddServices()
     {
-        var logPath = Path.Combine(AppDataDirectory(), "logs", "log.json");
-        var fileSinkOptions = new FileSinkOptions
-        {
-            Formatter = new JsonFormatter(),
-            Path = logPath,
-            RestrictedToMinimumLevel = LogEventLevel.Information,
-            RollingInterval = RollingInterval.Infinite,
-            RetainedFileCountLimit = 3,
-            RollOnFileSizeLimit = true,
-            Shared = false,
-            Buffered = true
-        };
-
-        var config = new LoggerConfiguration()
-            .WriteTo.Console()
-            .WriteTo.File(fileSinkOptions)
-            .Enrich.FromLogContext();
-
-#if DEBUG
-        config = config.MinimumLevel.Debug().WriteTo.Debug();
-#elif RELEASE
-        config = config.MinimumLevel.Information();
-#endif
-
-
+        Services.AddInjectables();
+        Services.AddLoggingUseCase(new MauiLoggingUseCase(AppDataDirectory()));
         var serviceBuilder = ServiceBuilder;
+
 
 
         var vmConfig = new ViewModelConfig(Services);
@@ -117,7 +96,7 @@ public class MauiLoggingUseCase : ILoggingUseCase
             RollingInterval = RollingInterval.Infinite,
             RetainedFileCountLimit = 3,
             RollOnFileSizeLimit = true,
-            Shared = true,
+            Shared = false,
             Buffered = true
         };
         Configuration.WriteTo.File(opts)

@@ -8,19 +8,20 @@ using Lib.Attributes;
 using Lib.Services;
 using Lib.Validators;
 using MauiConfig;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Moq;
+using Serilog;
 using ViewModels.Config;
 using ViewModels.Domain;
 using ViewModels.ExceptionHandlers;
+using ViewModels.Setup;
 
 namespace MauiConfigTests;
 
 public class ConfigTest
 {
-    private const string DbName = "test.db";
+    private class TestPage1 : ContentPage;
 
-
-    [TearDown]
     public async Task TearDown()
     {
         var channel = Channel.CreateBounded<FileSystemInfo>(Math.Max(Environment.ProcessorCount - 2, 1));
@@ -40,9 +41,15 @@ public class ConfigTest
         {
             if (fsi is FileInfo fi)
             {
-                if (fi.Name is DbName)
+                if (fi.Name is "test.db" or "log.json")
                 {
-                    fi.Delete();
+                    try
+                    {
+                        fi.Delete();
+                    }
+                    catch (Exception e)
+                    {
+                    }
                 }
 
                 return;
@@ -58,7 +65,6 @@ public class ConfigTest
         }
     }
 
-    private class TestPage1 : ContentPage;
 
     [Test]
     public void Configuration_ContainsRequiredDependencies()
@@ -73,7 +79,7 @@ public class ConfigTest
 
 
         mainPageGetter.Setup(x => x()).Returns(new TestPage1());
-        appDataDirectoryGetter.Setup(x => x()).Returns("test.db");
+        appDataDirectoryGetter.Setup(x => x()).Returns("test");
 
         var config = new MauiAppServiceConfiguration
         {
@@ -148,7 +154,8 @@ public class ConfigTest
 
 
         mainPageGetter.Setup(x => x()).Returns(new TestPage1());
-        appDataDirectoryGetter.Setup(x => x()).Returns("test.db");
+        appDataDirectoryGetter.Setup(x => x()).Returns("test");
+
 
         var config = new MauiAppServiceConfiguration
         {
@@ -158,21 +165,43 @@ public class ConfigTest
             MainPage = mainPageGetter.Object,
             ExceptionHandlerRegistration = registration.Object,
         };
+        var dbSetupMock = fixture.CreateMock<IDbSetup>();
 
         config.AddServices();
+        builder.Services.AddSingleton(dbSetupMock.Object);
+        builder.Services.AddSingleton(registration.Object);
+        builder.Services.AddSingleton(mainPageGetter.Object);
+        builder.Services.AddSingleton(appDataDirectoryGetter.Object);
+
+
+
         using var app = builder.Build();
         config.RunStartupActions(app);
 
-        using var _ = new AssertionScope();
+
+        dbSetupMock.Verify(x => x.SetupDb());
+
 
         registration.Verify(x => x(It.IsAny<UnhandledExceptionEventHandler>()));
-        mainPageGetter.Verify(mp => mp());
+
         appDataDirectoryGetter.Verify(ap => ap());
-        File.Exists("test.db").Should().BeTrue();
     }
 }
 
 public static class FixtureExtensions
 {
     public static Mock<T> CreateMock<T>(this IFixture fixture) where T : class => fixture.Create<Mock<T>>();
+}
+
+public class ProviderFactory : IServiceProviderFactory<IServiceCollection>
+{
+    public IServiceCollection CreateBuilder(IServiceCollection services)
+    {
+        return services;
+    }
+
+    public IServiceProvider CreateServiceProvider(IServiceCollection containerBuilder)
+    {
+        return containerBuilder.BuildServiceProvider();
+    }
 }

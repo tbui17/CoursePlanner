@@ -5,9 +5,13 @@ using Microsoft.Extensions.Logging;
 
 namespace ViewModels.Setup;
 
+public interface ISetupClient
+{
+    void Setup();
+}
 
-[Inject]
-public class SetupClient(DbSetup dbSetup, ILogger<SetupClient> logger)
+[Inject(typeof(ISetupClient))]
+public class SetupClient(IDbSetup dbSetup, ILogger<ISetupClient> logger) : ISetupClient
 {
     public void Setup()
     {
@@ -17,8 +21,13 @@ public class SetupClient(DbSetup dbSetup, ILogger<SetupClient> logger)
     }
 }
 
-[Inject]
-public class DbSetup(ILocalDbCtxFactory factory, ILogger<DbSetup> logger)
+public interface IDbSetup
+{
+    void SetupDb();
+}
+
+[Inject(typeof(IDbSetup))]
+public class DbSetup(ILocalDbCtxFactory factory, ILogger<IDbSetup> logger) : IDbSetup
 {
     public void SetupDb()
     {
