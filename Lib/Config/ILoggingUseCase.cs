@@ -20,8 +20,11 @@ public static class LogConfigurationBuilderExtensions
         useCase.AddSinks();
         useCase.AddEnrichments();
         useCase.AddLogFilters();
+        var logger = useCase.Configuration.CreateLogger();
+        Log.Logger = logger;
+
         return services
-            .AddSerilog(dispose:true)
+            .AddSerilog(logger,dispose:true)
             .AddLogging();
     }
 }

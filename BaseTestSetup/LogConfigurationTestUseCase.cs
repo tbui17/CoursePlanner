@@ -7,8 +7,6 @@ using Serilog.Formatting.Json;
 
 namespace BaseTestSetup;
 
-
-
 internal sealed class LogConfigurationTestUseCase : ILoggingUseCase
 {
     public LoggerConfiguration Configuration { get; set; } = new();
@@ -73,7 +71,6 @@ internal sealed class LogConfigurationTestUseCase : ILoggingUseCase
 
     public void AddLogFilters()
     {
-
         Configuration.Filter.ByExcluding(x => x.RenderMessage().Thru(InclusionFilters));
     }
 
@@ -85,9 +82,12 @@ internal sealed class LogConfigurationTestUseCase : ILoggingUseCase
         var key = Environment.GetEnvironmentVariable("SEQ_API_KEY");
 
 
-        if (!string.IsNullOrWhiteSpace(url) && !string.IsNullOrWhiteSpace(key))
+        if (string.IsNullOrWhiteSpace(url) || !string.IsNullOrWhiteSpace(key))
         {
-            Configuration.WriteTo.Seq(url, LogEventLevel.Information, apiKey: key);
+            Log.Warning("Seq URL or API key not found. Seq sink not added.");
+            return;
         }
+
+        Configuration.WriteTo.Seq(url, LogEventLevel.Information, apiKey: key);
     }
 }

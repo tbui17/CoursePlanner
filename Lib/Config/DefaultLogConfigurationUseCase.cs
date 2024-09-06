@@ -41,8 +41,8 @@ public class DefaultLogConfigurationUseCase : ILoggingUseCase
         RollingInterval = RollingInterval.Infinite,
         RetainedFileCountLimit = 3,
         RollOnFileSizeLimit = true,
-        Shared = true,
-        Buffered = true
+        FlushToDiskInterval = TimeSpan.FromSeconds(1),
+        Buffered = false
     };
 
     public void AddLogFilters()

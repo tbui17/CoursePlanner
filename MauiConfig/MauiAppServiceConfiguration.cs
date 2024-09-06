@@ -1,10 +1,13 @@
-﻿using Lib.Attributes;
+﻿using System.Diagnostics;
+using System.Text;
+using Lib.Attributes;
 using Lib.Config;
 using Lib.Models;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Events;
 using Serilog.Formatting.Json;
+using Serilog.Sinks.File;
 using ViewModels.Config;
 using ViewModels.ExceptionHandlers;
 using ViewModels.Services;
@@ -97,7 +100,8 @@ public class MauiLoggingUseCase : ILoggingUseCase
             RetainedFileCountLimit = 3,
             RollOnFileSizeLimit = true,
             Shared = false,
-            Buffered = true
+            FlushToDiskInterval = TimeSpan.FromMinutes(1),
+            Buffered = true,
         };
         Configuration.WriteTo.File(opts)
             .WriteTo.Console(LogEventLevel.Information);

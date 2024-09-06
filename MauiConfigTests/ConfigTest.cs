@@ -1,84 +1,48 @@
-using System.Collections.Concurrent;
-using System.Threading.Channels;
+using System.Linq.Expressions;
 using AutoFixture;
 using AutoFixture.AutoMoq;
 using FluentAssertions;
+using FluentAssertions.Collections;
 using FluentAssertions.Execution;
 using Lib.Attributes;
 using Lib.Services;
+using Lib.Services.NotificationService;
 using Lib.Validators;
 using MauiConfig;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Moq;
-using Serilog;
 using ViewModels.Config;
 using ViewModels.Domain;
 using ViewModels.ExceptionHandlers;
-using ViewModels.Setup;
 
 namespace MauiConfigTests;
 
 public class ConfigTest
 {
-    private class TestPage1 : ContentPage;
-
-    public async Task TearDown()
-    {
-        var channel = Channel.CreateBounded<FileSystemInfo>(Math.Max(Environment.ProcessorCount - 2, 1));
-
-        var tasks = new ConcurrentBag<Task>();
-        await channel.Writer.WriteAsync(new DirectoryInfo("."));
-
-        while (channel.Reader.TryRead(out var fsi))
-        {
-            Impl(fsi);
-        }
-
-        await Task.WhenAll(tasks);
-        return;
-
-        void Impl(FileSystemInfo fsi)
-        {
-            if (fsi is FileInfo fi)
-            {
-                if (fi.Name is "test.db" or "log.json")
-                {
-                    try
-                    {
-                        fi.Delete();
-                    }
-                    catch (Exception e)
-                    {
-                    }
-                }
-
-                return;
-            }
-
-            var dir = (DirectoryInfo)fsi;
-
-            dir.EnumerateFileSystemInfos()
-                .AsParallel()
-                .Select(x => channel.Writer.WriteAsync(x))
-                .Select(x => x.AsTask())
-                .ForAll(x => tasks.Add(x));
-        }
-    }
+    private MauiTestFixture _fixture;
 
 
-    [Test]
-    public void Configuration_ContainsRequiredDependencies()
+    [SetUp]
+    public void Setup()
     {
         var fixture = CreateFixture();
         var builder = MauiApp.CreateBuilder();
+        fixture.Inject(builder);
 
-        var serviceBuilder = fixture.CreateMock<IMauiServiceBuilder>();
-        var registration = fixture.CreateMock<Action<UnhandledExceptionEventHandler>>();
-        var mainPageGetter = fixture.CreateMock<MainPageGetter>();
-        var appDataDirectoryGetter = fixture.CreateMock<Func<string>>();
+        var serviceBuilder = fixture.FreezeMock<IMauiServiceBuilder>();
+        var registration = fixture.FreezeMock<Action<UnhandledExceptionEventHandler>>();
+        var mainPageGetter = fixture.FreezeMock<MainPageGetter>();
+
+        var testPage1 = new TestPage1();
+        mainPageGetter.Setup(x => x()).Returns(testPage1);
+        fixture.Inject(testPage1);
+
+        var fakeExceptionContext = fixture.Freeze<ExceptionContextFake>();
+        registration.Setup(x => x(It.IsAny<UnhandledExceptionEventHandler>()))
+            .Callback<UnhandledExceptionEventHandler>(x => fakeExceptionContext.Delegates.Add(x));
+
+        var appDataDirectoryGetter = fixture.FreezeMock<Func<string>>();
 
 
-        mainPageGetter.Setup(x => x()).Returns(new TestPage1());
         appDataDirectoryGetter.Setup(x => x()).Returns("test");
 
         var config = new MauiAppServiceConfiguration
@@ -91,12 +55,46 @@ public class ConfigTest
         };
 
         config.AddServices();
+        fixture.Inject(config);
+        fixture.Inject(config.Services);
+        fixture.Register(() => builder.Build());
 
-
-        config.Services.Should()
-            .HaveCountGreaterThan(30);
+        _fixture = new MauiTestFixture
+        {
+            Builder = builder,
+            Config = config,
+            Fixture = fixture,
+        };
     }
 
+    [Test]
+    public void ExceptionHandlerRegistration_ShouldOccur()
+    {
+        _fixture.RunStartupActions();
+        var registration = Mock.Get(_fixture.Config.ExceptionHandlerRegistration);
+        registration.ShouldCall();
+        _fixture.Fixture.Create<ExceptionContextFake>().Delegates.Should().HaveCount(1);
+    }
+
+    [Test]
+    public void DbSetup_ShouldOccur()
+    {
+        _fixture.RunStartupActions();
+        var mainPageGetter = Mock.Get(_fixture.Config.MainPage);
+        mainPageGetter.ShouldCall();
+    }
+
+    [Test]
+    public void Configuration_ContainsRequiredDependencies()
+    {
+        _fixture.Builder.Services
+            .Select(x => x.ImplementationType)
+            .Should()
+            .Contain(x => x == typeof(AccountService))
+            .And.Contain(x => x == typeof(LoginFieldValidator))
+            .And.Contain(x => x == typeof(LoginViewModel))
+            .And.Contain(x => x == typeof(NotificationService));
+    }
 
     private static IFixture CreateFixture()
     {
@@ -139,69 +137,55 @@ public class ConfigTest
         services.Should()
             .ContainSingle(x => x.ServiceType == typeof(IAccountService));
     }
-
-
-    [Test]
-    public void Configuration_PerformsExpectedStartupActions()
-    {
-        var fixture = CreateFixture();
-        var builder = MauiApp.CreateBuilder();
-
-        var serviceBuilder = fixture.CreateMock<IMauiServiceBuilder>();
-        var registration = fixture.CreateMock<Action<UnhandledExceptionEventHandler>>();
-        var mainPageGetter = fixture.CreateMock<MainPageGetter>();
-        var appDataDirectoryGetter = fixture.CreateMock<Func<string>>();
-
-
-        mainPageGetter.Setup(x => x()).Returns(new TestPage1());
-        appDataDirectoryGetter.Setup(x => x()).Returns("test");
-
-
-        var config = new MauiAppServiceConfiguration
-        {
-            ServiceBuilder = serviceBuilder.Object,
-            Services = builder.Services,
-            AppDataDirectory = appDataDirectoryGetter.Object,
-            MainPage = mainPageGetter.Object,
-            ExceptionHandlerRegistration = registration.Object,
-        };
-        var dbSetupMock = fixture.CreateMock<IDbSetup>();
-
-        config.AddServices();
-        builder.Services.AddSingleton(dbSetupMock.Object);
-        builder.Services.AddSingleton(registration.Object);
-        builder.Services.AddSingleton(mainPageGetter.Object);
-        builder.Services.AddSingleton(appDataDirectoryGetter.Object);
-
-
-
-        using var app = builder.Build();
-        config.RunStartupActions(app);
-
-
-        dbSetupMock.Verify(x => x.SetupDb());
-
-
-        registration.Verify(x => x(It.IsAny<UnhandledExceptionEventHandler>()));
-
-        appDataDirectoryGetter.Verify(ap => ap());
-    }
 }
 
-public static class FixtureExtensions
+file static class FixtureExtensions
 {
+    public static Mock<T> FreezeMock<T>(this IFixture fixture) where T : class => fixture.Freeze<Mock<T>>();
     public static Mock<T> CreateMock<T>(this IFixture fixture) where T : class => fixture.Create<Mock<T>>();
 }
 
-public class ProviderFactory : IServiceProviderFactory<IServiceCollection>
+file static class MockExtensions
 {
-    public IServiceCollection CreateBuilder(IServiceCollection services)
+    public static AndWhichConstraint<GenericCollectionAssertions<IInvocation>, IInvocation> ShouldCall<T>(
+        this Mock<T> mock, Expression<Func<T, string>> expr) where T : class
     {
-        return services;
+        var expr2 = (ConstantExpression)expr.Body;
+
+        var str = (string)expr2.Value!;
+
+        return mock.Invocations.Should().Contain(x => x.Method.Name == str);
     }
 
-    public IServiceProvider CreateServiceProvider(IServiceCollection containerBuilder)
+    public static AndConstraint<GenericCollectionAssertions<IInvocation>> ShouldCall<T>(this Mock<T> mock)
+        where T : class
     {
-        return containerBuilder.BuildServiceProvider();
+        using var scope = new AssertionScope();
+        var mockInvocations = mock.Invocations.Where(x => x.Method.DeclaringType?.Name is { } s &&
+                                                          (s.StartsWith("Action") || s.StartsWith("Func")));
+
+        return mockInvocations.Should().NotBeEmpty($"{mock} should call a Func or Action.");
     }
+}
+
+public delegate string NameSelect<T>(Expression<Func<T, string>> expr);
+
+public record MauiTestFixture
+{
+    public required IFixture Fixture { get; init; }
+    public required MauiAppServiceConfiguration Config { get; init; }
+    public required MauiAppBuilder Builder { get; init; }
+
+    public void RunStartupActions()
+    {
+        var app = Builder.Build();
+        Config.RunStartupActions(app);
+    }
+}
+
+file class TestPage1 : ContentPage;
+
+public class ExceptionContextFake
+{
+    public List<Delegate> Delegates { get; } = [];
 }
