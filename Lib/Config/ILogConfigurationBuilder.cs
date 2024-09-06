@@ -2,7 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Configuration;
 
-namespace BaseTestSetup;
+namespace Lib.Config;
 
 public interface ILogConfigurationBuilder<out T>
 {

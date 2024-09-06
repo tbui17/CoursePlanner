@@ -5,9 +5,9 @@ using Serilog.Core;
 using Serilog.Events;
 using Serilog.Exceptions;
 
-namespace BaseTestSetup;
+namespace Lib.Config;
 
-public class DefaultLogConfigurationBuilder : ILogConfigurationBuilder<DefaultLogConfigurationBuilder>
+public class DefaultLogConfigurationUseCase : ILogConfigurationBuilder<DefaultLogConfigurationUseCase>
 {
     public LoggerConfiguration Configuration { get; set; } = new();
 
@@ -15,19 +15,19 @@ public class DefaultLogConfigurationBuilder : ILogConfigurationBuilder<DefaultLo
         "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}";
 
 
-    public DefaultLogConfigurationBuilder SetMinimumLogLevel(Action<LoggerMinimumLevelConfiguration> setter)
+    public DefaultLogConfigurationUseCase SetMinimumLogLevel(Action<LoggerMinimumLevelConfiguration> setter)
     {
         setter(Configuration.MinimumLevel);
         return this;
     }
 
-    public DefaultLogConfigurationBuilder AddDefaultSinks()
+    public DefaultLogConfigurationUseCase AddDefaultSinks()
     {
         Configuration.WriteTo.Console(LogEventLevel.Information, LogTemplate);
         return this;
     }
 
-    public DefaultLogConfigurationBuilder AddDefaultEnrichments()
+    public DefaultLogConfigurationUseCase AddDefaultEnrichments()
     {
         Configuration
             .Enrich.FromLogContext()
@@ -50,7 +50,7 @@ public class DefaultLogConfigurationBuilder : ILogConfigurationBuilder<DefaultLo
         Buffered = true
     };
 
-    public DefaultLogConfigurationBuilder AddFileSink(Func<FileSinkOptions, FileSinkOptions>? options = null)
+    public DefaultLogConfigurationUseCase AddFileSink(Func<FileSinkOptions, FileSinkOptions>? options = null)
     {
         var opts = options?.Invoke(Options) ?? Options;
         Configuration.WriteTo.File(opts);
@@ -58,7 +58,7 @@ public class DefaultLogConfigurationBuilder : ILogConfigurationBuilder<DefaultLo
     }
 
 
-    public DefaultLogConfigurationBuilder AddLogFilters()
+    public DefaultLogConfigurationUseCase AddLogFilters()
     {
         return this;
     }

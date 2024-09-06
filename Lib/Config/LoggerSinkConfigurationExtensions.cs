@@ -1,7 +1,7 @@
 using Serilog;
 using Serilog.Configuration;
 
-namespace BaseTestSetup;
+namespace Lib.Config;
 
 public static class LoggerSinkConfigurationExtensions
 {

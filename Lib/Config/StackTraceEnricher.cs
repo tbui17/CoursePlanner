@@ -3,7 +3,7 @@ using System.Reflection;
 using Serilog.Core;
 using Serilog.Events;
 
-namespace BaseTestSetup;
+namespace Lib.Config;
 
 internal class StackTraceEnricher : ILogEventEnricher
 {

@@ -9,7 +9,7 @@ public static class BaseTestConfig
 {
     public static IServiceCollection AddLogger(this IServiceCollection services, bool useGlobalLogger = true)
     {
-        return new LogConfigurationTestBuilder()
+        return new LogConfigurationTestUseCase()
             .SetMinimumLogLevel(x => x.Debug())
             .AddDefaultSinks()
             .AddDefaultEnrichments()

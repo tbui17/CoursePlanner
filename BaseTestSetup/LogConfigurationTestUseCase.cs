@@ -1,4 +1,5 @@
 using System.Text;
+using Lib.Config;
 using Lib.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -8,30 +9,30 @@ using Serilog.Formatting.Json;
 
 namespace BaseTestSetup;
 
-internal class LogConfigurationTestBuilder :  ILogConfigurationBuilder<LogConfigurationTestBuilder>
+internal sealed class LogConfigurationTestUseCase :  ILogConfigurationBuilder<LogConfigurationTestUseCase>
 {
 
     public LoggerConfiguration Configuration { get; set; } = new();
 
-    private DefaultLogConfigurationBuilder Base { get; set; }
+    private DefaultLogConfigurationUseCase Base { get; set; }
 
-    public LogConfigurationTestBuilder()
+    public LogConfigurationTestUseCase()
     {
-        Base = new DefaultLogConfigurationBuilder {Configuration = Configuration};
+        Base = new DefaultLogConfigurationUseCase {Configuration = Configuration};
     }
 
 
-    public LogConfigurationTestBuilder SetMinimumLogLevel(Action<LoggerMinimumLevelConfiguration> setter)
+    public LogConfigurationTestUseCase SetMinimumLogLevel(Action<LoggerMinimumLevelConfiguration> setter)
     {
         Base.SetMinimumLogLevel(setter);
         return this;
     }
 
-    public LogConfigurationTestBuilder AddDefaultSinks()
+    public LogConfigurationTestUseCase AddDefaultSinks()
     {
         Base.AddDefaultSinks();
         Configuration
-            .WriteTo.Debug(LogEventLevel.Debug, DefaultLogConfigurationBuilder.LogTemplate);
+            .WriteTo.Debug(LogEventLevel.Debug, DefaultLogConfigurationUseCase.LogTemplate);
         return this;
     }
 
@@ -49,7 +50,7 @@ internal class LogConfigurationTestBuilder :  ILogConfigurationBuilder<LogConfig
         RetainedFileTimeLimit = TimeSpan.FromDays(1)
     };
 
-    public LogConfigurationTestBuilder AddFileSink(Func<FileSinkOptions, FileSinkOptions>? options = null)
+    public LogConfigurationTestUseCase AddFileSink(Func<FileSinkOptions, FileSinkOptions>? options = null)
     {
 
 
@@ -60,14 +61,14 @@ internal class LogConfigurationTestBuilder :  ILogConfigurationBuilder<LogConfig
         return this;
     }
 
-    public LogConfigurationTestBuilder AddDefaultEnrichments()
+    public LogConfigurationTestUseCase AddDefaultEnrichments()
     {
         Base.AddDefaultEnrichments();
         AppDataRecord.Parse(AppDomain.CurrentDomain.BaseDirectory).Enrich(Configuration);
         return this;
     }
 
-    public LogConfigurationTestBuilder AddLogFilters()
+    public LogConfigurationTestUseCase AddLogFilters()
     {
         var shouldExcludeMessage = new Func<string, bool>[]
             {
@@ -79,20 +80,31 @@ internal class LogConfigurationTestBuilder :  ILogConfigurationBuilder<LogConfig
         return this;
     }
 
+    public LogConfigurationTestUseCase AddSeq(string? seqUrl = default, string? apiKey = default)
+    {
+        string? url = null;
+        string? key = null;
+        if (string.IsNullOrWhiteSpace(seqUrl))
+        {
+            url = Environment.GetEnvironmentVariable("SEQ_URL");
+        }
+        if (string.IsNullOrWhiteSpace(apiKey))
+        {
+            key = Environment.GetEnvironmentVariable("SEQ_API_KEY");
+        }
+
+        if (!string.IsNullOrWhiteSpace(url) && !string.IsNullOrWhiteSpace(key))
+        {
+            Configuration.WriteTo.Seq(url, LogEventLevel.Information, apiKey: key);
+        }
+
+        return this;
+    }
+
     public IServiceCollection Finalize(IServiceCollection services, bool useGlobalLogger = true)
     {
         return Base.Finalize(services, useGlobalLogger);
     }
 
-    public LogConfigurationTestBuilder AddSeq()
-    {
-        var url = Environment.GetEnvironmentVariable("SEQ_URL");
-        var apiKey = Environment.GetEnvironmentVariable("SEQ_API_KEY");
-        if (url is not null && apiKey is not null)
-        {
-            Configuration.WriteTo.Seq(url, LogEventLevel.Information, apiKey: apiKey);
-        }
 
-        return this;
-    }
 }

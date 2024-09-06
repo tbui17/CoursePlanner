@@ -6,7 +6,7 @@ using Serilog.Formatting;
 using Serilog.Formatting.Json;
 using Serilog.Sinks.File;
 
-namespace BaseTestSetup;
+namespace Lib.Config;
 
 public record FileSinkOptions
 {
