@@ -1,10 +1,12 @@
 ﻿
+using System.Text;
 using Lib;
 using Lib.Config;
 using Lib.Models;
 using Lib.Utils;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using Serilog.Events;
 using Serilog.Formatting.Json;
 using ViewModels.Config;
 using ViewModels.ExceptionHandlers;
@@ -20,7 +22,6 @@ public class MauiAppServiceConfiguration
     public required IMauiServiceBuilder ServiceBuilder { get; set; }
     public required Func<string> AppDataDirectory { get; set; }
     public required MainPageGetter MainPage { get; set; }
-    public required string AssemblyName { get; set; }
     public required Action<UnhandledExceptionEventHandler> ExceptionHandlerRegistration { get; set; }
 
 
@@ -36,9 +37,20 @@ public class MauiAppServiceConfiguration
     public IServiceCollection ConfigServices()
     {
 
+        var logPath = Path.Combine(AppDataDirectory(),"logs","log.json");
+
         var config = new LoggerConfiguration()
             .WriteTo.Console()
-            .WriteTo.File(new JsonFormatter(), AppDataDirectory() + "/logs/log.json", buffered: true)
+            .WriteTo.File(
+                formatter: new JsonFormatter(),
+                path: logPath,
+                restrictedToMinimumLevel: LogEventLevel.Information,
+                rollingInterval: RollingInterval.Infinite,
+                retainedFileCountLimit: 3,
+                rollOnFileSizeLimit: true,
+                shared: true,
+                buffered: true
+                )
             .Enrich.FromLogContext();
 
 #if DEBUG
@@ -53,9 +65,9 @@ public class MauiAppServiceConfiguration
         var serviceBuilder = ServiceBuilder;
         serviceBuilder.SetLogger(config);
 
-        var assemblyService = new AssemblyService(AppDomain.CurrentDomain);
 
-        var vmConfig = new ViewModelConfig(assemblyService, Services);
+
+        var vmConfig = new ViewModelConfig(Services);
 
         Services.AddBackendServices();
         vmConfig.AddServices();

@@ -1,4 +1,3 @@
-using Lib.Attributes;
 using Lib.Config;
 using Lib.ExceptionHandlers;
 using Lib.Interfaces;
@@ -17,6 +16,10 @@ namespace ViewModels.Config;
 
 public class ViewModelConfig(AssemblyService assemblyService, IServiceCollection services)
 {
+    public ViewModelConfig(IServiceCollection services) : this(new AssemblyService(AppDomain.CurrentDomain), services)
+    {
+    }
+
     public IServiceCollection AddServices()
     {
         services

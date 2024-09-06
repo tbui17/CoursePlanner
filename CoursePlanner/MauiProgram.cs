@@ -23,7 +23,6 @@ public static class MauiProgram
             .UseUraniumUIMaterial();
         var setup = new MauiAppServiceConfiguration
         {
-            AssemblyName = nameof(CoursePlanner),
             AppDataDirectory = () => FileSystem.Current.AppDataDirectory,
             MainPage = () => Application.Current?.MainPage,
             ExceptionHandlerRegistration = x => MauiExceptions.UnhandledException += x,
