@@ -1,13 +1,10 @@
-﻿using System.Diagnostics;
-using System.Text;
-using Lib.Attributes;
+﻿using Lib.Attributes;
 using Lib.Config;
 using Lib.Models;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Events;
 using Serilog.Formatting.Json;
-using Serilog.Sinks.File;
 using ViewModels.Config;
 using ViewModels.ExceptionHandlers;
 using ViewModels.Services;
@@ -27,7 +24,6 @@ public class MauiAppServiceConfiguration
     public void RunStartupActions(MauiApp app)
     {
         var handler = app.Services.GetRequiredService<IClientExceptionHandler>();
-
         ExceptionHandlerRegistration((_, e) => handler.OnUnhandledException(e).Wait());
         var client = app.Services.GetRequiredService<ISetupClient>();
         client.Setup();
@@ -46,6 +42,9 @@ public class MauiAppServiceConfiguration
         Services.AddBackendServices();
         vmConfig.AddServices();
 
+        var dataSource = $"{AppDataDirectory()}/database.db";
+
+        Log.Information("Registering SQLite database at {DataSource}", dataSource);
 
         Services
             .AddSingleton(MainPage)
@@ -74,7 +73,7 @@ public class MauiLoggingUseCase : ILoggingUseCase
     public MauiLoggingUseCase(string appDataDirectory)
     {
         _appDataDirectory = appDataDirectory;
-        Base = new DefaultLogConfigurationUseCase() { Configuration = Configuration };
+        Base = new DefaultLogConfigurationUseCase { Configuration = Configuration };
     }
 
     public LoggerConfiguration Configuration { get; set; } = new();
