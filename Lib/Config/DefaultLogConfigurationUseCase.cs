@@ -1,15 +1,10 @@
-using Microsoft.Extensions.DependencyInjection;
 using Serilog;
-using Serilog.Configuration;
-using Serilog.Core;
 using Serilog.Events;
 using Serilog.Exceptions;
 
 namespace Lib.Config;
 
-public interface IDefaultLogConfigurationBuilder : ILogConfigurationBuilder<IDefaultLogConfigurationBuilder>;
-
-public class DefaultLogConfigurationUseCase : IDefaultLogConfigurationBuilder
+public class DefaultLogConfigurationUseCase : ILoggingUseCase
 {
     public LoggerConfiguration Configuration { get; set; } = new();
 
@@ -17,19 +12,19 @@ public class DefaultLogConfigurationUseCase : IDefaultLogConfigurationBuilder
         "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}";
 
 
-    public IDefaultLogConfigurationBuilder SetMinimumLogLevel(Action<LoggerMinimumLevelConfiguration> setter)
+    public void SetMinimumLogLevel()
     {
-        setter(Configuration.MinimumLevel);
-        return this;
+        Configuration.MinimumLevel
+            .Information()
+            .WriteTo.File(FileSinkOptions);
     }
 
-    public IDefaultLogConfigurationBuilder AddDefaultSinks()
+    public void AddSinks()
     {
         Configuration.WriteTo.Console(LogEventLevel.Information, LogTemplate);
-        return this;
     }
 
-    public IDefaultLogConfigurationBuilder AddDefaultEnrichments()
+    public void AddEnrichments()
     {
         Configuration
             .Enrich.FromLogContext()
@@ -37,11 +32,9 @@ public class DefaultLogConfigurationUseCase : IDefaultLogConfigurationBuilder
             .Enrich.WithEnvironmentName()
             .Enrich.WithProperty("FriendlyApplicationName", AppDomain.CurrentDomain.FriendlyName)
             .Enrich.With(new StackTraceEnricher());
-
-        return this;
     }
 
-    private static readonly FileSinkOptions Options = new()
+    public static readonly FileSinkOptions FileSinkOptions = new()
     {
         Path = Path.Combine("logs", "logs.json"),
         RestrictedToMinimumLevel = LogEventLevel.Information,
@@ -52,34 +45,7 @@ public class DefaultLogConfigurationUseCase : IDefaultLogConfigurationBuilder
         Buffered = true
     };
 
-    public IDefaultLogConfigurationBuilder AddFileSink(Func<FileSinkOptions, FileSinkOptions>? options = null)
+    public void AddLogFilters()
     {
-        var opts = options?.Invoke(Options) ?? Options;
-        Configuration.WriteTo.File(opts);
-        return this;
-    }
-
-
-    public IDefaultLogConfigurationBuilder AddLogFilters()
-    {
-        return this;
-    }
-
-
-    public IServiceCollection Finalize(IServiceCollection services, bool useGlobalLogger = true)
-    {
-        Logger? logger = null;
-        if (useGlobalLogger)
-        {
-            Log.Logger = Configuration.CreateLogger();
-        }
-        else
-        {
-            logger = Configuration.CreateLogger();
-        }
-
-        return services
-            .AddSerilog(logger, dispose: true)
-            .AddLogging();
     }
 }

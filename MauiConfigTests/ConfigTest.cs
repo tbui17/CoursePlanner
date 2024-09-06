@@ -84,7 +84,7 @@ public class ConfigTest
             ExceptionHandlerRegistration = registration.Object,
         };
 
-        config.ConfigServices();
+        config.AddServices();
 
 
         config.Services.Should()
@@ -159,15 +159,15 @@ public class ConfigTest
             ExceptionHandlerRegistration = registration.Object,
         };
 
-        config.ConfigServices();
+        config.AddServices();
         using var app = builder.Build();
         config.RunStartupActions(app);
 
         using var _ = new AssertionScope();
 
         registration.Verify(x => x(It.IsAny<UnhandledExceptionEventHandler>()));
-        mainPageGetter.Verify(x => x());
-        appDataDirectoryGetter.Verify(x => x());
+        mainPageGetter.Verify(mp => mp());
+        appDataDirectoryGetter.Verify(ap => ap());
         File.Exists("test.db").Should().BeTrue();
     }
 }

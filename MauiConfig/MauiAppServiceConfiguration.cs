@@ -1,9 +1,5 @@
-﻿
-using System.Text;
-using Lib;
-using Lib.Config;
+﻿using Lib.Config;
 using Lib.Models;
-using Lib.Utils;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Events;
@@ -17,7 +13,6 @@ namespace MauiConfig;
 
 public class MauiAppServiceConfiguration
 {
-
     public required IServiceCollection Services { get; set; }
     public required IMauiServiceBuilder ServiceBuilder { get; set; }
     public required Func<string> AppDataDirectory { get; set; }
@@ -32,25 +27,26 @@ public class MauiAppServiceConfiguration
         ExceptionHandlerRegistration((_, e) => handler.OnUnhandledException(e).Wait());
         var client = app.Services.GetRequiredService<SetupClient>();
         client.Setup();
-
     }
-    public IServiceCollection ConfigServices()
-    {
 
-        var logPath = Path.Combine(AppDataDirectory(),"logs","log.json");
+    public void AddServices()
+    {
+        var logPath = Path.Combine(AppDataDirectory(), "logs", "log.json");
+        var fileSinkOptions = new FileSinkOptions
+        {
+            Formatter = new JsonFormatter(),
+            Path = logPath,
+            RestrictedToMinimumLevel = LogEventLevel.Information,
+            RollingInterval = RollingInterval.Infinite,
+            RetainedFileCountLimit = 3,
+            RollOnFileSizeLimit = true,
+            Shared = false,
+            Buffered = true
+        };
 
         var config = new LoggerConfiguration()
             .WriteTo.Console()
-            .WriteTo.File(
-                formatter: new JsonFormatter(),
-                path: logPath,
-                restrictedToMinimumLevel: LogEventLevel.Information,
-                rollingInterval: RollingInterval.Infinite,
-                retainedFileCountLimit: 3,
-                rollOnFileSizeLimit: true,
-                shared: true,
-                buffered: true
-                )
+            .WriteTo.File(fileSinkOptions)
             .Enrich.FromLogContext();
 
 #if DEBUG
@@ -60,10 +56,7 @@ public class MauiAppServiceConfiguration
 #endif
 
 
-
-
         var serviceBuilder = ServiceBuilder;
-
 
 
         var vmConfig = new ViewModelConfig(Services);
@@ -89,8 +82,55 @@ public class MauiAppServiceConfiguration
 
         serviceBuilder.AddViews();
         serviceBuilder.AddAppServices();
+    }
+}
 
-        return Services;
+public class MauiLoggingUseCase : ILoggingUseCase
+{
+    private readonly string _appDataDirectory;
+
+    public MauiLoggingUseCase(string appDataDirectory)
+    {
+        _appDataDirectory = appDataDirectory;
+        Base = new DefaultLogConfigurationUseCase() { Configuration = Configuration };
     }
 
+    public LoggerConfiguration Configuration { get; set; } = new();
+    private DefaultLogConfigurationUseCase Base { get; set; }
+
+    public void SetMinimumLogLevel()
+    {
+#if DEBUG
+        Configuration.MinimumLevel.Debug().WriteTo.Debug(LogEventLevel.Debug);
+#elif RELEASE
+         Configuration.MinimumLevel.Information();
+#endif
+    }
+
+    public void AddSinks()
+    {
+        var opts = DefaultLogConfigurationUseCase.FileSinkOptions with
+        {
+            Formatter = new JsonFormatter(),
+            Path = Path.Combine(_appDataDirectory, "logs", "log.json"),
+            RestrictedToMinimumLevel = LogEventLevel.Information,
+            RollingInterval = RollingInterval.Infinite,
+            RetainedFileCountLimit = 3,
+            RollOnFileSizeLimit = true,
+            Shared = true,
+            Buffered = true
+        };
+        Configuration.WriteTo.File(opts)
+            .WriteTo.Console(LogEventLevel.Information);
+    }
+
+    public void AddEnrichments()
+    {
+        Base.AddEnrichments();
+    }
+
+    public void AddLogFilters()
+    {
+        Base.AddLogFilters();
+    }
 }

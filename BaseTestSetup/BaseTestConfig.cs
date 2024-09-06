@@ -1,4 +1,6 @@
-﻿namespace BaseTestSetup;
+﻿using Lib.Config;
+
+namespace BaseTestSetup;
 
 using Lib.Models;
 using Microsoft.EntityFrameworkCore;
@@ -7,16 +9,9 @@ using Serilog;
 
 public static class BaseTestConfig
 {
-    public static IServiceCollection AddLogger(this IServiceCollection services, bool useGlobalLogger = true)
+    public static IServiceCollection AddLogger(this IServiceCollection services)
     {
-        return new LogConfigurationTestUseCase()
-            .SetMinimumLogLevel(x => x.Debug())
-            .AddDefaultSinks()
-            .AddDefaultEnrichments()
-            .AddFileSink()
-            .AddLogFilters()
-            .AddSeq()
-            .Finalize(services, useGlobalLogger);
+        return services.AddLoggingUseCase(new LogConfigurationTestUseCase());
     }
 
     public static IServiceCollection AddTestDatabase(this IServiceCollection services, string? fileName = null)

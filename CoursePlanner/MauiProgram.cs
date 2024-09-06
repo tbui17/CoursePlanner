@@ -4,6 +4,7 @@ using CoursePlanner.Pages;
 using CoursePlanner.Services;
 using CoursePlanner.Views;
 using MauiConfig;
+using Microsoft.Extensions.Configuration;
 using Plugin.LocalNotification;
 using UraniumUI;
 using ViewModels.Services;
@@ -28,7 +29,7 @@ public static class MauiProgram
             Services = builder.Services,
             ServiceBuilder = new MauiServiceBuilder(builder.Services)
         };
-        setup.ConfigServices();
+        setup.AddServices();
 
         var app = builder.Build();
         setup.RunStartupActions(app);

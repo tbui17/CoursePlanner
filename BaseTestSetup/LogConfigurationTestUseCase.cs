@@ -1,44 +1,38 @@
 using System.Text;
 using Lib.Config;
 using Lib.Utils;
-using Microsoft.Extensions.DependencyInjection;
 using Serilog;
-using Serilog.Configuration;
 using Serilog.Events;
 using Serilog.Formatting.Json;
 
 namespace BaseTestSetup;
 
-internal interface ILogConfigurationTestUseCase : ILogConfigurationBuilder<ILogConfigurationTestUseCase>
-{
-    ILogConfigurationTestUseCase AddSeq(string? seqUrl = default, string? apiKey = default);
-}
 
-internal sealed class LogConfigurationTestUseCase :  ILogConfigurationTestUseCase
-{
 
+internal sealed class LogConfigurationTestUseCase : ILoggingUseCase
+{
     public LoggerConfiguration Configuration { get; set; } = new();
 
     private DefaultLogConfigurationUseCase Base { get; set; }
 
     public LogConfigurationTestUseCase()
     {
-        Base = new DefaultLogConfigurationUseCase {Configuration = Configuration};
+        Base = new DefaultLogConfigurationUseCase { Configuration = Configuration };
     }
 
 
-    public ILogConfigurationTestUseCase SetMinimumLogLevel(Action<LoggerMinimumLevelConfiguration> setter)
+    public void SetMinimumLogLevel()
     {
-        Base.SetMinimumLogLevel(setter);
-        return this;
+        Configuration.MinimumLevel.Debug();
     }
 
-    public ILogConfigurationTestUseCase AddDefaultSinks()
+    public void AddSinks()
     {
-        Base.AddDefaultSinks();
+        Base.AddSinks();
         Configuration
-            .WriteTo.Debug(LogEventLevel.Debug, DefaultLogConfigurationUseCase.LogTemplate);
-        return this;
+            .WriteTo
+            .Debug(LogEventLevel.Debug, DefaultLogConfigurationUseCase.LogTemplate);
+        AddSeq();
     }
 
     private static readonly FileSinkOptions Options = new()
@@ -55,61 +49,45 @@ internal sealed class LogConfigurationTestUseCase :  ILogConfigurationTestUseCas
         RetainedFileTimeLimit = TimeSpan.FromDays(1)
     };
 
-    public ILogConfigurationTestUseCase AddFileSink(Func<FileSinkOptions, FileSinkOptions>? options = null)
+    public void AddFileSink(Func<FileSinkOptions, FileSinkOptions>? options = null)
     {
-
-
         var opts = options?.Invoke(Options) ?? Options;
 
         Configuration.WriteTo.File(opts);
-
-        return this;
     }
 
-    public ILogConfigurationTestUseCase AddDefaultEnrichments()
+    public void AddEnrichments()
     {
-        Base.AddDefaultEnrichments();
-        AppDataRecord.Parse(AppDomain.CurrentDomain.BaseDirectory).Enrich(Configuration);
-        return this;
+        Base.AddEnrichments();
+        AppDataRecord
+            .Parse(AppDomain.CurrentDomain.BaseDirectory)
+            .Enrich(Configuration);
     }
 
-    public ILogConfigurationTestUseCase AddLogFilters()
-    {
-        var shouldExcludeMessage = new Func<string, bool>[]
-            {
-                x => x.Contains("CREATE"),
-                x => x.Contains("PRAGMA"),
-            }
-            .ToAnyPredicate();
-        Configuration.Filter.ByExcluding(x => x.RenderMessage().Thru(shouldExcludeMessage));
-        return this;
-    }
-
-    public ILogConfigurationTestUseCase AddSeq(string? seqUrl = default, string? apiKey = default)
-    {
-        string? url = null;
-        string? key = null;
-        if (string.IsNullOrWhiteSpace(seqUrl))
+    private static readonly Func<string, bool> InclusionFilters = new Func<string, bool>[]
         {
-            url = Environment.GetEnvironmentVariable("SEQ_URL");
+            x => x.Contains("CREATE"),
+            x => x.Contains("PRAGMA"),
         }
-        if (string.IsNullOrWhiteSpace(apiKey))
-        {
-            key = Environment.GetEnvironmentVariable("SEQ_API_KEY");
-        }
+        .ToAnyPredicate();
+
+    public void AddLogFilters()
+    {
+
+        Configuration.Filter.ByExcluding(x => x.RenderMessage().Thru(InclusionFilters));
+    }
+
+    private void AddSeq()
+    {
+        var url = Environment.GetEnvironmentVariable("SEQ_URL");
+
+
+        var key = Environment.GetEnvironmentVariable("SEQ_API_KEY");
+
 
         if (!string.IsNullOrWhiteSpace(url) && !string.IsNullOrWhiteSpace(key))
         {
             Configuration.WriteTo.Seq(url, LogEventLevel.Information, apiKey: key);
         }
-
-        return this;
     }
-
-    public IServiceCollection Finalize(IServiceCollection services, bool useGlobalLogger = true)
-    {
-        return Base.Finalize(services, useGlobalLogger);
-    }
-
-
 }
