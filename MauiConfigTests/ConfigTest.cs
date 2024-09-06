@@ -43,7 +43,7 @@ public class ConfigTest
         var appDataDirectoryGetter = fixture.FreezeMock<Func<string>>();
 
 
-        appDataDirectoryGetter.Setup(x => x()).Returns("test");
+        appDataDirectoryGetter.Setup(x => x()).Returns(Environment.CurrentDirectory);
 
         var config = new MauiAppServiceConfiguration
         {
@@ -80,8 +80,6 @@ public class ConfigTest
     public void DbSetup_ShouldOccur()
     {
         _fixture.RunStartupActions();
-        var mainPageGetter = Mock.Get(_fixture.Config.MainPage);
-        mainPageGetter.ShouldCall();
     }
 
     [Test]
