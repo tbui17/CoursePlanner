@@ -4,7 +4,7 @@ using Serilog.Configuration;
 
 namespace Lib.Config;
 
-public interface ILogConfigurationBuilder<out T>
+public interface ILogConfigurationBuilder<out T> where T : ILogConfigurationBuilder<T>
 {
     LoggerConfiguration Configuration { get; set; }
     T SetMinimumLogLevel(Action<LoggerMinimumLevelConfiguration> setter);

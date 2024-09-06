@@ -63,7 +63,6 @@ public class MauiAppServiceConfiguration
 
 
         var serviceBuilder = ServiceBuilder;
-        serviceBuilder.SetLogger(config);
 
 
 
@@ -94,11 +93,4 @@ public class MauiAppServiceConfiguration
         return Services;
     }
 
-}
-
-public interface IMauiServiceBuilder
-{
-    void AddViews();
-    void AddAppServices();
-    void SetLogger(LoggerConfiguration logger);
 }

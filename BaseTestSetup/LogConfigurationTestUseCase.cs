@@ -9,7 +9,12 @@ using Serilog.Formatting.Json;
 
 namespace BaseTestSetup;
 
-internal sealed class LogConfigurationTestUseCase :  ILogConfigurationBuilder<LogConfigurationTestUseCase>
+internal interface ILogConfigurationTestUseCase : ILogConfigurationBuilder<ILogConfigurationTestUseCase>
+{
+    ILogConfigurationTestUseCase AddSeq(string? seqUrl = default, string? apiKey = default);
+}
+
+internal sealed class LogConfigurationTestUseCase :  ILogConfigurationTestUseCase
 {
 
     public LoggerConfiguration Configuration { get; set; } = new();
@@ -22,13 +27,13 @@ internal sealed class LogConfigurationTestUseCase :  ILogConfigurationBuilder<Lo
     }
 
 
-    public LogConfigurationTestUseCase SetMinimumLogLevel(Action<LoggerMinimumLevelConfiguration> setter)
+    public ILogConfigurationTestUseCase SetMinimumLogLevel(Action<LoggerMinimumLevelConfiguration> setter)
     {
         Base.SetMinimumLogLevel(setter);
         return this;
     }
 
-    public LogConfigurationTestUseCase AddDefaultSinks()
+    public ILogConfigurationTestUseCase AddDefaultSinks()
     {
         Base.AddDefaultSinks();
         Configuration
@@ -50,7 +55,7 @@ internal sealed class LogConfigurationTestUseCase :  ILogConfigurationBuilder<Lo
         RetainedFileTimeLimit = TimeSpan.FromDays(1)
     };
 
-    public LogConfigurationTestUseCase AddFileSink(Func<FileSinkOptions, FileSinkOptions>? options = null)
+    public ILogConfigurationTestUseCase AddFileSink(Func<FileSinkOptions, FileSinkOptions>? options = null)
     {
 
 
@@ -61,14 +66,14 @@ internal sealed class LogConfigurationTestUseCase :  ILogConfigurationBuilder<Lo
         return this;
     }
 
-    public LogConfigurationTestUseCase AddDefaultEnrichments()
+    public ILogConfigurationTestUseCase AddDefaultEnrichments()
     {
         Base.AddDefaultEnrichments();
         AppDataRecord.Parse(AppDomain.CurrentDomain.BaseDirectory).Enrich(Configuration);
         return this;
     }
 
-    public LogConfigurationTestUseCase AddLogFilters()
+    public ILogConfigurationTestUseCase AddLogFilters()
     {
         var shouldExcludeMessage = new Func<string, bool>[]
             {
@@ -80,7 +85,7 @@ internal sealed class LogConfigurationTestUseCase :  ILogConfigurationBuilder<Lo
         return this;
     }
 
-    public LogConfigurationTestUseCase AddSeq(string? seqUrl = default, string? apiKey = default)
+    public ILogConfigurationTestUseCase AddSeq(string? seqUrl = default, string? apiKey = default)
     {
         string? url = null;
         string? key = null;

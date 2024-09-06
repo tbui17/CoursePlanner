@@ -7,7 +7,9 @@ using Serilog.Exceptions;
 
 namespace Lib.Config;
 
-public class DefaultLogConfigurationUseCase : ILogConfigurationBuilder<DefaultLogConfigurationUseCase>
+public interface IDefaultLogConfigurationBuilder : ILogConfigurationBuilder<IDefaultLogConfigurationBuilder>;
+
+public class DefaultLogConfigurationUseCase : IDefaultLogConfigurationBuilder
 {
     public LoggerConfiguration Configuration { get; set; } = new();
 
@@ -15,19 +17,19 @@ public class DefaultLogConfigurationUseCase : ILogConfigurationBuilder<DefaultLo
         "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}";
 
 
-    public DefaultLogConfigurationUseCase SetMinimumLogLevel(Action<LoggerMinimumLevelConfiguration> setter)
+    public IDefaultLogConfigurationBuilder SetMinimumLogLevel(Action<LoggerMinimumLevelConfiguration> setter)
     {
         setter(Configuration.MinimumLevel);
         return this;
     }
 
-    public DefaultLogConfigurationUseCase AddDefaultSinks()
+    public IDefaultLogConfigurationBuilder AddDefaultSinks()
     {
         Configuration.WriteTo.Console(LogEventLevel.Information, LogTemplate);
         return this;
     }
 
-    public DefaultLogConfigurationUseCase AddDefaultEnrichments()
+    public IDefaultLogConfigurationBuilder AddDefaultEnrichments()
     {
         Configuration
             .Enrich.FromLogContext()
@@ -50,7 +52,7 @@ public class DefaultLogConfigurationUseCase : ILogConfigurationBuilder<DefaultLo
         Buffered = true
     };
 
-    public DefaultLogConfigurationUseCase AddFileSink(Func<FileSinkOptions, FileSinkOptions>? options = null)
+    public IDefaultLogConfigurationBuilder AddFileSink(Func<FileSinkOptions, FileSinkOptions>? options = null)
     {
         var opts = options?.Invoke(Options) ?? Options;
         Configuration.WriteTo.File(opts);
@@ -58,7 +60,7 @@ public class DefaultLogConfigurationUseCase : ILogConfigurationBuilder<DefaultLo
     }
 
 
-    public DefaultLogConfigurationUseCase AddLogFilters()
+    public IDefaultLogConfigurationBuilder AddLogFilters()
     {
         return this;
     }

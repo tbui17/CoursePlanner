@@ -5,7 +5,6 @@ using CoursePlanner.Services;
 using CoursePlanner.Views;
 using MauiConfig;
 using Plugin.LocalNotification;
-using Serilog;
 using UraniumUI;
 using ViewModels.Services;
 
@@ -64,10 +63,5 @@ file class MauiServiceBuilder(IServiceCollection services) : IMauiServiceBuilder
             .AddSingleton<AppShell>()
             .AddSingleton<ISessionService, SessionService>()
             .AddSingleton<INavigationService, NavigationService>();
-    }
-
-    public void SetLogger(LoggerConfiguration logger)
-    {
-        Log.Logger = logger.CreateLogger();
     }
 }
