@@ -82,7 +82,7 @@ internal sealed class LogConfigurationTestUseCase : ILoggingUseCase
         var key = Environment.GetEnvironmentVariable("SEQ_API_KEY");
 
 
-        if (string.IsNullOrWhiteSpace(url) || !string.IsNullOrWhiteSpace(key))
+        if (string.IsNullOrWhiteSpace(url) || string.IsNullOrWhiteSpace(key))
         {
             Log.Warning("Seq URL or API key not found. Seq sink not added.");
             return;
