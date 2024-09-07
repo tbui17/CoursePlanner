@@ -1,10 +1,10 @@
+using AutoFixture;
 using BaseTestSetup;
 using Lib.Attributes;
-using Lib.Config;
 using Lib.Models;
 using Lib.Utils;
 using Microsoft.Data.Sqlite;
-using Serilog;
+using Moq;
 using ViewModels.Config;
 using ViewModels.Domain;
 using ViewModels.Services;
@@ -52,6 +52,13 @@ public abstract class BaseTest : IBaseTest
     }
 
     public T Resolve<T>() where T : notnull => Provider.GetRequiredService<T>();
+
+    protected IFixture CreateFixture()
+    {
+        return Globals.CreateFixture();
+    }
+
+    protected Mock<T> CreateMock<T>() where T : class => CreateFixture().Create<Mock<T>>();
 
 
     public async Task<LocalDbCtx> GetDb() =>

@@ -2,12 +2,13 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using Lib.Attributes;
 using Lib.Models;
 using Lib.Services.ReportService;
+using Microsoft.Extensions.Logging;
 using ViewModels.Interfaces;
 
 namespace ViewModels.Domain;
 
 [Inject]
-public partial class StatsViewModel(ReportService reportService) : ObservableObject, IRefresh
+public partial class StatsViewModel(ReportService reportService, ILogger<StatsViewModel> logger ) : ObservableObject, IRefresh
 {
 
     [ObservableProperty]
@@ -16,7 +17,9 @@ public partial class StatsViewModel(ReportService reportService) : ObservableObj
 
     public async Task RefreshAsync()
     {
+        logger.LogDebug("RefreshAsync triggered");
         var res = await reportService.GetDurationReport();
+        logger.LogDebug("{DurationReport}", res);
         DurationReport = (AggregateDurationReport)res;
     }
 }

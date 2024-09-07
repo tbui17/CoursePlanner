@@ -7,7 +7,8 @@ public class AppService(ILogger<AppService> logger) : IAppService
 {
     public async Task ShareAsync(ShareTextRequest request)
     {
-        logger.LogInformation("Sharing {Text}", request.Text);
+
+        logger.LogInformation("Sharing {Request}", request);
         await Share.RequestAsync(request);
     }
 
@@ -16,7 +17,7 @@ public class AppService(ILogger<AppService> logger) : IAppService
 
     public async Task ShowErrorAsync(string message)
     {
-        logger.LogError("Showing error message: {Message}", message);
+        logger.LogInformation("Showing user error message: {Message}", message);
         await Current.DisplayAlert("Error", message, "OK");
     }
 
@@ -37,6 +38,7 @@ public class AppService(ILogger<AppService> logger) : IAppService
 
     public async Task AlertAsync(string message)
     {
+        logger.LogInformation("Showing user alert message: {Message}", message);
         await Current.DisplayAlert("Alert", message, "OK");
     }
 }

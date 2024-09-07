@@ -17,7 +17,7 @@ public class MauiAppServiceConfiguration
     public required IServiceCollection Services { get; set; }
     public required IMauiServiceBuilder ServiceBuilder { get; set; }
     public required Func<string> AppDataDirectory { get; set; }
-    public required MainPageGetter MainPage { get; set; }
+    public required IMessageDisplay MainPage { get; set; }
     public required Action<UnhandledExceptionEventHandler> ExceptionHandlerRegistration { get; set; }
 
 

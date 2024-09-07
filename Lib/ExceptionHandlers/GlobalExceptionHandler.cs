@@ -10,7 +10,7 @@ namespace Lib.ExceptionHandlers;
 [Inject]
 public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger)
 {
-    public async Task<ExceptionResult> HandleAsync(Exception exc)
+    public GlobalExceptionHandlerResult Handle(Exception exc)
     {
         switch (exc)
         {
@@ -22,22 +22,22 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger)
                 or ReferenceConstraintException
                 ):
                 logger.LogInformation(e, "Database Domain Exception: {Message}", e.Message);
-                return ExceptionResult.From(e);
+                return GlobalExceptionHandlerResult.From(e);
             case DomainException e:
                 logger.LogInformation(e, "Domain Exception: {Message}", e.Message);
-                return new ExceptionResult(e, e.Message, true);
+                return new GlobalExceptionHandlerResult(e, e.Message, true);
             default:
                 logger.LogError(exc, "Unhandled Exception: {Message}", exc.Message);
-                return new ExceptionResult(exc, exc.Message);
+                return new GlobalExceptionHandlerResult(exc, exc.Message);
         }
     }
 }
 
-public record ExceptionResult(Exception? Exception = null, string Message = "", bool UserFriendly = false)
+public record GlobalExceptionHandlerResult(Exception? Exception = null, string Message = "", bool UserFriendly = false)
 {
     public Exception Exception { get; init; } = Exception ?? new Exception("");
 
-    internal static ExceptionResult From(DbUpdateException exception)
+    internal static GlobalExceptionHandlerResult From(DbUpdateException exception)
     {
         var message = exception switch
         {
@@ -48,6 +48,6 @@ public record ExceptionResult(Exception? Exception = null, string Message = "", 
             ReferenceConstraintException => "The chosen entry does not exist.",
             _ => throw new UnreachableException($"Unexpected exception type: {exception.GetType()}")
         };
-        return new ExceptionResult(exception, message, true);
+        return new GlobalExceptionHandlerResult(exception, message, true);
     }
 };

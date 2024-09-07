@@ -1,4 +1,5 @@
 ﻿using Lib.Models;
+using Serilog;
 
 namespace Lib.Utils;
 
@@ -124,7 +125,7 @@ public class TestDataFactory
             }
         }
 
-        return new TestDataResult
+        var res = new TestDataResult
         {
             Terms = terms,
             Instructors = instructors,
@@ -134,6 +135,9 @@ public class TestDataFactory
             Users = [new User{Id = 1, Username = "TestAccount12345", Password = "TestPassword12345"}],
             UserSettings = [new UserSetting{Id = 1, UserId = 1, NotificationRange = TimeSpan.FromDays(5)}]
         };
+
+        Log.ForContext<TestDataFactory>().Verbose("Created test data {Data}", res);
+        return res;
     }
 
 

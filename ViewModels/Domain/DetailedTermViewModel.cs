@@ -5,13 +5,14 @@ using CommunityToolkit.Mvvm.Input;
 using Lib.Attributes;
 using Lib.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using ViewModels.Interfaces;
 using ViewModels.Services;
 
 namespace ViewModels.Domain;
 
 [Inject]
-public partial class DetailedTermViewModel(ILocalDbCtxFactory factory, INavigationService navService, IAppService appService)
+public partial class DetailedTermViewModel(ILocalDbCtxFactory factory, INavigationService navService, IAppService appService, ILogger<DetailedTermViewModel> logger)
     : ObservableObject, IRefreshId
 {
     [ObservableProperty]
@@ -30,6 +31,7 @@ public partial class DetailedTermViewModel(ILocalDbCtxFactory factory, INavigati
 
     public async Task Init(int id)
     {
+        logger.LogDebug("Init triggered {Id}",id);
         Id = id;
         SelectedCourse = null;
         await using var db = await factory.CreateDbContextAsync();
@@ -41,6 +43,7 @@ public partial class DetailedTermViewModel(ILocalDbCtxFactory factory, INavigati
                .AsSplitQuery()
                .FirstOrDefaultAsync(x => x.Id == id) ??
             new();
+
         Term = res;
     }
 
@@ -65,9 +68,13 @@ public partial class DetailedTermViewModel(ILocalDbCtxFactory factory, INavigati
     [RelayCommand]
     public async Task AddCourseAsync()
     {
+
         await using var db = await factory.CreateDbContextAsync();
 
+        using var _ = logger.BeginScope("{Method}", nameof(AddCourseAsync));
+
         var courseCount = await db.Courses.CountAsync(x => x.TermId == Term.Id);
+        logger.LogDebug("Course count {CourseCount}",courseCount);
         if (courseCount >= 6)
         {
             await appService.ShowErrorAsync("You can only have up to 6 courses per term");
@@ -76,6 +83,7 @@ public partial class DetailedTermViewModel(ILocalDbCtxFactory factory, INavigati
         }
 
         var name = await appService.DisplayNamePromptAsync();
+        logger.LogDebug("{Name}",name);
         if (name is null)
         {
             return;
@@ -83,6 +91,7 @@ public partial class DetailedTermViewModel(ILocalDbCtxFactory factory, INavigati
 
         var course = Term.CreateCourse();
         course.Name = name;
+        logger.LogDebug("{Course}",course);
 
         db.Courses.Add(course);
         await db.SaveChangesAsync();
@@ -92,6 +101,7 @@ public partial class DetailedTermViewModel(ILocalDbCtxFactory factory, INavigati
     [RelayCommand]
     public async Task DeleteCourseAsync()
     {
+        logger.LogDebug("Delete triggered {SelectedCourse}",SelectedCourse);
         if (SelectedCourse is null) return;
         await using var db = await factory.CreateDbContextAsync();
         await db
@@ -103,6 +113,7 @@ public partial class DetailedTermViewModel(ILocalDbCtxFactory factory, INavigati
     [RelayCommand]
     public async Task DetailedCourseAsync()
     {
+        logger.LogDebug("Detailed course triggered {SelectedCourse}",SelectedCourse);
         if (SelectedCourse is null) return;
         await navService.GoToDetailedCoursesPageAsync(SelectedCourse.Id);
     }

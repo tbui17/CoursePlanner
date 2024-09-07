@@ -93,3 +93,4 @@ internal sealed class LogConfigurationTestUseCase : ILoggingUseCase
         log.Information("Seq sink added.");
     }
 }
+

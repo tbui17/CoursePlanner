@@ -260,12 +260,6 @@ public class DetailedCourseViewModelTest : BasePageViewModelTest
 
         private LocalDbCtx Db { get; set; }
 
-        [TearDown]
-        public async Task TearDown()
-        {
-            await Db.DisposeAsync();
-        }
-
 
         [Test]
         public void FixtureInitializedWithCorrectValues()

@@ -23,12 +23,19 @@ public static class InjectAttributeExtensions
             .AsParallel()
             .SelectMany(GetTypes)
             .SelectMany(x => x.GetCustomAttribute<InjectAttribute>() is { } a ? new[] { (Type: x, Attribute: a) } : [])
-            .Select(x => (x.Type, CreateAddImpl(x.Attribute)));
+            .Select(x => (x.Type, CreateAddImpl(x.Attribute)))
+            .ToArray();
+
+        var logger = Log.ForContext<InjectAttribute>();
+        logger.Information("Adding injectables");
 
         foreach (var (classType, addImpl) in types)
         {
             addImpl(classType);
         }
+
+        logger.Debug("{Count} injectables: {Items}", types.Length,types);
+
 
         return services;
 
@@ -46,28 +53,31 @@ public static class InjectAttributeExtensions
 
                 foreach (var loaderException in e.LoaderExceptions)
                 {
-                    log.Error(
+                    log.Warning(
                         loaderException,
                         "Error during type loading"
                     );
                 }
 
-                log.Warning(e,"Returning non-null types from those that were loaded. Some data may be missing.");
+                log.Warning(e, "Returning non-null types from those that were loaded. Some data may be missing.");
 
                 return e.Types.WhereNotNull();
             }
         }
 
-        // @formatter:off
+
         Action<Type> CreateAddImpl(InjectAttribute attribute) => attribute switch
-            {
-                { Interface: null, Lifetime: ServiceLifetime.Transient } => type => services.AddTransient(type),
-                { Interface: null, Lifetime: ServiceLifetime.Scoped } => type => services.AddScoped(type),
-                { Interface: null, Lifetime: ServiceLifetime.Singleton } => type => services.AddSingleton(type),
-                { Interface: {} interfaceType, Lifetime: ServiceLifetime.Transient } => type => services.AddTransient(interfaceType, type),
-                { Interface: {} interfaceType, Lifetime: ServiceLifetime.Scoped } => type => services.AddScoped(interfaceType, type),
-                { Interface: {} interfaceType, Lifetime: ServiceLifetime.Singleton } => type => services.AddSingleton(interfaceType, type),
-                _ => throw new ArgumentOutOfRangeException(nameof(attribute), attribute, null)
-            };
+        {
+            { Interface: null, Lifetime: ServiceLifetime.Transient } => type => services.AddTransient(type),
+            { Interface: null, Lifetime: ServiceLifetime.Scoped } => type => services.AddScoped(type),
+            { Interface: null, Lifetime: ServiceLifetime.Singleton } => type => services.AddSingleton(type),
+            { Interface: { } interfaceType, Lifetime: ServiceLifetime.Transient } => type =>
+                services.AddTransient(interfaceType, type),
+            { Interface: { } interfaceType, Lifetime: ServiceLifetime.Scoped } => type =>
+                services.AddScoped(interfaceType, type),
+            { Interface: { } interfaceType, Lifetime: ServiceLifetime.Singleton } => type =>
+                services.AddSingleton(interfaceType, type),
+            _ => throw new ArgumentOutOfRangeException(nameof(attribute), attribute, null)
+        };
     }
 }

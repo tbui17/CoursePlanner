@@ -9,10 +9,10 @@
     FlyoutBehavior="Flyout" Title="CoursePlanner" >
 
     <ShellContent ContentTemplate="{DataTemplate local:MainPage}" Title="Main" Route="MainPage" />
-    <ShellContent ContentTemplate="{DataTemplate pages:DevPage}" Title="Developer Util" Route="DevPage" />
+    <ShellContent ContentTemplate="{DataTemplate pages:DevPage}" Title="Developer Util" Route="DevPage" IsVisible="{Binding IsDebug}" />
     <ShellContent ContentTemplate="{DataTemplate pages:NotificationDataPage}" Title="Notification Data" Route="NotificationDataPage" IsVisible="{Binding IsLoggedIn}"  />
     <ShellContent ContentTemplate="{DataTemplate pages:StatsPage}" Title="Stats" Route="StatsPage" IsVisible="{Binding IsLoggedIn}"  />
-    <ShellContent ContentTemplate="{DataTemplate pages:StatsPage}" Title="Settings" Route="SettingsPage" IsVisible="{Binding IsLoggedIn}"  />
+    <ShellContent ContentTemplate="{DataTemplate pages:SettingsPage}" Title="Settings" Route="SettingsPage" IsVisible="{Binding IsLoggedIn}"  />
 
 
 

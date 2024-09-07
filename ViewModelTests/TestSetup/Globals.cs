@@ -1,4 +1,5 @@
 ﻿using AutoFixture;
+using AutoFixture.AutoFakeItEasy;
 using AutoFixture.AutoMoq;
 using Moq;
 
@@ -8,7 +9,9 @@ public static class Globals
 {
     public static IFixture CreateFixture()
     {
-        var fixture = new Fixture().Customize(new AutoMoqCustomization());
+        var fixture = new Fixture()
+            .Customize(new AutoMoqCustomization())
+            .Customize(new AutoFakeItEasyCustomization());
         fixture.Behaviors.OfType<ThrowingRecursionBehavior>()
             .ToList()
             .ForEach(b => fixture.Behaviors.Remove(b));

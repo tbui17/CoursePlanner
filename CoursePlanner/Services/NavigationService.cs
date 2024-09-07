@@ -19,8 +19,9 @@ public class NavigationService : INavigationService
         Current.Navigated += OnNavigated;
     }
 
-    private async void OnNavigated(object? _, ShellNavigatedEventArgs args)
+    private async void OnNavigated(object? sender, ShellNavigatedEventArgs args)
     {
+        _logger.LogInformation("{Method} {Sender} {Args}" , nameof(OnNavigated), sender, args);
         if (args.Source is not ShellNavigationSource.ShellItemChanged ||
             Current.CurrentPage is not IRefreshableView<IRefresh> refreshable)
         {
@@ -31,8 +32,9 @@ public class NavigationService : INavigationService
         await refreshable.Model.RefreshAsync();
     }
 
-    private async void OnNavigating(object? _, ShellNavigatingEventArgs args)
+    private async void OnNavigating(object? sender, ShellNavigatingEventArgs args)
     {
+        _logger.LogInformation("{Method} {Sender} {Args}" , nameof(OnNavigating), sender, args);
         if (args.Source is not ShellNavigationSource.Pop
             || Navigation.NavigationStack is not [.., IRefreshableView<IRefresh> refreshable, not null]
            )
@@ -85,7 +87,7 @@ public class NavigationService : INavigationService
     {
         if (Current.CurrentPage is MainPage)
         {
-            _logger.LogInformation("Already on main page. Creating dummy page to force navigation.");
+            _logger.LogInformation("Already on main page.");
             var dummy = new ContentPage();
             await GoToAsync(dummy);
         }

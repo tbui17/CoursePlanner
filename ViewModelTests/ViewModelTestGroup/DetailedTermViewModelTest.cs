@@ -1,23 +1,30 @@
-﻿using FluentAssertions;
+﻿using AutoFixture;
+using BaseTestSetup.Lib;
+using FluentAssertions;
 using FluentAssertions.Execution;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Moq;
 using ViewModels.Domain;
+using ViewModels.Services;
 using ViewModelTests.TestSetup;
 
 namespace ViewModelTests.ViewModelTestGroup;
 
 public class DetailedTermViewModelTest : BasePageViewModelTest
 {
+    private IFixture _fixture;
+
     [SetUp]
     public override async Task Setup()
     {
         await base.Setup();
-        Model = new DetailedTermViewModel(
-            factory: Resolve<ILocalDbCtxFactory>(),
-            appService: AppMock.Object,
-            navService: NavMock.Object
-        );
+        _fixture = CreateFixture();
+        _fixture.Register(Resolve<ILocalDbCtxFactory>);
+        _fixture.Inject(AppMock.Object);
+        _fixture.Register(Resolve<ILogger<DetailedTermViewModel>>);
+        NavMock = _fixture.FreezeMock<INavigationService>();
+        Model = _fixture.Create<DetailedTermViewModel>();
     }
 
 
