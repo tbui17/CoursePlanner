@@ -26,6 +26,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\BaseTestSetup\BaseTestSetup.csproj" />
       <ProjectReference Include="..\MauiConfig\MauiConfig.csproj" />
     </ItemGroup>
 

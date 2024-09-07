@@ -7,6 +7,7 @@ using Lib.Interfaces;
 using Lib.Utils;
 using Lib.Validators;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using ViewModels.Interfaces;
 using ViewModels.Services;
 
@@ -18,7 +19,7 @@ public partial class SettingsViewModel(
     ILocalDbCtxFactory factory,
     ISessionService session,
     IValidator<IUserSetting> validator,
-    IAppService appService) : ObservableObject, IRefresh, IUserSetting
+    IAppService appService, ILogger<SettingsViewModel> logger) : ObservableObject, IRefresh, IUserSetting
 {
     [ObservableProperty]
     private int _notificationRange;
@@ -33,13 +34,16 @@ public partial class SettingsViewModel(
     public async Task RefreshAsync()
     {
         var user = Result.Try(session.GetOrThrowUser);
+        user.Log();
         if (user.IsFailed)
         {
+
             NotificationRange = 1;
             return;
         }
         await using var db = await factory.CreateDbContextAsync();
         var settings = await db.UserSettings.Where(x => x.UserId == user.Value.Id).FirstAsync();
+        logger.LogDebug("Settings: {Settings}", settings);
 
         NotificationRange = (int)settings.NotificationRange.TotalDays;
     }
@@ -49,13 +53,16 @@ public partial class SettingsViewModel(
     {
         if (validator.Check(this) is { IsFailed: true } e)
         {
+            e.Log();
             await appService.ShowErrorAsync(e.ToErrorString());
             return;
         }
 
         await using var db = await factory.CreateDbContextAsync();
         var user = session.GetOrThrowUser();
+        logger.LogDebug("User: {User}", user);
         var settings = await db.UserSettings.Where(x => x.UserId == user.Id).FirstAsync();
+        logger.LogDebug("Settings: {Settings}", settings);
         settings.NotificationRange = TimeSpan.FromDays(NotificationRange);
         await db.SaveChangesAsync();
         await appService.AlertAsync("Settings saved.");

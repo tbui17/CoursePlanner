@@ -85,7 +85,7 @@ public class NavigationService : INavigationService
     {
         if (Current.CurrentPage is MainPage)
         {
-            _logger.LogInformation("Already on main page. Creating dummy page to force navigation.");
+            _logger.LogInformation("Already on main page.");
             var dummy = new ContentPage();
             await GoToAsync(dummy);
         }

@@ -16,7 +16,7 @@ public class AppService(ILogger<AppService> logger) : IAppService
 
     public async Task ShowErrorAsync(string message)
     {
-        logger.LogError("Showing error message: {Message}", message);
+        logger.LogInformation("Showing user error message: {Message}", message);
         await Current.DisplayAlert("Error", message, "OK");
     }
 

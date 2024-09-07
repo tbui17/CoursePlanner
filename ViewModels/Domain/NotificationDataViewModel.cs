@@ -6,7 +6,7 @@ using Lib.Interfaces;
 using Lib.Models;
 using Lib.Services.NotificationService;
 using Lib.Utils;
-
+using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using ViewModels.Config;
 using ViewModels.Interfaces;
@@ -98,13 +98,17 @@ public class NotificationDataViewModel : ReactiveObject, IRefresh
     private readonly ObservableAsPropertyHelper<int> _itemCountHelper;
     public int ItemCount => _itemCountHelper.Value;
 
+    private ILogger<NotificationDataViewModel> _logger;
+
+
     public NotificationDataViewModel(
-        NotificationService service, NotificationTypes types
-    )
+        NotificationService service, NotificationTypes types, ILogger<NotificationDataViewModel> logger)
     {
+        _logger = logger;
         Types = types.Value;
         ClearCommand = ReactiveCommand.Create(() =>
         {
+            _logger.LogDebug("Clearing filters");
             var today = DateTime.Today.Date;
             Start = new DateTime(today.Year, today.Month, today.Day);
             End = new DateTime(today.Year, today.Month, DateTime.DaysInMonth(today.Year, today.Month));
@@ -119,16 +123,19 @@ public class NotificationDataViewModel : ReactiveObject, IRefresh
         var textFilterSource = this.WhenAnyValue(
                 vm => vm.FilterText,
                 vm => vm.TypeFilter)
-            .Throttle(TimeSpan.FromMilliseconds(500));
+            .Throttle(TimeSpan.FromMilliseconds(500))
+            .Do(x => _logger.LogDebug("Filter text {FilterText} {TypeFilter}", x.Item1, x.Item2));
 
-        var pickerFilterSource = this.WhenAnyValue(x => x.SelectedNotificationOptionIndex);
+        var pickerFilterSource = this.WhenAnyValue(x => x.SelectedNotificationOptionIndex)
+            .Do(x => _logger.LogDebug("Picker index {Index}", x));
 
         var dateFilterSource = this
             .WhenAnyValue(
                 vm => vm.Start,
                 vm => vm.End,
                 (start, end) => new DateTimeRange { Start = start, End = end }
-            );
+            )
+            .Do(x => _logger.LogDebug("Date range {Start} {End}", x.Start, x.End));
 
         var dataStream = dateFilterSource
             .ObserveOn(RxApp.TaskpoolScheduler)
@@ -153,10 +160,12 @@ public class NotificationDataViewModel : ReactiveObject, IRefresh
 
         _itemCountHelper = dataStream
             .Select(x => x.Count)
+            .Do(x => _logger.LogDebug("Notification count {Count}", x))
             .ObserveOn(RxApp.MainThreadScheduler)
             .ToProperty(this, vm => vm.ItemCount);
 
         _notificationItemsHelper = dataStream
+            .Do(x => _logger.LogDebug("Notification items {Items}", x))
             .ObserveOn(RxApp.MainThreadScheduler)
             .ToProperty(this, vm => vm.NotificationItems);
     }
@@ -165,6 +174,7 @@ public class NotificationDataViewModel : ReactiveObject, IRefresh
 
     public Task RefreshAsync()
     {
+        _logger.LogDebug("Refreshing notification data");
         _refreshSubject.OnNext(new object());
         return Task.CompletedTask;
     }
