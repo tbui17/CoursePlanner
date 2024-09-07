@@ -36,7 +36,6 @@ public class MauiAppServiceConfiguration
         var serviceBuilder = ServiceBuilder;
 
 
-
         var vmConfig = new ViewModelConfig(Services);
 
         Services.AddBackendServices();
@@ -44,7 +43,9 @@ public class MauiAppServiceConfiguration
 
         var dataSource = $"{AppDataDirectory()}/database.db";
 
-        Log.Information("Registering SQLite database at {DataSource}", dataSource);
+
+        Log.ForContext<MauiAppServiceConfiguration>()
+            .Information("Registering SQLite database at {DataSource}", dataSource);
 
         Services
             .AddSingleton(MainPage)
@@ -82,7 +83,7 @@ public class MauiLoggingUseCase : ILoggingUseCase
     public void SetMinimumLogLevel()
     {
 #if DEBUG
-        Configuration.MinimumLevel.Debug().WriteTo.Debug(LogEventLevel.Debug);
+        Configuration.MinimumLevel.Debug().WriteTo.Debug(LogEventLevel.Debug, DefaultLogConfigurationUseCase.LogTemplate);
 #elif RELEASE
          Configuration.MinimumLevel.Information();
 #endif
@@ -103,7 +104,7 @@ public class MauiLoggingUseCase : ILoggingUseCase
             Buffered = true,
         };
         Configuration.WriteTo.File(opts)
-            .WriteTo.Console(LogEventLevel.Information);
+            .WriteTo.Console(LogEventLevel.Information,DefaultLogConfigurationUseCase.LogTemplate);
     }
 
     public void AddEnrichments()
