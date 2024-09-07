@@ -19,11 +19,26 @@ namespace MauiConfigTests;
 public class ConfigTest
 {
     private MauiTestFixture _fixture;
+    private const string Prefix = "7f1aebf1-8e5a-4f3c-bdb1-00d3aee364bc";
 
+    [OneTimeSetUp]
+    public void OneTimeSetup()
+    {
+        var dir = new DirectoryInfo(Directory.GetCurrentDirectory());
+
+
+        dir.EnumerateDirectories()
+            .AsParallel()
+            .Where(x => x.Name.StartsWith(Prefix))
+            .ForAll(x => x.Delete(true));
+    }
+
+    private string _directory;
 
     [SetUp]
     public void Setup()
     {
+        _directory = Prefix + Guid.NewGuid();
         var fixture = CreateFixture();
         var builder = MauiApp.CreateBuilder();
         fixture.Inject(builder);
@@ -43,7 +58,7 @@ public class ConfigTest
         var appDataDirectoryGetter = fixture.FreezeMock<Func<string>>();
 
 
-        appDataDirectoryGetter.Setup(x => x()).Returns(Environment.CurrentDirectory);
+        appDataDirectoryGetter.Setup(x => x()).Returns(_directory);
 
         var config = new MauiAppServiceConfiguration
         {
@@ -80,6 +95,9 @@ public class ConfigTest
     public void DbSetup_ShouldOccur()
     {
         _fixture.RunStartupActions();
+        var fs = new FileInfo(Path.Combine(_directory, "database.db"));
+        fs.Exists.Should().BeTrue();
+
     }
 
     [Test]
