@@ -1,8 +1,8 @@
 ﻿using Lib.Config;
+using Lib.Models;
 
 namespace BaseTestSetup;
 
-using Lib.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;

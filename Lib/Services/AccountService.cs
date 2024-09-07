@@ -11,6 +11,7 @@ using Lib.Utils;
 using Lib.Validators;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Lib.Services;
 
@@ -25,11 +26,14 @@ public interface IAccountService
 public class AccountService(
     ILocalDbCtxFactory factory,
     [FromKeyedServices(nameof(LoginFieldValidator))]
-    IValidator<ILogin> fieldValidator
+    IValidator<ILogin> fieldValidator,
+    ILogger<AccountService> logger
 ) : IAccountService
 {
     public async Task<Result<User>> LoginAsync(ILogin login)
     {
+        using var _ = logger.BeginScope("{Method}", nameof(LoginAsync));
+        logger.LogInformation("Login attempt for {Username}", login.Username);
         return await fieldValidator.Check(login)
             .Map(HashedLogin.Create)
             .BindAsync(async hashedLogin =>
@@ -40,6 +44,8 @@ public class AccountService(
                     .Select(x => new User { Id = x.Id, Username = x.Username })
                     .AsNoTracking()
                     .ToListAsync();
+
+                logger.LogInformation("Login attempt for {Username} resulted in {Result}", login.Username, res);
 
                 return res switch
                 {
@@ -58,6 +64,8 @@ public class AccountService(
 
     public async Task<Result<User>> CreateAsync(ILogin login)
     {
+        using var _ = logger.BeginScope("{Method}", nameof(CreateAsync));
+        logger.LogInformation("Create attempt for {Username}", login.Username);
         if (fieldValidator.Check(login) is { IsFailed: true } exc)
         {
             return exc.ToResult();

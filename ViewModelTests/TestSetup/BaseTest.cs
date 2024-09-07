@@ -1,9 +1,12 @@
+using AutoFixture;
+using AutoFixture.AutoMoq;
 using BaseTestSetup;
 using Lib.Attributes;
 using Lib.Config;
 using Lib.Models;
 using Lib.Utils;
 using Microsoft.Data.Sqlite;
+using Moq;
 using Serilog;
 using ViewModels.Config;
 using ViewModels.Domain;
@@ -52,6 +55,18 @@ public abstract class BaseTest : IBaseTest
     }
 
     public T Resolve<T>() where T : notnull => Provider.GetRequiredService<T>();
+
+    protected IFixture CreateFixture()
+    {
+        var fixture = new Fixture().Customize(new AutoMoqCustomization());
+        fixture.Behaviors.OfType<ThrowingRecursionBehavior>()
+            .ToList()
+            .ForEach(b => fixture.Behaviors.Remove(b));
+        fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+        return fixture;
+    }
+
+    protected Mock<T> CreateMock<T>() where T : class => CreateFixture().Create<Mock<T>>();
 
 
     public async Task<LocalDbCtx> GetDb() =>
