@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using Lib.Attributes;
 using Lib.ExceptionHandlers;
 using Microsoft.Extensions.Logging;
+using ViewModels.Exceptions;
 
 namespace ViewModels.ExceptionHandlers;
 
@@ -20,7 +21,8 @@ public class ClientExceptionHandler(
 {
     private static readonly ClientExceptionUserErrorMessage Message = new()
     {
-        Critical = "An unexpected error occurred during the application's lifecycle. Please restart the application to ensure data integrity. An error log can be found within the application's folder.",
+        Critical =
+            "An unexpected error occurred during the application's lifecycle. Please restart the application to ensure data integrity. An error log can be found within the application's folder.",
     };
 
 
@@ -34,13 +36,12 @@ public class ClientExceptionHandler(
         try
         {
             await Handle(args);
-
         }
         catch (ShowException e)
         {
-            logger.LogCritical(e, "Failed to display error message.");
-            throw;
-
+            const string message = "Failed to display error message.";
+            logger.LogCritical(e, message);
+            throw new ClientExceptionHandlerException(message, e);
         }
         catch (Exception e)
         {
@@ -51,8 +52,11 @@ public class ClientExceptionHandler(
             }
             catch (Exception ex)
             {
-                logger.LogCritical(ex, "Unhandled exception occurred during secondary attempt to show display error message");
-                throw;
+                const string message =
+                    "Unhandled exception occurred during secondary attempt to show display error message";
+                logger.LogCritical(ex, message);
+
+                throw new ClientExceptionHandlerException(message, ex);
             }
         }
     }
@@ -61,11 +65,7 @@ public class ClientExceptionHandler(
     {
         if (args.ExceptionObject is not Exception exception)
         {
-            logger.LogError(
-                "Unexpected exception object type: {Type}, {Args}",
-                args.ExceptionObject.GetType().Name,
-                args.ToString()
-            );
+            logger.LogError("Unexpected exception object type: {Args}", args);
             await messageDisplay.ShowError(Message.UnexpectedErrorType).ContinueWith(HandleTask);
             return;
         }
@@ -91,7 +91,7 @@ public class ClientExceptionHandler(
 
         return t;
     }
+    [ExcludeFromCodeCoverage]
+    private class ShowException(Exception e) : Exception(e.Message, e);
 }
 
-[ExcludeFromCodeCoverage]
-internal class ShowException(Exception e) : Exception(e.Message, e);
