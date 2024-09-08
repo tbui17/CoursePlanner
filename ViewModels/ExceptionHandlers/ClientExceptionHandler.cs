@@ -20,6 +20,7 @@ public class ClientExceptionHandler(
     GlobalExceptionHandler globalExceptionHandler
 ) : IClientExceptionHandler
 {
+    // TODO: Localization
     private static readonly ClientExceptionUserErrorMessage Message = new()
     {
         Critical =
