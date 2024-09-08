@@ -65,7 +65,8 @@ public class ClientExceptionHandler(
                 args.ExceptionObject.GetType().Name,
                 args.ToString()
             );
-            throw new ArgumentException("Unexpected exception object type", nameof(args));
+            await messageDisplay.ShowError(Message.UnexpectedErrorType).ContinueWith(HandleTask);
+            return;
         }
 
         var res = globalExceptionHandler.Handle(exception);
