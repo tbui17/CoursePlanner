@@ -18,7 +18,7 @@ public class MauiAppServiceConfiguration
     public required IServiceCollection Services { get; set; }
     public required IMauiServiceBuilder ServiceBuilder { get; set; }
     public required Func<string> AppDataDirectory { get; set; }
-    public required IMessageDisplay MainPage { get; set; }
+    public required IMessageDisplay MessageDisplayService { get; set; }
     public required Action<UnhandledExceptionEventHandler> ExceptionHandlerRegistration { get; set; }
 
 
@@ -49,7 +49,7 @@ public class MauiAppServiceConfiguration
             .Information("Registering SQLite database at {DataSource}", dataSource);
 
         Services
-            .AddSingleton(MainPage)
+            .AddSingleton(MessageDisplayService)
             .AddDbContext<LocalDbCtx>(b =>
                 {
                     b.UseSqlite($"DataSource={AppDataDirectory()}/database.db");

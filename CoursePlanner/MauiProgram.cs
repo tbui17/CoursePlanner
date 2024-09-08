@@ -26,7 +26,7 @@ public static class MauiProgram
         var setup = new MauiAppServiceConfiguration
         {
             AppDataDirectory = () => FileSystem.Current.AppDataDirectory,
-            MainPage = MessageDisplay.Create(),
+            MessageDisplayService = MessageDisplayService.Create(),
             ExceptionHandlerRegistration = x => MauiExceptions.UnhandledException += x,
             Services = builder.Services,
             ServiceBuilder = new MauiServiceBuilder(builder.Services)
@@ -40,24 +40,6 @@ public static class MauiProgram
     }
 }
 
-file class MessageDisplay(Func<Page?> current) : IMessageDisplay
-{
-    public static MessageDisplay Create()
-    {
-        return new MessageDisplay(() => Application.Current?.MainPage);
-    }
-
-
-    public Task ShowError(string message)
-    {
-        return current()?.DisplayAlert("Error", message, "OK") ?? Task.CompletedTask;
-    }
-
-    public Task ShowInfo(string message)
-    {
-        return current()?.DisplayAlert("Info", message, "OK") ?? Task.CompletedTask;
-    }
-}
 
 file class MauiServiceBuilder(IServiceCollection services) : IMauiServiceBuilder
 {
@@ -75,7 +57,8 @@ file class MauiServiceBuilder(IServiceCollection services) : IMauiServiceBuilder
             .AddTransient<DevPage>()
             .AddTransient<LoginView>()
             .AddTransient<NotificationDataPage>()
-            .AddTransient<StatsPage>();
+            .AddTransient<StatsPage>()
+            .AddTransient<SettingsPage>();
     }
 
     public void AddAppServices()
