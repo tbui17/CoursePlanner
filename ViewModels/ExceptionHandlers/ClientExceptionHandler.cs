@@ -72,6 +72,7 @@ public class ClientExceptionHandler(
         var res = globalExceptionHandler.Handle(exception);
         if (!res.UserFriendly)
         {
+            // logger.LogError(res.Exception, "Unhandled exception: {Message}", res.Message);
             await messageDisplay.ShowError(Message.Error).ContinueWith(HandleTask);
             return;
         }
