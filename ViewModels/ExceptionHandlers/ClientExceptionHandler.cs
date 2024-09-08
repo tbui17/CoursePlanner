@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Lib.Attributes;
 using Lib.ExceptionHandlers;
 using Microsoft.Extensions.Logging;
@@ -92,4 +93,5 @@ public class ClientExceptionHandler(
     }
 }
 
+[ExcludeFromCodeCoverage]
 internal class ShowException(Exception e) : Exception(e.Message, e);
