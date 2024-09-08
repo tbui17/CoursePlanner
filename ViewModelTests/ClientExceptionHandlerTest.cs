@@ -1,13 +1,13 @@
 using AutoFixture;
 using BaseTestSetup.Lib;
 using EntityFramework.Exceptions.Common;
-using FakeItEasy;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using Lib.ExceptionHandlers;
 using Lib.Exceptions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Testing;
+using Moq;
 using ViewModels.ExceptionHandlers;
 using ViewModels.Exceptions;
 using ViewModels.Interfaces;
@@ -25,9 +25,10 @@ public class ClientExceptionHandlerTest : BaseTest
         var clientLog = new FakeLogger<ClientExceptionHandler>(collector);
         var globalLog = new FakeLogger<GlobalExceptionHandler>(collector);
 
-        f.Register<ILogger<ClientExceptionHandler>>(() => clientLog);
-        f.Register<ILogger<GlobalExceptionHandler>>(() => globalLog);
-        var messageDisplay = f.FreezeFake<IMessageDisplay>();
+
+        f.Inject<ILogger<ClientExceptionHandler>>(clientLog);
+        f.Inject<ILogger<GlobalExceptionHandler>>(globalLog);
+        var messageDisplay = f.FreezeMock<IMessageDisplay>();
 
         var handler = f.Create<ClientExceptionHandler>();
 
@@ -68,13 +69,13 @@ public class ClientExceptionHandlerTest : BaseTest
         using var scope = new AssertionScope();
 
 
-        messageDisplay.RecordedCalls
-            .Where(x => x.Method.Name is nameof(messageDisplay.FakedObject.ShowInfo))
+        messageDisplay.Invocations
+            .Where(x => x.Method.Name is nameof(messageDisplay.Object.ShowInfo))
             .Should()
             .NotBeEmpty();
 
-        messageDisplay.RecordedCalls
-            .Where(x => x.Method.Name is nameof(messageDisplay.FakedObject.ShowError))
+        messageDisplay.Invocations
+            .Where(x => x.Method.Name is nameof(messageDisplay.Object.ShowError))
             .Should()
             .BeEmpty();
 
@@ -107,8 +108,8 @@ public class ClientExceptionHandlerTest : BaseTest
         using var scope = new AssertionScope();
 
 
-        messageDisplay.RecordedCalls
-            .Where(x => x.Method.Name is nameof(messageDisplay.FakedObject.ShowInfo))
+        messageDisplay.Invocations
+            .Where(x => x.Method.Name is nameof(messageDisplay.Object.ShowInfo))
             .Should()
             .BeEmpty();
     }
@@ -136,8 +137,8 @@ public class ClientExceptionHandlerTest : BaseTest
 
         using var scope = new AssertionScope();
 
-        messageDisplay.RecordedCalls
-            .Where(x => x.Method.Name is nameof(messageDisplay.FakedObject.ShowError))
+        messageDisplay.Invocations
+            .Where(x => x.Method.Name is nameof(messageDisplay.Object.ShowError))
             .Should()
             .NotBeEmpty();
     }
@@ -184,8 +185,6 @@ public class ClientExceptionHandlerTest : BaseTest
         await act.Awaiting(x => x())
             .Should()
             .NotThrowAsync();
-
-        using var scope = new AssertionScope();
     }
 
     [Test]
@@ -196,11 +195,11 @@ public class ClientExceptionHandlerTest : BaseTest
         var handler = fixture.Handler;
 
         messageDisplay
-            .CallsTo(x => x.ShowError(A<string>._))
+            .Setup(x => x.ShowInfo(It.IsAny<string>()))
             .ThrowsAsync(new TestException1());
 
         messageDisplay
-            .CallsTo(x => x.ShowInfo(A<string>._))
+            .Setup(x => x.ShowError(It.IsAny<string>()))
             .ThrowsAsync(new TestException2());
 
         var act = () => handler
@@ -219,7 +218,9 @@ public class ClientExceptionHandlerTest : BaseTest
         var messageDisplay = fixture.MessageDisplay;
         var handler = fixture.Handler;
 
-        messageDisplay.CallsTo(x => x.ShowError(A<string>._)).ThrowsAsync(new TestException1());
+        messageDisplay
+            .Setup(x => x.ShowError(It.IsAny<string>()))
+            .ThrowsAsync(new TestException1());
 
         var act = () => handler.OnUnhandledException(new UnhandledExceptionEventArgs(new TestException1(), false));
 
@@ -258,6 +259,7 @@ public class ClientExceptionHandlerTest : BaseTest
 
         await fixture.Handler.OnUnhandledException(new UnhandledExceptionEventArgs(null!, false));
 
-        fixture.MessageDisplay.CallsTo(x => x.ShowError(A<string>._)).MustHaveHappened();
+        fixture.MessageDisplay
+            .Verify(x => x.ShowError(It.IsAny<string>()));
     }
 }
