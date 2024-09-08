@@ -1,4 +1,4 @@
-namespace ViewModels.ExceptionHandlers;
+namespace ViewModels.Interfaces;
 
 public interface IMessageDisplay
 {

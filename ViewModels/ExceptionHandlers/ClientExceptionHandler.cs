@@ -3,6 +3,7 @@ using Lib.Attributes;
 using Lib.ExceptionHandlers;
 using Microsoft.Extensions.Logging;
 using ViewModels.Exceptions;
+using ViewModels.Interfaces;
 
 namespace ViewModels.ExceptionHandlers;
 
@@ -22,7 +23,8 @@ public class ClientExceptionHandler(
     private static readonly ClientExceptionUserErrorMessage Message = new()
     {
         Critical =
-            "An unexpected error occurred during the application's lifecycle. Please restart the application to ensure data integrity. An error log can be found within the application's folder.",
+            "A critical unexpected error occurred during the application's lifecycle. Please restart the application to ensure data integrity. An error log can be found within the application's folder.",
+        UnexpectedErrorType = "An unexpected exception occurred. Application service may be degraded. It is advised to restart the application.",
     };
 
 
@@ -73,12 +75,10 @@ public class ClientExceptionHandler(
         var res = globalExceptionHandler.Handle(exception);
         if (!res.UserFriendly)
         {
-            // logger.LogError(res.Exception, "Unhandled exception: {Message}", res.Message);
             await messageDisplay.ShowError(Message.Error).ContinueWith(HandleTask);
             return;
         }
 
-        logger.LogInformation("Domain exception: {Message}", res.Message);
         await messageDisplay.ShowInfo(res.Message).ContinueWith(HandleTask);
     }
 

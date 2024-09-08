@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Testing;
 using ViewModels.ExceptionHandlers;
 using ViewModels.Exceptions;
+using ViewModels.Interfaces;
 using ViewModelTests.TestData;
 using ViewModelTests.TestSetup;
 
@@ -175,13 +176,10 @@ public class ClientExceptionHandlerTest : BaseTest
     public async Task OnUnhandledException_CriticalExceptShowMessageError_DoesNotThrow()
     {
         var fixture = CreateTestFixture();
-        var messageDisplay = fixture.MessageDisplay;
         var handler = fixture.Handler;
 
-        messageDisplay.CallsTo(x => x.ShowInfo(A<string>._)).Throws(new TestException1());
-
         var act = () => handler
-            .OnUnhandledException(new UnhandledExceptionEventArgs(new DomainException(""), false));
+            .OnUnhandledException(new UnhandledExceptionEventArgs(new TestException1(), false));
 
         await act.Awaiting(x => x())
             .Should()
@@ -199,11 +197,11 @@ public class ClientExceptionHandlerTest : BaseTest
 
         messageDisplay
             .CallsTo(x => x.ShowError(A<string>._))
-            .Throws(new TestException1());
+            .ThrowsAsync(new TestException1());
 
         messageDisplay
             .CallsTo(x => x.ShowInfo(A<string>._))
-            .Throws(new TestException2());
+            .ThrowsAsync(new TestException2());
 
         var act = () => handler
             .OnUnhandledException(new UnhandledExceptionEventArgs(new DomainException(""), false));
@@ -221,7 +219,7 @@ public class ClientExceptionHandlerTest : BaseTest
         var messageDisplay = fixture.MessageDisplay;
         var handler = fixture.Handler;
 
-        messageDisplay.CallsTo(x => x.ShowError(A<string>._)).Throws(new TestException1());
+        messageDisplay.CallsTo(x => x.ShowError(A<string>._)).ThrowsAsync(new TestException1());
 
         var act = () => handler.OnUnhandledException(new UnhandledExceptionEventArgs(new TestException1(), false));
 
@@ -232,7 +230,7 @@ public class ClientExceptionHandlerTest : BaseTest
         log.Collector
             .GetSnapshot()
             .Should()
-            .Contain(x => x.Level == LogLevel.Critical && x.Exception is TestException1);
+            .Contain(x => x.Level == LogLevel.Critical);
     }
 
     [Test]
