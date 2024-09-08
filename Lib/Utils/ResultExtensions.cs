@@ -42,4 +42,18 @@ public static class ResultExtensions
     {
         return result.Errors.Select(x => x.Message).StringJoin(Environment.NewLine);
     }
+
+    public static async Task<Exception?> ToExceptionAsync(this Task task)
+    {
+        try
+        {
+            await task;
+        }
+        catch (Exception e)
+        {
+            return e;
+        }
+
+        return null;
+    }
 }

@@ -9,7 +9,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Testing;
 using Moq;
 using ViewModels.ExceptionHandlers;
-using ViewModels.Exceptions;
 using ViewModels.Interfaces;
 using ViewModelTests.TestData;
 using ViewModelTests.TestSetup;
@@ -174,7 +173,7 @@ public class ClientExceptionHandlerTest : BaseTest
 
 
     [Test]
-    public async Task OnUnhandledException_CriticalExceptShowMessageError_DoesNotThrow()
+    public async Task OnUnhandledException_CriticalCanShowMessage_DoesNotThrow()
     {
         var fixture = CreateTestFixture();
         var handler = fixture.Handler;
@@ -188,7 +187,7 @@ public class ClientExceptionHandlerTest : BaseTest
     }
 
     [Test]
-    public async Task OnUnhandledException_CriticalShowMessageError_Throws()
+    public async Task OnUnhandledException_CriticalCannotShowMessage_Throws()
     {
         var fixture = CreateTestFixture();
         var messageDisplay = fixture.MessageDisplay;
@@ -207,7 +206,7 @@ public class ClientExceptionHandlerTest : BaseTest
 
         await act.Awaiting(x => x())
             .Should()
-            .ThrowAsync<ClientExceptionHandlerException>();
+            .ThrowAsync<Exception>();
     }
 
     [Test]

@@ -1,16 +1,17 @@
-using System.Diagnostics.CodeAnalysis;
+using CommunityToolkit.Mvvm.Messaging;
 using Lib.Attributes;
 using Lib.ExceptionHandlers;
+using Lib.Exceptions;
+using Lib.Utils;
 using Microsoft.Extensions.Logging;
-using ViewModels.Exceptions;
+using OneOf;
 using ViewModels.Interfaces;
 
 namespace ViewModels.ExceptionHandlers;
 
 internal record ClientExceptionUserErrorMessage(
     string Critical = "",
-    string Error = "",
-    string UnexpectedErrorType = ""
+    string Error = ""
 );
 
 [Inject(typeof(IClientExceptionHandler))]
@@ -24,7 +25,8 @@ public class ClientExceptionHandler(
     {
         Critical =
             "A critical unexpected error occurred during the application's lifecycle. Please restart the application to ensure data integrity. An error log can be found within the application's folder.",
-        UnexpectedErrorType = "An unexpected exception occurred. Application service may be degraded. It is advised to restart the application.",
+        Error =
+            "An unexpected exception occurred. Application service may be degraded. It is advised to restart the application.",
     };
 
 
@@ -33,65 +35,58 @@ public class ClientExceptionHandler(
         await HandleTopLevel(args);
     }
 
+
     private async Task HandleTopLevel(UnhandledExceptionEventArgs args)
     {
-        try
-        {
-            await Handle(args);
-        }
-        catch (ShowException e)
-        {
-            const string message = "Failed to display error message.";
-            logger.LogCritical(e, message);
-            throw new ClientExceptionHandlerException(message, e);
-        }
-        catch (Exception e)
-        {
-            try
-            {
-                logger.LogCritical(e, "Unhandled exception occurred during exception handling.");
-                await messageDisplay.ShowError(Message.Critical);
-            }
-            catch (Exception ex)
-            {
-                const string message =
-                    "Unhandled exception occurred during secondary attempt to show display error message";
-                logger.LogCritical(ex, message);
+        var exception = await Handle(args)
+            .Match(
+                argumentOutOfRangeException =>
+                {
+                    logger.LogError(argumentOutOfRangeException, "Argument exception occurred during exception handling.");
+                    WeakReferenceMessenger.Default.Send(argumentOutOfRangeException);
+                    return messageDisplay.ShowError(Message.Error).ToExceptionAsync();
+                },
+                domainException =>
+                {
+                    logger.LogInformation(domainException, "User Exception.");
+                    WeakReferenceMessenger.Default.Send(domainException);
+                    return messageDisplay.ShowInfo(domainException.Message).ToExceptionAsync();
+                },
+                globalExceptionHandlerResult =>
+                {
+                    logger.LogError(globalExceptionHandlerResult.Exception, "Unhandled exception: {Message}",
+                        globalExceptionHandlerResult.Message);
+                    WeakReferenceMessenger.Default.Send(globalExceptionHandlerResult);
+                    return messageDisplay.ShowError(Message.Critical).ToExceptionAsync();
+                }
+            );
 
-                throw new ClientExceptionHandlerException(message, ex);
-            }
+
+        if (exception is not null)
+        {
+            logger.LogCritical(exception, "Failed to display error message.");
+            throw exception;
         }
     }
 
-    private async Task Handle(UnhandledExceptionEventArgs args)
+    private OneOf<ArgumentOutOfRangeException, DomainException, GlobalExceptionHandlerResult> Handle(
+        UnhandledExceptionEventArgs args)
     {
         if (args.ExceptionObject is not Exception exception)
         {
-            logger.LogError("Unexpected exception object type: {Args}", args);
-            await messageDisplay.ShowError(Message.UnexpectedErrorType).ContinueWith(HandleTask);
-            return;
+            return new ArgumentOutOfRangeException(
+                nameof(args),
+                args.ExceptionObject,
+                "Unexpected exception object type"
+            );
         }
 
         var res = globalExceptionHandler.Handle(exception);
         if (!res.UserFriendly)
         {
-            await messageDisplay.ShowError(Message.Error).ContinueWith(HandleTask);
-            return;
+            return res;
         }
 
-        await messageDisplay.ShowInfo(res.Message).ContinueWith(HandleTask);
+        return new DomainException(res.Message, res.Exception);
     }
-
-    private static Task HandleTask(Task t)
-    {
-        if (t.IsFaulted)
-        {
-            throw new ShowException(t.Exception);
-        }
-
-        return t;
-    }
-    [ExcludeFromCodeCoverage]
-    private class ShowException(Exception e) : Exception(e.Message, e);
 }
-
