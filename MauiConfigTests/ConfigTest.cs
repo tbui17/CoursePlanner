@@ -65,7 +65,7 @@ public class ConfigTest
             ServiceBuilder = serviceBuilder.Object,
             Services = builder.Services,
             AppDataDirectory = appDataDirectoryGetter.Object,
-            MainPage = messageDisplay.Object,
+            MessageDisplayService = messageDisplay.Object,
             ExceptionHandlerRegistration = registration.Object,
         };
 
