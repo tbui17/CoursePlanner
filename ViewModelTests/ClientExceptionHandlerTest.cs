@@ -25,8 +25,6 @@ public class ClientExceptionHandlerTest : BaseTest
 
         f.Register<ILogger<ClientExceptionHandler>>(() => clientLog);
         f.Register<ILogger<GlobalExceptionHandler>>(() => globalLog);
-        f.Register(Resolve<GlobalExceptionHandler>);
-
         var messageDisplay = f.FreezeFake<IMessageDisplay>();
 
         var handler = f.Create<ClientExceptionHandler>();
@@ -165,7 +163,6 @@ public class ClientExceptionHandlerTest : BaseTest
         using var scope = new AssertionScope();
 
 
-
         log.Collector
             .GetSnapshot()
             .Should()
@@ -174,34 +171,22 @@ public class ClientExceptionHandlerTest : BaseTest
 
 
     [Test]
-    public async Task OnUnhandledException_Critical_DoesNotThrow()
+    public async Task OnUnhandledException_CriticalExceptShowMessageError_DoesNotThrow()
     {
         var fixture = CreateTestFixture();
         var messageDisplay = fixture.MessageDisplay;
         var handler = fixture.Handler;
 
-        messageDisplay.CallsTo(x => x.ShowError(A<string>._)).Throws(new TestException1());
+        messageDisplay.CallsTo(x => x.ShowInfo(A<string>._)).Throws(new TestException1());
 
-        var exceptions = new List<Exception>
-        {
-            new TestException2(),
-            new TestException2()
-        };
+        var act = () => handler
+            .OnUnhandledException(new UnhandledExceptionEventArgs(new DomainException(""), false));
 
-
-        var act = FluentActions.Awaiting(async () =>
-        {
-            foreach (var args in exceptions.Select(exc => new UnhandledExceptionEventArgs(exc, false)))
-            {
-                await handler.OnUnhandledException(args);
-            }
-        });
-
-        using var scope = new AssertionScope();
-
-        await act
+        await act.Awaiting(x => x())
             .Should()
             .NotThrowAsync();
+
+        using var scope = new AssertionScope();
     }
 
     [Test]
@@ -214,22 +199,15 @@ public class ClientExceptionHandlerTest : BaseTest
 
         messageDisplay.CallsTo(x => x.ShowError(A<string>._)).Throws(new TestException1());
 
-        var exceptions = new List<Exception>
-        {
-            new TestException2(),
-            new TestException2()
-        };
+        var act = () => handler.OnUnhandledException(new UnhandledExceptionEventArgs(new TestException1(), false));
 
-
-        foreach (var args in exceptions.Select(exc => new UnhandledExceptionEventArgs(exc, false)))
-        {
-            await handler.OnUnhandledException(args);
-        }
+        await act.Awaiting(x => x())
+            .Should()
+            .ThrowAsync<TestException1>();
 
         log.Collector
             .GetSnapshot()
             .Should()
             .Contain(x => x.Level == LogLevel.Critical && x.Exception is TestException1);
     }
-
 }
