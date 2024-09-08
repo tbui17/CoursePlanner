@@ -43,6 +43,7 @@ public class ViewModelConfig(AssemblyService assemblyService, IServiceCollection
         INotificationService? LocalNotificationServiceFactory() => LocalNotificationCenter.Current;
     }
 
+    // TODO: Move to service
     private NotificationTypes GetNotificationTypes()
     {
         return assemblyService
