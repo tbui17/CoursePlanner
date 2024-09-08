@@ -9,6 +9,7 @@ using Lib.Exceptions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Testing;
 using ViewModels.ExceptionHandlers;
+using ViewModels.Exceptions;
 using ViewModelTests.TestData;
 using ViewModelTests.TestSetup;
 
@@ -190,6 +191,29 @@ public class ClientExceptionHandlerTest : BaseTest
     }
 
     [Test]
+    public async Task OnUnhandledException_CriticalShowMessageError_Throws()
+    {
+        var fixture = CreateTestFixture();
+        var messageDisplay = fixture.MessageDisplay;
+        var handler = fixture.Handler;
+
+        messageDisplay
+            .CallsTo(x => x.ShowError(A<string>._))
+            .Throws(new TestException1());
+
+        messageDisplay
+            .CallsTo(x => x.ShowInfo(A<string>._))
+            .Throws(new TestException2());
+
+        var act = () => handler
+            .OnUnhandledException(new UnhandledExceptionEventArgs(new DomainException(""), false));
+
+        await act.Awaiting(x => x())
+            .Should()
+            .ThrowAsync<ClientExceptionHandlerException>();
+    }
+
+    [Test]
     public async Task OnUnhandledException_Critical_LogsCritical()
     {
         var fixture = CreateTestFixture();
@@ -203,11 +227,39 @@ public class ClientExceptionHandlerTest : BaseTest
 
         await act.Awaiting(x => x())
             .Should()
-            .ThrowAsync<TestException1>();
+            .ThrowAsync<Exception>();
 
         log.Collector
             .GetSnapshot()
             .Should()
             .Contain(x => x.Level == LogLevel.Critical && x.Exception is TestException1);
+    }
+
+    [Test]
+    public async Task OnUnhandledException_NullException_LogsError()
+    {
+        var fixture = CreateTestFixture();
+        var log = fixture.Logger;
+        var handler = fixture.Handler;
+
+
+        await handler.OnUnhandledException(new UnhandledExceptionEventArgs(null!, false));
+
+        log.Collector
+            .GetSnapshot()
+            .Should()
+            .Contain(x => x.Level == LogLevel.Error)
+            .And.NotContain(x => x.Level == LogLevel.Critical);
+    }
+
+
+    [Test]
+    public async Task OnUnhandledException_NullException_ShowsClientErrorMessage()
+    {
+        var fixture = CreateTestFixture();
+
+        await fixture.Handler.OnUnhandledException(new UnhandledExceptionEventArgs(null!, false));
+
+        fixture.MessageDisplay.CallsTo(x => x.ShowError(A<string>._)).MustHaveHappened();
     }
 }
