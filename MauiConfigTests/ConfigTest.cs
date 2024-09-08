@@ -14,6 +14,7 @@ using Moq;
 using ViewModels.Config;
 using ViewModels.Domain;
 using ViewModels.ExceptionHandlers;
+using ViewModels.Interfaces;
 
 namespace MauiConfigTests;
 

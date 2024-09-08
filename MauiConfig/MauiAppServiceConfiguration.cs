@@ -7,6 +7,7 @@ using Serilog.Events;
 using Serilog.Formatting.Json;
 using ViewModels.Config;
 using ViewModels.ExceptionHandlers;
+using ViewModels.Interfaces;
 using ViewModels.Services;
 using ViewModels.Setup;
 
