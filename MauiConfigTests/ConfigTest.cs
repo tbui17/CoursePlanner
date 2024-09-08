@@ -46,10 +46,8 @@ public class ConfigTest
 
         var serviceBuilder = fixture.FreezeMock<IMauiServiceBuilder>();
         var registration = fixture.FreezeMock<Action<UnhandledExceptionEventHandler>>();
-        var mainPageGetter = fixture.FreezeMock<MainPageGetter>();
-
+        var messageDisplay = fixture.FreezeFake<IMessageDisplay>();
         var testPage1 = new TestPage1();
-        mainPageGetter.Setup(x => x()).Returns(testPage1);
         fixture.Inject(testPage1);
 
         var fakeExceptionContext = fixture.Freeze<ExceptionContextFake>();
@@ -66,7 +64,7 @@ public class ConfigTest
             ServiceBuilder = serviceBuilder.Object,
             Services = builder.Services,
             AppDataDirectory = appDataDirectoryGetter.Object,
-            MainPage = mainPageGetter.Object,
+            MainPage = messageDisplay.FakedObject,
             ExceptionHandlerRegistration = registration.Object,
         };
 

@@ -7,6 +7,7 @@ using MauiConfig;
 using Microsoft.Extensions.Configuration;
 using Plugin.LocalNotification;
 using UraniumUI;
+using ViewModels.ExceptionHandlers;
 using ViewModels.Services;
 
 namespace CoursePlanner;
@@ -24,7 +25,7 @@ public static class MauiProgram
         var setup = new MauiAppServiceConfiguration
         {
             AppDataDirectory = () => FileSystem.Current.AppDataDirectory,
-            MainPage = () => Application.Current?.MainPage,
+            MainPage = MessageDisplay.Create(),
             ExceptionHandlerRegistration = x => MauiExceptions.UnhandledException += x,
             Services = builder.Services,
             ServiceBuilder = new MauiServiceBuilder(builder.Services)
@@ -35,6 +36,25 @@ public static class MauiProgram
         setup.RunStartupActions(app);
 
         return app;
+    }
+}
+
+file class MessageDisplay(Func<Page?> current) : IMessageDisplay
+{
+    public static MessageDisplay Create()
+    {
+        return new MessageDisplay(() => Application.Current?.MainPage);
+    }
+
+
+    public Task ShowError(string message)
+    {
+        return current()?.DisplayAlert("Error", message, "OK") ?? Task.CompletedTask;
+    }
+
+    public Task ShowInfo(string message)
+    {
+        return current()?.DisplayAlert("Info", message, "OK") ?? Task.CompletedTask;
     }
 }
 

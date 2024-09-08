@@ -10,7 +10,7 @@ namespace Lib.ExceptionHandlers;
 [Inject]
 public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger)
 {
-    public async Task<ExceptionResult> HandleAsync(Exception exc)
+    public ExceptionResult Handle(Exception exc)
     {
         switch (exc)
         {

@@ -4,70 +4,90 @@ using Microsoft.Extensions.Logging;
 
 namespace ViewModels.ExceptionHandlers;
 
-
-public delegate Page? MainPageGetter();
-
-public interface IClientExceptionHandler
-{
-    Task OnUnhandledException(UnhandledExceptionEventArgs args);
-}
+internal record ClientExceptionUserErrorMessage(
+    string Critical = "",
+    string Error = "",
+    string UnexpectedErrorType = ""
+);
 
 [Inject(typeof(IClientExceptionHandler))]
 public class ClientExceptionHandler(
     ILogger<ClientExceptionHandler> logger,
-    MainPageGetter mainPageGetter,
+    IMessageDisplay messageDisplay,
     GlobalExceptionHandler globalExceptionHandler
 ) : IClientExceptionHandler
 {
+    private static readonly ClientExceptionUserErrorMessage Message = new()
+    {
+        Critical = "An unexpected error occurred during the application's lifecycle. Please restart the application to ensure data integrity. An error log can be found within the application's folder.",
+    };
+
+
     public async Task OnUnhandledException(UnhandledExceptionEventArgs args)
     {
-        if (mainPageGetter() is not { } p)
-        {
-            logger.LogCritical("Exception:\n{Exception}", args.ExceptionObject.ToString());
-            logger.LogCritical("Unexpected null MainPage");
-            throw new ApplicationException(args.ExceptionObject.ToString());
-        }
+        await HandleTopLevel(args);
+    }
 
-        if (args.ExceptionObject is not Exception exception)
-        {
-            logger.LogCritical("Unexpected exception object type: {Type}, {Args}",
-                args.ExceptionObject.GetType().Name, args.ToString());
-            await p.DisplayAlert("Unexpected Application Error",
-                "There was an error during exception handling. Please restart the application.", "Cancel");
-            return;
-        }
-
+    private async Task HandleTopLevel(UnhandledExceptionEventArgs args)
+    {
         try
         {
-            var res = await globalExceptionHandler.HandleAsync(exception);
-            if (res.UserFriendly)
-            {
-                await ShowInfo(res.Message);
-                return;
-            }
+            await Handle(args);
 
-            await ShowUnexpectedError(
-                "An unexpected error occurred during the application's lifecycle. Please restart the application to ensure data integrity. An error log can be found within the application's folder."
-            );
+        }
+        catch (ShowException e)
+        {
+            logger.LogCritical(e, "Failed to display error message.");
+            throw;
+
         }
         catch (Exception e)
         {
-            logger.LogCritical(e, "Unexpected error occurred during exception handling.");
-        }
-
-        return;
-
-        async Task ShowUnexpectedError(string message)
-        {
-            logger.LogError(exception, "Unhandled exception:\n{Exception}", exception.ToString());
-
-            await p.DisplayAlert("Unexpected Application Error", message, "Cancel");
-        }
-
-        async Task ShowInfo(string message)
-        {
-            logger.LogInformation("Domain exception: {Message}", message);
-            await p.DisplayAlert("Info", message, "Cancel");
+            try
+            {
+                logger.LogCritical(e, "Unhandled exception occurred during exception handling.");
+                await messageDisplay.ShowError(Message.Critical);
+            }
+            catch (Exception ex)
+            {
+                logger.LogCritical(ex, "Unhandled exception occurred during secondary attempt to show display error message");
+                throw;
+            }
         }
     }
+
+    private async Task Handle(UnhandledExceptionEventArgs args)
+    {
+        if (args.ExceptionObject is not Exception exception)
+        {
+            logger.LogError(
+                "Unexpected exception object type: {Type}, {Args}",
+                args.ExceptionObject.GetType().Name,
+                args.ToString()
+            );
+            throw new ArgumentException("Unexpected exception object type", nameof(args));
+        }
+
+        var res = globalExceptionHandler.Handle(exception);
+        if (!res.UserFriendly)
+        {
+            await messageDisplay.ShowError(Message.Error).ContinueWith(HandleTask);
+            return;
+        }
+
+        logger.LogInformation("Domain exception: {Message}", res.Message);
+        await messageDisplay.ShowInfo(res.Message).ContinueWith(HandleTask);
+    }
+
+    private static Task HandleTask(Task t)
+    {
+        if (t.IsFaulted)
+        {
+            throw new ShowException(t.Exception);
+        }
+
+        return t;
+    }
 }
+
+internal class ShowException(Exception e) : Exception(e.Message, e);
