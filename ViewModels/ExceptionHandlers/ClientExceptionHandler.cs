@@ -1,4 +1,3 @@
-using CommunityToolkit.Mvvm.Messaging;
 using Lib.Attributes;
 using Lib.ExceptionHandlers;
 using Lib.Exceptions;
@@ -43,20 +42,16 @@ public class ClientExceptionHandler(
                 argumentOutOfRangeException =>
                 {
                     logger.LogError(argumentOutOfRangeException, "Argument exception occurred during exception handling.");
-                    WeakReferenceMessenger.Default.Send(argumentOutOfRangeException);
                     return messageDisplay.ShowError(Message.Error).ToExceptionAsync();
                 },
                 domainException =>
                 {
                     logger.LogInformation(domainException, "User Exception.");
-                    WeakReferenceMessenger.Default.Send(domainException);
                     return messageDisplay.ShowInfo(domainException.Message).ToExceptionAsync();
                 },
                 globalExceptionHandlerResult =>
                 {
-                    logger.LogError(globalExceptionHandlerResult.Exception, "Unhandled exception: {Message}",
-                        globalExceptionHandlerResult.Message);
-                    WeakReferenceMessenger.Default.Send(globalExceptionHandlerResult);
+                    logger.LogError(globalExceptionHandlerResult.Exception, "Unhandled exception: {Message}", globalExceptionHandlerResult.Message);
                     return messageDisplay.ShowError(Message.Critical).ToExceptionAsync();
                 }
             );
