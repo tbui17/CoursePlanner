@@ -9,9 +9,8 @@ using Moq;
 using Plugin.LocalNotification;
 using ViewModels.Services;
 using ViewModelTests.TestSetup;
-using Result = FluentResults.Result;
 
-namespace ViewModelTests;
+namespace ViewModelTests.Domain.Services;
 
 public class LocalNotificationServiceTests : BaseDbTest
 {
