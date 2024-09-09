@@ -1,15 +1,18 @@
+using System.Linq.Expressions;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Windows.Input;
 using Lib.Attributes;
 using Lib.Interfaces;
 using Lib.Models;
+using Lib.Utils;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using ViewModels.Config;
 using ViewModels.Interfaces;
 using ViewModels.Models;
+using ViewModels.Scheduler;
 using ViewModels.Services;
 
 namespace ViewModels.Domain;
@@ -21,7 +24,7 @@ public interface INotificationDataViewModel
     string FilterText { get; set; }
     DateTime Start { get; set; }
     DateTime End { get; set; }
-
+    bool Busy { get; }
     string TypeFilter { get; set; }
     IList<string> NotificationOptions { get; set; }
     int SelectedNotificationOptionIndex { get; set; }
@@ -34,7 +37,6 @@ public interface INotificationDataViewModel
     ICommand ClearCommand { get; }
 }
 
-
 partial class NotificationDataViewModel
 {
     [Reactive]
@@ -45,6 +47,8 @@ partial class NotificationDataViewModel
 
     [Reactive]
     public DateTime End { get; set; }
+
+    public bool Busy { get; private set; }
 
     [Reactive]
     public string TypeFilter { get; set; } = "";
@@ -76,19 +80,19 @@ partial class NotificationDataViewModel
     public ICommand ClearCommand { get; }
 }
 
-
 [Inject]
 public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INotificationDataViewModel
 {
-
-
     private readonly ILogger<NotificationDataViewModel> _logger;
 
 
     public NotificationDataViewModel(
         NotificationDataStreamFactory notificationDataStreamFactory,
-        ILogger<NotificationDataViewModel> logger)
+        ILogger<NotificationDataViewModel> logger,
+        ISchedulerProvider schedulerProvider
+    )
     {
+        _schedulerProvider = schedulerProvider;
         var now = DateTime.Now.Date;
         FilterText = "";
         Start = now;
@@ -97,7 +101,7 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
         ChangePageCommand = ReactiveCommand.Create<int>(page => CurrentPage = page);
         NotificationOptions = new List<string> { "None", "True", "False" };
         _logger = logger;
-        Types = new NotificationTypes(["Assessment","Course"]).Value;
+        Types = new NotificationTypes(["Assessment", "Course"]).Value;
         ClearCommand = ReactiveCommand.Create(() =>
         {
             _logger.LogDebug("Clearing filters");
@@ -123,13 +127,12 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
         dataStream
             .Select(x => x.Count)
             .Do(x => _logger.LogDebug("Notification count {Count}", x))
-            .ObserveOn(RxApp.MainThreadScheduler)
-            .ToPropertyEx(this, vm => vm.ItemCount);
+            .Thru(x => ToPropertyEx(x,vm => vm.ItemCount));
 
         dataStream
             .Do(x => _logger.LogDebug("Notification items {Items}", x))
-            .ObserveOn(RxApp.MainThreadScheduler)
-            .ToPropertyEx(this, vm => vm.NotificationItems);
+            .ObserveOn(schedulerProvider.MainThread)
+            .Thru(x => ToPropertyEx(x, vm => vm.NotificationItems));
     }
 
     private IObservable<DateTimeRange> CreateDateFilterSource()
@@ -151,6 +154,14 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
         return pickerFilterSource;
     }
 
+    private ObservableAsPropertyHelper<TRet> ToPropertyEx<TRet>(
+        IObservable<TRet> item,
+        Expression<Func<NotificationDataViewModel, TRet>> property)
+    {
+
+        return item.ToPropertyEx(this, property, scheduler: _schedulerProvider.MainThread);
+    }
+
     private IObservable<TextFilterSource> CreateTextFilterSource()
     {
         var textFilterSource = this.WhenAnyValue(
@@ -163,6 +174,7 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
     }
 
     private readonly BehaviorSubject<object?> _refreshSubject = new(new object());
+    private readonly ISchedulerProvider _schedulerProvider;
 
     public Task RefreshAsync()
     {
