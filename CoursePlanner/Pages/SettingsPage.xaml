@@ -3,10 +3,17 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:controls="clr-namespace:CoursePlanner.Controls"
+             xmlns:domain="clr-namespace:ViewModels.Domain;assembly=ViewModels"
              xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
+             xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
              Title="Settings"
+             x:DataType="domain:SettingsViewModel"
              x:Class="CoursePlanner.Pages.SettingsPage">
     <ContentPage.Content>
-        <uranium:AutoFormView Source="Binding ." />
+        <VerticalStackLayout>
+            <material:TextField Title="Notification Range (Days)" Text="{Binding NotificationRange}" Keyboard="Numeric" />
+            <Button Text="Submit" HorizontalOptions="Start" Command="{Binding SaveCommand}" />
+        </VerticalStackLayout>
+
     </ContentPage.Content>
 </ContentPage>

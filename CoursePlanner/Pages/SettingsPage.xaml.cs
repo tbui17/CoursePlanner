@@ -10,6 +10,7 @@ public partial class SettingsPage : ContentPage, IRefreshableView<SettingsViewMo
     {
         Model = model;
         InitializeComponent();
+        BindingContext = model;
     }
 
     public SettingsViewModel Model { get; }
