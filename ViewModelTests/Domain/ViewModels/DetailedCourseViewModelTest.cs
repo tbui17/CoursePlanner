@@ -9,7 +9,7 @@ using ViewModels.Domain;
 using ViewModels.Services;
 using ViewModelTests.TestSetup;
 
-namespace ViewModelTests.Domain;
+namespace ViewModelTests.Domain.ViewModels;
 
 public class DetailedCourseViewModelTest : BasePageViewModelTest
 {

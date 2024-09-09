@@ -1,30 +1,35 @@
-using FluentAssertions;
+﻿using FluentAssertions;
 using FluentAssertions.Execution;
+using Lib.Models;
 using Microsoft.EntityFrameworkCore;
 using ViewModels.Domain;
 using ViewModelTests.TestData;
 using ViewModelTests.TestSetup;
 
-namespace ViewModelTests.Domain;
+namespace ViewModelTests.Domain.ViewModels;
 
-public class EditTermViewModelTest : BasePageViewModelTest
+public class EditCourseViewModelTest : BasePageViewModelTest
 {
+
     [SetUp]
     public override async Task Setup()
     {
         await base.Setup();
-        Model = new EditTermViewModel(factory: DbFactory, navService: NavMock.Object, appService: AppMock.Object);
+
+        Model = new EditCourseViewModel(factory:DbFactory,navService:NavMock.Object,appService:AppMock.Object);
         await Model.Init(1);
     }
 
-    private EditTermViewModel Model { get; set; }
+    private EditCourseViewModel Model { get; set; }
+
 
     [Test]
     public async Task Init_ShouldMapToDbValues()
     {
-
-        var expected = await Db.Terms.FirstAsync();
-        Model.Should().BeEquivalentTo(expected, x => x.ExcludingMissingMembers());
+        var expected = await Db.Courses.FirstAsync(x => x.Id == 1);
+        Model
+           .Should()
+           .BeEquivalentTo(expected, x => x.ExcludingMissingMembers());
     }
 
     [Test]
@@ -33,11 +38,17 @@ public class EditTermViewModelTest : BasePageViewModelTest
         Model.Name = "Test 123";
         Model.Start = DateTime.Now;
         Model.End = DateTime.Now.AddDays(1);
+        Model.SelectedStatus = Course.Completed;
         await Model.SaveAsync();
-        var term = await Db.Terms.Where(x => x.Name == "Test 123").ToListAsync();
-        term.Should().NotBeEmpty();
-
+        var course = await Db
+           .Courses
+           .Where(x => x.Name == "Test 123")
+           .ToListAsync();
+        course
+           .Should()
+           .NotBeEmpty();
     }
+
 
 
     [TestCaseSource(typeof(TestParam), nameof(TestParam.NameAndDate))]
@@ -51,12 +62,13 @@ public class EditTermViewModelTest : BasePageViewModelTest
 
         using var _ = new AssertionScope();
 
-        var term = await Db
-           .Terms
+        var course = await Db
+           .Courses
            .Where(x => x.Name == name)
            .ToListAsync();
-
-        term.Should().BeEmpty();
+        course
+           .Should()
+           .BeEmpty();
         AppMock.VerifyReceivedError();
     }
 }
