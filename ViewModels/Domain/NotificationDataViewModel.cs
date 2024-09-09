@@ -104,6 +104,7 @@ public class NotificationDataViewModel : ReactiveObject, IRefresh
     public NotificationDataViewModel(
         NotificationService service, NotificationTypes types, ILogger<NotificationDataViewModel> logger)
     {
+        _notificationService = service;
         _logger = logger;
         Types = types.Value;
         ClearCommand = ReactiveCommand.Create(() =>
@@ -120,26 +121,34 @@ public class NotificationDataViewModel : ReactiveObject, IRefresh
 
         var refreshSource = _refreshSubject;
 
-        var textFilterSource = this.WhenAnyValue(
-                vm => vm.FilterText,
-                vm => vm.TypeFilter)
-            .Throttle(TimeSpan.FromMilliseconds(500))
-            .Do(x => _logger.LogDebug("Filter text {FilterText} {TypeFilter}", x.Item1, x.Item2));
+        var textFilterSource = CreateTextFilterSource();
 
-        var pickerFilterSource = this.WhenAnyValue(x => x.SelectedNotificationOptionIndex)
-            .Do(x => _logger.LogDebug("Picker index {Index}", x));
+        var pickerFilterSource = CreatePickerFilterSource();
 
-        var dateFilterSource = this
-            .WhenAnyValue(
-                vm => vm.Start,
-                vm => vm.End,
-                (start, end) => new DateTimeRange { Start = start, End = end }
-            )
-            .Do(x => _logger.LogDebug("Date range {Start} {End}", x.Start, x.End));
+        var dateFilterSource = CreateDateFilterSource();
 
+        var dataStream = CreateDataStream(dateFilterSource, textFilterSource, pickerFilterSource, refreshSource);
+
+        _itemCountHelper = dataStream
+            .Select(x => x.Count)
+            .Do(x => _logger.LogDebug("Notification count {Count}", x))
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .ToProperty(this, vm => vm.ItemCount);
+
+        _notificationItemsHelper = dataStream
+            .Do(x => _logger.LogDebug("Notification items {Items}", x))
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .ToProperty(this, vm => vm.NotificationItems);
+    }
+
+    private IObservable<NotificationCollection> CreateDataStream(
+        IObservable<DateTimeRange> dateFilterSource,
+        IObservable<(string, string)> textFilterSource, IObservable<int> pickerFilterSource,
+        BehaviorSubject<object?> refreshSource)
+    {
         var dataStream = dateFilterSource
             .ObserveOn(RxApp.TaskpoolScheduler)
-            .SelectMany(service.GetNotificationsWithinDateRange)
+            .SelectMany(this._notificationService.GetNotificationsWithinDateRange)
             .CombineLatest(textFilterSource, pickerFilterSource, refreshSource)
             .Select(sources =>
             {
@@ -157,20 +166,40 @@ public class NotificationDataViewModel : ReactiveObject, IRefresh
             })
             .Select(x => x.ToList())
             .LoggedCatch(this, Observable.Return(new NotificationCollection()));
+        return dataStream;
+    }
 
-        _itemCountHelper = dataStream
-            .Select(x => x.Count)
-            .Do(x => _logger.LogDebug("Notification count {Count}", x))
-            .ObserveOn(RxApp.MainThreadScheduler)
-            .ToProperty(this, vm => vm.ItemCount);
+    private IObservable<DateTimeRange> CreateDateFilterSource()
+    {
+        var dateFilterSource = this
+            .WhenAnyValue(
+                vm => vm.Start,
+                vm => vm.End,
+                (start, end) => new DateTimeRange { Start = start, End = end }
+            )
+            .Do(x => _logger.LogDebug("Date range {Start} {End}", x.Start, x.End));
+        return dateFilterSource;
+    }
 
-        _notificationItemsHelper = dataStream
-            .Do(x => _logger.LogDebug("Notification items {Items}", x))
-            .ObserveOn(RxApp.MainThreadScheduler)
-            .ToProperty(this, vm => vm.NotificationItems);
+    private IObservable<int> CreatePickerFilterSource()
+    {
+        var pickerFilterSource = this.WhenAnyValue(x => x.SelectedNotificationOptionIndex)
+            .Do(x => _logger.LogDebug("Picker index {Index}", x));
+        return pickerFilterSource;
+    }
+
+    private IObservable<(string, string)> CreateTextFilterSource()
+    {
+        var textFilterSource = this.WhenAnyValue(
+                vm => vm.FilterText,
+                vm => vm.TypeFilter)
+            .Throttle(TimeSpan.FromMilliseconds(500))
+            .Do(x => _logger.LogDebug("Filter text {FilterText} {TypeFilter}", x.Item1, x.Item2));
+        return textFilterSource;
     }
 
     private readonly BehaviorSubject<object?> _refreshSubject = new(new object());
+    private readonly NotificationService _notificationService;
 
     public Task RefreshAsync()
     {
