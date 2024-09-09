@@ -1,8 +1,7 @@
-using FluentAssertions;
 using ViewModels.Domain;
 using ViewModelTests.TestSetup;
 
-namespace ViewModelTests.ViewModelTestGroup;
+namespace ViewModelTests.Domain;
 
 public class StatsViewModelTest : BasePageViewModelTest
 {

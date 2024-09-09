@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using ViewModels.Domain;
 using ViewModelTests.TestSetup;
 
-namespace ViewModelTests.ViewModelTestGroup;
+namespace ViewModelTests.Domain;
 
 public class NotificationDataViewModelTest : BasePageViewModelTest
 {
