@@ -5,7 +5,9 @@ namespace ViewModels.Models;
 
 public record InputSource(
     IObservable<DateTimeRange> DateFilterSource,
-    IObservable<(string, string)> TextFilterSource,
+    IObservable<TextFilterSource> TextFilterSource,
     IObservable<int> PickerFilterSource,
     BehaviorSubject<object?> RefreshSource
 );
+
+public record TextFilterSource(string TextFilter, string TypeFilter);
