@@ -6,6 +6,7 @@ using Lib.Interfaces;
 using Lib.Models;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 using ViewModels.Config;
 using ViewModels.Interfaces;
 using ViewModels.Models;
@@ -24,90 +25,56 @@ public interface INotificationDataViewModel
     string TypeFilter { get; set; }
     IList<string> NotificationOptions { get; set; }
     int SelectedNotificationOptionIndex { get; set; }
-    ICommand ClearCommand { get; }
-    DateTime MonthDate { get; set; }
     NotificationCollection NotificationItems { get; }
     int ItemCount { get; }
     int CurrentPage { get; set; }
     int Pages { get; }
     ICommand ChangePageCommand { get; }
-
+    ICommand ClearCommand { get; }
 }
 
 
-public partial class NotificationDataViewModel
+partial class NotificationDataViewModel
 {
-    private string _filterText = "";
+    [Reactive]
+    public string FilterText { get; set; }
 
-    public string FilterText
-    {
-        get => _filterText;
-        set => this.RaiseAndSetIfChanged(ref _filterText, value);
-    }
+    [Reactive]
+    public DateTime Start { get; set; }
 
-    private DateTime _start = DateTime.Now.Date;
+    [Reactive]
+    public DateTime End { get; set; }
 
-    public DateTime Start
-    {
-        get => _start;
-        set => this.RaiseAndSetIfChanged(ref _start, value);
-    }
-
-    private DateTime _end = DateTime.Now.Date.AddMonths(1);
-
-    public DateTime End
-    {
-        get => _end;
-        set => this.RaiseAndSetIfChanged(ref _end, value);
-    }
-
+    [ObservableAsProperty]
     public IList<string> Types { get; }
 
-    private string _typeFilter = "";
+    [Reactive]
+    public string TypeFilter { get; set; } = "";
 
-    public string TypeFilter
-    {
-        get => _typeFilter;
-        set => this.RaiseAndSetIfChanged(ref _typeFilter, value);
-    }
+    [Reactive]
+    public IList<string> NotificationOptions { get; set; }
 
-
-    private IList<string> _notificationOptions = ["None", "True", "False"];
+    [Reactive]
+    public int SelectedNotificationOptionIndex { get; set; }
 
 
-    public IList<string> NotificationOptions
-    {
-        get => _notificationOptions;
-        set => this.RaiseAndSetIfChanged(ref _notificationOptions, value);
-    }
 
-    private int _selectedNotificationOptionIndex;
+    [ObservableAsProperty]
+    public NotificationCollection NotificationItems { get; }
 
-    public int SelectedNotificationOptionIndex
-    {
-        get => _selectedNotificationOptionIndex;
-        set => this.RaiseAndSetIfChanged(ref _selectedNotificationOptionIndex, value);
-    }
+    [ObservableAsProperty]
+    public int ItemCount { get; }
+
+    [Reactive]
+    public int CurrentPage { get; set; }
+
+    [ObservableAsProperty]
+    public int Pages { get; }
+
+
+    public ICommand ChangePageCommand { get; set; }
 
     public ICommand ClearCommand { get; }
-
-    private DateTime _monthDate = DateTime.Now.Date;
-
-    public DateTime MonthDate
-    {
-        get => _monthDate;
-        set => this.RaiseAndSetIfChanged(ref _monthDate, value);
-    }
-
-    private readonly ObservableAsPropertyHelper<NotificationCollection> _notificationItemsHelper;
-
-    public NotificationCollection NotificationItems => _notificationItemsHelper.Value;
-
-    private readonly ObservableAsPropertyHelper<int> _itemCountHelper;
-    public int ItemCount => _itemCountHelper.Value;
-    public int CurrentPage { get; set; }
-    public int Pages { get; set; }
-    public ICommand ChangePageCommand { get; set; }
 }
 
 
@@ -123,6 +90,13 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
         NotificationDataStreamFactory notificationDataStreamFactory, NotificationTypes types,
         ILogger<NotificationDataViewModel> logger)
     {
+        var now = DateTime.Now.Date;
+        FilterText = "";
+        Start = now;
+        End = now;
+        NotificationItems = [];
+        ChangePageCommand = ReactiveCommand.Create<int>(page => CurrentPage = page);
+        NotificationOptions = new List<string> { "None", "True", "False" };
         _logger = logger;
         Types = types.Value;
         ClearCommand = ReactiveCommand.Create(() =>
@@ -149,16 +123,16 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
 
         var dataStream = notificationDataStreamFactory.CreateDataStream(inputSource);
 
-        _itemCountHelper = dataStream
+        dataStream
             .Select(x => x.Count)
             .Do(x => _logger.LogDebug("Notification count {Count}", x))
             .ObserveOn(RxApp.MainThreadScheduler)
-            .ToProperty(this, vm => vm.ItemCount);
+            .ToPropertyEx(this, vm => vm.ItemCount);
 
-        _notificationItemsHelper = dataStream
+        dataStream
             .Do(x => _logger.LogDebug("Notification items {Items}", x))
             .ObserveOn(RxApp.MainThreadScheduler)
-            .ToProperty(this, vm => vm.NotificationItems);
+            .ToPropertyEx(this, vm => vm.NotificationItems);
     }
 
     private IObservable<DateTimeRange> CreateDateFilterSource()

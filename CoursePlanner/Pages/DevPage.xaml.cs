@@ -237,15 +237,6 @@ public partial class DevPage
                         e.Message);
                 }
             },
-            ["Nav Data Page"] = async () =>
-            {
-                var login = new LoginDetails("testaccount", "testpass");
-                await AccountService.CreateAsync(login);
-                await SessionService.LoginAsync(login);
-                await Shell.Current.GoToAsync($"///{nameof(NotificationDataPage)}");
-                var page = (NotificationDataPage)Shell.Current.CurrentPage;
-                page.Model.MonthDate = new DateTime(2023, 9, 1);
-            },
             ["Throw"] = () => throw new DevPageException()
         };
     }
