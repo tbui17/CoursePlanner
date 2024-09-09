@@ -1,4 +1,3 @@
-using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Windows.Input;
@@ -23,12 +22,16 @@ public interface INotificationDataViewModel
     DateTime End { get; set; }
     IList<string> Types { get; }
     string TypeFilter { get; set; }
-    List<string> NotificationOptions { get; set; }
+    IList<string> NotificationOptions { get; set; }
     int SelectedNotificationOptionIndex { get; set; }
     ICommand ClearCommand { get; }
     DateTime MonthDate { get; set; }
     NotificationCollection NotificationItems { get; }
     int ItemCount { get; }
+    int CurrentPage { get; set; }
+    int Pages { get; }
+    ICommand ChangePageCommand { get; }
+
 }
 
 
@@ -69,10 +72,10 @@ public partial class NotificationDataViewModel
     }
 
 
-    private List<string> _notificationOptions = ["None", "True", "False"];
+    private IList<string> _notificationOptions = ["None", "True", "False"];
 
 
-    public List<string> NotificationOptions
+    public IList<string> NotificationOptions
     {
         get => _notificationOptions;
         set => this.RaiseAndSetIfChanged(ref _notificationOptions, value);
@@ -102,6 +105,9 @@ public partial class NotificationDataViewModel
 
     private readonly ObservableAsPropertyHelper<int> _itemCountHelper;
     public int ItemCount => _itemCountHelper.Value;
+    public int CurrentPage { get; set; }
+    public int Pages { get; set; }
+    public ICommand ChangePageCommand { get; set; }
 }
 
 
@@ -131,20 +137,17 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
         });
 
 
-        var refreshSource = _refreshSubject;
 
-        var textFilterSource = CreateTextFilterSource();
 
-        var pickerFilterSource = CreatePickerFilterSource();
+        var inputSource = new InputSource
+        {
+            RefreshSource = _refreshSubject,
+            DateFilterSource = CreateDateFilterSource(),
+            TextFilterSource = CreateTextFilterSource(),
+            PickerFilterSource = CreatePickerFilterSource()
+        };
 
-        var dateFilterSource = CreateDateFilterSource();
-
-        var dataStream = notificationDataStreamFactory.CreateDataStream(new InputSource(
-                dateFilterSource,
-                textFilterSource,
-                pickerFilterSource,
-                refreshSource
-            ));
+        var dataStream = notificationDataStreamFactory.CreateDataStream(inputSource);
 
         _itemCountHelper = dataStream
             .Select(x => x.Count)
