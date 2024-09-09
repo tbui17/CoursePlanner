@@ -28,8 +28,8 @@ internal sealed class LogConfigurationTestUseCase : ILoggingUseCase
     {
         Base.AddSinks();
         Configuration
-            .WriteTo
-            .Debug(LogEventLevel.Debug, DefaultLogConfigurationUseCase.LogTemplate);
+            .WriteTo.Debug(LogEventLevel.Debug, DefaultLogConfigurationUseCase.LogTemplate)
+            .WriteTo.Console(LogEventLevel.Debug, DefaultLogConfigurationUseCase.LogTemplate);
         AddSeq();
     }
 
