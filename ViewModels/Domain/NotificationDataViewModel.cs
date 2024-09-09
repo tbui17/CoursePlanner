@@ -10,6 +10,8 @@ using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using ViewModels.Config;
 using ViewModels.Interfaces;
+using ViewModels.Models;
+using ViewModels.Services;
 
 namespace ViewModels.Domain;
 
@@ -98,13 +100,12 @@ public class NotificationDataViewModel : ReactiveObject, IRefresh
     private readonly ObservableAsPropertyHelper<int> _itemCountHelper;
     public int ItemCount => _itemCountHelper.Value;
 
-    private ILogger<NotificationDataViewModel> _logger;
+    private readonly ILogger<NotificationDataViewModel> _logger;
 
 
     public NotificationDataViewModel(
-        NotificationService service, NotificationTypes types, ILogger<NotificationDataViewModel> logger)
+        DataStreamFactory dataStreamFactory, NotificationTypes types, ILogger<NotificationDataViewModel> logger)
     {
-        _notificationService = service;
         _logger = logger;
         Types = types.Value;
         ClearCommand = ReactiveCommand.Create(() =>
@@ -127,7 +128,8 @@ public class NotificationDataViewModel : ReactiveObject, IRefresh
 
         var dateFilterSource = CreateDateFilterSource();
 
-        var dataStream = CreateDataStream(dateFilterSource, textFilterSource, pickerFilterSource, refreshSource);
+        var dataStream = dataStreamFactory.CreateDataStream(new InputSource(dateFilterSource, textFilterSource,
+            pickerFilterSource, refreshSource));
 
         _itemCountHelper = dataStream
             .Select(x => x.Count)
@@ -139,34 +141,6 @@ public class NotificationDataViewModel : ReactiveObject, IRefresh
             .Do(x => _logger.LogDebug("Notification items {Items}", x))
             .ObserveOn(RxApp.MainThreadScheduler)
             .ToProperty(this, vm => vm.NotificationItems);
-    }
-
-    private IObservable<NotificationCollection> CreateDataStream(
-        IObservable<DateTimeRange> dateFilterSource,
-        IObservable<(string, string)> textFilterSource, IObservable<int> pickerFilterSource,
-        BehaviorSubject<object?> refreshSource)
-    {
-        var dataStream = dateFilterSource
-            .ObserveOn(RxApp.TaskpoolScheduler)
-            .SelectMany(this._notificationService.GetNotificationsWithinDateRange)
-            .CombineLatest(textFilterSource, pickerFilterSource, refreshSource)
-            .Select(sources =>
-            {
-                var (notifications, (filterText, typeFilter), notificationSelectedIndex, _) = sources;
-
-                return notifications
-                    .AsParallel()
-                    .Thru(notificationStream => ApplyNotificationFilter(notificationStream, notificationSelectedIndex))
-                    .Where(item => item.Name.Contains(filterText, StringComparison.CurrentCultureIgnoreCase))
-                    .Where(item =>
-                        item is Assessment assessment
-                            ? $"{assessment.Type} Assessment".Contains(typeFilter,
-                                StringComparison.CurrentCultureIgnoreCase)
-                            : item.GetType().Name.Contains(typeFilter, StringComparison.CurrentCultureIgnoreCase));
-            })
-            .Select(x => x.ToList())
-            .LoggedCatch(this, Observable.Return(new NotificationCollection()));
-        return dataStream;
     }
 
     private IObservable<DateTimeRange> CreateDateFilterSource()
@@ -199,7 +173,6 @@ public class NotificationDataViewModel : ReactiveObject, IRefresh
     }
 
     private readonly BehaviorSubject<object?> _refreshSubject = new(new object());
-    private readonly NotificationService _notificationService;
 
     public Task RefreshAsync()
     {

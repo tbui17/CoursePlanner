@@ -3,11 +3,6 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="CoursePlanner.Pages.NotificationDataPage"
-
-             xmlns:controls="clr-namespace:CoursePlanner.Controls"
-             xmlns:interfaces="clr-namespace:Lib.Interfaces;assembly=Lib"
-             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
-             xmlns:cz="clr-namespace:FunctionZero.Maui.Controls;assembly=FunctionZero.Maui.Controls"
              xmlns:domain="clr-namespace:ViewModels.Domain;assembly=ViewModels"
              xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
              x:Name="Page"
@@ -22,28 +17,27 @@
             <VerticalStackLayout x:Name="MainLayout" Margin="10,10,10,30">
                 <VerticalStackLayout Margin="10" Spacing="10">
                     <VerticalStackLayout>
-                        <VerticalStackLayout>
-                            <material:TextField Title="Name" Text="{Binding FilterText}" />
-                            <material:AutoCompleteTextField Title="Type" ItemsSource="{Binding Types}" Text="{Binding TypeFilter}" />
-                            <material:PickerField ItemsSource="{Binding NotificationOptions}" SelectedIndex="{Binding SelectedNotificationOptionIndex}" />
-                        </VerticalStackLayout>
-                        <HorizontalStackLayout Spacing="25">
-                            <material:DatePickerField Title="Start" Date="{Binding Start}" />
-                            <material:DatePickerField Title="End" Date="{Binding End}" />
-                        </HorizontalStackLayout>
-                        <HorizontalStackLayout>
-                            <Button Text="Clear" Command="{Binding ClearCommand}" />
-                        </HorizontalStackLayout>
-                        <Label Text="{Binding ItemCount, StringFormat='Count: {0}'}"/>
-
+                        <material:TextField Title="Name" Text="{Binding FilterText}" />
+                        <material:AutoCompleteTextField Title="Type" ItemsSource="{Binding Types}"
+                                                        Text="{Binding TypeFilter}" />
+                        <material:PickerField Title="Notification Option" ItemsSource="{Binding NotificationOptions}"
+                                              SelectedIndex="{Binding SelectedNotificationOptionIndex}" />
                     </VerticalStackLayout>
-
+                    <HorizontalStackLayout Spacing="25">
+                        <material:DatePickerField Title="Start" Date="{Binding Start}" />
+                        <material:DatePickerField Title="End" Date="{Binding End}" />
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout>
+                        <Button Text="Clear" Command="{Binding ClearCommand}" />
+                    </HorizontalStackLayout>
+                    <Label Text="{Binding ItemCount, StringFormat='Count: {0}'}" />
                 </VerticalStackLayout>
 
-                <cz:ListViewZero
-                    ItemsSource="{Binding NotificationItems}"
-                    SelectionMode="None"
-                    ItemTemplate="{StaticResource NotificationCard}" />
+                <CollectionView ItemsSource="{Binding NotificationItems}"
+                                SelectionMode="None"
+                                MaximumHeightRequest="300"
+                                ItemTemplate="{StaticResource NotificationCard}" />
+
 
             </VerticalStackLayout>
         </ScrollView>

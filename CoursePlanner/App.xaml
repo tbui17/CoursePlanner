@@ -1,12 +1,9 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 
 <Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:local="clr-namespace:CoursePlanner"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
              xmlns:interfaces="clr-namespace:Lib.Interfaces;assembly=Lib"
-             xmlns:models="clr-namespace:Lib.Models;assembly=Lib"
-             xmlns:controls="clr-namespace:CoursePlanner.Controls"
-             xmlns:u="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
              x:Class="CoursePlanner.App">
     <Application.Resources>
         <ResourceDictionary>
