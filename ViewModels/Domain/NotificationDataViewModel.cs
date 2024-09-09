@@ -1,11 +1,10 @@
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Windows.Input;
 using Lib.Attributes;
 using Lib.Interfaces;
 using Lib.Models;
-using Lib.Services.NotificationService;
-using Lib.Utils;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using ViewModels.Config;
@@ -17,8 +16,23 @@ namespace ViewModels.Domain;
 
 using NotificationCollection = List<INotification>;
 
-[Inject]
-public class NotificationDataViewModel : ReactiveObject, IRefresh
+public interface INotificationDataViewModel
+{
+    string FilterText { get; set; }
+    DateTime Start { get; set; }
+    DateTime End { get; set; }
+    IList<string> Types { get; }
+    string TypeFilter { get; set; }
+    List<string> NotificationOptions { get; set; }
+    int SelectedNotificationOptionIndex { get; set; }
+    ICommand ClearCommand { get; }
+    DateTime MonthDate { get; set; }
+    NotificationCollection NotificationItems { get; }
+    int ItemCount { get; }
+}
+
+
+public partial class NotificationDataViewModel
 {
     private string _filterText = "";
 
@@ -72,18 +86,7 @@ public class NotificationDataViewModel : ReactiveObject, IRefresh
         set => this.RaiseAndSetIfChanged(ref _selectedNotificationOptionIndex, value);
     }
 
-    private static ParallelQuery<INotification> ApplyNotificationFilter(
-        ParallelQuery<INotification> results,
-        int notificationSelectedIndex
-    ) =>
-        notificationSelectedIndex switch
-        {
-            < 1 => results,
-            1 => results.Where(item => item.ShouldNotify),
-            > 1 => results.Where(item => !item.ShouldNotify)
-        };
-
-    public ReactiveCommand<Unit, Unit> ClearCommand { get; }
+    public ICommand ClearCommand { get; }
 
     private DateTime _monthDate = DateTime.Now.Date;
 
@@ -99,12 +102,20 @@ public class NotificationDataViewModel : ReactiveObject, IRefresh
 
     private readonly ObservableAsPropertyHelper<int> _itemCountHelper;
     public int ItemCount => _itemCountHelper.Value;
+}
+
+
+[Inject]
+public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INotificationDataViewModel
+{
+
 
     private readonly ILogger<NotificationDataViewModel> _logger;
 
 
     public NotificationDataViewModel(
-        DataStreamFactory dataStreamFactory, NotificationTypes types, ILogger<NotificationDataViewModel> logger)
+        NotificationDataStreamFactory notificationDataStreamFactory, NotificationTypes types,
+        ILogger<NotificationDataViewModel> logger)
     {
         _logger = logger;
         Types = types.Value;
@@ -128,8 +139,12 @@ public class NotificationDataViewModel : ReactiveObject, IRefresh
 
         var dateFilterSource = CreateDateFilterSource();
 
-        var dataStream = dataStreamFactory.CreateDataStream(new InputSource(dateFilterSource, textFilterSource,
-            pickerFilterSource, refreshSource));
+        var dataStream = notificationDataStreamFactory.CreateDataStream(new InputSource(
+                dateFilterSource,
+                textFilterSource,
+                pickerFilterSource,
+                refreshSource
+            ));
 
         _itemCountHelper = dataStream
             .Select(x => x.Count)
@@ -162,13 +177,14 @@ public class NotificationDataViewModel : ReactiveObject, IRefresh
         return pickerFilterSource;
     }
 
-    private IObservable<(string, string)> CreateTextFilterSource()
+    private IObservable<TextFilterSource> CreateTextFilterSource()
     {
         var textFilterSource = this.WhenAnyValue(
                 vm => vm.FilterText,
                 vm => vm.TypeFilter)
             .Throttle(TimeSpan.FromMilliseconds(500))
-            .Do(x => _logger.LogDebug("Filter text {FilterText} {TypeFilter}", x.Item1, x.Item2));
+            .Select(x => new TextFilterSource(x.Item1, x.Item2))
+            .Do(x => _logger.LogDebug("Filters: {Data}", x));
         return textFilterSource;
     }
 

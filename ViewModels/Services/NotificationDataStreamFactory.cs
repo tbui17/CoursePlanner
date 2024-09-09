@@ -6,13 +6,12 @@ using Lib.Services.NotificationService;
 using Lib.Utils;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
-using ViewModels.Domain;
 using ViewModels.Models;
 
 namespace ViewModels.Services;
 
 [Inject]
-public class DataStreamFactory(NotificationService notificationService, ILogger<DataStreamFactory> logger)
+public class NotificationDataStreamFactory(NotificationService notificationService, ILogger<NotificationDataStreamFactory> logger)
 {
     private static ParallelQuery<INotification> ApplyNotificationFilter(
         ParallelQuery<INotification> results,
