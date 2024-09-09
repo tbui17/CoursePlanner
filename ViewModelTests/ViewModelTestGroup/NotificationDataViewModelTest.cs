@@ -41,7 +41,7 @@ public class NotificationDataViewModelTest : BasePageViewModelTest
     {
 
         await Model.RefreshAsync();
-        Model.MonthDate = DateTime.Now.AddMinutes(2);
+        Model.Start = DateTime.Now.AddMinutes(2);
         Model.FilterText = "Course";
         await Task.Delay(1000);
         using var scope = new AssertionScope();
