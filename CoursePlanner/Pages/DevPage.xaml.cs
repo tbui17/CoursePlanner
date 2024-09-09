@@ -63,6 +63,7 @@ public partial class DevPage
         {
             text = (string)Input.SelectedItem;
         }
+
         catch (Exception ex)
         {
             await ApplicationService.AlertAsync("Error parsing command: " + ex.Message);
@@ -76,6 +77,10 @@ public partial class DevPage
             {
                 await action();
                 return;
+            }
+            catch (DevPageException)
+            {
+                throw;
             }
             catch (Exception exc)
             {
@@ -240,7 +245,10 @@ public partial class DevPage
                 await Shell.Current.GoToAsync($"///{nameof(NotificationDataPage)}");
                 var page = (NotificationDataPage)Shell.Current.CurrentPage;
                 page.Model.MonthDate = new DateTime(2023, 9, 1);
-            }
+            },
+            ["Throw"] = () => throw new DevPageException()
         };
     }
 }
+
+public class DevPageException() : Exception("Dev Page Test Exception");

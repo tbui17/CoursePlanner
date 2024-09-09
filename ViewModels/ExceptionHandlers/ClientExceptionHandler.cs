@@ -8,11 +8,6 @@ using ViewModels.Interfaces;
 
 namespace ViewModels.ExceptionHandlers;
 
-internal record ClientExceptionUserErrorMessage(
-    string Critical = "",
-    string Error = ""
-);
-
 [Inject(typeof(IClientExceptionHandler))]
 public class ClientExceptionHandler(
     ILogger<ClientExceptionHandler> logger,
@@ -20,14 +15,7 @@ public class ClientExceptionHandler(
     GlobalExceptionHandler globalExceptionHandler
 ) : IClientExceptionHandler
 {
-    // TODO: Localization
-    private static readonly ClientExceptionUserErrorMessage Message = new()
-    {
-        Critical =
-            "A critical unexpected error occurred during the application's lifecycle. Please restart the application to ensure data integrity. An error log can be found within the application's folder.",
-        Error =
-            "An unexpected exception occurred. Application service may be degraded. It is advised to restart the application.",
-    };
+
 
 
     public async Task OnUnhandledException(UnhandledExceptionEventArgs args)
@@ -36,14 +24,18 @@ public class ClientExceptionHandler(
     }
 
 
+    private const string ErrorMessage =
+        "An unexpected exception occurred. Application service may be degraded. It is advised to restart the application.";
+
     private async Task HandleTopLevel(UnhandledExceptionEventArgs args)
     {
+
         var exception = await Handle(args)
             .Match(
                 argumentOutOfRangeException =>
                 {
                     logger.LogError(argumentOutOfRangeException, "Argument exception occurred during exception handling.");
-                    return messageDisplay.ShowError(Message.Error).ToExceptionAsync();
+                    return messageDisplay.ShowError(ErrorMessage).ToExceptionAsync();
                 },
                 domainException =>
                 {
@@ -53,7 +45,7 @@ public class ClientExceptionHandler(
                 globalExceptionHandlerResult =>
                 {
                     logger.LogError(globalExceptionHandlerResult.Exception, "Unhandled exception: {Message}", globalExceptionHandlerResult.Message);
-                    return messageDisplay.ShowError(Message.Critical).ToExceptionAsync();
+                    return messageDisplay.ShowError(ErrorMessage).ToExceptionAsync();
                 }
             );
 

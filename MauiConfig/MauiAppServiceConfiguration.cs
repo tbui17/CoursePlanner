@@ -25,7 +25,7 @@ public class MauiAppServiceConfiguration
     public void RunStartupActions(MauiApp app)
     {
         var handler = app.Services.GetRequiredService<IClientExceptionHandler>();
-        ExceptionHandlerRegistration((_, e) => handler.OnUnhandledException(e).Wait());
+        ExceptionHandlerRegistration(async (_, e) => await handler.OnUnhandledException(e));
         var client = app.Services.GetRequiredService<ISetupClient>();
         client.Setup();
     }
