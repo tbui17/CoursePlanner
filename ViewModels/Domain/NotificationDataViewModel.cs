@@ -21,13 +21,14 @@ public interface INotificationDataViewModel
     string FilterText { get; set; }
     DateTime Start { get; set; }
     DateTime End { get; set; }
-    IList<string> Types { get; }
+
     string TypeFilter { get; set; }
     IList<string> NotificationOptions { get; set; }
     int SelectedNotificationOptionIndex { get; set; }
     NotificationCollection NotificationItems { get; }
-    int ItemCount { get; }
     int CurrentPage { get; set; }
+    IList<string> Types { get; }
+    int ItemCount { get; }
     int Pages { get; }
     ICommand ChangePageCommand { get; }
     ICommand ClearCommand { get; }
@@ -45,9 +46,6 @@ partial class NotificationDataViewModel
     [Reactive]
     public DateTime End { get; set; }
 
-    [ObservableAsProperty]
-    public IList<string> Types { get; }
-
     [Reactive]
     public string TypeFilter { get; set; } = "";
 
@@ -57,19 +55,20 @@ partial class NotificationDataViewModel
     [Reactive]
     public int SelectedNotificationOptionIndex { get; set; }
 
+    [Reactive]
+    public int CurrentPage { get; set; }
 
+    [ObservableAsProperty]
+    public int Pages { get; }
+
+    [ObservableAsProperty]
+    public IList<string> Types { get; }
 
     [ObservableAsProperty]
     public NotificationCollection NotificationItems { get; }
 
     [ObservableAsProperty]
     public int ItemCount { get; }
-
-    [Reactive]
-    public int CurrentPage { get; set; }
-
-    [ObservableAsProperty]
-    public int Pages { get; }
 
 
     public ICommand ChangePageCommand { get; set; }
@@ -87,7 +86,7 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
 
 
     public NotificationDataViewModel(
-        NotificationDataStreamFactory notificationDataStreamFactory, NotificationTypes types,
+        NotificationDataStreamFactory notificationDataStreamFactory,
         ILogger<NotificationDataViewModel> logger)
     {
         var now = DateTime.Now.Date;
@@ -98,7 +97,7 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
         ChangePageCommand = ReactiveCommand.Create<int>(page => CurrentPage = page);
         NotificationOptions = new List<string> { "None", "True", "False" };
         _logger = logger;
-        Types = types.Value;
+        Types = new NotificationTypes(["Assessment","Course"]).Value;
         ClearCommand = ReactiveCommand.Create(() =>
         {
             _logger.LogDebug("Clearing filters");
@@ -109,8 +108,6 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
             TypeFilter = "";
             SelectedNotificationOptionIndex = 0;
         });
-
-
 
 
         var inputSource = new InputSource
