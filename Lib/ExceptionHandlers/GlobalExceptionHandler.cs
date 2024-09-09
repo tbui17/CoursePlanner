@@ -3,11 +3,12 @@ using EntityFramework.Exceptions.Common;
 using Lib.Attributes;
 using Lib.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Lib.ExceptionHandlers;
 
-[Inject]
+[Inject(lifetime: ServiceLifetime.Singleton)]
 public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger)
 {
     public GlobalExceptionHandlerResult Handle(Exception exc)
