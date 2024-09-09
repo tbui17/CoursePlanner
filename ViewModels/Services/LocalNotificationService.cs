@@ -36,7 +36,7 @@ public class LocalNotificationService(
             .Map(notificationService.GetUpcomingNotifications)
             .Map(x => x.Result.ToList());
 
-        var notificationCount = res.Value.Count;
+        var notificationCount = res.IsFailed ? 0 : res.Value.Count;
 
         logger.LogInformation("Found {NotificationsCount} notifications.", notificationCount);
 
