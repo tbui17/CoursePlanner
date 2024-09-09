@@ -1,4 +1,4 @@
-namespace ViewModels.Interfaces;
+namespace ViewModels.ExceptionHandlers;
 
 public interface IClientExceptionHandler
 {
