@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using ViewModels.Domain;
 using ViewModelTests.TestSetup;
 
-namespace ViewModelTests.Domain;
+namespace ViewModelTests.Domain.ViewModels;
 
 public class EditNoteViewModelTest : BasePageViewModelTest
 {
