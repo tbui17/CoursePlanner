@@ -5,8 +5,6 @@ using Lib.Models;
 using Lib.Services.NotificationService;
 using Lib.Utils;
 using Microsoft.Extensions.Logging;
-using ReactiveUI;
-using ViewModels.Domain;
 using ViewModels.Models;
 using ViewModels.Scheduler;
 
