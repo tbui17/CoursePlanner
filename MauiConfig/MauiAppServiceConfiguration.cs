@@ -32,7 +32,7 @@ public class MauiAppServiceConfiguration
 
     public void AddServices()
     {
-        Services.AddInjectables();
+        Services.AddInjectables(false);
         Services.AddLoggingUseCase(new MauiLoggingUseCase(AppDataDirectory()));
         var serviceBuilder = ServiceBuilder;
 

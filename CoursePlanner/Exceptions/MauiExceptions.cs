@@ -3,11 +3,11 @@ namespace CoursePlanner.Exceptions;
 public static class MauiExceptions
 {
 #if WINDOWS
-    private static Exception _lastFirstChanceException;
+    private static Exception? _lastFirstChanceException;
 #endif
 
     // We'll route all unhandled exceptions through this one event.
-    public static event UnhandledExceptionEventHandler UnhandledException;
+    public static event UnhandledExceptionEventHandler? UnhandledException;
 
     static MauiExceptions()
     {
@@ -73,7 +73,7 @@ public static class MauiExceptions
             }
 
             args.Handled = true;
-            UnhandledException?.Invoke(sender, new UnhandledExceptionEventArgs(exception, true));
+            UnhandledException?.Invoke(sender, new UnhandledExceptionEventArgs(exception ?? new ApplicationException("Maui application exception",args.Exception), true));
         };
 #endif
     }

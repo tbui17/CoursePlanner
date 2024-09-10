@@ -3,9 +3,9 @@ using ViewModels.Interfaces;
 
 namespace CoursePlanner.Pages;
 
-public partial class EditAssessmentPage : IRefreshableView<EditAssessmentViewModel>
+public partial class EditAssessmentPage : IRefreshableView<IEditAssessmentViewModel>
 {
-    public EditAssessmentPage(EditAssessmentViewModel model)
+    public EditAssessmentPage(IEditAssessmentViewModel model)
     {
         Model = model;
         InitializeComponent();
@@ -19,5 +19,5 @@ public partial class EditAssessmentPage : IRefreshableView<EditAssessmentViewMod
         await Model.RefreshAsync();
     }
 
-    public EditAssessmentViewModel Model { get; set; }
+    public IEditAssessmentViewModel Model { get; set; }
 }

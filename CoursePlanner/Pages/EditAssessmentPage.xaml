@@ -5,7 +5,7 @@
              xmlns:l="clr-namespace:CoursePlanner.Controls"
 
              xmlns:domain="clr-namespace:ViewModels.Domain;assembly=ViewModels"
-             x:DataType="domain:EditAssessmentViewModel"
+             x:DataType="domain:IEditAssessmentViewModel"
              Title="Edit Assessment"
              x:Class="CoursePlanner.Pages.EditAssessmentPage">
 
