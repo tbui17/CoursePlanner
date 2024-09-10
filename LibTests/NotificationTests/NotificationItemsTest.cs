@@ -7,7 +7,7 @@ namespace LibTests.NotificationTests;
 
 public class NotificationItemsTest : BaseDbTest
 {
-    private NotificationDataService _notificationDataService;
+    private INotificationDataService _notificationDataService;
 
     private DateTime _now;
 
@@ -16,7 +16,7 @@ public class NotificationItemsTest : BaseDbTest
     {
         await base.Setup();
 
-        _notificationDataService = Provider.GetRequiredService<NotificationDataService>();
+        _notificationDataService = Provider.GetRequiredService<INotificationDataService>();
         _now = DateTime.Now.Date;
         var res = await _notificationDataService.GetNotificationsForMonth(_now);
         res.Should()

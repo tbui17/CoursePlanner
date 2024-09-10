@@ -31,12 +31,12 @@ public class InitializationTest : BasePageViewModelTest
     [Test]
     public async Task Properties_Initialize_UpdateWithDbValues()
     {
-        var res = await Model
+        await Model
             .WhenAnyValue(x => x.NotificationItems)
             .WhereNotNull()
-            .Take(1);
+            .FirstAsync();
 
-        res.Should()
+        Model.NotificationItems.Should()
             .NotBeNullOrEmpty()
             .And.ContainItemsAssignableTo<Assessment>();
     }
@@ -49,13 +49,13 @@ public class InitializationTest : BasePageViewModelTest
         Model.FilterText = "Course";
 
 
-        var items = await Model
+        await Model
             .WhenAnyValue(x => x.NotificationItems)
             .WhereNotNull()
-            .TakeUntil(x => x.OfType<Course>().Any());
+            .FirstAsync(x => x.OfType<Course>().Any());
 
         using var scope = new AssertionScope();
-        items.Should()
+        Model.NotificationItems.Should()
             .NotContainItemsAssignableTo<Assessment>()
             .And.ContainItemsAssignableTo<Course>();
         Model.ItemCount.Should().BeGreaterThan(0);

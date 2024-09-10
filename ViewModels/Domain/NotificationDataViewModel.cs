@@ -12,7 +12,6 @@ using ReactiveUI.Fody.Helpers;
 using ViewModels.Config;
 using ViewModels.Interfaces;
 using ViewModels.Models;
-using ViewModels.Scheduler;
 using ViewModels.Services;
 
 namespace ViewModels.Domain;
@@ -112,6 +111,26 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
         });
 
 
+
+
+        var dataStream = notificationDataStreamFactory.CreateDataStream(CreateInputSource());
+
+        var countStream = dataStream.Select(x => x.Count);
+
+        // var pagesStream = countStream
+        //     .Select(x => (int)Math.Ceiling(x / 10.0));
+
+        countStream
+            .Do(x => _logger.LogDebug("Notification count {Count}", x))
+            .Thru(x => ToPropertyEx(x,vm => vm.ItemCount));
+
+        dataStream
+            .Do(x => _logger.LogDebug("Notification items {Items}", x))
+            .Thru(x => ToPropertyEx(x, vm => vm.NotificationItems));
+    }
+
+    private InputSource CreateInputSource()
+    {
         var inputSource = new InputSource
         {
             RefreshSource = _refreshSubject,
@@ -119,18 +138,7 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
             TextFilterSource = CreateTextFilterSource(),
             PickerFilterSource = CreatePickerFilterSource()
         };
-
-        var dataStream = notificationDataStreamFactory.CreateDataStream(inputSource);
-
-        dataStream
-            .Select(x => x.Count)
-            .Do(x => _logger.LogDebug("Notification count {Count}", x))
-            .Thru(x => ToPropertyEx(x,vm => vm.ItemCount));
-
-        dataStream
-            .Do(x => _logger.LogDebug("Notification items {Items}", x))
-            .ObserveOn(RxApp.MainThreadScheduler)
-            .Thru(x => ToPropertyEx(x, vm => vm.NotificationItems));
+        return inputSource;
     }
 
     private IObservable<DateTimeRange> CreateDateFilterSource()

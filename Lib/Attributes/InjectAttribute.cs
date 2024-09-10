@@ -66,14 +66,14 @@ public static class InjectAttributeExtensions
         List<ServiceDescriptor> CreateServiceDescriptors(Type type, InjectAttribute attribute)
         {
             List<ServiceDescriptor> result = [];
-            var baseDescriptor = new ServiceDescriptor(type, attribute.Lifetime);
-            if (attribute.Interface is not {} x)
+            var baseDescriptor = new ServiceDescriptor(type,type, attribute.Lifetime);
+            if (attribute.Interface is not {} interfaceType)
             {
                 result.Add(baseDescriptor);
                 return result;
             }
 
-            var withInterface = new ServiceDescriptor(x,type, attribute.Lifetime);
+            var withInterface = new ServiceDescriptor(interfaceType,type, attribute.Lifetime);
             result.Add(withInterface);
 
             if (!registerAsInterfaceOnly)
