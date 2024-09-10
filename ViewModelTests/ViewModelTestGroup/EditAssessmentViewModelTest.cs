@@ -286,6 +286,32 @@ public class EditAssessmentViewModelTest : BasePageViewModelTest
         AppMock.VerifyReceivedError(0);
         NavMock.Verify(x => x.PopAsync());
     }
+
+
+    [Test]
+    public async Task DeleteAssessmentAndSave_AllAssessmentsDeleted_ShouldPersistChanges()
+    {
+        await Model.Init(1);
+        Model.Assessments.Should().HaveCount(2);
+        var assessment1 = Model.Assessments[0];
+        var assessment2 = Model.Assessments[1];
+
+        Model.SelectedAssessment = assessment1;
+        Model.DeleteAssessmentCommand.Execute();
+        Model.SelectedAssessment = assessment2;
+        Model.DeleteAssessmentCommand.Execute();
+
+        Model.Assessments.Should().BeEmpty();
+
+        await Model.SaveCommand.ExecuteAsync();
+
+        var dbAssessments = await Db.Assessments.Where(x => x.CourseId == 1).ToListAsync();
+
+        dbAssessments.Should().BeEmpty();
+
+        AppMock.VerifyReceivedError(0);
+        NavMock.Verify(x => x.PopAsync());
+    }
 }
 
 public static class CommandExtensions

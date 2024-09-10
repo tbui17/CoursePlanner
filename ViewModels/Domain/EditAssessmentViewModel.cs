@@ -93,7 +93,7 @@ public partial class EditAssessmentViewModel(
     {
         var assessmentCount = Assessments.Count;
         logger.LogInformation("Assessment count: {AssessmentCount}", assessmentCount);
-        if (Assessments.Count == 0)
+        if (Assessments.Count == 0 && LocalDeleteLog.Count == 0)
         {
             logger.LogInformation("No assessments to save.");
             await BackAsync();
