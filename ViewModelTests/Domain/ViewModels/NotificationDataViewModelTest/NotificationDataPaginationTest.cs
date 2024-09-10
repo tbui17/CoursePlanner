@@ -107,11 +107,6 @@ public class NotificationDataPaginationTest : BaseTest
 
         model.ChangePageCommand.Execute(2);
 
-        await model
-            .WaitFor(x => x.NotificationItems is { Count: 10 } items
-                          && items.All(item => dataIds.Contains(item.Id))
-            );
-
         await model.Should()
             .EventuallySatisfy(x => x.NotificationItems.Should()
                 .HaveCount(10)
