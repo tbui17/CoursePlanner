@@ -88,7 +88,7 @@ public class NotificationDataPaginationTest : BaseTest
     {
         var fixture = CreateFixture();
 
-        var (data, expected) = CreateNotificationData(fixture);
+        var (data, _) = CreateNotificationData(fixture);
 
         var dataIds = data.Select(x => x.Id).ToList();
 
