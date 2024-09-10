@@ -1,6 +1,5 @@
 using BaseTestSetup;
 using BenchmarkDotNet.Attributes;
-using Lib;
 using Lib.Attributes;
 using Lib.Config;
 using Lib.Interfaces;

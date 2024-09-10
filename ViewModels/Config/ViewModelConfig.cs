@@ -3,7 +3,6 @@ using Lib.Interfaces;
 using Lib.Models;
 using Lib.Utils;
 using Plugin.LocalNotification;
-using ViewModels.Domain;
 using ViewModels.Services;
 
 // ReSharper disable RedundantNameQualifier

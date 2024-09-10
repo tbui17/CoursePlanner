@@ -1,5 +1,4 @@
 using FluentAssertions;
-using FluentAssertions.Execution;
 using Lib.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using ViewModels.Domain;

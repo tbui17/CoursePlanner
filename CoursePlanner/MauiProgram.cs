@@ -4,11 +4,8 @@ using CoursePlanner.Pages;
 using CoursePlanner.Services;
 using CoursePlanner.Views;
 using MauiConfig;
-using Microsoft.Extensions.Configuration;
 using Plugin.LocalNotification;
 using UraniumUI;
-using ViewModels.ExceptionHandlers;
-using ViewModels.Interfaces;
 using ViewModels.Services;
 
 namespace CoursePlanner;
