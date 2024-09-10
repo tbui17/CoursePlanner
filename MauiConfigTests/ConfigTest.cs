@@ -1,9 +1,7 @@
-using System.Linq.Expressions;
 using AutoFixture;
 using AutoFixture.AutoMoq;
 using BaseTestSetup.Lib;
 using FluentAssertions;
-using FluentAssertions.Collections;
 using FluentAssertions.Execution;
 using Lib.Attributes;
 using Lib.Services;
@@ -13,7 +11,6 @@ using MauiConfig;
 using Moq;
 using ViewModels.Config;
 using ViewModels.Domain;
-using ViewModels.ExceptionHandlers;
 using ViewModels.Interfaces;
 
 namespace MauiConfigTests;
