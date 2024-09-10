@@ -10,7 +10,7 @@ public static class ReactiveTestExtensions
         var cts = new CancellationTokenSource(timeoutMs);
         while (!cts.Token.IsCancellationRequested && !predicate(model))
         {
-            await Task.Delay(100, cts.Token);
+            await Task.Delay(100);
         }
 
         return predicate(model);
