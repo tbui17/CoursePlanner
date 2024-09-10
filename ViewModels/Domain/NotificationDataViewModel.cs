@@ -97,8 +97,8 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
         End = now;
         ChangePageCommand = ReactiveCommand.Create<int>(page =>
         {
-            CurrentPage = page;
-            // CurrentPage = Math.Min(Pages,page);
+
+            CurrentPage = Math.Clamp(page, 0, Pages);
         });
         NotificationOptions = new List<string> { "None", "True", "False" };
         _logger = logger;
@@ -143,7 +143,8 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
             .Select(x => x.Data.Count)
             .Thru(x => ToPropertyEx(x, vm => vm.ItemCount));
 
-        dataStream2.Select(x => x.PageCount)
+        dataStream2
+            .Select(x => x.PageCount)
             .Thru(x => ToPropertyEx(x, vm => vm.Pages));
     }
 

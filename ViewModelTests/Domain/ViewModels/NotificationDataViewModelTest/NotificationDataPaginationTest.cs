@@ -138,7 +138,7 @@ public class NotificationDataPaginationTest : BaseTest
             .EventuallySatisfy(x => x.Pages.Should().BeGreaterThan(1));
     }
 
-    [Test, Timeout(2000), Ignore("WIP")]
+    [Test]
     public async Task ChangePage_AboveLimit_DefaultsToMax()
     {
         var f = CreateFixtureData();
