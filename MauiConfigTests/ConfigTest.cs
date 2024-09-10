@@ -97,7 +97,6 @@ public class ConfigTest
         _fixture.RunStartupActions();
         var fs = new FileInfo(Path.Combine(_directory, "database.db"));
         fs.Exists.Should().BeTrue();
-
     }
 
     [Test]
@@ -108,8 +107,11 @@ public class ConfigTest
             .Should()
             .Contain(x => x == typeof(AccountService))
             .And.Contain(x => x == typeof(LoginFieldValidator))
-            .And.Contain(x => x == typeof(LoginViewModel))
-            .And.Contain(x => x == typeof(NotificationDataService));
+            .And.Contain(x => x == typeof(LoginViewModel));
+
+        _fixture.Builder.Services
+            .Should()
+            .Contain(x => x.ServiceType == typeof(INotificationDataService) && x.ImplementationType != null);
     }
 
     private static IFixture CreateFixture()
@@ -154,7 +156,6 @@ public class ConfigTest
             .ContainSingle(x => x.ServiceType == typeof(IAccountService));
     }
 }
-
 
 public record MauiTestFixture
 {
