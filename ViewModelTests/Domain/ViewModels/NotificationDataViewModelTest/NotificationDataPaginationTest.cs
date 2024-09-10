@@ -116,13 +116,6 @@ public class NotificationDataPaginationTest : BaseTest
 
 
         await model.WhenAnyValue(x => x.NotificationItems).WhereNotNull().FirstAsync();
-
-        using var scope = new AssertionScope();
-
         model.Pages.Should().BeGreaterThan(1);
-
-
-
-        model.FilterText = "abc";
     }
 }
