@@ -8,8 +8,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Lib.Services.NotificationService;
 
-[Inject]
-public class NotificationService(MultiLocalDbContextFactory dbFactory)
+public interface INotificationDataService
+{
+    Task<IList<INotificationDataResult>> GetUpcomingNotifications(IUserSetting settings);
+    Task<IList<INotification>> GetNotificationsForMonth(DateTime date);
+    Task<IList<INotification>> GetNotificationsWithinDateRange(IDateTimeRange dateRange);
+    Task<INotification?> GetNextNotificationDate(DateTime date);
+    Task<INotification?> GetPreviousNotificationDate(DateTime date);
+    Task<int> GetTotalItems();
+    Task<INotificationRatio> GetFutureNotifications();
+}
+
+[Inject(typeof(INotificationDataService))]
+public class NotificationDataService(MultiLocalDbContextFactory dbFactory) : INotificationDataService
 {
     public async Task<IList<INotificationDataResult>> GetUpcomingNotifications(IUserSetting settings)
     {

@@ -13,7 +13,7 @@ public class NotificationDataFetchingTest : BaseDbTest
         await using var db = await GetDb();
         // course is 1 type of notification class
         var courseCount = await db.Courses.CountAsync();
-        var notificationService = Provider.GetRequiredService<NotificationService>();
+        var notificationService = Provider.GetRequiredService<NotificationDataService>();
         var result = await notificationService.GetTotalItems();
         result.Should()
             .BeGreaterThan(0)

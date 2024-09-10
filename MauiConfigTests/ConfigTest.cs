@@ -109,7 +109,7 @@ public class ConfigTest
             .Contain(x => x == typeof(AccountService))
             .And.Contain(x => x == typeof(LoginFieldValidator))
             .And.Contain(x => x == typeof(LoginViewModel))
-            .And.Contain(x => x == typeof(NotificationService));
+            .And.Contain(x => x == typeof(NotificationDataService));
     }
 
     private static IFixture CreateFixture()

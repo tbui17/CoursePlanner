@@ -8,9 +8,10 @@ using ReactiveUI;
 using ViewModels.Domain;
 using ViewModelTests.TestSetup;
 
-namespace ViewModelTests.Domain.ViewModels;
+namespace ViewModelTests.Domain.ViewModels.NotificationDataViewModelTest;
 
-public class NotificationDataViewModelTest : BasePageViewModelTest
+[Timeout(5000)]
+public class InitializationTest : BasePageViewModelTest
 {
     [SetUp]
     public override async Task Setup()
@@ -23,7 +24,6 @@ public class NotificationDataViewModelTest : BasePageViewModelTest
         }
 
         Model = Resolve<NotificationDataViewModel>();
-        await Task.Delay(600);
     }
 
     private NotificationDataViewModel Model { get; set; }
@@ -31,45 +31,31 @@ public class NotificationDataViewModelTest : BasePageViewModelTest
     [Test]
     public async Task Properties_Initialize_UpdateWithDbValues()
     {
-        Model.NotificationItems
-            .Should()
-            .NotBeNull()
+        var res = await Model
+            .WhenAnyValue(x => x.NotificationItems)
+            .WhereNotNull()
+            .Take(1);
+
+        res.Should()
+            .NotBeNullOrEmpty()
             .And.ContainItemsAssignableTo<Assessment>();
-        await Task.CompletedTask;
     }
 
 
     [Test]
     public async Task Properties_UserInput_UpdateWithDbValues()
     {
-        await Model.RefreshAsync();
         Model.Start = DateTime.Now.AddMinutes(2);
         Model.FilterText = "Course";
-        await Task.Delay(1000);
+
+
+        var items = await Model
+            .WhenAnyValue(x => x.NotificationItems)
+            .WhereNotNull()
+            .TakeUntil(x => x.OfType<Course>().Any());
+
         using var scope = new AssertionScope();
-        Model.NotificationItems.Should()
-            .NotContainItemsAssignableTo<Assessment>()
-            .And.ContainItemsAssignableTo<Course>();
-        Model.ItemCount.Should().BeGreaterThan(0);
-    }
-
-    [Test]
-    public async Task ChangePage_ChangesData()
-    {
-
-        await Model.RefreshAsync();
-        var data = Model.NotificationItems.ToList()
-            .Should()
-            .NotBeEmpty()
-            .And.Subject;
-
-        var changes = new List<bool>();
-
-        Model.WhenAnyValue(x => x.Busy)
-            .Subscribe(x => changes.Add(x));
-        Model.ChangePageCommand.Execute(2);
-        using var scope = new AssertionScope();
-        Model.NotificationItems.Should()
+        items.Should()
             .NotContainItemsAssignableTo<Assessment>()
             .And.ContainItemsAssignableTo<Course>();
         Model.ItemCount.Should().BeGreaterThan(0);

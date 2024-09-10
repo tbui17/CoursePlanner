@@ -88,11 +88,9 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
 
     public NotificationDataViewModel(
         NotificationDataStreamFactory notificationDataStreamFactory,
-        ILogger<NotificationDataViewModel> logger,
-        ISchedulerProvider schedulerProvider
+        ILogger<NotificationDataViewModel> logger
     )
     {
-        _schedulerProvider = schedulerProvider;
         var now = DateTime.Now.Date;
         FilterText = "";
         Start = now;
@@ -131,7 +129,7 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
 
         dataStream
             .Do(x => _logger.LogDebug("Notification items {Items}", x))
-            .ObserveOn(schedulerProvider.MainThread)
+            .ObserveOn(RxApp.MainThreadScheduler)
             .Thru(x => ToPropertyEx(x, vm => vm.NotificationItems));
     }
 
@@ -159,7 +157,7 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
         Expression<Func<NotificationDataViewModel, TRet>> property)
     {
 
-        return item.ToPropertyEx(this, property, scheduler: _schedulerProvider.MainThread);
+        return item.ToPropertyEx(this, property, scheduler: RxApp.MainThreadScheduler);
     }
 
     private IObservable<TextFilterSource> CreateTextFilterSource()
@@ -174,7 +172,7 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
     }
 
     private readonly BehaviorSubject<object?> _refreshSubject = new(new object());
-    private readonly ISchedulerProvider _schedulerProvider;
+
 
     public Task RefreshAsync()
     {

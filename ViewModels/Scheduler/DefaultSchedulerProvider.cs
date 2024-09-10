@@ -4,7 +4,7 @@ using ReactiveUI;
 
 namespace ViewModels.Scheduler;
 
-[Inject]
+[Inject(Interface = typeof(ISchedulerProvider))]
 public class DefaultSchedulerProvider : ISchedulerProvider
 {
     public IScheduler MainThread => RxApp.MainThreadScheduler;
