@@ -16,7 +16,7 @@ public interface ILocalNotificationService
 }
 [Inject(typeof(ILocalNotificationService),ServiceLifetime.Singleton)]
 public class LocalNotificationService(
-    NotificationDataService notificationDataService,
+    INotificationDataService notificationDataService,
     ILogger<ILocalNotificationService> logger,
     Func<INotificationService?> localNotificationServiceFactory,
     ISessionService sessionService

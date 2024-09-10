@@ -42,7 +42,7 @@ public class LocalNotificationServiceTests : BaseDbTest
             .ReturnsAsync(userSetting.ToResult());
         var notificationMock = CreateMock<INotificationService>();
         var service = new LocalNotificationService(
-            notificationDataService: Resolve<NotificationDataService>(),
+            notificationDataService: Resolve<INotificationDataService>(),
             logger: Resolve<ILogger<ILocalNotificationService>>(),
             localNotificationServiceFactory: () => notificationMock.Object,
             sessionService: sessionMock.Object
