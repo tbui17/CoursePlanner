@@ -98,7 +98,7 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
         ChangePageCommand = ReactiveCommand.Create<int>(page =>
         {
 
-            CurrentPage = Math.Clamp(page, 0, Pages);
+            CurrentPage = Math.Min(page, Pages);
         });
         NotificationOptions = new List<string> { "None", "True", "False" };
         _logger = logger;
