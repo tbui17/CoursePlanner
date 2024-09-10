@@ -112,10 +112,11 @@ public class NotificationDataPaginationTest : BaseTest
                           && items.All(item => dataIds.Contains(item.Id))
             );
 
-
-        model.NotificationItems?.Select(x => x.Id)
-            .Should()
-            .BeEquivalentTo(expected.Select(x => x.Id));
+        await model.Should()
+            .EventuallySatisfy(x => x.NotificationItems.Should()
+                .HaveCount(10)
+                .And.AllSatisfy(item => dataIds.Should().Contain(item.Id))
+            );
     }
 
     [Test, Timeout(2000)]
@@ -138,12 +139,8 @@ public class NotificationDataPaginationTest : BaseTest
             Start = DateTime.Now.Date
         };
 
-        await model
-            .WaitFor(x => x.NotificationItems is not null);
-
-        model
-            .Pages.Should()
-            .BeGreaterThan(1);
+        await model.Should()
+            .EventuallySatisfy(x => x.Pages.Should().BeGreaterThan(1));
     }
 
     [Test, Timeout(2000), Ignore("WIP")]
@@ -159,8 +156,6 @@ public class NotificationDataPaginationTest : BaseTest
 
         f.Model.ChangePageCommand.Execute(1000);
 
-        await f.Model.WaitFor(x => x.CurrentPage is 5);
-
-        f.Model.CurrentPage.Should().Be(5);
+        await f.Model.Should().EventuallySatisfy(x => x.CurrentPage.Should().Be(5));
     }
 }
