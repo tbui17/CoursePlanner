@@ -10,13 +10,13 @@ namespace LibTests.NotificationTests;
 
 public class NotificationUpcomingTest : BaseDbTest
 {
-    private NotificationDataService _notificationDataService;
+    private INotificationDataService _notificationDataService;
 
     [SetUp]
     public override async Task Setup()
     {
         await base.Setup();
-        _notificationDataService = Provider.GetRequiredService<NotificationDataService>();
+        _notificationDataService = Provider.GetRequiredService<INotificationDataService>();
     }
 
     [Test]
@@ -27,7 +27,7 @@ public class NotificationUpcomingTest : BaseDbTest
         {
             NotificationRange = TimeSpan.FromDays(5)
         };
-        var notificationService = Provider.GetRequiredService<NotificationDataService>();
+        var notificationService = Provider.GetRequiredService<INotificationDataService>();
         var result = await notificationService.GetUpcomingNotifications(userSetting);
         result.Should().BeEmpty();
     }
@@ -59,7 +59,7 @@ public class NotificationUpcomingTest : BaseDbTest
         {
             NotificationRange = TimeSpan.FromDays(99999)
         };
-        var notificationService = Provider.GetRequiredService<NotificationDataService>();
+        var notificationService = Provider.GetRequiredService<INotificationDataService>();
         var result = await notificationService.GetUpcomingNotifications(userSetting);
         result
             .Select(x => x.Entity)
