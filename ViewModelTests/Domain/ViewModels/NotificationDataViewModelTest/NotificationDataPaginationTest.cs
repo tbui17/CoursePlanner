@@ -13,6 +13,7 @@ using ReactiveUI;
 using ViewModels.Domain;
 using ViewModels.Services;
 using ViewModelTests.TestSetup;
+using ViewModelTests.Utils;
 
 namespace ViewModelTests.Domain.ViewModels.NotificationDataViewModelTest;
 
@@ -54,6 +55,33 @@ public class NotificationDataPaginationTest : BaseTest
         return (data, expected);
     }
 
+    private NotificationDataPaginationTestFixtureData CreateFixtureData()
+    {
+        var fixture = CreateFixture();
+
+        var data = CreateNotificationData(fixture);
+
+        var dataService = fixture.FreezeMock<INotificationDataService>();
+
+        dataService
+            .Setup(x => x.GetNotificationsWithinDateRange(It.IsAny<IDateTimeRange>()))
+            .ReturnsAsync(data.data);
+
+        var model = new NotificationDataViewModel(
+            fixture.Create<NotificationDataStreamFactory>(),
+            new FakeLogger<NotificationDataViewModel>()
+        );
+
+        return new NotificationDataPaginationTestFixtureData
+        {
+            Fixture = fixture,
+            Data = data.data,
+            DataService = dataService,
+            Model = model,
+            Expected = data.expected
+        };
+    }
+
 
     [Test]
     public async Task NotificationItems_PageChangedBy1_ChangesToNextSet()
@@ -77,20 +105,15 @@ public class NotificationDataPaginationTest : BaseTest
             Start = DateTime.Now.Date
         };
 
-        var task = model
-            .WhenAnyValue(x => x.NotificationItems)
-            .WhereNotNull()
-            .Where(x => x.Count is 10)
-            .Where(x => x.All(y => dataIds.Contains(y.Id)))
-            .FirstAsync()
-            .ToTask();
-
         model.ChangePageCommand.Execute(2);
 
-        await task;
+        await model
+            .WaitFor(x => x.NotificationItems is { Count: 10 } items
+                          && items.All(item => dataIds.Contains(item.Id))
+            );
 
 
-        model.NotificationItems.Select(x => x. Id)
+        model.NotificationItems?.Select(x => x.Id)
             .Should()
             .BeEquivalentTo(expected.Select(x => x.Id));
     }
@@ -115,9 +138,29 @@ public class NotificationDataPaginationTest : BaseTest
             Start = DateTime.Now.Date
         };
 
+        await model
+            .WaitFor(x => x.NotificationItems is not null);
+
+        model
+            .Pages.Should()
+            .BeGreaterThan(1);
+    }
+
+    [Test, Timeout(2000), Ignore("WIP")]
+    public async Task ChangePage_AboveLimit_DefaultsToMax()
+    {
+        var f = CreateFixtureData();
+
+        await f.Model.WhenAnyValue(x => x.NotificationItems)
+            .WhereNotNull()
+            .FirstAsync()
+            .ToTask();
 
 
-        await model.WhenAnyValue(x => x.NotificationItems).WhereNotNull().FirstAsync().ToTask();
-        model.Pages.Should().BeGreaterThan(1);
+        f.Model.ChangePageCommand.Execute(1000);
+
+        await f.Model.WaitFor(x => x.CurrentPage is 5);
+
+        f.Model.CurrentPage.Should().Be(5);
     }
 }

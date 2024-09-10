@@ -1,12 +1,10 @@
-using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using Lib.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using ReactiveUI;
 using ViewModels.Domain;
 using ViewModelTests.TestSetup;
+using ViewModelTests.Utils;
 
 namespace ViewModelTests.Domain.ViewModels.NotificationDataViewModelTest;
 
@@ -31,11 +29,7 @@ public class InitializationTest : BasePageViewModelTest
     [Test]
     public async Task Properties_Initialize_UpdateWithDbValues()
     {
-        await Model
-            .WhenAnyValue(x => x.NotificationItems)
-            .WhereNotNull()
-            .FirstAsync()
-            .ToTask();
+        await Model.WaitFor(x => x.NotificationItems is not null);
 
         Model.NotificationItems.Should()
             .NotBeNullOrEmpty()
@@ -51,12 +45,7 @@ public class InitializationTest : BasePageViewModelTest
         Model.FilterText = filter;
 
 
-        await Model
-            .WhenAnyValue(x => x.NotificationItems)
-            .WhereNotNull()
-            .FirstAsync(p => p.All(x => x.Name.Contains(filter)))
-            .ToTask();
-
+        await Model.WaitFor(x => x.NotificationItems?.All(item => item.Name.Contains(filter)) is true);
         using var scope = new AssertionScope();
         Model.NotificationItems.Should()
             .NotBeNullOrEmpty()

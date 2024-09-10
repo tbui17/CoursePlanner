@@ -27,11 +27,12 @@ public interface INotificationDataViewModel
     string TypeFilter { get; set; }
     IList<string> NotificationOptions { get; set; }
     int SelectedNotificationOptionIndex { get; set; }
-    NotificationCollection NotificationItems { get; }
+
     int CurrentPage { get; set; }
-    IList<string> Types { get; }
+    IList<string>? Types { get; }
     int ItemCount { get; }
     int Pages { get; }
+    NotificationCollection? NotificationItems { get; }
     ICommand ChangePageCommand { get; }
     ICommand ClearCommand { get; }
 }
@@ -68,13 +69,13 @@ partial class NotificationDataViewModel
     public IList<string> Types { get; }
 
     [ObservableAsProperty]
-    public NotificationCollection NotificationItems { get; }
+    public NotificationCollection? NotificationItems { get; }
 
     [ObservableAsProperty]
     public int ItemCount { get; }
 
 
-    public ICommand ChangePageCommand { get; set; }
+    public ICommand ChangePageCommand { get; }
 
     public ICommand ClearCommand { get; }
 }
@@ -94,8 +95,11 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
         FilterText = "";
         Start = now;
         End = now;
-        NotificationItems = [];
-        ChangePageCommand = ReactiveCommand.Create<int>(page => CurrentPage = page);
+        ChangePageCommand = ReactiveCommand.Create<int>(page =>
+        {
+            CurrentPage = page;
+            // CurrentPage = Math.Min(Pages,page);
+        });
         NotificationOptions = new List<string> { "None", "True", "False" };
         _logger = logger;
         Types = new NotificationTypes(["Assessment", "Course"]).Value;
