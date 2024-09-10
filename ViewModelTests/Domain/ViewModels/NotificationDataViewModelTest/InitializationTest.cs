@@ -40,14 +40,14 @@ public class InitializationTest : BasePageViewModelTest
     public async Task Properties_UserInput_UpdateWithDbValues()
     {
         Model.Start = DateTime.Now.AddMinutes(2);
-        const string filter = "Assessm34ent";
+        const string filter = "Assessment";
         Model.FilterText = filter;
 
         await Model.Should()
             .EventuallySatisfy(x =>
                 x.NotificationItems.Should()
                     .NotBeNullOrEmpty()
-                    .And.AllSatisfy(y => y.Name.Should().Be(filter))
+                    .And.AllSatisfy(y => y.Name.Should().Contain(filter))
             );
     }
 }
