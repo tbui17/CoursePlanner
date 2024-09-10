@@ -7,7 +7,7 @@ namespace LibTests.NotificationTests;
 
 public class NotificationItemsTest : BaseDbTest
 {
-    private NotificationService _notificationService;
+    private NotificationDataService _notificationDataService;
 
     private DateTime _now;
 
@@ -16,9 +16,9 @@ public class NotificationItemsTest : BaseDbTest
     {
         await base.Setup();
 
-        _notificationService = Provider.GetRequiredService<NotificationService>();
+        _notificationDataService = Provider.GetRequiredService<NotificationDataService>();
         _now = DateTime.Now.Date;
-        var res = await _notificationService.GetNotificationsForMonth(_now);
+        var res = await _notificationDataService.GetNotificationsForMonth(_now);
         res.Should()
             .BeEmpty(
                 $"Unexpected precondition: No notifications should be present for this month for this test fixture, but {res.Count} were found.");
@@ -31,7 +31,7 @@ public class NotificationItemsTest : BaseDbTest
         await db.Assessments.Take(2)
             .ExecuteUpdateAsync(p => p.SetProperty(x => x.Start, _now).SetProperty(x => x.ShouldNotify, true));
 
-        var res = await _notificationService.GetNotificationsForMonth(_now);
+        var res = await _notificationDataService.GetNotificationsForMonth(_now);
 
         res.Should().HaveCount(2);
     }
@@ -55,7 +55,7 @@ public class NotificationItemsTest : BaseDbTest
 
         await db.SaveChangesAsync();
 
-        var res = await _notificationService.GetNotificationsForMonth(_now);
+        var res = await _notificationDataService.GetNotificationsForMonth(_now);
 
         res.Should().HaveCount(count);
     }

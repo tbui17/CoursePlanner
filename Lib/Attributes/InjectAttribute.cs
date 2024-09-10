@@ -16,30 +16,28 @@ public class InjectAttribute(Type? interfaceType = null, ServiceLifetime lifetim
 
 public static class InjectAttributeExtensions
 {
-    public static IServiceCollection AddInjectables(this IServiceCollection services)
+    public static IServiceCollection AddInjectables(this IServiceCollection services,
+        bool registerAsInterfaceOnly = true)
     {
-        var appDomain = AppDomain.CurrentDomain;
-        var types = appDomain.GetAssemblies()
-            .AsParallel()
-            .SelectMany(GetTypes)
-            .SelectMany(x => x.GetCustomAttribute<InjectAttribute>() is { } a ? new[] { (Type: x, Attribute: a) } : [])
-            .Select(x => (x.Type, CreateAddImpl(x.Attribute)))
+        var serviceDescriptors = GetTypesWithInjectAttribute()
+            .SelectMany(x => CreateServiceDescriptors(x.Type, x.Attribute))
             .ToArray();
 
         var logger = Log.ForContext<InjectAttribute>();
         logger.Information("Adding injectables");
 
-        foreach (var (classType, addImpl) in types)
-        {
-            addImpl(classType);
-        }
 
-        logger.Debug("{Count} injectables: {Items}", types.Length,types);
+        logger.Debug("Service descriptors: {Count} {Data}", serviceDescriptors.Length, serviceDescriptors);
+
+        foreach (var serviceDescriptor in serviceDescriptors)
+        {
+            services.Add(serviceDescriptor);
+        }
 
 
         return services;
 
-        IEnumerable<Type> GetTypes(Assembly assembly)
+        IEnumerable<Type> GetAssemblyTypes(Assembly assembly)
         {
             try
             {
@@ -48,7 +46,7 @@ public static class InjectAttributeExtensions
             catch (ReflectionTypeLoadException e)
             {
                 using var _ = LogContext.PushProperty("Assembly", assembly.FullName);
-                using var __ = LogContext.PushProperty("Domain", appDomain.FriendlyName);
+                using var __ = LogContext.PushProperty("Domain", AppDomain.CurrentDomain.FriendlyName);
                 var log = Log.ForContext<InjectAttribute>();
 
                 foreach (var loaderException in e.LoaderExceptions)
@@ -65,19 +63,36 @@ public static class InjectAttributeExtensions
             }
         }
 
-
-        Action<Type> CreateAddImpl(InjectAttribute attribute) => attribute switch
+        List<ServiceDescriptor> CreateServiceDescriptors(Type type, InjectAttribute attribute)
         {
-            { Interface: null, Lifetime: ServiceLifetime.Transient } => type => services.AddTransient(type),
-            { Interface: null, Lifetime: ServiceLifetime.Scoped } => type => services.AddScoped(type),
-            { Interface: null, Lifetime: ServiceLifetime.Singleton } => type => services.AddSingleton(type),
-            { Interface: { } interfaceType, Lifetime: ServiceLifetime.Transient } => type =>
-                services.AddTransient(interfaceType, type),
-            { Interface: { } interfaceType, Lifetime: ServiceLifetime.Scoped } => type =>
-                services.AddScoped(interfaceType, type),
-            { Interface: { } interfaceType, Lifetime: ServiceLifetime.Singleton } => type =>
-                services.AddSingleton(interfaceType, type),
-            _ => throw new ArgumentOutOfRangeException(nameof(attribute), attribute, null)
-        };
+            List<ServiceDescriptor> result = [];
+            var baseDescriptor = new ServiceDescriptor(type, attribute.Lifetime);
+            if (attribute.Interface is not {} x)
+            {
+                result.Add(baseDescriptor);
+                return result;
+            }
+
+            var withInterface = new ServiceDescriptor(x,type, attribute.Lifetime);
+            result.Add(withInterface);
+
+            if (!registerAsInterfaceOnly)
+            {
+                result.Add(baseDescriptor);
+            }
+
+            return result;
+
+
+        }
+
+        ParallelQuery<(Type Type, InjectAttribute Attribute)> GetTypesWithInjectAttribute()
+        {
+            return AppDomain.CurrentDomain.GetAssemblies()
+                .AsParallel()
+                .SelectMany(GetAssemblyTypes)
+                .SelectMany(x =>
+                    x.GetCustomAttribute<InjectAttribute>() is { } a ? new[] { (Type: x, Attribute: a) } : []);
+        }
     }
 }

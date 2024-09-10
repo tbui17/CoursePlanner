@@ -5,13 +5,13 @@ using Lib.Models;
 using Lib.Services.NotificationService;
 using Lib.Utils;
 using Microsoft.Extensions.Logging;
+using ReactiveUI;
 using ViewModels.Models;
-using ViewModels.Scheduler;
 
 namespace ViewModels.Services;
 
 [Inject]
-public class NotificationDataStreamFactory(NotificationService notificationService, ILogger<NotificationDataStreamFactory> logger, ISchedulerProvider schedulerProvider)
+public class NotificationDataStreamFactory(INotificationDataService notificationDataService, ILogger<NotificationDataStreamFactory> logger)
 {
     private static ParallelQuery<INotification> ApplyNotificationFilter(
         ParallelQuery<INotification> results,
@@ -28,8 +28,8 @@ public class NotificationDataStreamFactory(NotificationService notificationServi
     {
 
         return inputSource.DateFilterSource
-            .ObserveOn(schedulerProvider.TaskPool)
-            .SelectMany(notificationService.GetNotificationsWithinDateRange)
+            .ObserveOn(RxApp.TaskpoolScheduler)
+            .SelectMany(notificationDataService.GetNotificationsWithinDateRange)
             .CombineLatest(inputSource.TextFilterSource, inputSource.PickerFilterSource, inputSource.RefreshSource)
             .Select(sources =>
             {
