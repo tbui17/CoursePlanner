@@ -38,7 +38,7 @@ public class InitializationTest : BasePageViewModelTest
 
         Model.NotificationItems.Should()
             .NotBeNullOrEmpty()
-            .And.ContainItemsAssignableTo<Assessment>();
+            .And.ContainItemsAssignableTo<INotification>();
     }
 
 
@@ -46,18 +46,19 @@ public class InitializationTest : BasePageViewModelTest
     public async Task Properties_UserInput_UpdateWithDbValues()
     {
         Model.Start = DateTime.Now.AddMinutes(2);
-        Model.FilterText = "Course";
+        const string filter = "Assessment";
+        Model.FilterText = filter;
 
 
         await Model
             .WhenAnyValue(x => x.NotificationItems)
             .WhereNotNull()
-            .FirstAsync(x => x.OfType<Course>().Any());
+            .FirstAsync(p => p.All(x => x.Name.Contains(filter)));
 
         using var scope = new AssertionScope();
         Model.NotificationItems.Should()
-            .NotContainItemsAssignableTo<Assessment>()
-            .And.ContainItemsAssignableTo<Course>();
+            .NotBeNullOrEmpty()
+            .And.AllSatisfy(x => x.Name.Should().Contain(filter));
         Model.ItemCount.Should().BeGreaterThan(0);
     }
 }

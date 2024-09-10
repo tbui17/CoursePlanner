@@ -111,22 +111,36 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
         });
 
 
-
-
         var dataStream = notificationDataStreamFactory.CreateDataStream(CreateInputSource());
 
-        var countStream = dataStream.Select(x => x.Count);
+        var paginatedDataStream = dataStream
+            .Select(x => x.Chunk(10));
 
-        // var pagesStream = countStream
-        //     .Select(x => (int)Math.Ceiling(x / 10.0));
 
-        countStream
-            .Do(x => _logger.LogDebug("Notification count {Count}", x))
-            .Thru(x => ToPropertyEx(x,vm => vm.ItemCount));
+        var pageIndexSource = this.WhenAnyValue(vm => vm.CurrentPage)
+            .Select(x => Math.Max(0, x - 1));
 
-        dataStream
+        var dataStream2 = pageIndexSource
+            .CombineLatest(paginatedDataStream, (x, y) => (PageIndex: x, PaginatedData: y))
+            .Select(x =>
+            {
+                var data = x.PaginatedData.ElementAtOrDefault(x.PageIndex)?.ToList() ?? [];
+                var pageCount = x.PaginatedData.Count();
+                return (Data: data, PageCount: pageCount);
+            })
+            .Do(x => _logger.LogDebug("Item Data: {Data}", x));
+
+        dataStream2
+            .Select(x => x.Data)
             .Do(x => _logger.LogDebug("Notification items {Items}", x))
             .Thru(x => ToPropertyEx(x, vm => vm.NotificationItems));
+
+        dataStream2
+            .Select(x => x.Data.Count)
+            .Thru(x => ToPropertyEx(x, vm => vm.ItemCount));
+
+        dataStream2.Select(x => x.PageCount)
+            .Thru(x => ToPropertyEx(x, vm => vm.Pages));
     }
 
     private InputSource CreateInputSource()
@@ -164,7 +178,6 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
         IObservable<TRet> item,
         Expression<Func<NotificationDataViewModel, TRet>> property)
     {
-
         return item.ToPropertyEx(this, property, scheduler: RxApp.MainThreadScheduler);
     }
 
