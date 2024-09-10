@@ -55,12 +55,14 @@ public class NotificationDataPaginationTest : BaseTest
     }
 
 
-    [Test, Ignore("Not implemented")]
+    [Test]
     public async Task NotificationItems_PageChangedBy1_ChangesToNextSet()
     {
         var fixture = CreateFixture();
 
         var (data, expected) = CreateNotificationData(fixture);
+
+        var dataIds = data.Select(x => x.Id).ToList();
 
         var dataService = fixture.FreezeMock<INotificationDataService>();
 
@@ -75,22 +77,22 @@ public class NotificationDataPaginationTest : BaseTest
             Start = DateTime.Now.Date
         };
 
-        await model.WhenAnyValue(x => x.NotificationItems)
-            .WhereNotNull()
-            .Take(1)
-            .ToTask();
-
-        var task = model.WhenAnyValue(x => x.NotificationItems)
+        var task = model
+            .WhenAnyValue(x => x.NotificationItems)
             .WhereNotNull()
             .Where(x => x.Count is 10)
-            .Where(items => items.IntersectBy(data.Select(x => x.Id), x => x.Id).Any())
+            .Where(x => x.All(y => dataIds.Contains(y.Id)))
+            .FirstAsync()
             .ToTask();
 
         model.ChangePageCommand.Execute(2);
+
         await task;
-        model.NotificationItems
+
+
+        model.NotificationItems.Select(x => x. Id)
             .Should()
-            .BeEquivalentTo(expected);
+            .BeEquivalentTo(expected.Select(x => x.Id));
     }
 
     [Test, Timeout(2000)]
@@ -115,7 +117,7 @@ public class NotificationDataPaginationTest : BaseTest
 
 
 
-        await model.WhenAnyValue(x => x.NotificationItems).WhereNotNull().FirstAsync();
+        await model.WhenAnyValue(x => x.NotificationItems).WhereNotNull().FirstAsync().ToTask();
         model.Pages.Should().BeGreaterThan(1);
     }
 }

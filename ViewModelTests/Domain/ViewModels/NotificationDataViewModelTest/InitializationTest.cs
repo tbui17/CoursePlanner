@@ -1,8 +1,8 @@
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using Lib.Interfaces;
-using Lib.Models;
 using Microsoft.EntityFrameworkCore;
 using ReactiveUI;
 using ViewModels.Domain;
@@ -34,7 +34,8 @@ public class InitializationTest : BasePageViewModelTest
         await Model
             .WhenAnyValue(x => x.NotificationItems)
             .WhereNotNull()
-            .FirstAsync();
+            .FirstAsync()
+            .ToTask();
 
         Model.NotificationItems.Should()
             .NotBeNullOrEmpty()
@@ -53,7 +54,8 @@ public class InitializationTest : BasePageViewModelTest
         await Model
             .WhenAnyValue(x => x.NotificationItems)
             .WhereNotNull()
-            .FirstAsync(p => p.All(x => x.Name.Contains(filter)));
+            .FirstAsync(p => p.All(x => x.Name.Contains(filter)))
+            .ToTask();
 
         using var scope = new AssertionScope();
         Model.NotificationItems.Should()
