@@ -95,11 +95,7 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
         FilterText = "";
         Start = now;
         End = now;
-        ChangePageCommand = ReactiveCommand.Create<int>(page =>
-        {
-
-            CurrentPage = Math.Min(page, Pages);
-        });
+        ChangePageCommand = ReactiveCommand.Create<int>(page => { CurrentPage = Math.Min(page, Pages); });
         NotificationOptions = new List<string> { "None", "True", "False" };
         _logger = logger;
         Types = new NotificationTypes(["Assessment", "Course"]).Value;
@@ -114,48 +110,38 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
             SelectedNotificationOptionIndex = 0;
         });
 
-
-        var dataStream = notificationDataStreamFactory.CreateDataStream(CreateInputSource());
-
-        var paginatedDataStream = dataStream
-            .Select(x => x.Chunk(10));
+        var pageSource = this.WhenAnyValue(x => x.CurrentPage);
 
 
-        var pageIndexSource = this.WhenAnyValue(vm => vm.CurrentPage)
-            .Select(x => Math.Max(0, x - 1));
+        var dataStream = CreateInputSource()
+            .Thru(notificationDataStreamFactory.Create)
+            .Thru(x => new InputSourceWithCurrentPage { Data = x, CurrentPage = pageSource })
+            .Thru(notificationDataStreamFactory.Create);
 
-        var dataStream2 = pageIndexSource
-            .CombineLatest(paginatedDataStream, (x, y) => (PageIndex: x, PaginatedData: y))
-            .Select(x =>
-            {
-                var data = x.PaginatedData.ElementAtOrDefault(x.PageIndex)?.ToList() ?? [];
-                var pageCount = x.PaginatedData.Count();
-                return (Data: data, PageCount: pageCount);
-            })
-            .Do(x => _logger.LogDebug("Item Data: {Data}", x));
 
-        dataStream2
+        dataStream
             .Select(x => x.Data)
             .Do(x => _logger.LogDebug("Notification items {Items}", x))
             .Thru(x => ToPropertyEx(x, vm => vm.NotificationItems));
 
-        dataStream2
+        dataStream
             .Select(x => x.Data.Count)
             .Thru(x => ToPropertyEx(x, vm => vm.ItemCount));
 
-        dataStream2
+        dataStream
             .Select(x => x.PageCount)
             .Thru(x => ToPropertyEx(x, vm => vm.Pages));
     }
+
 
     private InputSource CreateInputSource()
     {
         var inputSource = new InputSource
         {
-            RefreshSource = _refreshSubject,
-            DateFilterSource = CreateDateFilterSource(),
-            TextFilterSource = CreateTextFilterSource(),
-            PickerFilterSource = CreatePickerFilterSource()
+            Refresh = _refreshSubject,
+            DateFilter = CreateDateFilterSource(),
+            TextFilter = CreateTextFilterSource(),
+            PickerFilter = CreatePickerFilterSource()
         };
         return inputSource;
     }
