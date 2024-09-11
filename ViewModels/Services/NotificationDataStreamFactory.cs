@@ -35,7 +35,9 @@ public class NotificationDataStreamFactory(
             )
             .Select(x => new CombinedSource
             {
-                Notifications = x.Item1, FilterText = x.Item2, TypeFilter = x.Item3,
+                Notifications = x.Item1,
+                FilterText = x.Item2,
+                TypeFilter = x.Item3,
                 NotificationSelectedIndex = x.Item4,
                 CurrentPage = x.Item5,
                 PageSize = x.Item6
