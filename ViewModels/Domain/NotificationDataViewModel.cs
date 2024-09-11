@@ -136,10 +136,12 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
 
     private InputSource CreateInputSource()
     {
+        var (textFilter, typeFilter) = CreateTextFilters();
         var inputSource = new InputSource
         {
             DateFilter = CreateDateFilterSource(),
-            TextFilter = CreateTextFilterSource(),
+            TextFilter = textFilter,
+            TypeFilter = typeFilter,
             PickerFilter = CreatePickerFilterSource(),
             CurrentPage = this.WhenAnyValue(x => x.CurrentPage),
             Refresh = _refreshSubject
@@ -173,15 +175,14 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
         return item.ToPropertyEx(this, property, scheduler: RxApp.MainThreadScheduler);
     }
 
-    private IObservable<TextFilterSource> CreateTextFilterSource()
+    private (IObservable<string> TextFilter, IObservable<string> TypeFilter) CreateTextFilters()
     {
         var textFilterSource = this.WhenAnyValue(
                 vm => vm.FilterText,
                 vm => vm.TypeFilter)
             .Throttle(TimeSpan.FromMilliseconds(500))
-            .Select(x => new TextFilterSource(x.Item1, x.Item2))
             .Do(x => _logger.LogDebug("Filters: {Data}", x));
-        return textFilterSource;
+        return (textFilterSource.Select(x => x.Item1), textFilterSource.Select(x => x.Item2));
     }
 
     private readonly BehaviorSubject<object?> _refreshSubject = new(new object());
