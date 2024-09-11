@@ -68,9 +68,12 @@ public class NotificationDataStreamFactory(
     private static CombinedResult Selector(CombinedSource sources)
     {
         var (notifications, filterText, typeFilter, notificationSelectedIndex, currentPage, pageSize) = sources;
+        // apply constraints
         var pageIndex = Math.Max(0, currentPage - 1);
         var partitionSize = Math.Max(1, pageSize);
 
+
+        // filter and transform
         var filteredData = FilterData();
         var paginatedData = PaginateData();
 
