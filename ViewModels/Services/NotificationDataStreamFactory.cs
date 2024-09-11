@@ -44,7 +44,7 @@ public class NotificationDataStreamFactory(
             });
 
 
-        var intermediateResult = combinedSource
+        var combinedResult = combinedSource
             .Select(Selector)
             .Do(x => logger.LogDebug("Notification count {Count}", x.Data.Count))
             .Catch((Exception exception) =>
@@ -54,13 +54,13 @@ public class NotificationDataStreamFactory(
             });
 
         return new PageDataStream(
-            Data: intermediateResult.Select(x => x.Data),
-            PageCount: intermediateResult.Select(x => x.PageCount),
-            ItemCount: intermediateResult.Select(x => x.Data.Count)
+            Data: combinedResult.Select(x => x.Data),
+            PageCount: combinedResult.Select(x => x.PageCount),
+            ItemCount: combinedResult.Select(x => x.Data.Count)
         );
     }
 
-    private CombinedResult Selector(CombinedSource sources)
+    private static CombinedResult Selector(CombinedSource sources)
     {
         var (notifications, filterText, typeFilter, notificationSelectedIndex, currentPage, pageSize) = sources;
         var pageIndex = Math.Max(0, currentPage - 1);
@@ -71,7 +71,11 @@ public class NotificationDataStreamFactory(
 
         var currentPageItems = GetCurrentPage();
 
-        return new CombinedResult { Data = currentPageItems.ToList(), PageCount = paginatedData.Count };
+        return new CombinedResult
+        {
+            Data = currentPageItems.ToList(),
+            PageCount = paginatedData.Count
+        };
 
         List<INotification[]> PaginateData()
         {
@@ -81,7 +85,11 @@ public class NotificationDataStreamFactory(
 
         ParallelQuery<INotification> FilterData()
         {
-            var filterFactory = new NotificationDataFilterFactory { FilterText = filterText, TypeFilter = typeFilter, SelectedNotificationOptionIndex = notificationSelectedIndex, };
+            var filterFactory = new NotificationDataFilterFactory
+            {
+                FilterText = filterText, TypeFilter = typeFilter,
+                SelectedNotificationOptionIndex = notificationSelectedIndex,
+            };
             var filter = filterFactory.CreateFilter();
             var parallelQuery = notifications.AsParallel().Where(filter);
             return parallelQuery;
