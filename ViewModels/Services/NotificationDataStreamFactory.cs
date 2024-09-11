@@ -26,10 +26,10 @@ public class NotificationDataStreamFactory(
     public (IObservable<List<INotification>> Data, IObservable<int> PageCount, IObservable<int> ItemCount) Create(InputSource inputSource)
     {
         var res = CreateNotificationDataStream(inputSource.DateFilter, inputSource.Refresh)
-            .CombineLatest(inputSource.TextFilter, inputSource.PickerFilter, inputSource.CurrentPage)
+            .CombineLatest(inputSource.TextFilter, inputSource.TypeFilter, inputSource.PickerFilter, inputSource.CurrentPage,inputSource.PageSize)
             .Select(sources =>
             {
-                var (notifications, (filterText, typeFilter), notificationSelectedIndex, currentPage) = sources;
+                var (notifications,filterText, typeFilter, notificationSelectedIndex, currentPage, pageSize) = sources;
 
 
 
@@ -45,7 +45,7 @@ public class NotificationDataStreamFactory(
                 var res = notifications
                     .AsParallel()
                     .Where(filter)
-                    .Chunk(10)
+                    .Chunk(pageSize)
                     .ToList();
 
                 var pageIndex = Math.Max(0, currentPage - 1);
