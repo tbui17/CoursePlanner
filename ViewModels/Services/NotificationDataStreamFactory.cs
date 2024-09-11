@@ -6,12 +6,13 @@ using Lib.Models;
 using Lib.Services.NotificationService;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
+using ViewModels.Domain;
 using ViewModels.Models;
 
 namespace ViewModels.Services;
 
 [Inject]
-public class NotificationDataStreamFactory(
+public partial class NotificationDataStreamFactory(
     INotificationDataService notificationDataService,
     ILogger<NotificationDataStreamFactory> logger)
 {
@@ -53,9 +54,7 @@ public class NotificationDataStreamFactory(
             });
 
 
-        var combinedResult = combinedSource
-            .Select(Selector)
-            .Do(x => logger.LogDebug("Notification count {Count}", x.Data.Count));
+        var combinedResult = combinedSource.Select(Selector);
 
         return new PageDataStream
         {
@@ -107,5 +106,39 @@ public class NotificationDataStreamFactory(
         {
             return paginatedData.ElementAtOrDefault(pageIndex) ?? [];
         }
+    }
+
+
+}
+
+public partial class NotificationDataStreamFactory
+{
+
+    private record CombinedSource
+    {
+        public required IList<INotification> Notifications { get; init; }
+        public required string FilterText { get; init; }
+        public required string TypeFilter { get; init; }
+        public required ShouldNotifyIndex NotificationSelectedIndex { get; init; }
+        public required int CurrentPage { get; init; }
+        public required int PageSize { get; init; }
+
+        public void Deconstruct(out IList<INotification> notifications, out string filterText, out string typeFilter,
+            out ShouldNotifyIndex notificationSelectedIndex, out int currentPage, out int pageSize)
+        {
+            notifications = Notifications;
+            filterText = FilterText;
+            typeFilter = TypeFilter;
+            notificationSelectedIndex = NotificationSelectedIndex;
+            currentPage = CurrentPage;
+            pageSize = PageSize;
+        }
+    }
+
+
+    private record CombinedResult
+    {
+        public List<INotification> Data { get; init; } = [];
+        public int PageCount { get; init; }
     }
 }
