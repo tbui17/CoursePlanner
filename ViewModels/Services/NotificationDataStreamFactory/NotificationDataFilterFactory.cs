@@ -6,9 +6,9 @@ using ViewModels.Domain;
 namespace ViewModels.Services.NotificationDataStreamFactory;
 
 
-public class NotificationDataFilterFactory
+public class NotificationDataFilterFactory(IFilterData data)
 {
-    public required IFilterData Data { get; init; }
+
 
     private static Func<INotification, bool> CreateShouldNotifyFilter(
         ShouldNotifyIndex index)
@@ -27,19 +27,19 @@ public class NotificationDataFilterFactory
 
     public IList<Func<INotification, bool>> CreateFilters()
     {
-        var shouldNotifyFilter = CreateShouldNotifyFilter(Data.NotificationSelectedIndex);
+        var shouldNotifyFilter = CreateShouldNotifyFilter(data.NotificationSelectedIndex);
         return
         [
-            x => x.Name.Contains(Data.FilterText, StringComparison.CurrentCultureIgnoreCase),
+            x => x.Name.Contains(data.FilterText, StringComparison.CurrentCultureIgnoreCase),
             x =>
             {
                 if (x is Assessment assessment)
                 {
-                    return $"{assessment.Type} Assessment".Contains(Data.TypeFilter,
+                    return $"{assessment.Type} Assessment".Contains(data.TypeFilter,
                         StringComparison.CurrentCultureIgnoreCase);
                 }
 
-                return x.GetType().Name.Contains(Data.TypeFilter, StringComparison.CurrentCultureIgnoreCase);
+                return x.GetType().Name.Contains(data.TypeFilter, StringComparison.CurrentCultureIgnoreCase);
             },
             shouldNotifyFilter
         ];
