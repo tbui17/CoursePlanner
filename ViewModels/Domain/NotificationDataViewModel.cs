@@ -126,7 +126,7 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
         });
 
 
-        var (data, pageCount, itemCount) = notificationDataStreamFactory.Create(CreateInputSource());
+        var (data, pageCount, itemCount) = notificationDataStreamFactory.CreatePageDataStream(CreateInputSource());
 
 
         data
