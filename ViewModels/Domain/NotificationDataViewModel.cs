@@ -129,8 +129,6 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
 
 
         var pageResult = notificationDataStreamFactory.CreatePageDataStream(CreateInputSource());
-
-        pageResult.DefaultIfEmpty(new EmptyPageResult());
         ToPropertyEx(pageResult, x => x.PageResult);
 
 
