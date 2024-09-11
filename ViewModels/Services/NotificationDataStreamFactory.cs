@@ -30,29 +30,34 @@ public class NotificationDataStreamFactory(
             .Select(sources =>
             {
                 var (notifications,filterText, typeFilter, notificationSelectedIndex, currentPage, pageSize) = sources;
-
-
-
-                var filterFactory = new NotificationDataFilterFactory
-                {
-                    FilterText = filterText,
-                    TypeFilter = typeFilter,
-                    SelectedNotificationOptionIndex = notificationSelectedIndex,
-                };
-
-                var filter = filterFactory.CreateFilter();
-
-                var res = notifications
-                    .AsParallel()
-                    .Where(filter)
-                    .Chunk(pageSize)
-                    .ToList();
-
                 var pageIndex = Math.Max(0, currentPage - 1);
+                var partitionSize = Math.Max(1, pageSize);
 
-                var items = res.ElementAtOrDefault(pageIndex) ?? [];
+                var filteredData = FilterData();
+                var paginatedData = PaginateData();
 
-                return (Data: items, PageCount: res.Count);
+                var currentPageItems = GetCurrentPage();
+
+                return (Data: currentPageItems, PageCount: paginatedData.Count);
+
+                List<INotification[]> PaginateData()
+                {
+                    var notificationsList = filteredData.Chunk(partitionSize).ToList();
+                    return notificationsList;
+                }
+
+                ParallelQuery<INotification> FilterData()
+                {
+                    var filterFactory = new NotificationDataFilterFactory { FilterText = filterText, TypeFilter = typeFilter, SelectedNotificationOptionIndex = notificationSelectedIndex, };
+                    var filter = filterFactory.CreateFilter();
+                    var parallelQuery = notifications.AsParallel().Where(filter);
+                    return parallelQuery;
+                }
+
+                INotification[] GetCurrentPage()
+                {
+                    return paginatedData.ElementAtOrDefault(pageIndex) ?? [];
+                }
             })
             .Do(x => logger.LogDebug("Notification count {Count}", x.Data.Length))
             .Catch((Exception exception) =>

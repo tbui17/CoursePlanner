@@ -33,6 +33,7 @@ public interface INotificationFilter : IDateTimeRange
     IList<string> NotificationOptions { get; set; }
     ShouldNotifyIndex SelectedNotificationOptionIndex { get; set; }
     int CurrentPage { get; set; }
+    int PageSize { get; set; }
 }
 
 public interface INotificationDataViewModel : INotificationFilter
@@ -72,6 +73,9 @@ partial class NotificationDataViewModel
     [Reactive]
     public int CurrentPage { get; set; }
 
+    [Reactive]
+    public int PageSize { get; set; }
+
     [ObservableAsProperty]
     public int Pages { get; }
 
@@ -102,6 +106,7 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
     )
     {
         var now = DateTime.Now.Date;
+        PageSize = 10;
         FilterText = "";
         Start = now;
         End = now;
@@ -144,7 +149,8 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
             TypeFilter = typeFilter,
             PickerFilter = CreatePickerFilterSource(),
             CurrentPage = this.WhenAnyValue(x => x.CurrentPage),
-            Refresh = _refreshSubject
+            Refresh = _refreshSubject,
+            PageSize = this.WhenAnyValue(x => x.PageSize)
         };
         return inputSource;
     }

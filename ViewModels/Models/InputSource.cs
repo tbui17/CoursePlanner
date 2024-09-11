@@ -1,5 +1,3 @@
-
-using System.Reactive.Linq;
 using Lib.Models;
 using ViewModels.Domain;
 
@@ -13,5 +11,5 @@ public class InputSource
     public required IObservable<ShouldNotifyIndex> PickerFilter { get; init; }
     public required IObservable<object?> Refresh { get; init; }
     public required IObservable<int> CurrentPage { get; init; }
-    public IObservable<int> PageSize { get; init; } = Observable.Never<int>().StartWith(10);
+    public required IObservable<int> PageSize { get; init; }
 }
