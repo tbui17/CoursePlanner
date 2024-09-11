@@ -25,7 +25,7 @@ public class CompleteInputModel
         return _cache;
     }
 
-    public IReadOnlyList<INotification[]> GetPaginatedData() =>
+    public IReadOnlyList<IReadOnlyList<INotification>> GetPaginatedData() =>
         GetFilteredData()
             .Chunk(PartitionSize)
             .ToList();
