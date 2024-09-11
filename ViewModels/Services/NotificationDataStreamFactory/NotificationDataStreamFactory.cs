@@ -12,7 +12,8 @@ namespace ViewModels.Services.NotificationDataStreamFactory;
 [Inject]
 public class NotificationDataStreamFactory(
     INotificationDataService notificationDataService,
-    ILogger<NotificationDataStreamFactory> logger
+    ILogger<NotificationDataStreamFactory> logger,
+    PageResultFactory completeInputModelFactory
 )
 {
     public int RetryCount { get; set; } = 3;
@@ -53,8 +54,8 @@ public class NotificationDataStreamFactory(
                 CurrentPage = x.Item5,
                 PageSize = x.Item6
             })
-            .Select(x => new CompleteInputModel { Data = x })
-            .Do(x => logger.LogInformation("Data: {Data}",x.Data))
+            .Select(completeInputModelFactory.Create)
+            .Do(x => logger.LogInformation("Data: {Data}",x.CurrentPageData))
             .CreatePageDataStream();
     }
 }

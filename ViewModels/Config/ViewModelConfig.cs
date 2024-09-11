@@ -4,6 +4,7 @@ using Lib.Models;
 using Lib.Utils;
 using Plugin.LocalNotification;
 using ViewModels.Services;
+using ViewModels.Services.NotificationDataStreamFactory;
 
 // ReSharper disable RedundantNameQualifier
 

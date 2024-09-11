@@ -39,12 +39,14 @@ public class NotificationDataPaginationTestFixtureDataFactory(IFixture fixture, 
         var dataService = fixture.FreezeMock<INotificationDataService>();
         fixture.Register(provider.GetRequiredService<ILogger<NotificationDataViewModel>>);
         fixture.Register(provider.GetRequiredService<ILogger<NotificationDataStreamFactory>>);
+        // fixture.Register<ILogger<NotificationDataViewModel>>(() => new FakeLogger<NotificationDataViewModel>());
+        // fixture.Register<ILogger<NotificationDataStreamFactory>>(() => new FakeLogger<NotificationDataStreamFactory>());
 
         dataService
             .Setup(x => x.GetNotificationsWithinDateRange(It.IsAny<IDateTimeRange>()))
             .Callback<IDateTimeRange>(x =>
             {
-                Log.ForContext<NotificationDataPaginationTestFixture>().Information("GetNoficationsWithinDateRange called with {DateRange}", x);
+                Log.ForContext<NotificationDataPaginationTestFixture>().Information("GetNotificationsWithinDateRange called with {DateRange}", x);
             })
             .ReturnsAsync(data);
 

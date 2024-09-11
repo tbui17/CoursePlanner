@@ -106,6 +106,9 @@ public static class UtilExtensions
 
     public static Func<T,bool> ToAllPredicate<T>(this IEnumerable<Func<T,bool>> predicates) =>
         x => predicates.All(p => p(x));
+
+    public static int DivideRoundedUp(this int dividend, int divisor) =>
+        (dividend + divisor - 1) / divisor;
 }
 
 public static class Grouping
