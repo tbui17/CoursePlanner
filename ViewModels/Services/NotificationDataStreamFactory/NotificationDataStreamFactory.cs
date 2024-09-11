@@ -29,7 +29,8 @@ public class NotificationDataStreamFactory(
             .Catch((Exception exception) =>
             {
                 logger.LogError(exception, "Error getting notifications: {Exception}", exception);
-                return Observable.Return(new List<INotification>());
+                throw exception;
+                // return Observable.Return(new List<INotification>());
             });
     }
 
@@ -43,16 +44,19 @@ public class NotificationDataStreamFactory(
                 inputSource.CurrentPage,
                 inputSource.PageSize
             )
-            .Select(x => new CompleteInputData
-            {
-                Notifications = x.Item1,
-                FilterText = x.Item2,
-                TypeFilter = x.Item3,
-                NotificationSelectedIndex = x.Item4,
-                CurrentPage = x.Item5,
-                PageSize = x.Item6
-            })
-            .Select(x => new CompleteInputModel{Data = x})
+            .Let(s => s
+                .Select(x => new CompleteInputData
+                {
+                    Notifications = x.Item1,
+                    FilterText = x.Item2,
+                    TypeFilter = x.Item3,
+                    NotificationSelectedIndex = x.Item4,
+                    CurrentPage = x.Item5,
+                    PageSize = x.Item6
+                })
+                .Select(x => new CompleteInputModel { Data = x })
+            )
+            .Do(x => logger.LogInformation("Data: {Data}",x.Data))
             .CreatePageDataStream();
     }
 }

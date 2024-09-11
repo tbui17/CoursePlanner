@@ -34,8 +34,6 @@ public abstract class BaseTest : IBaseTest
 
     private IServiceProvider CreateProvider()
     {
-
-
         var services = new ServiceCollection();
         var assemblyService = new AssemblyService(AppDomain.CurrentDomain);
         var vmConfig = new ViewModelConfig(assemblyService, services);
@@ -47,7 +45,8 @@ public abstract class BaseTest : IBaseTest
             .AddTestDatabase()
             .AddTransient<ISessionService, SessionService>()
             .AddTransient<AppShellViewModel>()
-            .AddTransient<NotificationDataPaginationTestFixture>(_ => NotificationDataPaginationTestFixtureDataFactory.CreatePaginationFixture());
+            .AddTransient<NotificationDataPaginationTestFixture>(x =>
+                new NotificationDataPaginationTestFixtureDataFactory(CreateFixture(), x).CreateFixture());
         vmConfig.AddServices();
 
         return services.BuildServiceProvider();
