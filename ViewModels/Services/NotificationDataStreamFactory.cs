@@ -1,5 +1,5 @@
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
+
 using Lib.Attributes;
 using Lib.Interfaces;
 using Lib.Models;
@@ -12,7 +12,7 @@ using ViewModels.Models;
 namespace ViewModels.Services;
 
 [Inject]
-public partial class NotificationDataStreamFactory(
+public class NotificationDataStreamFactory(
     INotificationDataService notificationDataService,
     ILogger<NotificationDataStreamFactory> logger)
 {
@@ -43,7 +43,7 @@ public partial class NotificationDataStreamFactory(
                 inputSource.CurrentPage,
                 inputSource.PageSize
             )
-            .Select(x => new CombinedSource
+            .Select(x => new CompleteInputSource
             {
                 Notifications = x.Item1,
                 FilterText = x.Item2,
@@ -54,19 +54,41 @@ public partial class NotificationDataStreamFactory(
             });
 
 
-        var combinedResult = combinedSource.Select(Selector);
+        var data = combinedSource.Select(x => x.CreateFilteredPaginatedData());
 
         return new PageDataStream
         {
-            Data = combinedResult.Select(x => x.Data),
-            PageCount = combinedResult.Select(x => x.PageCount),
-            ItemCount = combinedResult.Select(x => x.Data.Count)
+            Data = data.Select(x => x.Data),
+            PageCount = data.Select(x => x.PageCount),
+            ItemCount = data.Select(x => x.Data.Count)
         };
     }
 
-    private static CombinedResult Selector(CombinedSource sources)
+
+}
+file record CompleteInputSource
+{
+    public required IList<INotification> Notifications { get; init; }
+    public required string FilterText { get; init; }
+    public required string TypeFilter { get; init; }
+    public required ShouldNotifyIndex NotificationSelectedIndex { get; init; }
+    public required int CurrentPage { get; init; }
+    public required int PageSize { get; init; }
+
+    public void Deconstruct(out IList<INotification> notifications, out string filterText, out string typeFilter,
+        out ShouldNotifyIndex notificationSelectedIndex, out int currentPage, out int pageSize)
     {
-        var (notifications, filterText, typeFilter, notificationSelectedIndex, currentPage, pageSize) = sources;
+        notifications = Notifications;
+        filterText = FilterText;
+        typeFilter = TypeFilter;
+        notificationSelectedIndex = NotificationSelectedIndex;
+        currentPage = CurrentPage;
+        pageSize = PageSize;
+    }
+
+    public FilteredPaginatedData CreateFilteredPaginatedData()
+    {
+        var (notifications, filterText, typeFilter, notificationSelectedIndex, currentPage, pageSize) = this;
         // apply constraints
         var pageIndex = Math.Max(0, currentPage - 1);
         var partitionSize = Math.Max(1, pageSize);
@@ -78,7 +100,7 @@ public partial class NotificationDataStreamFactory(
 
         var currentPageItems = GetCurrentPage();
 
-        return new CombinedResult
+        return new FilteredPaginatedData
         {
             Data = currentPageItems.ToList(),
             PageCount = paginatedData.Count
@@ -107,38 +129,11 @@ public partial class NotificationDataStreamFactory(
             return paginatedData.ElementAtOrDefault(pageIndex) ?? [];
         }
     }
-
-
 }
 
-public partial class NotificationDataStreamFactory
+
+file record FilteredPaginatedData
 {
-
-    private record CombinedSource
-    {
-        public required IList<INotification> Notifications { get; init; }
-        public required string FilterText { get; init; }
-        public required string TypeFilter { get; init; }
-        public required ShouldNotifyIndex NotificationSelectedIndex { get; init; }
-        public required int CurrentPage { get; init; }
-        public required int PageSize { get; init; }
-
-        public void Deconstruct(out IList<INotification> notifications, out string filterText, out string typeFilter,
-            out ShouldNotifyIndex notificationSelectedIndex, out int currentPage, out int pageSize)
-        {
-            notifications = Notifications;
-            filterText = FilterText;
-            typeFilter = TypeFilter;
-            notificationSelectedIndex = NotificationSelectedIndex;
-            currentPage = CurrentPage;
-            pageSize = PageSize;
-        }
-    }
-
-
-    private record CombinedResult
-    {
-        public List<INotification> Data { get; init; } = [];
-        public int PageCount { get; init; }
-    }
+    public List<INotification> Data { get; init; } = [];
+    public int PageCount { get; init; }
 }
