@@ -103,6 +103,9 @@ public static class UtilExtensions
 
     public static Func<T, bool> ToAnyPredicate<T>(this IEnumerable<Func<T, bool>> predicates) =>
         x => predicates.Any(p => p(x));
+
+    public static Func<T,bool> ToAllPredicate<T>(this IEnumerable<Func<T,bool>> predicates) =>
+        x => predicates.All(p => p(x));
 }
 
 public static class Grouping
