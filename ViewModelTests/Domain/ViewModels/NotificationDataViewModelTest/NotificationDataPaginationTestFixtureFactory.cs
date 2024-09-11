@@ -4,13 +4,10 @@ using Lib.Interfaces;
 using Lib.Models;
 using Lib.Services.NotificationService;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Testing;
 using Moq;
 using Serilog;
 using ViewModels.Domain;
-using ViewModels.Services;
 using ViewModels.Services.NotificationDataStreamFactory;
-using ViewModelTests.TestSetup;
 
 namespace ViewModelTests.Domain.ViewModels.NotificationDataViewModelTest;
 
