@@ -25,6 +25,7 @@ public class NotificationDataStreamFactory(
             .CombineLatest(refresh, (dateRange, _) => dateRange)
             .Select(notificationDataService.GetNotificationsWithinDateRange)
             .Switch()
+            .Retry(RetryCount)
             .Replay(1)
             .RefCount()
             .Catch((Exception exception) =>
