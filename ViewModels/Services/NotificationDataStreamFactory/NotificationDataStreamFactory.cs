@@ -32,7 +32,6 @@ public class NotificationDataStreamFactory(
             {
                 logger.LogError(exception, "Error getting notifications: {Exception}", exception);
                 throw exception;
-                // return Observable.Return(new List<INotification>());
             });
     }
 
