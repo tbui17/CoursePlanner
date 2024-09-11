@@ -18,6 +18,16 @@ public static class MockExtensions
         return mock.Invocations.Should().Contain(x => x.Method.Name == str);
     }
 
+    public static AndConstraint<GenericCollectionAssertions<IInvocation>> ShouldCall<T>(
+        this Mock<T> mock, Expression<Func<T, string>> expr, int times) where T : class
+    {
+        var expr2 = (ConstantExpression)expr.Body;
+
+        var str = (string)expr2.Value!;
+
+        return mock.Invocations.Where(x => x.Method.Name == str).Should().HaveCount(times);
+    }
+
     public static AndConstraint<GenericCollectionAssertions<IInvocation>> ShouldNotCall<T>(
         this Mock<T> mock, string methodName) where T : class
     {
