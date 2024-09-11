@@ -13,6 +13,7 @@ using ViewModels.Config;
 using ViewModels.Interfaces;
 using ViewModels.Models;
 using ViewModels.Services;
+using ViewModels.Services.NotificationDataStreamFactory;
 
 namespace ViewModels.Domain;
 
