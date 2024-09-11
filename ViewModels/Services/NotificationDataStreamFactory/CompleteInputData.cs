@@ -7,34 +7,35 @@ namespace ViewModels.Services.NotificationDataStreamFactory;
 
 public class CompleteInputModel
 {
-    public CompleteInputData Data { get; set; } = new();
+    public CompleteInputData Data { get; init; } = new();
 
     public int PageIndex => Math.Max(0, Data.CurrentPage - 1);
     public int PartitionSize => Math.Max(1, Data.PageSize);
 
-    public IEnumerable<INotification> GetFilteredData()
+    private IReadOnlyList<INotification>? _cache;
+
+    public IReadOnlyList<INotification> GetFilteredData()
     {
-        var filterFactory = new NotificationDataFilterFactory
+        if (_cache is not null)
         {
-            FilterText = Data.FilterText,
-            TypeFilter = Data.TypeFilter,
-            SelectedNotificationOptionIndex = Data.NotificationSelectedIndex,
-        };
-        var filter = filterFactory.CreateFilter();
-        return Data.Notifications.AsParallel().Where(filter);
+            return _cache;
+        }
+        var filter = new NotificationDataFilterFactory { Data = Data }.CreateFilter();
+        _cache =  Data.Notifications.AsParallel().Where(filter).ToList();
+        return _cache;
     }
 
-    public List<INotification[]> GetPaginatedData() =>
+    public IReadOnlyList<INotification[]> GetPaginatedData() =>
         GetFilteredData()
             .Chunk(PartitionSize)
             .ToList();
 
 
-    public INotification[] GetCurrentPage() => GetPaginatedData()
+    public IReadOnlyList<INotification> GetCurrentPage() => GetPaginatedData()
         .ElementAtOrDefault(PageIndex) ?? [];
 }
 
-public record CompleteInputData
+public record CompleteInputData : IFilterData
 {
     public IList<INotification> Notifications { get; init; } = [];
     public string FilterText { get; init; } = "";
@@ -57,13 +58,13 @@ public record CompleteInputData
 
 public static class CompleteInputModelExtensions
 {
-    public static PageDataStream CreateStream(this IObservable<CompleteInputModel> stream)
+    public static PageDataStream CreatePageDataStream(this IObservable<CompleteInputModel> stream)
     {
         return new PageDataStream
         {
             Data = stream.Select(x => x.GetCurrentPage().ToList()),
             PageCount = stream.Select(x => x.GetPaginatedData().Count),
-            ItemCount = stream.Select(x => x.GetCurrentPage().Length)
+            ItemCount = stream.Select(x => x.GetCurrentPage().Count)
         };
     }
 }

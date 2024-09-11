@@ -13,8 +13,7 @@ namespace ViewModels.Services.NotificationDataStreamFactory;
 [Inject]
 public class NotificationDataStreamFactory(
     INotificationDataService notificationDataService,
-    ILogger<NotificationDataStreamFactory> logger,
-    PageDataFactory pageDataFactory
+    ILogger<NotificationDataStreamFactory> logger
 )
 {
     public int RetryCount { get; set; } = 3;
@@ -36,7 +35,7 @@ public class NotificationDataStreamFactory(
 
     public PageDataStream CreatePageDataStream(InputSource inputSource)
     {
-        var combinedSource = CreateNotificationDataStream(inputSource.DateFilter, inputSource.Refresh)
+        return CreateNotificationDataStream(inputSource.DateFilter, inputSource.Refresh)
             .CombineLatest(
                 inputSource.TextFilter,
                 inputSource.TypeFilter,
@@ -52,11 +51,8 @@ public class NotificationDataStreamFactory(
                 NotificationSelectedIndex = x.Item4,
                 CurrentPage = x.Item5,
                 PageSize = x.Item6
-            });
-
-
-        return combinedSource
-            .Select(pageDataFactory.Create)
-            .Thru(pageDataFactory.CreateStream);
+            })
+            .Select(x => new CompleteInputModel{Data = x})
+            .CreatePageDataStream();
     }
 }

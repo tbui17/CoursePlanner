@@ -3,13 +3,12 @@ using Lib.Models;
 using Lib.Utils;
 using ViewModels.Domain;
 
-namespace ViewModels.Services;
+namespace ViewModels.Services.NotificationDataStreamFactory;
+
 
 public class NotificationDataFilterFactory
 {
-    public required string FilterText { get; init; }
-    public required string TypeFilter { get; init; }
-    public required ShouldNotifyIndex SelectedNotificationOptionIndex { get; init; }
+    public required IFilterData Data { get; init; }
 
     private static Func<INotification, bool> CreateShouldNotifyFilter(
         ShouldNotifyIndex index)
@@ -28,24 +27,24 @@ public class NotificationDataFilterFactory
 
     public IList<Func<INotification, bool>> CreateFilters()
     {
-        var shouldNotifyFilter = CreateShouldNotifyFilter(SelectedNotificationOptionIndex);
+        var shouldNotifyFilter = CreateShouldNotifyFilter(Data.NotificationSelectedIndex);
         return
         [
-            x => x.Name.Contains(FilterText, StringComparison.CurrentCultureIgnoreCase),
+            x => x.Name.Contains(Data.FilterText, StringComparison.CurrentCultureIgnoreCase),
             x =>
             {
                 if (x is Assessment assessment)
                 {
-                    return $"{assessment.Type} Assessment".Contains(TypeFilter,
+                    return $"{assessment.Type} Assessment".Contains(Data.TypeFilter,
                         StringComparison.CurrentCultureIgnoreCase);
                 }
 
-                return x.GetType().Name.Contains(TypeFilter, StringComparison.CurrentCultureIgnoreCase);
+                return x.GetType().Name.Contains(Data.TypeFilter, StringComparison.CurrentCultureIgnoreCase);
             },
             shouldNotifyFilter
         ];
     }
-    
+
     public Func<INotification, bool> CreateFilter()
     {
         return CreateFilters().ToAllPredicate();
