@@ -1,4 +1,4 @@
-using System.Reactive.Subjects;
+
 using Lib.Interfaces;
 using Lib.Models;
 using ViewModels.Domain;
@@ -11,6 +11,7 @@ public class InputSource
     public required IObservable<TextFilterSource> TextFilter { get; init; }
     public required IObservable<ShouldNotifyIndex> PickerFilter { get; init; }
     public required IObservable<object?> Refresh { get; init; }
+    public required IObservable<int> CurrentPage { get; init; }
 }
 
 public class InputSourceWithCurrentPage

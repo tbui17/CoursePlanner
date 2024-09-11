@@ -15,20 +15,23 @@ public class NotificationDataStreamFactory(
     ILogger<NotificationDataStreamFactory> logger)
 {
 
-    public IObservable<IList<INotification>> CreateNotificationDataStream(IObservable<DateTimeRange> dateFilter)
+    private IObservable<IList<INotification>> CreateNotificationDataStream(IObservable<DateTimeRange> dateFilter, IObservable<object?> refresh)
     {
         return dateFilter.ObserveOn(RxApp.TaskpoolScheduler)
+            .CombineLatest(refresh, (dateRange,_) => dateRange)
             .Select(notificationDataService.GetNotificationsWithinDateRange)
             .Switch();
     }
 
-    public IObservable<List<INotification>> Create(InputSource inputSource)
+    public (IObservable<List<INotification>> Data, IObservable<int> PageCount, IObservable<int> ItemCount) Create(InputSource inputSource)
     {
-        return CreateNotificationDataStream(inputSource.DateFilter)
-            .CombineLatest(inputSource.TextFilter, inputSource.PickerFilter, inputSource.Refresh)
+        var res = CreateNotificationDataStream(inputSource.DateFilter, inputSource.Refresh)
+            .CombineLatest(inputSource.TextFilter, inputSource.PickerFilter, inputSource.CurrentPage)
             .Select(sources =>
             {
-                var (notifications, (filterText, typeFilter), notificationSelectedIndex, _) = sources;
+                var (notifications, (filterText, typeFilter), notificationSelectedIndex, currentPage) = sources;
+
+
 
                 var filterFactory = new NotificationDataFilterFactory
                 {
@@ -39,37 +42,30 @@ public class NotificationDataStreamFactory(
 
                 var filter = filterFactory.CreateFilter();
 
-                return notifications
+                var res = notifications
                     .AsParallel()
                     .Where(filter)
+                    .Chunk(10)
                     .ToList();
+
+                var pageIndex = Math.Max(0, currentPage - 1);
+
+                var items = res.ElementAtOrDefault(pageIndex) ?? [];
+
+                return (Data: items, PageCount: res.Count);
             })
-            .Do(x => logger.LogDebug("Notification count {Count}", x.Count))
+            .Do(x => logger.LogDebug("Notification count {Count}", x.Data.Length))
             .Catch((Exception exception) =>
             {
                 logger.LogError(exception, "Error getting notifications: {Exception}", exception);
-                return Observable.Return(new List<INotification>());
+                (INotification[] Data, int PageCount) empty = ([], 0);
+                return Observable.Return(empty);
             });
-    }
 
-    public IObservable<(List<INotification> Data, int PageCount)> Create(InputSourceWithCurrentPage source)
-    {
-        var paginatedDataStream = source.Data
-            .Select(x => x.Chunk(10));
-
-
-        var pageIndexStream = source.CurrentPage
-            .Select(x => Math.Max(0, x - 1));
-
-        var dataStream2 = pageIndexStream
-            .CombineLatest(paginatedDataStream, (x, y) => (PageIndex: x, PaginatedData: y))
-            .Select(x =>
-            {
-                var data = x.PaginatedData.ElementAtOrDefault(x.PageIndex)?.ToList() ?? [];
-                var pageCount = x.PaginatedData.Count();
-                return (Data: data, PageCount: pageCount);
-            })
-            .Do(x => logger.LogDebug("Item Data: {Data}", x));
-        return dataStream2;
+        return (
+            Data: res.Select(x => x.Data.ToList()),
+            PageCount: res.Select(x => x.PageCount),
+            ItemCount: res.Select(x => x.Data.Length)
+        );
     }
 }
