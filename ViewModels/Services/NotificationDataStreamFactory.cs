@@ -66,7 +66,7 @@ public class NotificationDataStreamFactory(
 
 
 }
-file record CompleteInputSource
+file class CompleteInputSource
 {
     public required IList<INotification> Notifications { get; init; }
     public required string FilterText { get; init; }
