@@ -120,26 +120,16 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
             SelectedNotificationOptionIndex = 0;
         });
 
-        var pageSource = this.WhenAnyValue(x => x.CurrentPage);
+
+        var (data, pageCount, itemCount) = notificationDataStreamFactory.Create(CreateInputSource());
 
 
-        var dataStream = CreateInputSource()
-            .Thru(notificationDataStreamFactory.Create)
-            .Thru(x => new InputSourceWithCurrentPage { Data = x, CurrentPage = pageSource })
-            .Thru(notificationDataStreamFactory.Create);
-
-
-        dataStream
-            .Select(x => x.Data)
+        data
             .Do(x => _logger.LogDebug("Notification items {Items}", x))
             .Thru(x => ToPropertyEx(x, vm => vm.NotificationItems));
-
-        dataStream
-            .Select(x => x.Data.Count)
+        itemCount
             .Thru(x => ToPropertyEx(x, vm => vm.ItemCount));
-
-        dataStream
-            .Select(x => x.PageCount)
+        pageCount
             .Thru(x => ToPropertyEx(x, vm => vm.Pages));
     }
 
@@ -148,10 +138,11 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
     {
         var inputSource = new InputSource
         {
-            Refresh = _refreshSubject,
             DateFilter = CreateDateFilterSource(),
             TextFilter = CreateTextFilterSource(),
-            PickerFilter = CreatePickerFilterSource()
+            PickerFilter = CreatePickerFilterSource(),
+            CurrentPage = this.WhenAnyValue(x => x.CurrentPage),
+            Refresh = _refreshSubject
         };
         return inputSource;
     }
