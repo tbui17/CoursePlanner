@@ -25,7 +25,6 @@ public class NotificationDataStreamFactory(
             .CombineLatest(refresh, (dateRange, _) => dateRange)
             .Select(notificationDataService.GetNotificationsWithinDateRange)
             .Switch()
-            .Retry(RetryCount)
             .Replay(1)
             .RefCount()
             .Catch((Exception exception) =>
@@ -35,7 +34,7 @@ public class NotificationDataStreamFactory(
             });
     }
 
-    public PageDataStream CreatePageDataStream(InputSource inputSource)
+    public IObservable<IPageResult> CreatePageDataStream(InputSource inputSource)
     {
         return CreateNotificationDataStream(inputSource.DateFilter, inputSource.Refresh)
             .CombineLatest(
@@ -55,7 +54,6 @@ public class NotificationDataStreamFactory(
                 PageSize = x.Item6
             })
             .Select(completeInputModelFactory.Create)
-            .Do(x => logger.LogInformation("Data: {Data}",x.CurrentPageData))
-            .CreatePageDataStream();
+            .Do(x => logger.LogInformation("Data: {Data}",x.CurrentPageData));
     }
 }

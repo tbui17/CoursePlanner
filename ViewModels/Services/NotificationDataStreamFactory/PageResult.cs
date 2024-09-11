@@ -14,6 +14,14 @@ public interface IPageResult
     IReadOnlyList<INotification> CurrentPageData { get; }
 }
 
+public record EmptyPageResult : IPageResult
+{
+    public int PageCount { get; init; } = 0;
+    public int ItemCount { get; init; } = 0;
+    public int CurrentPage { get; init; } = 0;
+    public IReadOnlyList<INotification> CurrentPageData { get; init; } = [];
+}
+
 public class PageResult(Func<INotification, bool> filter, CompleteInputData data) : IPageResult
 {
     private CompleteInputData Data => data;
@@ -50,19 +58,5 @@ public class PageResultFactory
         var factory = new NotificationDataFilterFactory(data);
         var filter = factory.CreateFilter();
         return new PageResult(filter, data);
-    }
-}
-
-public static class PageResultExtensions
-{
-    public static PageDataStream CreatePageDataStream(this IObservable<PageResult> stream)
-    {
-
-        return new PageDataStream
-        {
-            Data = stream.Select(x => x.CurrentPageData.ToList()),
-            PageCount = stream.Select(x => x.PageCount),
-            ItemCount = stream.Select(x => x.ItemCount)
-        };
     }
 }

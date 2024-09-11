@@ -19,7 +19,6 @@ namespace ViewModels.Domain;
 
 using NotificationCollection = List<INotification>;
 
-
 public enum ShouldNotifyIndex
 {
     None,
@@ -39,12 +38,9 @@ public interface INotificationFilter : IDateTimeRange
 
 public interface INotificationDataViewModel : INotificationFilter
 {
-
     IList<string>? Types { get; }
-    int ItemCount { get; }
+
     // bool Busy { get; }
-    int Pages { get; }
-    NotificationCollection? NotificationItems { get; }
     ICommand ChangePageCommand { get; }
     ICommand ClearCommand { get; }
 }
@@ -78,17 +74,11 @@ partial class NotificationDataViewModel
     public int PageSize { get; set; }
 
     [ObservableAsProperty]
-    public int Pages { get; }
+    public IPageResult? PageResult { get; set; }
+
 
     [ObservableAsProperty]
     public IList<string> Types { get; }
-
-    [ObservableAsProperty]
-    public NotificationCollection? NotificationItems { get; }
-
-    [ObservableAsProperty]
-    public int ItemCount { get; }
-
 
     public ICommand ChangePageCommand { get; }
 
@@ -106,15 +96,26 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
         ILogger<NotificationDataViewModel> logger
     )
     {
+
         var now = DateTime.Now.Date;
         PageSize = 10;
         FilterText = "";
         Start = now;
         End = now;
-        ChangePageCommand = ReactiveCommand.Create<int>(page => { CurrentPage = Math.Min(page, Pages); });
+
+        ChangePageCommand = ReactiveCommand.Create<int>(page =>
+            {
+                if (GetPage(PageResult) is not { } p)
+                {
+                    return;
+                }
+                CurrentPage = Math.Min(page, p);
+            },
+            canExecute: this.WhenAnyValue(x => x.PageResult).Select(x => GetPage(x) is not null)
+        );
         NotificationOptions = new List<string> { "None", "True", "False" };
         _logger = logger;
-        Types = new NotificationTypes(["Assessment", "Course"]).Value;
+        Types = new NotificationTypes(["Objective Assessment", "Performance Assessment", "Course"]).Value;
         ClearCommand = ReactiveCommand.Create(() =>
         {
             _logger.LogDebug("Clearing filters");
@@ -127,16 +128,22 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
         });
 
 
-        var (data, pageCount, itemCount) = notificationDataStreamFactory.CreatePageDataStream(CreateInputSource());
+        var pageResult = notificationDataStreamFactory.CreatePageDataStream(CreateInputSource());
+
+        pageResult.DefaultIfEmpty(new EmptyPageResult());
+        ToPropertyEx(pageResult, x => x.PageResult);
 
 
-        data
-            .Do(x => _logger.LogDebug("Notification items {Items}", x))
-            .Thru(x => ToPropertyEx(x, vm => vm.NotificationItems));
-        itemCount
-            .Thru(x => ToPropertyEx(x, vm => vm.ItemCount));
-        pageCount
-            .Thru(x => ToPropertyEx(x, vm => vm.Pages));
+    }
+
+    private static int? GetPage(IPageResult? pageResult)
+    {
+        if (pageResult is not { CurrentPage: var p and > 1 })
+        {
+            return null;
+        }
+
+        return p;
     }
 
 
