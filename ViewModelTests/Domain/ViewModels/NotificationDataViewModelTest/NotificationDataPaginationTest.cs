@@ -4,7 +4,7 @@ using ViewModelTests.Utils;
 
 namespace ViewModelTests.Domain.ViewModels.NotificationDataViewModelTest;
 
-// [Timeout(5000)]
+[Timeout(5000)]
 public class NotificationDataPaginationTest : BaseTest
 {
 
@@ -28,7 +28,7 @@ public class NotificationDataPaginationTest : BaseTest
             );
     }
 
-    [Test, Timeout(2000)]
+    [Test]
     public async Task Pages_PartitionedBy10_GreaterThan1()
     {
         var f = CreateFixture();

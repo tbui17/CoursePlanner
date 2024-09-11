@@ -3,6 +3,7 @@ using BaseTestSetup.Lib;
 using Lib.Interfaces;
 using Lib.Models;
 using Lib.Services.NotificationService;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Testing;
 using Moq;
 using ViewModels.Domain;
@@ -12,7 +13,7 @@ using ViewModelTests.TestSetup;
 
 namespace ViewModelTests.Domain.ViewModels.NotificationDataViewModelTest;
 
-public class NotificationDataPaginationTestFixtureDataFactory(IFixture fixture)
+public class NotificationDataPaginationTestFixtureDataFactory(IFixture fixture, IServiceProvider provider)
 {
     public List<INotification> CreateNotificationData()
     {
@@ -35,6 +36,8 @@ public class NotificationDataPaginationTestFixtureDataFactory(IFixture fixture)
         var data = CreateNotificationData();
 
         var dataService = fixture.FreezeMock<INotificationDataService>();
+        fixture.Register(provider.GetRequiredService<ILogger<NotificationDataViewModel>>);
+        fixture.Register(provider.GetRequiredService<ILogger<NotificationDataStreamFactory>>);
 
         dataService
             .Setup(x => x.GetNotificationsWithinDateRange(It.IsAny<IDateTimeRange>()))
@@ -42,7 +45,9 @@ public class NotificationDataPaginationTestFixtureDataFactory(IFixture fixture)
 
         var model = new NotificationDataViewModel(
             fixture.Create<NotificationDataStreamFactory>(),
-            new FakeLogger<NotificationDataViewModel>()
+            fixture.Create<ILogger<NotificationDataViewModel>>()
+
+
         );
 
         return new NotificationDataPaginationTestFixture
@@ -53,11 +58,5 @@ public class NotificationDataPaginationTestFixtureDataFactory(IFixture fixture)
             Model = model,
             Expected = data
         };
-    }
-
-    public static NotificationDataPaginationTestFixture CreatePaginationFixture()
-    {
-        var fixture = Globals.CreateFixture();
-        return new NotificationDataPaginationTestFixtureDataFactory(fixture).CreateFixture();
     }
 }
