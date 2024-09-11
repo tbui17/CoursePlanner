@@ -2,7 +2,9 @@ using Lib.Interfaces;
 
 namespace ViewModels.Services;
 
-public record PageDataStream(
-    IObservable<List<INotification>> Data,
-    IObservable<int> PageCount,
-    IObservable<int> ItemCount);
+public record PageDataStream()
+{
+    public required IObservable<List<INotification>> Data { get; init; }
+    public required IObservable<int> PageCount { get; init; }
+    public required IObservable<int> ItemCount { get; init; }
+}

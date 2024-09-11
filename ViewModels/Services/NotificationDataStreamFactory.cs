@@ -15,8 +15,8 @@ public class NotificationDataStreamFactory(
     INotificationDataService notificationDataService,
     ILogger<NotificationDataStreamFactory> logger)
 {
-
     public int RetryCount { get; set; } = 3;
+
     private IObservable<IList<INotification>> CreateNotificationDataStream(IObservable<DateTimeRange> dateFilter,
         IObservable<object?> refresh)
     {
@@ -57,11 +57,12 @@ public class NotificationDataStreamFactory(
             .Select(Selector)
             .Do(x => logger.LogDebug("Notification count {Count}", x.Data.Count));
 
-        return new PageDataStream(
-            Data: combinedResult.Select(x => x.Data),
-            PageCount: combinedResult.Select(x => x.PageCount),
-            ItemCount: combinedResult.Select(x => x.Data.Count)
-        );
+        return new PageDataStream
+        {
+            Data = combinedResult.Select(x => x.Data),
+            PageCount = combinedResult.Select(x => x.PageCount),
+            ItemCount = combinedResult.Select(x => x.Data.Count)
+        };
     }
 
     private static CombinedResult Selector(CombinedSource sources)
