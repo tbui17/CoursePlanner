@@ -1,4 +1,5 @@
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using Lib.Attributes;
 using Lib.Interfaces;
 using Lib.Models;
@@ -14,13 +15,21 @@ public class NotificationDataStreamFactory(
     INotificationDataService notificationDataService,
     ILogger<NotificationDataStreamFactory> logger)
 {
+
+    public int RetryCount { get; set; } = 3;
     private IObservable<IList<INotification>> CreateNotificationDataStream(IObservable<DateTimeRange> dateFilter,
         IObservable<object?> refresh)
     {
         return dateFilter.ObserveOn(RxApp.TaskpoolScheduler)
             .CombineLatest(refresh, (dateRange, _) => dateRange)
             .Select(notificationDataService.GetNotificationsWithinDateRange)
-            .Switch();
+            .Switch()
+            .Retry(RetryCount)
+            .Catch((Exception exception) =>
+            {
+                logger.LogError(exception, "Error getting notifications: {Exception}", exception);
+                return Observable.Return(new List<INotification>());
+            });
     }
 
     public PageDataStream CreatePageDataStream(InputSource inputSource)
@@ -46,12 +55,7 @@ public class NotificationDataStreamFactory(
 
         var combinedResult = combinedSource
             .Select(Selector)
-            .Do(x => logger.LogDebug("Notification count {Count}", x.Data.Count))
-            .Catch((Exception exception) =>
-            {
-                logger.LogError(exception, "Error getting notifications: {Exception}", exception);
-                return Observable.Return(new CombinedResult());
-            });
+            .Do(x => logger.LogDebug("Notification count {Count}", x.Data.Count));
 
         return new PageDataStream(
             Data: combinedResult.Select(x => x.Data),
