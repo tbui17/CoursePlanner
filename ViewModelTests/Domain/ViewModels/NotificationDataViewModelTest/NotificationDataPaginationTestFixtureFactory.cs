@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging.Testing;
 using Moq;
 using ViewModels.Domain;
 using ViewModels.Services;
+using ViewModels.Services.NotificationDataStreamFactory;
 using ViewModelTests.TestSetup;
 
 namespace ViewModelTests.Domain.ViewModels.NotificationDataViewModelTest;
