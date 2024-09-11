@@ -18,19 +18,29 @@ namespace ViewModels.Domain;
 
 using NotificationCollection = List<INotification>;
 
-public interface INotificationDataViewModel
+
+public enum ShouldNotifyIndex
+{
+    None,
+    True,
+    False
+}
+
+public interface INotificationFilter : IDateTimeRange
 {
     string FilterText { get; set; }
-    DateTime Start { get; set; }
-    DateTime End { get; set; }
-    bool Busy { get; }
     string TypeFilter { get; set; }
     IList<string> NotificationOptions { get; set; }
-    int SelectedNotificationOptionIndex { get; set; }
-
+    ShouldNotifyIndex SelectedNotificationOptionIndex { get; set; }
     int CurrentPage { get; set; }
+}
+
+public interface INotificationDataViewModel : INotificationFilter
+{
+
     IList<string>? Types { get; }
     int ItemCount { get; }
+    // bool Busy { get; }
     int Pages { get; }
     NotificationCollection? NotificationItems { get; }
     ICommand ChangePageCommand { get; }
@@ -48,7 +58,7 @@ partial class NotificationDataViewModel
     [Reactive]
     public DateTime End { get; set; }
 
-    public bool Busy { get; private set; }
+    // public bool Busy { get; private set; }
 
     [Reactive]
     public string TypeFilter { get; set; } = "";
@@ -57,7 +67,7 @@ partial class NotificationDataViewModel
     public IList<string> NotificationOptions { get; set; }
 
     [Reactive]
-    public int SelectedNotificationOptionIndex { get; set; }
+    public ShouldNotifyIndex SelectedNotificationOptionIndex { get; set; }
 
     [Reactive]
     public int CurrentPage { get; set; }
@@ -158,7 +168,7 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
         return dateFilterSource;
     }
 
-    private IObservable<int> CreatePickerFilterSource()
+    private IObservable<ShouldNotifyIndex> CreatePickerFilterSource()
     {
         var pickerFilterSource = this.WhenAnyValue(x => x.SelectedNotificationOptionIndex)
             .Do(x => _logger.LogDebug("Picker index {Index}", x));

@@ -3,7 +3,6 @@ using Lib.Attributes;
 using Lib.Interfaces;
 using Lib.Models;
 using Lib.Services.NotificationService;
-using Lib.Utils;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using ViewModels.Models;
@@ -11,52 +10,50 @@ using ViewModels.Models;
 namespace ViewModels.Services;
 
 [Inject]
-public class NotificationDataStreamFactory(INotificationDataService notificationDataService, ILogger<NotificationDataStreamFactory> logger)
+public class NotificationDataStreamFactory(
+    INotificationDataService notificationDataService,
+    ILogger<NotificationDataStreamFactory> logger)
 {
-    private static ParallelQuery<INotification> ApplyNotificationFilter(
-        ParallelQuery<INotification> results,
-        int notificationSelectedIndex
-    ) =>
-        notificationSelectedIndex switch
-        {
-            < 1 => results,
-            1 => results.Where(item => item.ShouldNotify),
-            > 1 => results.Where(item => !item.ShouldNotify)
-        };
+
+    public IObservable<IList<INotification>> CreateNotificationDataStream(IObservable<DateTimeRange> dateFilter)
+    {
+        return dateFilter.ObserveOn(RxApp.TaskpoolScheduler)
+            .Select(notificationDataService.GetNotificationsWithinDateRange)
+            .Switch();
+    }
 
     public IObservable<List<INotification>> Create(InputSource inputSource)
     {
-
-        return inputSource.DateFilter
-            .ObserveOn(RxApp.TaskpoolScheduler)
-            .SelectMany(notificationDataService.GetNotificationsWithinDateRange)
+        return CreateNotificationDataStream(inputSource.DateFilter)
             .CombineLatest(inputSource.TextFilter, inputSource.PickerFilter, inputSource.Refresh)
             .Select(sources =>
             {
                 var (notifications, (filterText, typeFilter), notificationSelectedIndex, _) = sources;
 
+                var filterFactory = new NotificationDataFilterFactory
+                {
+                    FilterText = filterText,
+                    TypeFilter = typeFilter,
+                    SelectedNotificationOptionIndex = notificationSelectedIndex,
+                };
+
+                var filter = filterFactory.CreateFilter();
+
                 return notifications
                     .AsParallel()
-                    .Thru(notificationStream => ApplyNotificationFilter(notificationStream, notificationSelectedIndex))
-                    .Where(item => item.Name.Contains(filterText, StringComparison.CurrentCultureIgnoreCase))
-                    .Where(item =>
-                        item is Assessment assessment
-                            ? $"{assessment.Type} Assessment".Contains(typeFilter,
-                                StringComparison.CurrentCultureIgnoreCase)
-                            : item.GetType().Name.Contains(typeFilter, StringComparison.CurrentCultureIgnoreCase));
+                    .Where(filter)
+                    .ToList();
             })
-            .Select(x => x.ToList())
             .Do(x => logger.LogDebug("Notification count {Count}", x.Count))
             .Catch((Exception exception) =>
             {
-                logger.LogError(exception, "Error getting notifications: {Exception}",exception);
+                logger.LogError(exception, "Error getting notifications: {Exception}", exception);
                 return Observable.Return(new List<INotification>());
             });
     }
 
     public IObservable<(List<INotification> Data, int PageCount)> Create(InputSourceWithCurrentPage source)
     {
-
         var paginatedDataStream = source.Data
             .Select(x => x.Chunk(10));
 
