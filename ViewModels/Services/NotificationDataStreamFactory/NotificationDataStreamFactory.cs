@@ -44,7 +44,7 @@ public class NotificationDataStreamFactory(
                 inputSource.CurrentPage,
                 inputSource.PageSize
             )
-            .Select(x => new CompleteInputSource
+            .Select(x => new CompleteInputData
             {
                 Notifications = x.Item1,
                 FilterText = x.Item2,

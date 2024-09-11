@@ -18,9 +18,9 @@ public class PageDataFactory
         };
     }
 
-    public PageData Create(CompleteInputSource source)
+    public PageData Create(CompleteInputData input)
     {
-        var (notifications, filterText, typeFilter, notificationSelectedIndex, currentPage, pageSize) = source;
+        var (notifications, filterText, typeFilter, notificationSelectedIndex, currentPage, pageSize) = input;
         // apply constraints
         var pageIndex = Math.Max(0, currentPage - 1);
         var partitionSize = Math.Max(1, pageSize);
