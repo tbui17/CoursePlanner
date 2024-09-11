@@ -26,6 +26,8 @@ public class NotificationDataStreamFactory(
             .Select(notificationDataService.GetNotificationsWithinDateRange)
             .Switch()
             .Retry(RetryCount)
+            .Replay(1)
+            .RefCount()
             .Catch((Exception exception) =>
             {
                 logger.LogError(exception, "Error getting notifications: {Exception}", exception);
@@ -44,18 +46,16 @@ public class NotificationDataStreamFactory(
                 inputSource.CurrentPage,
                 inputSource.PageSize
             )
-            .Let(s => s
-                .Select(x => new CompleteInputData
-                {
-                    Notifications = x.Item1,
-                    FilterText = x.Item2,
-                    TypeFilter = x.Item3,
-                    NotificationSelectedIndex = x.Item4,
-                    CurrentPage = x.Item5,
-                    PageSize = x.Item6
-                })
-                .Select(x => new CompleteInputModel { Data = x })
-            )
+            .Select(x => new CompleteInputData
+            {
+                Notifications = x.Item1,
+                FilterText = x.Item2,
+                TypeFilter = x.Item3,
+                NotificationSelectedIndex = x.Item4,
+                CurrentPage = x.Item5,
+                PageSize = x.Item6
+            })
+            .Select(x => new CompleteInputModel { Data = x })
             .Do(x => logger.LogInformation("Data: {Data}",x.Data))
             .CreatePageDataStream();
     }
