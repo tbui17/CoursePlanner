@@ -6,6 +6,7 @@ using Lib.Services.NotificationService;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Testing;
 using Moq;
+using Serilog;
 using ViewModels.Domain;
 using ViewModels.Services;
 using ViewModels.Services.NotificationDataStreamFactory;
@@ -41,6 +42,10 @@ public class NotificationDataPaginationTestFixtureDataFactory(IFixture fixture, 
 
         dataService
             .Setup(x => x.GetNotificationsWithinDateRange(It.IsAny<IDateTimeRange>()))
+            .Callback<IDateTimeRange>(x =>
+            {
+                Log.ForContext<NotificationDataPaginationTestFixture>().Information("GetNoficationsWithinDateRange called with {DateRange}", x);
+            })
             .ReturnsAsync(data);
 
         var model = new NotificationDataViewModel(
