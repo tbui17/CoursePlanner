@@ -53,7 +53,7 @@ public class PageResultFactory
     }
 }
 
-public static class CompleteInputModelExtensions
+public static class PageResultExtensions
 {
     public static PageDataStream CreatePageDataStream(this IObservable<PageResult> stream)
     {
