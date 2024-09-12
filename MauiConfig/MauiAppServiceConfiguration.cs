@@ -83,6 +83,7 @@ public class MauiLoggingUseCase : ILoggingUseCase
 
     public void SetMinimumLogLevel()
     {
+        Base.SetMinimumLogLevel();
 #if DEBUG
         Configuration.MinimumLevel.Debug().WriteTo.Debug(LogEventLevel.Debug, DefaultLogConfigurationUseCase.LogTemplate);
 #elif RELEASE
@@ -92,6 +93,7 @@ public class MauiLoggingUseCase : ILoggingUseCase
 
     public void AddSinks()
     {
+        Base.WriteConsole();
         var opts = DefaultLogConfigurationUseCase.FileSinkOptions with
         {
             Formatter = new JsonFormatter(),
