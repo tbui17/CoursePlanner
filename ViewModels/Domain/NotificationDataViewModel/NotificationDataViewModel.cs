@@ -47,7 +47,7 @@ partial class NotificationDataViewModel
     public int PageSize { get; set; }
 
     [ObservableAsProperty]
-    public IPageResult? PageResult { get; set; }
+    public IPageResult? PageResult { get; }
 
 
     [Reactive]
