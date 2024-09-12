@@ -6,7 +6,7 @@ using ViewModels.Models;
 
 namespace ViewModels.Domain.NotificationDataViewModel;
 
-public class NotificationDataViewModelInputSourceFactory(INotificationDataViewModel viewModel)
+public class NotificationFilterInputSourceFactory(INotificationFilter viewModel)
 {
     public InputSource CreateInputSource(BehaviorSubject<object?> refreshSubject)
     {
