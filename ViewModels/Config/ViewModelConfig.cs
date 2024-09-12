@@ -48,4 +48,4 @@ public class ViewModelConfig(AssemblyService assemblyService, IServiceCollection
     }
 }
 
-public record NotificationTypes(IList<string> Value);
+public record NotificationTypes(List<string> Value);

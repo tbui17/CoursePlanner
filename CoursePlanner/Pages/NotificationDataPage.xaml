@@ -5,10 +5,11 @@
              x:Class="CoursePlanner.Pages.NotificationDataPage"
              xmlns:domain="clr-namespace:ViewModels.Domain;assembly=ViewModels"
              xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+             xmlns:notificationDataViewModel="using:ViewModels.Domain.NotificationDataViewModel"
              x:Name="Page"
              Title="Notification Data"
 
-             x:DataType="domain:NotificationDataViewModel">
+             x:DataType="notificationDataViewModel:NotificationDataViewModel">
     <ContentPage.Resources>
 
     </ContentPage.Resources>

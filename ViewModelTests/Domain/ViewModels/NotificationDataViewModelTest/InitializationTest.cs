@@ -3,6 +3,7 @@ using Lib.Interfaces;
 using Lib.Models;
 using Microsoft.EntityFrameworkCore;
 using ViewModels.Domain;
+using ViewModels.Domain.NotificationDataViewModel;
 using ViewModelTests.TestSetup;
 using ViewModelTests.Utils;
 
