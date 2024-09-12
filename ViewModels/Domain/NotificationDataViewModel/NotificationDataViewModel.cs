@@ -10,6 +10,7 @@ using ReactiveUI.Fody.Helpers;
 using ViewModels.Config;
 using ViewModels.Interfaces;
 using ViewModels.Services.NotificationDataStreamFactory;
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
 namespace ViewModels.Domain.NotificationDataViewModel;
 
@@ -32,7 +33,7 @@ partial class NotificationDataViewModel
     public DateTime End { get; set; }
 
     [Reactive]
-    public string TypeFilter { get; set; } = "";
+    public string TypeFilter { get; set; }
 
     [Reactive]
     public IList NotificationOptions { get; private init; }
@@ -47,7 +48,7 @@ partial class NotificationDataViewModel
     public int PageSize { get; set; }
 
     [ObservableAsProperty]
-    public IPageResult? PageResult { get; }
+    public IPageResult PageResult { get; }
 
 
     [Reactive]
@@ -67,21 +68,22 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
     public NotificationDataViewModel(
         NotificationDataStreamFactory notificationDataStreamFactory,
         ILogger<NotificationDataViewModel> logger,
-        IDefaultDateProvider? defaultDateProvider,
-        IDefaultPageProvider? defaultPageProvider
+        IDefaultDateProvider defaultDateProvider,
+        IDefaultPageProvider defaultPageProvider
     )
     {
-        defaultDateProvider ??= new DefaultDateProvider();
-        defaultPageProvider ??= new DefaultPageProvider();
-        var dateRange = defaultDateProvider.DateRange;
+
         // init
         _logger = logger;
-        CurrentPage = 1;
-        var now = dateRange.Start;
-        PageSize = defaultPageProvider.PageSize;
-        FilterText = "";
 
-        Start = now;
+        CurrentPage = 1;
+        PageSize = defaultPageProvider.PageSize;
+
+        FilterText = "";
+        TypeFilter = "";
+
+        var dateRange = defaultDateProvider.DateRange;
+        Start = dateRange.Start;
         End = dateRange.End;
 
         NotificationOptions = new List<string>
