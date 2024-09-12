@@ -1,7 +1,6 @@
 using Lib.Interfaces;
 using Lib.Models;
 using Lib.Utils;
-using ViewModels.Domain;
 using ViewModels.Domain.NotificationDataViewModel;
 
 namespace ViewModels.Services.NotificationDataStreamFactory;
