@@ -17,23 +17,21 @@
             <VerticalStackLayout x:Name="MainLayout" Margin="10,10,10,30">
                 <VerticalStackLayout Margin="10" Spacing="10">
                     <VerticalStackLayout>
-                        <material:TextField Title="Name" Text="{Binding FilterText}" />
-                        <material:AutoCompleteTextField Title="Type" ItemsSource="{Binding Types}"
-                                                        Text="{Binding TypeFilter}" />
-                        <material:PickerField Title="Notification Option" ItemsSource="{Binding NotificationOptions}"
-                                              SelectedIndex="{Binding SelectedNotificationOptionIndex}" />
+                        <material:TextField x:Name="NameTextField" Title="Name" />
+                        <material:AutoCompleteTextField x:Name="TypeAutoCompleteField" Title="Type"/>
+                        <material:PickerField x:Name="NotificationOptionPickerField" Title="Notification Option" />
                     </VerticalStackLayout>
                     <HorizontalStackLayout Spacing="25">
-                        <material:DatePickerField Title="Start" Date="{Binding Start}" />
-                        <material:DatePickerField Title="End" Date="{Binding End}" />
+                        <material:DatePickerField x:Name="StartDatePickerField" Title="Start" />
+                        <material:DatePickerField x:Name="EndDatepickerField" Title="End" />
                     </HorizontalStackLayout>
                     <HorizontalStackLayout>
-                        <Button Text="Clear" Command="{Binding ClearCommand}" />
+                        <Button x:Name="ClearButton" Text="Clear"  />
                     </HorizontalStackLayout>
-                    <Label Text="{Binding ItemCount, StringFormat='Count: {0}'}" />
+                    <Label x:Name="ItemCountLabel" />
                 </VerticalStackLayout>
 
-                <CollectionView ItemsSource="{Binding NotificationItems}"
+                <CollectionView x:Name="NotificationItemInstance"
                                 SelectionMode="None"
                                 MaximumHeightRequest="300"
                                 ItemTemplate="{StaticResource NotificationCard}" />
