@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Windows.Input;
 using FluentAssertions;
@@ -40,8 +41,6 @@ public class ReactiveObjectAssertions<T>(T instance) :
     public async Task<AndConstraint<ReactiveObjectAssertions<T>>> EventuallySatisfy(
         Action<T> assertion, int timeoutMs = 3000)
     {
-
-
         var scope = new AssertionScope();
         var cts = new CancellationTokenSource(timeoutMs);
 
@@ -49,9 +48,52 @@ public class ReactiveObjectAssertions<T>(T instance) :
 
         while (!cts.Token.IsCancellationRequested)
         {
-
             var scope2 = new AssertionScope();
             assertion(Subject);
+            if (!scope2.HasFailures())
+            {
+                return new AndConstraint<ReactiveObjectAssertions<T>>(this);
+            }
+
+            errors = scope2.Discard();
+            await Task.Delay(100);
+        }
+
+
+        if (errors.Length > 0)
+        {
+            scope.FailWith(string.Join("\n", errors));
+        }
+
+        scope.FailWith("Expected assertion to pass within {0}ms, but it did not.", timeoutMs);
+        scope.Dispose();
+        throw new UnreachableException();
+    }
+
+    [CustomAssertion]
+    public async Task<AndConstraint<ReactiveObjectAssertions<T>>> EventuallySatisfy<T2>(
+        Expression<Func<T, T2?>> selector, Action<T2> assertion, int timeoutMs = 3000) where T2 : class
+    {
+        var scope = new AssertionScope();
+        var cts = new CancellationTokenSource(timeoutMs);
+
+        string[] errors = [];
+
+        var compiledSelector = selector.Compile();
+
+        while (!cts.Token.IsCancellationRequested)
+        {
+            var scope2 = new AssertionScope();
+            var subj = compiledSelector(Subject);
+            if (subj is null)
+            {
+                scope2.FailWith("Expected {0} to be not null, but it was.", selector);
+            }
+            else
+            {
+                assertion(subj);
+            }
+
             if (!scope2.HasFailures())
             {
                 return new AndConstraint<ReactiveObjectAssertions<T>>(this);

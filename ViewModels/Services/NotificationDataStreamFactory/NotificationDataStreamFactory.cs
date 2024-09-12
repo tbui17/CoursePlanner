@@ -54,7 +54,6 @@ public class NotificationDataStreamFactory(
                 CurrentPage = x.Item5,
                 PageSize = x.Item6
             })
-            .Select(completeInputModelFactory.Create)
-            .Do(x => logger.LogInformation("Data: {Data}",x.CurrentPageData));
+            .Select(completeInputModelFactory.Create);
     }
 }

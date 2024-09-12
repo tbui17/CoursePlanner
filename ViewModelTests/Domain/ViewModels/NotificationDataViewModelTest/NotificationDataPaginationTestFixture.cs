@@ -1,5 +1,4 @@
 using AutoFixture;
-using FluentAssertions;
 using Lib.Interfaces;
 using Lib.Services.NotificationService;
 using Moq;
@@ -22,8 +21,7 @@ public class NotificationDataPaginationTestFixture
 
     public async Task ModelEventuallyHasData()
     {
-        await Model.Should()
-            .EventuallySatisfy(x => { x.PageResult?.CurrentPageData.Should().HaveCountGreaterThan(10); });
+        await Model.Should().EventuallyHave(x => x.PageResult is { CurrentPageData.Count: > 0 });
     }
 
 
@@ -32,6 +30,13 @@ public class NotificationDataPaginationTestFixture
         return Data
             .Chunk(10)
             .ElementAt(index)
+            .ToList();
+    }
+
+    public List<int> GetIdSubset(int index)
+    {
+        return GetSubset(index)
+            .Select(x => x.Id)
             .ToList();
     }
 }
