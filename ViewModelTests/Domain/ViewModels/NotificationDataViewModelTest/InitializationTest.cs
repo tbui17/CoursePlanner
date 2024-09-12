@@ -1,11 +1,7 @@
-using System.Reactive.Linq;
 using FluentAssertions;
-using FluentAssertions.Extensions;
-using FluentAssertions.Reactive;
 using Lib.Interfaces;
 using Lib.Models;
 using Microsoft.EntityFrameworkCore;
-using ReactiveUI;
 using ViewModels.Domain;
 using ViewModelTests.TestSetup;
 using ViewModelTests.Utils;
@@ -34,7 +30,7 @@ public class InitializationTest : BasePageViewModelTest
     {
         var model = Resolve<NotificationDataViewModel>();
         model.Start = DateTime.Now.AddMinutes(-2);
-        await model.WaitFor(x => x.PageResult?.CurrentPageData is not null);
+        await model.Should().EventuallyHave(x => x.PageResult?.CurrentPageData.Count > 1);
 
         model.PageResult?.CurrentPageData.Should()
             .NotBeNullOrEmpty()
@@ -92,13 +88,7 @@ public class InitializationTest : BasePageViewModelTest
         var model = Resolve<NotificationDataViewModel>();
         await model.RefreshAsync();
 
-        await model.WhenAnyValue(x => x.PageResult)
-            .WhereNotNull()
-            .Where(x => x.CurrentPage is 1)
-            .FirstAsync()
-            .Observe()
-            .Should()
-            .CompleteAsync(5.Seconds());
+        await model.Should().EventuallySatisfy(x => x.CurrentPage.Should().Be(1));
     }
 
     [Test]
@@ -107,12 +97,6 @@ public class InitializationTest : BasePageViewModelTest
         var model = Resolve<NotificationDataViewModel>();
         await model.RefreshAsync();
 
-        await model.WhenAnyValue(x => x.PageResult)
-            .WhereNotNull()
-            .Where(x => x.PageCount > 1)
-            .FirstAsync()
-            .Observe()
-            .Should()
-            .CompleteAsync(5.Seconds());
+        await model.Should().EventuallySatisfy(x => x.PageResult, x => x.PageCount.Should().BeGreaterThan(1));
     }
 }

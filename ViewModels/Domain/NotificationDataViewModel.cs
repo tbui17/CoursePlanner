@@ -132,15 +132,15 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
 
 
         var pageResult = notificationDataStreamFactory.CreatePageDataStream(CreateInputSource());
-        ToPropertyEx(pageResult, x => x.PageResult);
+        // ToPropertyEx(pageResult, x => x.PageResult);
 
-        // pageResult
-        //     .StartWith(new EmptyPageResult())
-        //     .ToPropertyEx(
-        //         this,
-        //         x => x.PageResult,
-        //         scheduler: RxApp.MainThreadScheduler
-        //     );
+        pageResult
+            .StartWith(new EmptyPageResult())
+            .ToPropertyEx(
+                this,
+                x => x.PageResult,
+                scheduler: RxApp.MainThreadScheduler
+            );
     }
 
     private static int? GetPage(IPageResult? pageResult)
