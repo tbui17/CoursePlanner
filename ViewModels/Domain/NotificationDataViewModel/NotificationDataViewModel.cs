@@ -67,8 +67,8 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
     public NotificationDataViewModel(
         NotificationDataStreamFactory notificationDataStreamFactory,
         ILogger<NotificationDataViewModel> logger,
-        IDefaultDateProvider? defaultDateProvider = null,
-        IDefaultPageProvider? defaultPageProvider = null
+        IDefaultDateProvider? defaultDateProvider,
+        IDefaultPageProvider? defaultPageProvider
     )
     {
         defaultDateProvider ??= new DefaultDateProvider();
