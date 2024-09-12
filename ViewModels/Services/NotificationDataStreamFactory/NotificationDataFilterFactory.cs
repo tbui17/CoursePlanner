@@ -7,9 +7,7 @@ namespace ViewModels.Services.NotificationDataStreamFactory;
 
 public class NotificationDataFilterFactory(IFilterData data)
 {
-    private static Func<INotification, bool> CreateShouldNotifyFilter(
-        ShouldNotifyIndex index
-    ) =>
+    private static Func<INotification, bool> CreateShouldNotifyFilter(ShouldNotifyIndex index) =>
         index switch
         {
             ShouldNotifyIndex.True => n => n.ShouldNotify,
@@ -18,26 +16,22 @@ public class NotificationDataFilterFactory(IFilterData data)
         };
 
 
-    public IList<Func<INotification, bool>> CreateFilters()
-    {
-        var shouldNotifyFilter = CreateShouldNotifyFilter(data.NotificationSelectedIndex);
-        return
-        [
-            x => x.Name.Contains(data.FilterText, StringComparison.CurrentCultureIgnoreCase),
-            x =>
+    public IList<Func<INotification, bool>> CreateFilters() =>
+    [
+        n => n.Name.Contains(data.FilterText, StringComparison.CurrentCultureIgnoreCase),
+        n =>
+        {
+            if (n is Assessment assessment)
             {
-                if (x is Assessment assessment)
-                {
-                    return $"{assessment.Type} Assessment".Contains(data.TypeFilter,
-                        StringComparison.CurrentCultureIgnoreCase
-                    );
-                }
+                return $"{assessment.Type} Assessment".Contains(data.TypeFilter,
+                    StringComparison.CurrentCultureIgnoreCase
+                );
+            }
 
-                return x.GetType().Name.Contains(data.TypeFilter, StringComparison.CurrentCultureIgnoreCase);
-            },
-            shouldNotifyFilter
-        ];
-    }
+            return n.GetType().Name.Contains(data.TypeFilter, StringComparison.CurrentCultureIgnoreCase);
+        },
+        CreateShouldNotifyFilter(data.NotificationSelectedIndex)
+    ];
 
     public Func<INotification, bool> CreateFilter()
     {
