@@ -66,7 +66,7 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
 
 
     public NotificationDataViewModel(
-        NotificationDataStreamFactory notificationDataStreamFactory,
+        PageResultStreamFactory notificationDataStreamFactory,
         ILogger<NotificationDataViewModel> logger,
         IDefaultDateProvider defaultDateProvider,
         IDefaultPageProvider defaultPageProvider
@@ -88,10 +88,7 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
         NotificationOptions = new List<string> { "All", "Notifications Enabled", "Notifications Disabled" };
 
         // properties
-        var pageResult =
-            notificationDataStreamFactory.CreatePageDataStream(
-                new NotificationFilterInputSourceFactory(this).CreateInputSource(_refreshSubject)
-            );
+        var pageResult = notificationDataStreamFactory.Create(this, _refreshSubject);
 
         pageResult
             .StartWith(new EmptyPageResult())
@@ -145,6 +142,7 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
             }
         );
     }
+
 
     private readonly BehaviorSubject<object?> _refreshSubject = new(new object());
 
