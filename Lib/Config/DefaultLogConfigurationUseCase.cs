@@ -15,11 +15,15 @@ public class DefaultLogConfigurationUseCase : ILoggingUseCase
     public void SetMinimumLogLevel()
     {
         Configuration.MinimumLevel
-            .Information()
-            .WriteTo.File(FileSinkOptions);
+            .Information();
     }
 
     public void AddSinks()
+    {
+        WriteConsole();
+    }
+
+    public void WriteConsole()
     {
         Configuration.WriteTo.Console(LogEventLevel.Information, LogTemplate);
     }
