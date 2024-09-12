@@ -1,8 +1,10 @@
+using Lib.Attributes;
 using Lib.Interfaces;
 using Lib.Models;
 
 namespace ViewModels.Domain.NotificationDataViewModel;
 
+[Inject(typeof(IDefaultDateProvider))]
 public sealed class DefaultDateProvider : IDefaultDateProvider
 {
     public IDateTimeRange DateRange
