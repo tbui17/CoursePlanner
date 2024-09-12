@@ -5,24 +5,17 @@ using ViewModels.Domain;
 
 namespace ViewModels.Services.NotificationDataStreamFactory;
 
-
 public class NotificationDataFilterFactory(IFilterData data)
 {
-
-
     private static Func<INotification, bool> CreateShouldNotifyFilter(
-        ShouldNotifyIndex index)
-    {
-        return Filter;
-
-        bool Filter(INotification ix) =>
-            index switch
-            {
-                ShouldNotifyIndex.True => ix.ShouldNotify,
-                ShouldNotifyIndex.False => !ix.ShouldNotify,
-                _ => true,
-            };
-    }
+        ShouldNotifyIndex index
+    ) =>
+        index switch
+        {
+            ShouldNotifyIndex.True => n => n.ShouldNotify,
+            ShouldNotifyIndex.False => n => !n.ShouldNotify,
+            _ => _ => true
+        };
 
 
     public IList<Func<INotification, bool>> CreateFilters()
@@ -36,7 +29,8 @@ public class NotificationDataFilterFactory(IFilterData data)
                 if (x is Assessment assessment)
                 {
                     return $"{assessment.Type} Assessment".Contains(data.TypeFilter,
-                        StringComparison.CurrentCultureIgnoreCase);
+                        StringComparison.CurrentCultureIgnoreCase
+                    );
                 }
 
                 return x.GetType().Name.Contains(data.TypeFilter, StringComparison.CurrentCultureIgnoreCase);
