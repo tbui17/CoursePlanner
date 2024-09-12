@@ -16,7 +16,7 @@ public record EmptyPageResult : IPageResult
 {
     public int PageCount { get; init; } = 0;
     public int ItemCount { get; init; } = 0;
-    public int CurrentPage { get; init; } = 0;
+    public int CurrentPage { get; init; } = 1;
     public IReadOnlyList<INotification> CurrentPageData { get; init; } = [];
 }
 
