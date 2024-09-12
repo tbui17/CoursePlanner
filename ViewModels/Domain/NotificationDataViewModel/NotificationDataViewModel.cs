@@ -7,9 +7,9 @@ using Lib.Attributes;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using ViewModels.Config;
 using ViewModels.Interfaces;
 using ViewModels.Services.NotificationDataStreamFactory;
+
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
 namespace ViewModels.Domain.NotificationDataViewModel;
@@ -72,7 +72,6 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
         IDefaultPageProvider defaultPageProvider
     )
     {
-
         // init
         _logger = logger;
 
@@ -86,15 +85,12 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
         Start = dateRange.Start;
         End = dateRange.End;
 
-        NotificationOptions = new List<string>
-            { "All", "Notifications Enabled", "Notifications Disabled" };
-        Types = new NotificationTypes(["Objective Assessment", "Performance Assessment", "Course"]).Value;
-
+        NotificationOptions = new List<string> { "All", "Notifications Enabled", "Notifications Disabled" };
 
         // properties
         var pageResult =
             notificationDataStreamFactory.CreatePageDataStream(
-                new NotificationDataViewModelInputSourceFactory(this).CreateInputSource(_refreshSubject)
+                new NotificationFilterInputSourceFactory(this).CreateInputSource(_refreshSubject)
             );
 
         pageResult
