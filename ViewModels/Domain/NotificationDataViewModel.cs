@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -5,19 +6,15 @@ using System.Windows.Input;
 using Lib.Attributes;
 using Lib.Interfaces;
 using Lib.Models;
-using Lib.Utils;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using ViewModels.Config;
 using ViewModels.Interfaces;
 using ViewModels.Models;
-using ViewModels.Services;
 using ViewModels.Services.NotificationDataStreamFactory;
 
 namespace ViewModels.Domain;
-
-using NotificationCollection = List<INotification>;
 
 public enum ShouldNotifyIndex
 {
@@ -106,13 +103,19 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
 
         ChangePageCommand = ReactiveCommand.Create<int>(page =>
             {
-                // if (GetPage(PageResult) is not { } p)
-                // {
-                //     return;
-                // }
-                CurrentPage = page;
+                if (PageResult is not { PageCount: var max and > 0})
+                {
+                    var err = new UnreachableException("Unexpected page result state.");
+                    logger.LogError(err,"Unexpected page result state. {PageResult} {Page} {CurrentPage}", PageResult, page, CurrentPage);
+                    throw err;
+                }
+
+
+                var newPage = Math.Clamp(page, 1, max);
+                CurrentPage = newPage;
             }
         );
+
         NotificationOptions = new List<string> { "None", "True", "False" };
         _logger = logger;
         Types = new NotificationTypes(["Objective Assessment", "Performance Assessment", "Course"]).Value;

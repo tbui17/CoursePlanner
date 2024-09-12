@@ -33,10 +33,7 @@ public class NotificationDataPaginationTest : BaseTest
 
         f.Model.ChangePageCommand.Execute(2);
 
-        await f.Model.Should().EventuallySatisfy(_ =>
-        {
-            f.Model.CurrentPage.Should().Be(2);
-        });
+        await f.Model.Should().EventuallySatisfy(_ => { f.Model.CurrentPage.Should().Be(2); });
 
         await f.Model.Should()
             .EventuallySatisfy(x => x.PageResult, x => x.CurrentPageData.Should()
@@ -62,11 +59,11 @@ public class NotificationDataPaginationTest : BaseTest
     {
         var f = CreateFixture();
 
-        await f.Model
-            .WhenAnyValue(x => x.PageResult)
-            .WhereNotNull()
-            .Where(x => x.CurrentPageData.Count > 5 && x.CurrentPage is 1)
-            .FirstAsync()
-            .Do(_ => f.Model.ChangePageCommand.Execute(1000));
+        await f.ModelEventuallyHasData();
+        f.Model.ChangePageCommand.Execute(1000);
+
+        await f.Model.Should().EventuallySatisfy(x => x.CurrentPage.Should().NotBe(1));
+
+        await f.Model.Should().EventuallySatisfy(x => x.CurrentPage.Should().Be(5));
     }
 }
