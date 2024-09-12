@@ -1,8 +1,6 @@
-using System.Reactive.Linq;
 using Lib.Attributes;
 using Lib.Interfaces;
 using Lib.Utils;
-using ViewModels.Models;
 
 namespace ViewModels.Services.NotificationDataStreamFactory;
 
@@ -36,7 +34,7 @@ public class PageResult(Func<INotification, bool> filter, CompleteInputData data
 
     private ParallelQuery<INotification> GetFilteredData()
     {
-        return Data.Notifications.AsParallel().Where(filter);
+        return Data.Notifications.AsParallel().Where(filter).OrderBy(x => x.Id);
     }
 
     private List<INotification[]> GetPaginatedData() =>

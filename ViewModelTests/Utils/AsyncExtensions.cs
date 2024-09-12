@@ -1,5 +1,3 @@
-
-
 namespace ViewModelTests.Utils;
 
 public static class AsyncExtensions

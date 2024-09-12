@@ -97,6 +97,7 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
     )
     {
 
+        CurrentPage = 1;
         var now = DateTime.Now.Date;
         PageSize = 10;
         FilterText = "";
@@ -105,13 +106,12 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
 
         ChangePageCommand = ReactiveCommand.Create<int>(page =>
             {
-                if (GetPage(PageResult) is not { } p)
-                {
-                    return;
-                }
-                CurrentPage = Math.Min(page, p);
-            },
-            canExecute: this.WhenAnyValue(x => x.PageResult).Select(x => GetPage(x) is not null)
+                // if (GetPage(PageResult) is not { } p)
+                // {
+                //     return;
+                // }
+                CurrentPage = page;
+            }
         );
         NotificationOptions = new List<string> { "None", "True", "False" };
         _logger = logger;

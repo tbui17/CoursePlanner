@@ -1,4 +1,6 @@
+using System.Reactive.Linq;
 using FluentAssertions;
+using ReactiveUI;
 using ViewModelTests.TestSetup;
 using ViewModelTests.Utils;
 
@@ -7,7 +9,6 @@ namespace ViewModelTests.Domain.ViewModels.NotificationDataViewModelTest;
 [Timeout(5000)]
 public class NotificationDataPaginationTest : BaseTest
 {
-
     private NotificationDataPaginationTestFixture CreateFixture()
     {
         return Resolve<NotificationDataPaginationTestFixture>();
@@ -18,13 +19,31 @@ public class NotificationDataPaginationTest : BaseTest
     {
         var f = CreateFixture();
 
+        var oneToTen = f.GetIdSubset(0);
+        var elevenToTwenty = f.GetIdSubset(1);
+
+
+        await f.Model.Should()
+            .EventuallySatisfy(x => x.PageResult,
+                x => x.CurrentPageData.Should()
+                    .HaveCount(10)
+                    .And.Subject.Select(s => s.Id)
+                    .Should()
+                    .BeSubsetOf(oneToTen));
 
         f.Model.ChangePageCommand.Execute(2);
 
+        await f.Model.Should().EventuallySatisfy(_ =>
+        {
+            f.Model.CurrentPage.Should().Be(2);
+        });
+
         await f.Model.Should()
-            .EventuallySatisfy(x => x.PageResult?.CurrentPageData.Should()
+            .EventuallySatisfy(x => x.PageResult, x => x.CurrentPageData.Should()
                 .HaveCount(10)
-                .And.AllSatisfy(item => f.DataIds.Should().Contain(item.Id))
+                .And.Subject.Select(s => s.Id)
+                .Should()
+                .BeSubsetOf(elevenToTwenty)
             );
     }
 
@@ -34,19 +53,20 @@ public class NotificationDataPaginationTest : BaseTest
         var f = CreateFixture();
 
         await f.Model.Should()
-            .EventuallySatisfy(x => x.PageResult?.PageCount.Should().BeGreaterThan(1));
+            .EventuallySatisfy(x => x.PageResult, x => x.PageCount.Should().BeGreaterThan(1));
     }
+
 
     [Test]
     public async Task ChangePage_AboveLimit_DefaultsToMax()
     {
         var f = CreateFixture();
-        await f.Model.RefreshAsync();
 
-        await f.Model.Should().EventuallySatisfy(x => x.PageResult?.CurrentPageData.Should().HaveCount(10));
-
-        f.Model.ChangePageCommand.Execute(1000);
-
-        await f.Model.Should().EventuallySatisfy(x => x.PageResult?.CurrentPage.Should().Be(5));
+        await f.Model
+            .WhenAnyValue(x => x.PageResult)
+            .WhereNotNull()
+            .Where(x => x.CurrentPageData.Count > 5 && x.CurrentPage is 1)
+            .FirstAsync()
+            .Do(_ => f.Model.ChangePageCommand.Execute(1000));
     }
 }

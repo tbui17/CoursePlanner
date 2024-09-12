@@ -1,15 +1,18 @@
+using System.Reactive.Linq;
 using FluentAssertions;
+using FluentAssertions.Extensions;
+using FluentAssertions.Reactive;
 using Lib.Interfaces;
 using Lib.Models;
 using Microsoft.EntityFrameworkCore;
+using ReactiveUI;
 using ViewModels.Domain;
 using ViewModelTests.TestSetup;
 using ViewModelTests.Utils;
 
 namespace ViewModelTests.Domain.ViewModels.NotificationDataViewModelTest;
 
-[Timeout(5000)]
-[NonParallelizable]
+[Timeout(10000)]
 public class InitializationTest : BasePageViewModelTest
 {
     [SetUp]
@@ -60,6 +63,8 @@ public class InitializationTest : BasePageViewModelTest
     public async Task Refresh_UpdatesWithDbValues()
     {
         var model = Resolve<NotificationDataViewModel>();
+        await model.Should()
+            .EventuallySatisfy(x => x.PageResult, x => x.CurrentPageData.Should().HaveCountGreaterThan(6));
         await using var db = await DbFactory.CreateDbContextAsync();
         foreach (var dbSet in db.GetDbSets<INotification>())
         {
@@ -70,9 +75,44 @@ public class InitializationTest : BasePageViewModelTest
         db.Add(new Course() { TermId = 1, Name = "Cde" });
         await db.SaveChangesAsync();
 
+        await model.RefreshAsync();
 
-        model.PageResult?.CurrentPageData.Should()
-            .HaveCount(2)
-            .And.Satisfy(x => x.Name == "Abc", x => x.Name == "Cde");
+        await model.Should().EventuallySatisfy(x => x.PageResult, p =>
+        {
+            p.CurrentPageData.Should()
+                .HaveCount(2)
+                .And.Satisfy(x => x.Name == "Abc", x => x.Name == "Cde");
+
+        });
+    }
+
+    [Test]
+    public async Task Initialization_StartsAtPage1()
+    {
+        var model = Resolve<NotificationDataViewModel>();
+        await model.RefreshAsync();
+
+        await model.WhenAnyValue(x => x.PageResult)
+            .WhereNotNull()
+            .Where(x => x.CurrentPage is 1)
+            .FirstAsync()
+            .Observe()
+            .Should()
+            .CompleteAsync(5.Seconds());
+    }
+
+    [Test]
+    public async Task Initialization_HasMoreThanOnePage()
+    {
+        var model = Resolve<NotificationDataViewModel>();
+        await model.RefreshAsync();
+
+        await model.WhenAnyValue(x => x.PageResult)
+            .WhereNotNull()
+            .Where(x => x.PageCount > 1)
+            .FirstAsync()
+            .Observe()
+            .Should()
+            .CompleteAsync(5.Seconds());
     }
 }
