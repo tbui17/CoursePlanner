@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Serilog;
 using ViewModels.Domain;
+using ViewModels.Domain.NotificationDataViewModel;
 using ViewModels.Services.NotificationDataStreamFactory;
 
 namespace ViewModelTests.Domain.ViewModels.NotificationDataViewModelTest;

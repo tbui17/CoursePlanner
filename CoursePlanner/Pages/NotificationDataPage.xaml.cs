@@ -1,10 +1,10 @@
-﻿using System.Collections;
-using System.Reactive.Linq;
+﻿using System.Reactive.Linq;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
-using UraniumUI.Material.Controls;
 using ViewModels.Domain;
+using ViewModels.Domain.NotificationDataViewModel;
 using ViewModels.Interfaces;
+#pragma warning disable CS8767 // Nullability of reference types in type of parameter doesn't match implicitly implemented member (possibly because of nullability attributes).
 
 namespace CoursePlanner.Pages;
 
@@ -59,16 +59,14 @@ public partial class NotificationDataPage : IRefreshableView<NotificationDataVie
             x => x.TypeAutoCompleteField.Text
         );
 
-        this.Bind(ViewModel,
+        this.OneWayBind(ViewModel,
             x => x.Types,
             x => x.TypeAutoCompleteField.ItemsSource
         );
 
-        this.Bind(ViewModel,
+        this.OneWayBind(ViewModel,
             x => x.NotificationOptions,
-            x => x.NotificationOptionPickerField.ItemsSource,
-            vmToViewConverter: x => (IList)x!,
-            viewToVmConverter: x => (IList<string>)x
+            x => x.NotificationOptionPickerField.ItemsSource
         );
 
         this.Bind(ViewModel,
@@ -86,44 +84,5 @@ public partial class NotificationDataPage : IRefreshableView<NotificationDataVie
 
         pageResult.Select(x => $"Page Count: {x.PageCount}")
             .BindTo(this, x => x.ItemCountLabel.Text);
-    }
-}
-
-public class SelectedNotificationOptionIndexConverter : IBindingTypeConverter
-{
-    public int GetAffinityForObjects(Type fromType, Type toType)
-    {
-        if (fromType == typeof(int) && toType == typeof(ShouldNotifyIndex))
-        {
-            return 100;
-        }
-
-        if (fromType == typeof(ShouldNotifyIndex) && toType == typeof(int))
-        {
-            return 100;
-        }
-
-        return 0;
-    }
-
-    public bool TryConvert(
-        object? from,
-        Type toType,
-        object? conversionHint,
-        out object? result
-    )
-    {
-        switch (from)
-        {
-            case int i when toType == typeof(ShouldNotifyIndex):
-                result = (ShouldNotifyIndex)i;
-                return true;
-            case ShouldNotifyIndex s when toType == typeof(int):
-                result = (int)s;
-                return true;
-            default:
-                result = null;
-                return false;
-        }
     }
 }

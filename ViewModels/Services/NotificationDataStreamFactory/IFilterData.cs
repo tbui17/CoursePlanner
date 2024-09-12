@@ -1,4 +1,5 @@
 using ViewModels.Domain;
+using ViewModels.Domain.NotificationDataViewModel;
 
 namespace ViewModels.Services.NotificationDataStreamFactory;
 

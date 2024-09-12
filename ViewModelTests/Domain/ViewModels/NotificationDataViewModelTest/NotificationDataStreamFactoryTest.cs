@@ -9,6 +9,7 @@ using Lib.Models;
 using Microsoft.Extensions.Logging.Testing;
 using ReactiveUI;
 using ViewModels.Domain;
+using ViewModels.Domain.NotificationDataViewModel;
 using ViewModels.Models;
 using ViewModels.Services.NotificationDataStreamFactory;
 using ViewModelTests.TestSetup;

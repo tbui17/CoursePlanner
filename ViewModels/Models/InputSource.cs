@@ -1,5 +1,6 @@
 using Lib.Models;
 using ViewModels.Domain;
+using ViewModels.Domain.NotificationDataViewModel;
 
 namespace ViewModels.Models;
 
