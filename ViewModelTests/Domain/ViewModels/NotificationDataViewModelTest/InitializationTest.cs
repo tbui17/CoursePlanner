@@ -8,7 +8,7 @@ using ViewModelTests.Utils;
 
 namespace ViewModelTests.Domain.ViewModels.NotificationDataViewModelTest;
 
-[Timeout(10000)]
+[Timeout(5000)]
 [NonParallelizable]
 public class InitializationTest : BasePageViewModelTest
 {
@@ -20,20 +20,20 @@ public class InitializationTest : BasePageViewModelTest
         foreach (var set in db.GetDbSets<INotification>())
         {
             await set.ExecuteUpdateAsync(x =>
-                x.SetProperty(y => y.ShouldNotify, true).SetProperty(y => y.Start, DateTime.Now));
+                x.SetProperty(y => y.ShouldNotify, true)
+                    .SetProperty(y => y.Start, DateTime.Now)
+                    .SetProperty(y => y.End, DateTime.Now.AddMinutes(100)));
         }
-
-        Model = Resolve<NotificationDataViewModel>();
     }
-
-    private NotificationDataViewModel Model { get; set; }
 
     [Test]
     public async Task Properties_Initialize_UpdateWithDbValues()
     {
-        await Model.WaitFor(x => x.PageResult?.CurrentPageData is not null);
+        var model = Resolve<NotificationDataViewModel>();
+        model.Start = DateTime.Now.AddMinutes(-2);
+        await model.WaitFor(x => x.PageResult?.CurrentPageData is not null);
 
-        Model.PageResult?.CurrentPageData.Should()
+        model.PageResult?.CurrentPageData.Should()
             .NotBeNullOrEmpty()
             .And.ContainItemsAssignableTo<INotification>()
             .And.ContainItemsAssignableTo<Course>();
@@ -43,15 +43,36 @@ public class InitializationTest : BasePageViewModelTest
     [Test]
     public async Task Properties_UserInput_UpdateWithDbValues()
     {
-        Model.Start = DateTime.Now.AddMinutes(2);
+        var model = Resolve<NotificationDataViewModel>();
+        model.Start = DateTime.Now.AddMinutes(2);
         const string filter = "Assessment";
-        Model.FilterText = filter;
+        model.FilterText = filter;
 
-        await Model.Should()
+        await model.Should()
             .EventuallySatisfy(x =>
                 x.PageResult?.CurrentPageData.Should()
                     .NotBeNullOrEmpty()
                     .And.AllSatisfy(y => y.Name.Should().Contain(filter))
             );
+    }
+
+    [Test]
+    public async Task Refresh_UpdatesWithDbValues()
+    {
+        var model = Resolve<NotificationDataViewModel>();
+        await using var db = await DbFactory.CreateDbContextAsync();
+        foreach (var dbSet in db.GetDbSets<INotification>())
+        {
+            await dbSet.ExecuteDeleteAsync();
+        }
+
+        db.Add(new Course() { TermId = 1, Name = "Abc" });
+        db.Add(new Course() { TermId = 1, Name = "Cde" });
+        await db.SaveChangesAsync();
+
+
+        model.PageResult?.CurrentPageData.Should()
+            .HaveCount(2)
+            .And.Satisfy(x => x.Name == "Abc", x => x.Name == "Cde");
     }
 }

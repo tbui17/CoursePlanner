@@ -32,7 +32,7 @@ public abstract class BaseTest : IBaseTest
 
     protected SqliteConnectionStringBuilder Connection { get; private set; }
 
-    private IServiceProvider CreateProvider()
+    public static IServiceProvider CreateProvider()
     {
         var services = new ServiceCollection();
         var assemblyService = new AssemblyService(AppDomain.CurrentDomain);
@@ -45,8 +45,10 @@ public abstract class BaseTest : IBaseTest
             .AddTestDatabase()
             .AddTransient<ISessionService, SessionService>()
             .AddTransient<AppShellViewModel>()
+            .AddTransient<NotificationDataPaginationTestFixtureDataFactory>(x =>
+                new NotificationDataPaginationTestFixtureDataFactory(CreateFixture(), x))
             .AddTransient<NotificationDataPaginationTestFixture>(x =>
-                new NotificationDataPaginationTestFixtureDataFactory(CreateFixture(), x).CreateFixture());
+                x.GetRequiredService<NotificationDataPaginationTestFixtureDataFactory>().CreateFixture());
         vmConfig.AddServices();
 
         return services.BuildServiceProvider();
