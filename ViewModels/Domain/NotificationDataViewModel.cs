@@ -101,7 +101,7 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
         PageSize = 10;
         FilterText = "";
         Start = now;
-        End = now;
+        End = now.AddMonths(1);
 
         ChangePageCommand = ReactiveCommand.Create<int>(page =>
             {
@@ -131,7 +131,13 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
         var pageResult = notificationDataStreamFactory.CreatePageDataStream(CreateInputSource());
         ToPropertyEx(pageResult, x => x.PageResult);
 
-
+        // pageResult
+        //     .StartWith(new EmptyPageResult())
+        //     .ToPropertyEx(
+        //         this,
+        //         x => x.PageResult,
+        //         scheduler: RxApp.MainThreadScheduler
+        //     );
     }
 
     private static int? GetPage(IPageResult? pageResult)

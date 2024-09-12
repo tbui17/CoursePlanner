@@ -34,13 +34,14 @@ public class NotificationDataPaginationTest : BaseTest
         var f = CreateFixture();
 
         await f.Model.Should()
-            .EventuallySatisfy(x => x.PageResult?.CurrentPage.Should().BeGreaterThan(1));
+            .EventuallySatisfy(x => x.PageResult?.PageCount.Should().BeGreaterThan(1));
     }
 
     [Test]
     public async Task ChangePage_AboveLimit_DefaultsToMax()
     {
         var f = CreateFixture();
+        await f.Model.RefreshAsync();
 
         await f.Model.Should().EventuallySatisfy(x => x.PageResult?.CurrentPageData.Should().HaveCount(10));
 

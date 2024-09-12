@@ -3,7 +3,7 @@ using ViewModels.Domain;
 
 namespace ViewModels.Models;
 
-public class InputSource
+public record InputSource
 {
     public required IObservable<DateTimeRange> DateFilter { get; init; }
     public required IObservable<string> TextFilter { get; init; }
