@@ -2,7 +2,6 @@ using FluentAssertions;
 using Lib.Interfaces;
 using Lib.Models;
 using Microsoft.EntityFrameworkCore;
-using ViewModels.Domain;
 using ViewModels.Domain.NotificationDataViewModel;
 using ViewModelTests.TestSetup;
 using ViewModelTests.Utils;
@@ -30,10 +29,10 @@ public class InitializationTest : BasePageViewModelTest
     public async Task Properties_Initialize_UpdateWithDbValues()
     {
         var model = Resolve<NotificationDataViewModel>();
-        model.Start = DateTime.Now.AddMinutes(-2);
-        await model.Should().EventuallyHave(x => x.PageResult?.CurrentPageData.Count > 1);
+        model.ChangeStartDateCommand.Execute(DateTime.Now.AddMinutes(-2));
+        await model.Should().EventuallyHave(x => x.PageResult.CurrentPageData.Count > 1);
 
-        model.PageResult?.CurrentPageData.Should()
+        model.PageResult.CurrentPageData.Should()
             .NotBeNullOrEmpty()
             .And.ContainItemsAssignableTo<INotification>()
             .And.ContainItemsAssignableTo<Course>();
@@ -44,13 +43,13 @@ public class InitializationTest : BasePageViewModelTest
     public async Task Properties_UserInput_UpdateWithDbValues()
     {
         var model = Resolve<NotificationDataViewModel>();
-        model.Start = DateTime.Now.AddMinutes(2);
+        model.ChangeStartDateCommand.Execute(DateTime.Now.AddMinutes(-2));
         const string filter = "Assessment";
         model.FilterText = filter;
 
         await model.Should()
             .EventuallySatisfy(x =>
-                x.PageResult?.CurrentPageData.Should()
+                x.PageResult.CurrentPageData.Should()
                     .NotBeNullOrEmpty()
                     .And.AllSatisfy(y => y.Name.Should().Contain(filter))
             );
