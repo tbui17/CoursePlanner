@@ -1,7 +1,7 @@
-﻿using System.Reactive.Linq;
+﻿using System.Collections;
+using System.Reactive.Linq;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
-using ViewModels.Domain;
 using ViewModels.Domain.NotificationDataViewModel;
 using ViewModels.Interfaces;
 #pragma warning disable CS8767 // Nullability of reference types in type of parameter doesn't match implicitly implemented member (possibly because of nullability attributes).
@@ -66,7 +66,8 @@ public partial class NotificationDataPage : IRefreshableView<NotificationDataVie
 
         this.OneWayBind(ViewModel,
             x => x.NotificationOptions,
-            x => x.NotificationOptionPickerField.ItemsSource
+            x => x.NotificationOptionPickerField.ItemsSource,
+            selector: x => (IList)x
         );
 
         this.Bind(ViewModel,

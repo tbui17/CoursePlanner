@@ -1,7 +1,6 @@
 using System.Reactive.Linq;
 using Lib.Attributes;
 using Lib.Interfaces;
-using Lib.Models;
 using Lib.Services.NotificationService;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
