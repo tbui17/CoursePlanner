@@ -14,7 +14,7 @@ using ViewModelTests.TestSetup;
 namespace ViewModelTests.Domain.ViewModels.NotificationDataViewModelTest;
 
 [Timeout(10000)]
-public class NotificationDataStreamFactoryTest : BaseTest
+public class NotificationDataStreamServiceTest : BaseTest
 {
     private InputSource CreateDefaultInputSource()
     {
@@ -43,15 +43,15 @@ public class NotificationDataStreamFactoryTest : BaseTest
         var (data, service) = Resolve<NotificationDataPaginationTestFixtureDataFactory>().CreateDataServiceWithData();
 
 
-        var dataFactory = new NotificationDataStreamFactory(
+        var dataFactory = new NotificationDataStreamService(
             service.Object,
-            new FakeLogger<NotificationDataStreamFactory>(),
+            new FakeLogger<NotificationDataStreamService>(),
             f.Create<PageResultFactory>()
         );
 
         var input = CreateDefaultInputSource();
 
-        var obs = dataFactory.CreatePageDataStream(input);
+        var obs = dataFactory.GetPageData(input);
 
         var res = await obs
             .FirstAsync(x => x.CurrentPageData.Count > 0)
@@ -77,9 +77,9 @@ public class NotificationDataStreamFactoryTest : BaseTest
         var (data, service) = Resolve<NotificationDataPaginationTestFixtureDataFactory>().CreateDataServiceWithData();
 
 
-        var dataFactory = new NotificationDataStreamFactory(
+        var dataFactory = new NotificationDataStreamService(
             service.Object,
-            new FakeLogger<NotificationDataStreamFactory>(),
+            new FakeLogger<NotificationDataStreamService>(),
             f.Create<PageResultFactory>()
         );
 
@@ -87,7 +87,7 @@ public class NotificationDataStreamFactoryTest : BaseTest
         var name = data[0].Name;
         var textFilter = (ReactiveProperty<string>)input.TextFilter;
 
-        var obs = dataFactory.CreatePageDataStream(input);
+        var obs = dataFactory.GetPageData(input);
 
 
         var res = await obs.FirstAsync(x => x.CurrentPageData.Count > 0)

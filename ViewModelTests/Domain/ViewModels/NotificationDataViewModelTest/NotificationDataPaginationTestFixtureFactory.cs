@@ -34,9 +34,9 @@ public class NotificationDataPaginationTestFixtureDataFactory(IFixture fixture, 
         var data = CreateNotificationData();
         var dataService = fixture.FreezeMock<INotificationDataService>();
         fixture.Register(provider.GetRequiredService<ILogger<NotificationDataViewModel>>);
-        fixture.Register(provider.GetRequiredService<ILogger<NotificationDataStreamFactory>>);
+        fixture.Register(provider.GetRequiredService<ILogger<NotificationDataStreamService>>);
         // fixture.Register<ILogger<NotificationDataViewModel>>(() => new FakeLogger<NotificationDataViewModel>());
-        // fixture.Register<ILogger<NotificationDataStreamFactory>>(() => new FakeLogger<NotificationDataStreamFactory>());
+        // fixture.Register<ILogger<NotificationDataStreamService>>(() => new FakeLogger<NotificationDataStreamService>());
 
         dataService
             .Setup(x => x.GetNotificationsWithinDateRange(It.IsAny<IDateTimeRange>()))
