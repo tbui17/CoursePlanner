@@ -1,6 +1,4 @@
-using System.Reactive.Linq;
 using FluentAssertions;
-using ReactiveUI;
 using ViewModelTests.TestSetup;
 using ViewModelTests.Utils;
 

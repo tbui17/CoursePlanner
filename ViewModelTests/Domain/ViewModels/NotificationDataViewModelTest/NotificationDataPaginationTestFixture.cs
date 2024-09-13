@@ -2,7 +2,6 @@ using AutoFixture;
 using Lib.Interfaces;
 using Lib.Services.NotificationService;
 using Moq;
-using ViewModels.Domain;
 using ViewModels.Domain.NotificationDataViewModel;
 using ViewModelTests.Utils;
 
