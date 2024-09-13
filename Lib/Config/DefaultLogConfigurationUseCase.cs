@@ -1,6 +1,7 @@
 using Serilog;
 using Serilog.Events;
 using Serilog.Exceptions;
+using Serilog.Formatting.Display;
 
 namespace Lib.Config;
 
@@ -15,13 +16,17 @@ public class DefaultLogConfigurationUseCase : ILoggingUseCase
     public void SetMinimumLogLevel()
     {
         Configuration.MinimumLevel
-            .Information()
-            .WriteTo.File(FileSinkOptions);
+            .Information();
     }
 
     public void AddSinks()
     {
-        Configuration.WriteTo.Console(LogEventLevel.Information, LogTemplate);
+        WriteConsole();
+    }
+
+    public void WriteConsole()
+    {
+        Configuration.WriteTo.Console(new MessageTemplateTextFormatter(LogTemplate), LogEventLevel.Information);
     }
 
     public void AddEnrichments()

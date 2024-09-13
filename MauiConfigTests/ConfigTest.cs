@@ -1,9 +1,7 @@
-using System.Linq.Expressions;
 using AutoFixture;
 using AutoFixture.AutoMoq;
 using BaseTestSetup.Lib;
 using FluentAssertions;
-using FluentAssertions.Collections;
 using FluentAssertions.Execution;
 using Lib.Attributes;
 using Lib.Services;
@@ -13,7 +11,6 @@ using MauiConfig;
 using Moq;
 using ViewModels.Config;
 using ViewModels.Domain;
-using ViewModels.ExceptionHandlers;
 using ViewModels.Interfaces;
 
 namespace MauiConfigTests;
@@ -97,7 +94,6 @@ public class ConfigTest
         _fixture.RunStartupActions();
         var fs = new FileInfo(Path.Combine(_directory, "database.db"));
         fs.Exists.Should().BeTrue();
-
     }
 
     [Test]
@@ -108,8 +104,11 @@ public class ConfigTest
             .Should()
             .Contain(x => x == typeof(AccountService))
             .And.Contain(x => x == typeof(LoginFieldValidator))
-            .And.Contain(x => x == typeof(LoginViewModel))
-            .And.Contain(x => x == typeof(NotificationService));
+            .And.Contain(x => x == typeof(LoginViewModel));
+
+        _fixture.Builder.Services
+            .Should()
+            .Contain(x => x.ServiceType == typeof(INotificationDataService) && x.ImplementationType != null);
     }
 
     private static IFixture CreateFixture()
@@ -154,7 +153,6 @@ public class ConfigTest
             .ContainSingle(x => x.ServiceType == typeof(IAccountService));
     }
 }
-
 
 public record MauiTestFixture
 {

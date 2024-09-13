@@ -5,14 +5,27 @@ using Lib.Models;
 using Lib.Services.MultiDbContext;
 using LinqKit;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Lib.Services.NotificationService;
 
-[Inject]
-public class NotificationService(MultiLocalDbContextFactory dbFactory)
+public interface INotificationDataService
+{
+    Task<IList<INotificationDataResult>> GetUpcomingNotifications(IUserSetting settings);
+    Task<IList<INotification>> GetNotificationsForMonth(DateTime date);
+    Task<IList<INotification>> GetNotificationsWithinDateRange(IDateTimeRange dateRange);
+    // Task<INotification?> GetNextNotificationDate(DateTime date);
+    // Task<INotification?> GetPreviousNotificationDate(DateTime date);
+    Task<int> GetTotalItems();
+    // Task<INotificationRatio> GetFutureNotifications();
+}
+
+[Inject(typeof(INotificationDataService))]
+public class NotificationDataService(MultiLocalDbContextFactory dbFactory, ILogger<INotificationDataService> logger) : INotificationDataService
 {
     public async Task<IList<INotificationDataResult>> GetUpcomingNotifications(IUserSetting settings)
     {
+        logger.LogInformation("Received request for upcoming notifications. Settings: {Settings}", settings);
 
         var today = DateTime.Now.Date;
         var timeAheadDate = today.Add(settings.NotificationRange);
@@ -39,6 +52,7 @@ public class NotificationService(MultiLocalDbContextFactory dbFactory)
 
     public async Task<IList<INotification>> GetNotificationsForMonth(DateTime date)
     {
+        logger.LogInformation("GetNotificationsForMonth: month: {Date}", date);
         var start = Builder()
             .Start(x => x.Start.Month == date.Month)
             .And(x => x.Start.Year == date.Year);
@@ -62,6 +76,7 @@ public class NotificationService(MultiLocalDbContextFactory dbFactory)
 
     public async Task<IList<INotification>> GetNotificationsWithinDateRange(IDateTimeRange dateRange)
     {
+        logger.LogInformation("GetNotificationsWithinDateRange: {DateRange}", dateRange);
         var inRange = CreateDateRangePredicate(dateRange);
 
 

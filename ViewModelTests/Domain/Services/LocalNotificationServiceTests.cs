@@ -9,9 +9,8 @@ using Moq;
 using Plugin.LocalNotification;
 using ViewModels.Services;
 using ViewModelTests.TestSetup;
-using Result = FluentResults.Result;
 
-namespace ViewModelTests;
+namespace ViewModelTests.Domain.Services;
 
 public class LocalNotificationServiceTests : BaseDbTest
 {
@@ -43,7 +42,7 @@ public class LocalNotificationServiceTests : BaseDbTest
             .ReturnsAsync(userSetting.ToResult());
         var notificationMock = CreateMock<INotificationService>();
         var service = new LocalNotificationService(
-            notificationService: Resolve<NotificationService>(),
+            notificationDataService: Resolve<INotificationDataService>(),
             logger: Resolve<ILogger<ILocalNotificationService>>(),
             localNotificationServiceFactory: () => notificationMock.Object,
             sessionService: sessionMock.Object

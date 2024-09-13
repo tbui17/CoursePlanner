@@ -1,5 +1,3 @@
-using Serilog;
-
 namespace MauiConfig;
 
 public interface IMauiServiceBuilder

@@ -8,7 +8,7 @@ using ViewModels.Interfaces;
 
 namespace ViewModels.ExceptionHandlers;
 
-[Inject(typeof(IClientExceptionHandler))]
+[Inject(typeof(IClientExceptionHandler),lifetime: ServiceLifetime.Singleton)]
 public class ClientExceptionHandler(
     ILogger<ClientExceptionHandler> logger,
     IMessageDisplay messageDisplay,

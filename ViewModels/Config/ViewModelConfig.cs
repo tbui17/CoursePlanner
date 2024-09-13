@@ -1,13 +1,10 @@
 using Lib.Config;
-using Lib.ExceptionHandlers;
 using Lib.Interfaces;
 using Lib.Models;
 using Lib.Utils;
 using Plugin.LocalNotification;
-using ViewModels.Domain;
-using ViewModels.ExceptionHandlers;
 using ViewModels.Services;
-using ViewModels.Setup;
+using ViewModels.Services.NotificationDataStreamFactory;
 
 // ReSharper disable RedundantNameQualifier
 
@@ -31,13 +28,7 @@ public class ViewModelConfig(AssemblyService assemblyService, IServiceCollection
                 instance.StartListening();
                 return instance;
             })
-            .AddSingleton<NotificationTypes>(_ => GetNotificationTypes())
-            .AddTransient<GlobalExceptionHandler>()
-            .AddSingleton<ClientExceptionHandler>()
-            .AddSingleton<ISessionService, SessionService>()
-            .AddTransient<DbSetup>()
-            .AddTransient<SetupClient>()
-            .AddSingleton<AppShellViewModel>();
+            .AddSingleton<NotificationTypes>(_ => GetNotificationTypes());
         return services;
 
         INotificationService? LocalNotificationServiceFactory() => LocalNotificationCenter.Current;
@@ -57,4 +48,4 @@ public class ViewModelConfig(AssemblyService assemblyService, IServiceCollection
     }
 }
 
-public record NotificationTypes(IList<string> Value);
+public record NotificationTypes(List<string> Value);

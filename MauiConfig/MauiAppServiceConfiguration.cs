@@ -4,8 +4,11 @@ using Lib.Models;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Events;
+using Serilog.Formatting.Compact;
+using Serilog.Formatting.Display;
 using Serilog.Formatting.Json;
 using ViewModels.Config;
+using ViewModels.ExceptionHandlers;
 using ViewModels.Interfaces;
 using ViewModels.Services;
 using ViewModels.Setup;
@@ -31,7 +34,7 @@ public class MauiAppServiceConfiguration
 
     public void AddServices()
     {
-        Services.AddInjectables();
+        Services.AddInjectables(false);
         Services.AddLoggingUseCase(new MauiLoggingUseCase(AppDataDirectory()));
         var serviceBuilder = ServiceBuilder;
 
@@ -82,8 +85,12 @@ public class MauiLoggingUseCase : ILoggingUseCase
 
     public void SetMinimumLogLevel()
     {
+        Base.SetMinimumLogLevel();
 #if DEBUG
-        Configuration.MinimumLevel.Debug().WriteTo.Debug(LogEventLevel.Debug, DefaultLogConfigurationUseCase.LogTemplate);
+        Configuration.MinimumLevel
+            .Debug()
+            .WriteTo.Debug(new MessageTemplateTextFormatter(DefaultLogConfigurationUseCase.LogTemplate), LogEventLevel.Debug);
+
 #elif RELEASE
          Configuration.MinimumLevel.Information();
 #endif
@@ -91,9 +98,10 @@ public class MauiLoggingUseCase : ILoggingUseCase
 
     public void AddSinks()
     {
+        Base.WriteConsole();
         var opts = DefaultLogConfigurationUseCase.FileSinkOptions with
         {
-            Formatter = new JsonFormatter(),
+            Formatter = new CompactJsonFormatter(),
             Path = Path.Combine(_appDataDirectory, "logs", "log.json"),
             RestrictedToMinimumLevel = LogEventLevel.Information,
             RollingInterval = RollingInterval.Infinite,
@@ -104,7 +112,7 @@ public class MauiLoggingUseCase : ILoggingUseCase
             Buffered = true,
         };
         Configuration.WriteTo.File(opts)
-            .WriteTo.Console(LogEventLevel.Information,DefaultLogConfigurationUseCase.LogTemplate);
+            .WriteTo.Console(LogEventLevel.Information, DefaultLogConfigurationUseCase.LogTemplate);
     }
 
     public void AddEnrichments()

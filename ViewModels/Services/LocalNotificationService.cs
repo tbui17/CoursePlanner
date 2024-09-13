@@ -16,7 +16,7 @@ public interface ILocalNotificationService
 }
 [Inject(typeof(ILocalNotificationService),ServiceLifetime.Singleton)]
 public class LocalNotificationService(
-    NotificationService notificationService,
+    INotificationDataService notificationDataService,
     ILogger<ILocalNotificationService> logger,
     Func<INotificationService?> localNotificationServiceFactory,
     ISessionService sessionService
@@ -33,7 +33,7 @@ public class LocalNotificationService(
 
         var res = await sessionService
             .GetUserSettingsAsync()
-            .Map(notificationService.GetUpcomingNotifications)
+            .Map(notificationDataService.GetUpcomingNotifications)
             .Map(x => x.Result.ToList());
 
         var notificationCount = res.IsFailed ? 0 : res.Value.Count;

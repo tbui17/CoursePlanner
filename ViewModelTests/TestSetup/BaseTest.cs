@@ -8,6 +8,7 @@ using Moq;
 using ViewModels.Config;
 using ViewModels.Domain;
 using ViewModels.Services;
+using ViewModelTests.Domain.ViewModels.NotificationDataViewModelTest;
 
 namespace ViewModelTests.TestSetup;
 
@@ -31,10 +32,8 @@ public abstract class BaseTest : IBaseTest
 
     protected SqliteConnectionStringBuilder Connection { get; private set; }
 
-    private IServiceProvider CreateProvider()
+    public static IServiceProvider CreateProvider()
     {
-
-
         var services = new ServiceCollection();
         var assemblyService = new AssemblyService(AppDomain.CurrentDomain);
         var vmConfig = new ViewModelConfig(assemblyService, services);
@@ -45,20 +44,17 @@ public abstract class BaseTest : IBaseTest
             .AddLogger()
             .AddTestDatabase()
             .AddTransient<ISessionService, SessionService>()
-            .AddTransient<AppShellViewModel>();
+            .AddTransient<AppShellViewModel>()
+            .AddTransient<NotificationDataPaginationTestFixtureDataFactory>(x =>
+                new NotificationDataPaginationTestFixtureDataFactory(CreateFixture(), x))
+            .AddTransient<NotificationDataPaginationTestFixture>(x =>
+                x.GetRequiredService<NotificationDataPaginationTestFixtureDataFactory>().CreateFixture());
         vmConfig.AddServices();
 
         return services.BuildServiceProvider();
     }
 
     public T Resolve<T>() where T : notnull => Provider.GetRequiredService<T>();
-
-    protected IFixture CreateFixture()
-    {
-        return Globals.CreateFixture();
-    }
-
-    protected Mock<T> CreateMock<T>() where T : class => CreateFixture().Create<Mock<T>>();
 
 
     public async Task<LocalDbCtx> GetDb() =>

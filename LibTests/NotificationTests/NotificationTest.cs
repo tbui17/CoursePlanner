@@ -10,13 +10,13 @@ namespace LibTests.NotificationTests;
 
 public class NotificationUpcomingTest : BaseDbTest
 {
-    private NotificationService _notificationService;
+    private INotificationDataService _notificationDataService;
 
     [SetUp]
     public override async Task Setup()
     {
         await base.Setup();
-        _notificationService = Provider.GetRequiredService<NotificationService>();
+        _notificationDataService = Provider.GetRequiredService<INotificationDataService>();
     }
 
     [Test]
@@ -27,7 +27,7 @@ public class NotificationUpcomingTest : BaseDbTest
         {
             NotificationRange = TimeSpan.FromDays(5)
         };
-        var notificationService = Provider.GetRequiredService<NotificationService>();
+        var notificationService = Provider.GetRequiredService<INotificationDataService>();
         var result = await notificationService.GetUpcomingNotifications(userSetting);
         result.Should().BeEmpty();
     }
@@ -59,7 +59,7 @@ public class NotificationUpcomingTest : BaseDbTest
         {
             NotificationRange = TimeSpan.FromDays(99999)
         };
-        var notificationService = Provider.GetRequiredService<NotificationService>();
+        var notificationService = Provider.GetRequiredService<INotificationDataService>();
         var result = await notificationService.GetUpcomingNotifications(userSetting);
         result
             .Select(x => x.Entity)
@@ -108,7 +108,7 @@ public class NotificationUpcomingTest : BaseDbTest
             NotificationRange = 5.Days()
         };
 
-        var result = await _notificationService.GetUpcomingNotifications(userSetting);
+        var result = await _notificationDataService.GetUpcomingNotifications(userSetting);
         result.Should().NotBeEmpty();
     }
 
@@ -123,7 +123,7 @@ public class NotificationUpcomingTest : BaseDbTest
             NotificationRange = 10.Days()
         };
 
-        var result = await _notificationService.GetUpcomingNotifications(userSetting);
+        var result = await _notificationDataService.GetUpcomingNotifications(userSetting);
         result.Should().NotBeEmpty();
     }
 
@@ -138,7 +138,7 @@ public class NotificationUpcomingTest : BaseDbTest
             NotificationRange = 10.Days()
         };
 
-        var result = await _notificationService.GetUpcomingNotifications(userSetting);
+        var result = await _notificationDataService.GetUpcomingNotifications(userSetting);
         result.Should().NotBeEmpty();
     }
 }

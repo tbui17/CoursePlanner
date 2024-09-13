@@ -21,7 +21,16 @@ public class NavigationService : INavigationService
 
     private async void OnNavigated(object? sender, ShellNavigatedEventArgs args)
     {
-        _logger.LogInformation("{Method} {Sender} {Args}" , nameof(OnNavigated), sender, args);
+        _logger.LogInformation(
+            "{Method} {Sender} {Source} {PreviousLocation} {CurrentLocation} {CurrentTitle} {CurrentItemCount}",
+            nameof(OnNavigated),
+            sender,
+            args.Source,
+            args.Previous?.Location,
+            args.Current?.Location,
+            Shell.Current?.CurrentPage?.Title,
+            Shell.Current?.Items?.Count
+        );
         if (args.Source is not ShellNavigationSource.ShellItemChanged ||
             Current.CurrentPage is not IRefreshableView<IRefresh> refreshable)
         {
@@ -34,7 +43,15 @@ public class NavigationService : INavigationService
 
     private async void OnNavigating(object? sender, ShellNavigatingEventArgs args)
     {
-        _logger.LogInformation("{Method} {Sender} {Args}" , nameof(OnNavigating), sender, args);
+        _logger.LogDebug(
+            "{Method} {Sender} {Source} {CurrentLocation} {CurrentTitle} {CurrentItemCount}",
+            nameof(OnNavigated),
+            sender,
+            args.Source,
+            args.Current?.Location,
+            Shell.Current?.CurrentPage?.Title,
+            Shell.Current?.Items?.Count
+        );
         if (args.Source is not ShellNavigationSource.Pop
             || Navigation.NavigationStack is not [.., IRefreshableView<IRefresh> refreshable, not null]
            )
@@ -120,7 +137,6 @@ public class NavigationService : INavigationService
 
     public async Task GoToAddInstructorPageAsync()
     {
-        _logger.LogInformation("Navigating to add instructor page");
         var factory = Resolve<InstructorFormViewModelFactory>();
         var page = new InstructorFormPage(factory.CreateAddingModel());
         await GoToAsync(page);

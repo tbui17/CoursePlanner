@@ -7,7 +7,7 @@ using ViewModels.Domain;
 using ViewModels.Services;
 using ViewModelTests.TestSetup;
 
-namespace ViewModelTests.ViewModelTestGroup;
+namespace ViewModelTests.Domain.ViewModels;
 
 public class LoginViewModelTest : BasePageViewModelTest
 {

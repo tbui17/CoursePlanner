@@ -5,7 +5,7 @@ using ViewModels.Domain;
 using ViewModelTests.TestData;
 using ViewModelTests.TestSetup;
 
-namespace ViewModelTests.ViewModelTestGroup;
+namespace ViewModelTests.Domain.ViewModels;
 
 public class EditTermViewModelTest : BasePageViewModelTest
 {
