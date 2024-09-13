@@ -13,7 +13,7 @@ public interface INotificationFilterService
 }
 
 [Inject(typeof(INotificationFilterService))]
-public class NotificationFilterService(NotificationDataStreamFactory factory) : INotificationFilterService
+public class NotificationFilterService(NotificationDataStreamService service) : INotificationFilterService
 {
     private readonly BehaviorSubject<Unit> _refresh = new(Unit.Default);
 
@@ -22,7 +22,7 @@ public class NotificationFilterService(NotificationDataStreamFactory factory) : 
         var source = new NotificationFilterInputSourceFactory(fields).CreateInputSource();
 
         return _refresh
-            .Select(_ => factory.CreatePageDataStream(source))
+            .Select(_ => service.GetPageData(source))
             .Switch();
     }
 
