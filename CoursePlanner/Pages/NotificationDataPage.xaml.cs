@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Reactive.Linq;
-using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using ViewModels.Domain.NotificationDataViewModel;
 using ViewModels.Interfaces;
@@ -11,11 +10,9 @@ namespace CoursePlanner.Pages;
 public partial class NotificationDataPage : IRefreshableView<NotificationDataViewModel>,
     IViewFor<NotificationDataViewModel>
 {
-    private ILogger<NotificationDataPage> _logger;
 
-    public NotificationDataPage(NotificationDataViewModel model, ILogger<NotificationDataPage> logger)
+    public NotificationDataPage(NotificationDataViewModel model)
     {
-        _logger = logger;
         Model = model;
         InitializeComponent();
         HideSoftInputOnTapped = true;
@@ -78,6 +75,19 @@ public partial class NotificationDataPage : IRefreshableView<NotificationDataVie
         );
 
         var pageResult = this.WhenAnyValue(x => x.ViewModel.PageResult).WhereNotNull();
+
+        pageResult.Select(x => x.CurrentPage)
+            .BindTo(this, x => x.PaginatorInstance.CurrentPage);
+
+        this.OneWayBind(ViewModel,
+            x => x.ChangePageCommand,
+            x => x.PaginatorInstance.ChangePageCommand
+        );
+
+        pageResult
+            .Select(x => x.PageCount)
+            .BindTo(this, x => x.PaginatorInstance.TotalPageCount);
+
 
         pageResult
             .Select(x => x.CurrentPageData)
