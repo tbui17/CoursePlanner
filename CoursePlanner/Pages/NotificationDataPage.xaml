@@ -19,7 +19,7 @@
                 <VerticalStackLayout Margin="10" Spacing="10">
                     <VerticalStackLayout>
                         <material:TextField x:Name="NameTextField" Title="Name" />
-                        <material:AutoCompleteTextField x:Name="TypeAutoCompleteField" Title="Type"/>
+                        <material:AutoCompleteTextField x:Name="TypeAutoCompleteField" Title="Type" />
                         <material:PickerField x:Name="NotificationOptionPickerField" Title="Notification Option" />
                     </VerticalStackLayout>
                     <HorizontalStackLayout Spacing="25">
@@ -27,10 +27,11 @@
                         <material:DatePickerField x:Name="EndDatepickerField" Title="End" />
                     </HorizontalStackLayout>
                     <HorizontalStackLayout>
-                        <Button x:Name="ClearButton" Text="Clear"  />
+                        <Button x:Name="ClearButton" Text="Clear" />
                     </HorizontalStackLayout>
                     <Label x:Name="ItemCountLabel" />
                 </VerticalStackLayout>
+                <material:Paginator x:Name="PaginatorInstance" />
 
                 <CollectionView x:Name="NotificationItemInstance"
                                 SelectionMode="None"
