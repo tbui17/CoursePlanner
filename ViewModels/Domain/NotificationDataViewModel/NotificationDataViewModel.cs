@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Windows.Input;
@@ -15,7 +14,7 @@ namespace ViewModels.Domain.NotificationDataViewModel;
 
 public interface INotificationDataViewModel : INotificationFilter
 {
-    IList Types { get; }
+    IList<string> Types { get; }
     ICommand ChangePageCommand { get; }
     ICommand ClearCommand { get; }
 }
@@ -34,8 +33,9 @@ partial class NotificationDataViewModel
     [Reactive]
     public string TypeFilter { get; set; }
 
-    [Reactive]
-    public IList NotificationOptions { get; private init; }
+
+    public IList<string> NotificationOptions { get; } = new List<string>
+        { "All", "Notifications Enabled", "Notifications Disabled" };
 
     [Reactive]
     public ShouldNotifyIndex SelectedNotificationOptionIndex { get; set; }
@@ -50,8 +50,8 @@ partial class NotificationDataViewModel
     public IPageResult PageResult { get; }
 
 
-    [Reactive]
-    public IList Types { get; private init; }
+
+    public IList<string> Types { get; }
 
     public ICommand ChangePageCommand { get; }
 
@@ -86,12 +86,10 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
         Start = dateRange.Start;
         End = dateRange.End;
 
-        NotificationOptions = new List<string> { "All", "Notifications Enabled", "Notifications Disabled" };
-        Types = new ArrayList();
+        Types = new List<string> { "Objective Assessment", "Performance Assessment", "Course"};
 
         // properties
         var pageResult = notificationFilterService.Connect(this);
-
         pageResult
             .Do(x => _logger.LogInformation("Page result {PageResult}", x))
             .ToPropertyEx(
