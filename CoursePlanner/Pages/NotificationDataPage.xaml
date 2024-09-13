@@ -3,7 +3,6 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="CoursePlanner.Pages.NotificationDataPage"
-             xmlns:domain="clr-namespace:ViewModels.Domain;assembly=ViewModels"
              xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
              xmlns:notificationDataViewModel="using:ViewModels.Domain.NotificationDataViewModel"
              x:Name="Page"
@@ -15,23 +14,27 @@
     </ContentPage.Resources>
     <ContentPage.Content>
         <ScrollView>
-            <VerticalStackLayout x:Name="MainLayout" Margin="10,10,10,30">
+            <VerticalStackLayout x:Name="MainLayout" Margin="10,10,10,30" Spacing="10">
                 <VerticalStackLayout Margin="10" Spacing="10">
-                    <VerticalStackLayout>
+                    <VerticalStackLayout Spacing="5">
                         <material:TextField x:Name="NameTextField" Title="Name" />
                         <material:AutoCompleteTextField x:Name="TypeAutoCompleteField" Title="Type" />
                         <material:PickerField x:Name="NotificationOptionPickerField" Title="Notification Option" />
                     </VerticalStackLayout>
                     <HorizontalStackLayout Spacing="25">
-                        <material:DatePickerField x:Name="StartDatePickerField" Title="Start" />
-                        <material:DatePickerField x:Name="EndDatepickerField" Title="End" />
+                        <material:DatePickerField x:Name="StartDatePickerField" AllowClear="False" Title="Start" />
+                        <material:DatePickerField x:Name="EndDatepickerField" AllowClear="False" Title="End" />
                     </HorizontalStackLayout>
                     <HorizontalStackLayout>
                         <Button x:Name="ClearButton" Text="Clear" />
                     </HorizontalStackLayout>
-                    <Label x:Name="ItemCountLabel" />
                 </VerticalStackLayout>
-                <material:Paginator x:Name="PaginatorInstance" />
+
+                <VerticalStackLayout>
+                    <Label x:Name="ItemCountLabel" HorizontalOptions="Center"/>
+                    <material:Paginator x:Name="PaginatorInstance" PageStepCount="2" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+
 
                 <CollectionView x:Name="NotificationItemInstance"
                                 SelectionMode="None"

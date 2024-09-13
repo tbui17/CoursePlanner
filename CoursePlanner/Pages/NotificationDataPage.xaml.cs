@@ -79,11 +79,6 @@ public partial class NotificationDataPage : IRefreshableView<NotificationDataVie
         pageResult.Select(x => x.CurrentPage)
             .BindTo(this, x => x.PaginatorInstance.CurrentPage);
 
-        this.OneWayBind(ViewModel,
-            x => x.ChangePageCommand,
-            x => x.PaginatorInstance.ChangePageCommand
-        );
-
         pageResult
             .Select(x => x.PageCount)
             .BindTo(this, x => x.PaginatorInstance.TotalPageCount);
@@ -95,5 +90,16 @@ public partial class NotificationDataPage : IRefreshableView<NotificationDataVie
 
         pageResult.Select(x => $"Page Count: {x.PageCount}")
             .BindTo(this, x => x.ItemCountLabel.Text);
+
+        this.OneWayBind(ViewModel,
+            x => x.ChangePageCommand,
+            x => x.PaginatorInstance.ChangePageCommand
+        );
+
+        this.OneWayBind(ViewModel,
+            x => x.ClearCommand,
+            x => x.ClearButton.Command
+        );
+
     }
 }
