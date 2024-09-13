@@ -62,15 +62,24 @@ public class InitializationTest : BasePageViewModelTest
         var model = Resolve<NotificationDataViewModel>();
         await model.Should()
             .EventuallySatisfy(x => x.PageResult, x => x.CurrentPageData.Should().HaveCountGreaterThan(6));
-        await using var db = await DbFactory.CreateDbContextAsync();
-        foreach (var dbSet in db.GetDbSets<INotification>())
-        {
-            await dbSet.ExecuteDeleteAsync();
-        }
 
-        db.Add(new Course() { TermId = 1, Name = "Abc" });
-        db.Add(new Course() { TermId = 1, Name = "Cde" });
-        await db.SaveChangesAsync();
+        var setup = async () =>
+        {
+            await using var db = await DbFactory.CreateDbContextAsync();
+            foreach (var dbSet in db.GetDbSets<INotification>())
+            {
+                await dbSet.ExecuteDeleteAsync();
+            }
+
+            await db.Courses.ToListAsync().ContinueWith(x => x.Result.Should().BeEmpty());
+
+            db.Add(new Course() { TermId = 1, Name = "Abc" });
+            db.Add(new Course() { TermId = 1, Name = "Cde" });
+            await db.SaveChangesAsync();
+        };
+        await setup();
+        model.PageResult.CurrentPageData.Should().HaveCount(10);
+
 
         await model.RefreshAsync();
 

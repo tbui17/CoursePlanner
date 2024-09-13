@@ -1,6 +1,4 @@
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
-using System.Reactive.Threading.Tasks;
 using AutoFixture;
 using FluentAssertions;
 using FluentAssertions.Execution;
@@ -8,12 +6,10 @@ using FluentAssertions.Extensions;
 using Lib.Models;
 using Microsoft.Extensions.Logging.Testing;
 using ReactiveUI;
-using ViewModels.Domain;
 using ViewModels.Domain.NotificationDataViewModel;
 using ViewModels.Models;
 using ViewModels.Services.NotificationDataStreamFactory;
 using ViewModelTests.TestSetup;
-using ViewModelTests.Utils;
 
 namespace ViewModelTests.Domain.ViewModels.NotificationDataViewModelTest;
 
@@ -24,7 +20,6 @@ public class NotificationDataStreamFactoryTest : BaseTest
     {
         return new InputSource
         {
-            Refresh = new BehaviorSubject<object?>(new object()),
             CurrentPage = CreateProperty(1),
             DateFilter = CreateProperty(new DateTimeRange())!,
             PageSize = CreateProperty(10),
@@ -105,34 +100,5 @@ public class NotificationDataStreamFactoryTest : BaseTest
         res.ItemCount.Should().Be(1);
         res.CurrentPage.Should().Be(1);
         res.PageCount.Should().Be(5);
-    }
-
-    [Test]
-    public async Task CreatePageDataStream_Refresh_InvokesNewCallEveryTime()
-    {
-        var f = CreateFixture();
-
-        var (_, service) = Resolve<NotificationDataPaginationTestFixtureDataFactory>().CreateDataServiceWithData();
-
-
-        var dataFactory = new NotificationDataStreamFactory(
-            service.Object,
-            new FakeLogger<NotificationDataStreamFactory>(),
-            f.Create<PageResultFactory>()
-        );
-
-        service.Invocations.Should().BeEmpty();
-
-        // var refresh = new BehaviorSubject<object?>(new object());
-        var input = CreateDefaultInputSource();
-        var refresh = input.Refresh.As<BehaviorSubject<object?>>();
-
-
-        var obs = dataFactory.CreatePageDataStream(input);
-        obs.TakeWhile(_ => service.Invocations.Count < 3)
-            .Subscribe(_ => refresh.OnNext(new object()));
-
-        await service.Invocations.WaitFor(x => x.Count == 3);
-        service.Invocations.Should().HaveCount(3);
     }
 }

@@ -1,4 +1,6 @@
+using System.Reactive;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using Lib.Attributes;
 using Lib.Models;
 using ReactiveUI;
@@ -8,18 +10,28 @@ using ViewModels.Services.NotificationDataStreamFactory;
 namespace ViewModels.Domain.NotificationDataViewModel;
 
 [Inject]
-public class PageResultStreamFactory(NotificationDataStreamFactory factory)
+public class NotificationFilterService(NotificationDataStreamFactory factory)
 {
-    public IObservable<IPageResult> Create(INotificationFilter fields, IObservable<object?> refreshSource)
+    private readonly BehaviorSubject<Unit> _refresh = new(Unit.Default);
+
+    public IObservable<IPageResult> Connect(INotificationFilter fields)
     {
-        var source = new NotificationFilterInputSourceFactory(fields).CreateInputSource(refreshSource);
-        return factory.CreatePageDataStream(source);
+        var source = new NotificationFilterInputSourceFactory(fields).CreateInputSource();
+
+        return _refresh
+            .Select(_ => factory.CreatePageDataStream(source))
+            .Switch();
+    }
+
+    public void Refresh()
+    {
+        _refresh.OnNext(_refresh.Value);
     }
 }
 
 public class NotificationFilterInputSourceFactory(INotificationFilter viewModel)
 {
-    public InputSource CreateInputSource(IObservable<object?> refreshSubject)
+    public InputSource CreateInputSource()
     {
         var (textFilter, typeFilter) = CreateTextFilters();
         var inputSource = new InputSource
@@ -29,7 +41,6 @@ public class NotificationFilterInputSourceFactory(INotificationFilter viewModel)
             TypeFilter = typeFilter,
             PickerFilter = CreatePickerFilterSource(),
             CurrentPage = viewModel.WhenAnyValue(x => x.CurrentPage),
-            Refresh = refreshSubject,
             PageSize = viewModel.WhenAnyValue(x => x.PageSize)
         };
         return inputSource;

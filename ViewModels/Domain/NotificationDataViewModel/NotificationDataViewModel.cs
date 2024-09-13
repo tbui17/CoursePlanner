@@ -63,15 +63,17 @@ partial class NotificationDataViewModel
 public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INotificationDataViewModel
 {
     private readonly ILogger<NotificationDataViewModel> _logger;
+    private readonly NotificationFilterService _notificationFilterService;
 
 
     public NotificationDataViewModel(
-        PageResultStreamFactory notificationDataStreamFactory,
+        NotificationFilterService notificationFilterService,
         ILogger<NotificationDataViewModel> logger,
         IDefaultDateProvider defaultDateProvider,
         IDefaultPageProvider defaultPageProvider
     )
     {
+        _notificationFilterService = notificationFilterService;
         // init
         _logger = logger;
 
@@ -86,9 +88,10 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
         End = dateRange.End;
 
         NotificationOptions = new List<string> { "All", "Notifications Enabled", "Notifications Disabled" };
+        Types = new ArrayList();
 
         // properties
-        var pageResult = notificationDataStreamFactory.Create(this, _refreshSubject);
+        var pageResult = notificationFilterService.Connect(this);
 
         pageResult
             .StartWith(new EmptyPageResult())
@@ -144,13 +147,11 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
     }
 
 
-    private readonly BehaviorSubject<object?> _refreshSubject = new(new object());
-
-
     public Task RefreshAsync()
     {
         _logger.LogDebug("Refreshing notification data");
-        _refreshSubject.OnNext(new object());
+        _notificationFilterService.Refresh();
+
         return Task.CompletedTask;
     }
 }
