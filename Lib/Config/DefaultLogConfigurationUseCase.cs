@@ -1,6 +1,7 @@
 using Serilog;
 using Serilog.Events;
 using Serilog.Exceptions;
+using Serilog.Formatting.Display;
 
 namespace Lib.Config;
 
@@ -25,7 +26,7 @@ public class DefaultLogConfigurationUseCase : ILoggingUseCase
 
     public void WriteConsole()
     {
-        Configuration.WriteTo.Console(LogEventLevel.Information, LogTemplate);
+        Configuration.WriteTo.Console(new MessageTemplateTextFormatter(LogTemplate), LogEventLevel.Information);
     }
 
     public void AddEnrichments()
