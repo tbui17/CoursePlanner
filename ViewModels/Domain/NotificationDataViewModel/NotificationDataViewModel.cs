@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Diagnostics;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using System.Windows.Input;
 using Lib.Attributes;
 using Microsoft.Extensions.Logging;
