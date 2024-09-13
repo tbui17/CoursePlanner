@@ -23,7 +23,8 @@ public class NotificationFilterService(NotificationDataStreamService service) : 
 
         return _refresh
             .Select(_ => service.GetPageData(source))
-            .Switch();
+            .Switch()
+            .StartWith(new EmptyPageResult());
     }
 
     public void Refresh()
