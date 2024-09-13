@@ -1,8 +1,12 @@
 ﻿using System.Collections;
+using System.Reactive;
 using System.Reactive.Linq;
+using Lib.Utils;
+using Plainer.Maui.Controls;
 using ReactiveUI;
 using ViewModels.Domain.NotificationDataViewModel;
 using ViewModels.Interfaces;
+
 #pragma warning disable CS8767 // Nullability of reference types in type of parameter doesn't match implicitly implemented member (possibly because of nullability attributes).
 
 namespace CoursePlanner.Pages;
@@ -10,7 +14,6 @@ namespace CoursePlanner.Pages;
 public partial class NotificationDataPage : IRefreshableView<NotificationDataViewModel>,
     IViewFor<NotificationDataViewModel>
 {
-
     public NotificationDataPage(NotificationDataViewModel model)
     {
         Model = model;
@@ -34,18 +37,26 @@ public partial class NotificationDataPage : IRefreshableView<NotificationDataVie
         set => Model = value;
     }
 
-
     private void Bind()
     {
-        this.Bind(ViewModel,
-            x => x.Start,
-            x => x.StartDatePickerField.Date
-        );
-        this.Bind(ViewModel,
-            x => x.End,
-            x => x.EndDatepickerField.Date
-        );
 
+        // bind dates
+        StartDatePickerField.DatePickerView.Thru(ToDateSelectedObservable)
+            .Select(x => x.EventArgs.NewDate)
+            .Subscribe(x => ViewModel.ChangeStartDateCommand.Execute(x));
+
+        this.WhenAnyValue(x => x.ViewModel.Start)
+            .Subscribe(x => StartDatePickerField.Date = x);
+
+        this.WhenAnyValue(x => x.ViewModel.End)
+            .Subscribe(x => EndDatePickerField.Date = x);
+
+        EndDatePickerField.DatePickerView.Thru(ToDateSelectedObservable)
+            .Select(x => x.EventArgs)
+            .Subscribe(x => ViewModel.ChangeEndDateCommand.Execute(x));
+
+
+        // text filters
         this.Bind(ViewModel,
             x => x.FilterText,
             x => x.NameTextField.Text
@@ -61,6 +72,8 @@ public partial class NotificationDataPage : IRefreshableView<NotificationDataVie
             x => x.TypeAutoCompleteField.ItemsSource
         );
 
+        // filter options
+
         this.OneWayBind(ViewModel,
             x => x.NotificationOptions,
             x => x.NotificationOptionPickerField.ItemsSource,
@@ -73,6 +86,8 @@ public partial class NotificationDataPage : IRefreshableView<NotificationDataVie
             vmToViewConverter: x => (int)x,
             viewToVmConverter: x => (ShouldNotifyIndex)x
         );
+
+        // page result
 
         var pageResult = this.WhenAnyValue(x => x.ViewModel.PageResult).WhereNotNull();
 
@@ -91,6 +106,8 @@ public partial class NotificationDataPage : IRefreshableView<NotificationDataVie
         pageResult.Select(x => $"Page Count: {x.PageCount}")
             .BindTo(this, x => x.ItemCountLabel.Text);
 
+        // command
+
         this.OneWayBind(ViewModel,
             x => x.ChangePageCommand,
             x => x.PaginatorInstance.ChangePageCommand
@@ -101,5 +118,14 @@ public partial class NotificationDataPage : IRefreshableView<NotificationDataVie
             x => x.ClearButton.Command
         );
 
+
+    }
+
+    private static IObservable<EventPattern<DateChangedEventArgs>> ToDateSelectedObservable(DatePickerView view)
+    {
+        return Observable.FromEventPattern<DateChangedEventArgs>(
+            h => view.DateSelected += h,
+            h => view.DateSelected -= h
+        );
     }
 }
