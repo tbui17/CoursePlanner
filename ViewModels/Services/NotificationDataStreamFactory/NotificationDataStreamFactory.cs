@@ -18,11 +18,9 @@ public class NotificationDataStreamFactory(
 {
     public int RetryCount { get; set; } = 3;
 
-    private IObservable<IList<INotification>> CreateNotificationDataStream(IObservable<DateTimeRange> dateFilter,
-        IObservable<object?> refresh)
+    private IObservable<IList<INotification>> CreateNotificationDataStream(IObservable<IDateTimeRange> dateFilter)
     {
         return dateFilter.ObserveOn(RxApp.TaskpoolScheduler)
-            .CombineLatest(refresh, (dateRange, _) => dateRange)
             .Select(notificationDataService.GetNotificationsWithinDateRange)
             .Switch()
             .Retry(RetryCount)
@@ -37,7 +35,7 @@ public class NotificationDataStreamFactory(
 
     public IObservable<IPageResult> CreatePageDataStream(InputSource inputSource)
     {
-        return CreateNotificationDataStream(inputSource.DateFilter, inputSource.Refresh)
+        return CreateNotificationDataStream(inputSource.DateFilter)
             .CombineLatest(
                 inputSource.TextFilter,
                 inputSource.TypeFilter,
