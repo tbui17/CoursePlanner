@@ -8,16 +8,7 @@ using ReactiveUI.Fody.Helpers;
 using ViewModels.Interfaces;
 using ViewModels.Services.NotificationDataStreamFactory;
 
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-
 namespace ViewModels.Domain.NotificationDataViewModel;
-
-public interface INotificationDataViewModel : INotificationFilter
-{
-    IList<string> Types { get; }
-    ICommand ChangePageCommand { get; }
-    ICommand ClearCommand { get; }
-}
 
 partial class NotificationDataViewModel
 {
@@ -25,10 +16,10 @@ partial class NotificationDataViewModel
     public string FilterText { get; set; }
 
     [Reactive]
-    public DateTime Start { get; set; }
+    public DateTime Start { get; private set; }
 
     [Reactive]
-    public DateTime End { get; set; }
+    public DateTime End { get; private set; }
 
     [Reactive]
     public string TypeFilter { get; set; }
@@ -46,20 +37,18 @@ partial class NotificationDataViewModel
     [Reactive]
     public int PageSize { get; set; }
 
-    [ObservableAsProperty]
-    public IPageResult PageResult { get; }
 
-
-
+    private readonly ObservableAsPropertyHelper<IPageResult> _pageResult;
+    public IPageResult PageResult => _pageResult.Value;
     public IList<string> Types { get; }
-
     public ICommand ChangePageCommand { get; }
-
     public ICommand ClearCommand { get; }
+    public ICommand ChangeStartDateCommand { get; set; }
+    public ICommand ChangeEndDateCommand { get; set; }
 }
 
 [Inject]
-public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INotificationDataViewModel
+public partial class NotificationDataViewModel : ReactiveObject,INotificationFilter, IRefresh
 {
     private readonly ILogger<NotificationDataViewModel> _logger;
     private readonly INotificationFilterService _notificationFilterService;
@@ -68,38 +57,38 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
     public NotificationDataViewModel(
         INotificationFilterService notificationFilterService,
         ILogger<NotificationDataViewModel> logger,
-        IDefaultDateProvider defaultDateProvider,
-        IDefaultPageProvider defaultPageProvider
+        INotificationDataViewModelDefaultsProvider defaultsProvider
     )
     {
-        // init
+
+        #region init
         _notificationFilterService = notificationFilterService;
         _logger = logger;
 
         CurrentPage = 1;
-        PageSize = defaultPageProvider.PageSize;
+        PageSize = defaultsProvider.PageSize;
 
         FilterText = "";
         TypeFilter = "";
 
-        var dateRange = defaultDateProvider.DateRange;
+        var dateRange = defaultsProvider.DateRange;
         Start = dateRange.Start;
         End = dateRange.End;
 
-        Types = new List<string> { "Objective Assessment", "Performance Assessment", "Course"};
+        Types = new List<string> { "Objective Assessment", "Performance Assessment", "Course" };
 
-        // properties
-        var pageResult = notificationFilterService.Connect(this);
-        pageResult
+        #endregion
+
+
+        #region properties
+
+        _pageResult = notificationFilterService.Connect(this)
             .Do(x => _logger.LogInformation("Page result {PageResult}", x))
-            .ToPropertyEx(
-                this,
-                x => x.PageResult,
-                scheduler: RxApp.MainThreadScheduler
-            );
+            .ToProperty(this,x => x.PageResult,scheduler:RxApp.MainThreadScheduler);
+        #endregion
 
 
-        // commands
+        #region commands
 
         ChangePageCommand = ReactiveCommand.Create<int>(page =>
             {
@@ -140,14 +129,57 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
                 SelectedNotificationOptionIndex = 0;
             }
         );
+
+        ChangeStartDateCommand = ReactiveCommand.Create<DateTime>(newStart =>
+            {
+                if (newStart > End)
+                {
+                    Start = End;
+                    return;
+                }
+
+                if (newStart == Start)
+                {
+                    Refresh();
+                    return;
+                }
+
+                Start = newStart;
+            }
+        );
+
+        ChangeEndDateCommand = ReactiveCommand.Create<DateTime>(newEnd =>
+            {
+                if (Start > newEnd)
+                {
+                    End = Start;
+                    return;
+                }
+
+                if (newEnd == End)
+                {
+                    Refresh();
+                    return;
+                }
+
+                End = newEnd;
+            }
+        );
+
+        #endregion
+
     }
 
 
-    public Task RefreshAsync()
+    private void Refresh()
     {
         _logger.LogDebug("Refreshing notification data");
         _notificationFilterService.Refresh();
+    }
 
+    public Task RefreshAsync()
+    {
+        Refresh();
         return Task.CompletedTask;
     }
 }
