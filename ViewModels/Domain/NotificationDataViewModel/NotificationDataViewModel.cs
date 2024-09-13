@@ -63,18 +63,18 @@ partial class NotificationDataViewModel
 public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INotificationDataViewModel
 {
     private readonly ILogger<NotificationDataViewModel> _logger;
-    private readonly NotificationFilterService _notificationFilterService;
+    private readonly INotificationFilterService _notificationFilterService;
 
 
     public NotificationDataViewModel(
-        NotificationFilterService notificationFilterService,
+        INotificationFilterService notificationFilterService,
         ILogger<NotificationDataViewModel> logger,
         IDefaultDateProvider defaultDateProvider,
         IDefaultPageProvider defaultPageProvider
     )
     {
-        _notificationFilterService = notificationFilterService;
         // init
+        _notificationFilterService = notificationFilterService;
         _logger = logger;
 
         CurrentPage = 1;
@@ -94,7 +94,6 @@ public partial class NotificationDataViewModel : ReactiveObject, IRefresh, INoti
         var pageResult = notificationFilterService.Connect(this);
 
         pageResult
-            .StartWith(new EmptyPageResult())
             .Do(x => _logger.LogInformation("Page result {PageResult}", x))
             .ToPropertyEx(
                 this,
