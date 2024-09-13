@@ -6,8 +6,14 @@ using ViewModels.Services.NotificationDataStreamFactory;
 
 namespace ViewModels.Domain.NotificationDataViewModel;
 
-[Inject]
-public class NotificationFilterService(NotificationDataStreamFactory factory)
+public interface INotificationFilterService
+{
+    IObservable<IPageResult> Connect(INotificationFilter fields);
+    void Refresh();
+}
+
+[Inject(typeof(INotificationFilterService))]
+public class NotificationFilterService(NotificationDataStreamFactory factory) : INotificationFilterService
 {
     private readonly BehaviorSubject<Unit> _refresh = new(Unit.Default);
 
