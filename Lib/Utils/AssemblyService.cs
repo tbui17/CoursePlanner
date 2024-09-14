@@ -1,5 +1,8 @@
+using Lib.Attributes;
+
 namespace Lib.Utils;
 
+[Inject]
 public class AssemblyService(AppDomain currentDomain)
 {
     public ParallelQuery<Type> GetTypesInAssembly(string assemblyName) =>
