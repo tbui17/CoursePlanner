@@ -59,7 +59,9 @@ public class NotificationDataPaginationTestFixtureDataFactory(IFixture fixture, 
         var model = new NotificationDataViewModel(
             fixture.Create<NotificationFilterService>(),
             fixture.Create<ILogger<NotificationDataViewModel>>(),
-            fixture.Create<INotificationDataViewModelDefaultsProvider>()
+            fixture.Create<INotificationDataViewModelDefaultsProvider>(),
+            provider.GetRequiredService<AutocompleteService>()
+
         );
 
         return new NotificationDataPaginationTestFixture
