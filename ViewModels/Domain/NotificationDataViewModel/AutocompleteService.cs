@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Reactive.Linq;
 using DynamicData;
 using Lib.Attributes;
+using Lib.Services.NotificationService;
 using ReactiveUI;
 using ViewModels.Config;
 
@@ -12,9 +13,9 @@ public class AutocompleteService
 {
     private readonly SourceCache<string, string> _source = new(x => x);
 
-    public AutocompleteService(NotificationTypes types)
+    public AutocompleteService(NotificationTypeProvider provider)
     {
-        _source.AddOrUpdate(types.Value);
+        _source.AddOrUpdate(provider.GetNotificationTypes());
     }
 
     public IObservable<IChangeSet<string, string>> Connect()
