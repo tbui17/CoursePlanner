@@ -39,20 +39,19 @@ public partial class NotificationDataPage : IRefreshableView<NotificationDataVie
 
     private void Bind()
     {
-
         // bind dates
         StartDatePickerField.DatePickerView.Thru(ToDateSelectedObservable)
             .Select(x => x.EventArgs.NewDate)
             .Subscribe(x => ViewModel.ChangeStartDateCommand.Execute(x));
 
         this.WhenAnyValue(x => x.ViewModel.Start)
-            .Subscribe(x => StartDatePickerField.Date = x);
+            .BindTo(this, x => x.StartDatePickerField.Date);
 
         this.WhenAnyValue(x => x.ViewModel.End)
-            .Subscribe(x => EndDatePickerField.Date = x);
+            .BindTo(this, x => x.EndDatePickerField.Date);
 
         EndDatePickerField.DatePickerView.Thru(ToDateSelectedObservable)
-            .Select(x => x.EventArgs)
+            .Select(x => x.EventArgs.NewDate)
             .Subscribe(x => ViewModel.ChangeEndDateCommand.Execute(x));
 
 
@@ -117,8 +116,6 @@ public partial class NotificationDataPage : IRefreshableView<NotificationDataVie
             x => x.ClearCommand,
             x => x.ClearButton.Command
         );
-
-
     }
 
     private static IObservable<EventPattern<DateChangedEventArgs>> ToDateSelectedObservable(DatePickerView view)
