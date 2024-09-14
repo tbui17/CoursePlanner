@@ -41,8 +41,8 @@ partial class NotificationDataViewModel
 
     private readonly ObservableAsPropertyHelper<IPageResult> _pageResult;
     public IPageResult PageResult => _pageResult.Value;
-    private readonly ReadOnlyObservableCollection<string> _types;
-    public ReadOnlyObservableCollection<string> Types => _types;
+    public ReadOnlyObservableCollection<string> Types { get; }
+
     public ICommand ChangePageCommand { get; }
     public ICommand ClearCommand { get; }
     public ICommand ChangeStartDateCommand { get; set; }
@@ -78,7 +78,7 @@ public partial class NotificationDataViewModel : ReactiveObject, INotificationFi
         Start = dateRange.Start;
         End = dateRange.End;
 
-        _types = autocompleteService.BindSubscribe();
+        Types = autocompleteService.BindSubscribe();
 
         #endregion
 
