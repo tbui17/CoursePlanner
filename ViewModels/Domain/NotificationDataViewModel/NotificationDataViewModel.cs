@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Windows.Input;
@@ -40,7 +41,8 @@ partial class NotificationDataViewModel
 
     private readonly ObservableAsPropertyHelper<IPageResult> _pageResult;
     public IPageResult PageResult => _pageResult.Value;
-    public IList<string> Types { get; }
+    private readonly ReadOnlyObservableCollection<string> _types;
+    public ReadOnlyObservableCollection<string> Types => _types;
     public ICommand ChangePageCommand { get; }
     public ICommand ClearCommand { get; }
     public ICommand ChangeStartDateCommand { get; set; }
@@ -48,7 +50,7 @@ partial class NotificationDataViewModel
 }
 
 [Inject]
-public partial class NotificationDataViewModel : ReactiveObject,INotificationFilter, IRefresh
+public partial class NotificationDataViewModel : ReactiveObject, INotificationFilter, IRefresh
 {
     private readonly ILogger<NotificationDataViewModel> _logger;
     private readonly INotificationFilterService _notificationFilterService;
@@ -57,11 +59,12 @@ public partial class NotificationDataViewModel : ReactiveObject,INotificationFil
     public NotificationDataViewModel(
         INotificationFilterService notificationFilterService,
         ILogger<NotificationDataViewModel> logger,
-        INotificationDataViewModelDefaultsProvider defaultsProvider
+        INotificationDataViewModelDefaultsProvider defaultsProvider,
+        AutocompleteService autocompleteService
     )
     {
-
         #region init
+
         _notificationFilterService = notificationFilterService;
         _logger = logger;
 
@@ -75,7 +78,7 @@ public partial class NotificationDataViewModel : ReactiveObject,INotificationFil
         Start = dateRange.Start;
         End = dateRange.End;
 
-        Types = new List<string> { "Objective Assessment", "Performance Assessment", "Course" };
+        _types = autocompleteService.BindSubscribe();
 
         #endregion
 
@@ -84,7 +87,8 @@ public partial class NotificationDataViewModel : ReactiveObject,INotificationFil
 
         _pageResult = notificationFilterService.Connect(this)
             .Do(x => _logger.LogInformation("Page result {PageResult}", x))
-            .ToProperty(this,x => x.PageResult,scheduler:RxApp.MainThreadScheduler);
+            .ToProperty(this, x => x.PageResult, scheduler: RxApp.MainThreadScheduler);
+
         #endregion
 
 
@@ -167,7 +171,6 @@ public partial class NotificationDataViewModel : ReactiveObject,INotificationFil
         );
 
         #endregion
-
     }
 
 
