@@ -46,24 +46,6 @@ public static class UtilExtensions
         }
     }
 
-    public static string PascalCaseToPascalSentence(this string text)
-    {
-        var sb = new StringBuilder();
-        sb.Append(char.ToUpper(text[0]));
-
-        foreach (var c in text)
-        {
-            if (char.IsUpper(c) && sb.Length > 0)
-            {
-                sb.Append(' ');
-            }
-
-            sb.Append(c);
-        }
-
-        return sb.ToString();
-    }
-
     public static T2 Thru<T1, T2>(this T1 value, Func<T1, T2> func) => func(value);
 
     public static T Thru<T>(this T value, Action<T> func)
