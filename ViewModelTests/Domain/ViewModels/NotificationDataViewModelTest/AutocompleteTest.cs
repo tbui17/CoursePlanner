@@ -27,7 +27,7 @@ public class AutocompleteTest : BaseTest
     }
 
     [Test]
-    public void Types_OnlyContainsEntriesRelatedToDomainModels()
+    public void Types_LikelyOnlyContainsEntriesRelatedToDomainModels()
     {
         var model = Resolve<NotificationDataViewModel>();
 
