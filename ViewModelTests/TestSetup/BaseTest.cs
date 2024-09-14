@@ -1,10 +1,7 @@
-using AutoFixture;
 using BaseTestSetup;
 using Lib.Attributes;
 using Lib.Models;
-using Lib.Utils;
 using Microsoft.Data.Sqlite;
-using Moq;
 using ViewModels.Config;
 using ViewModels.Domain;
 using ViewModels.Services;
@@ -35,8 +32,7 @@ public abstract class BaseTest : IBaseTest
     public static IServiceProvider CreateProvider()
     {
         var services = new ServiceCollection();
-        var assemblyService = new AssemblyService(AppDomain.CurrentDomain);
-        var vmConfig = new ViewModelConfig(assemblyService, services);
+        var vmConfig = new ViewModelConfig(services);
 
 
         services
