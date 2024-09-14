@@ -6,12 +6,10 @@ using Serilog;
 using Serilog.Events;
 using Serilog.Formatting.Compact;
 using Serilog.Formatting.Display;
-using Serilog.Formatting.Json;
 using ViewModels.Config;
 using ViewModels.ExceptionHandlers;
 using ViewModels.Interfaces;
 using ViewModels.Services;
-using ViewModels.Setup;
 
 namespace MauiConfig;
 
