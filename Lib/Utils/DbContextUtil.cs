@@ -11,4 +11,10 @@ public static class DbContextUtil
             .Where(x => x.PropertyType.IsGenericType)
             .Where(x => x.PropertyType.GetGenericTypeDefinition() == typeof(DbSet<>))
             .Where(x => x.PropertyType.GenericTypeArguments[0].IsAssignableTo(typeof(TType)));
+
+    public static IEnumerable<Type> GetEntityTypes<TDbContext, TType>() where TType : class
+    {
+        return GetDbSets<TDbContext, TType>()
+            .Select(x => x.PropertyType.GenericTypeArguments[0]).ToList();
+    }
 }
