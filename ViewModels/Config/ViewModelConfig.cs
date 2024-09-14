@@ -38,7 +38,7 @@ public class ViewModelConfig(AssemblyService assemblyService, IServiceCollection
     private NotificationTypes GetNotificationTypes()
     {
         return assemblyService
-            .GetConcreteClassesInNamespace(NamespaceData.FromNameofExpression(nameof(ViewModels.Domain)))
+            .GetConcreteClassesInNamespace(NamespaceData.FromNameofExpression(nameof(Lib.Models)))
             .Where(x => x.IsAssignableTo(typeof(INotification)))
             .Where(x => x != typeof(Assessment))
             .Select(x => x.Name)
