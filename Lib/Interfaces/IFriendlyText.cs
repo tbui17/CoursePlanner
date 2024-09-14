@@ -1,3 +1,4 @@
+using Humanizer;
 using Lib.Utils;
 
 namespace Lib.Interfaces;
@@ -11,7 +12,7 @@ public static class FriendlyTextExtensions
             .GetProperties()
             .Select(prop =>
                 {
-                    var key = prop.Name.PascalCaseToPascalSentence();
+                    var key = prop.Name.Humanize(LetterCasing.Title);
                     var value = prop.GetValue(self) switch
                     {
                         DateTime date => date.ToShortDateString(),
