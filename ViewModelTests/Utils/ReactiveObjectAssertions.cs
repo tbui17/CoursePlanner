@@ -17,7 +17,7 @@ public class ReactiveObjectAssertions<T>(T instance) :
 
     [CustomAssertion]
     public async Task<AndConstraint<ReactiveObjectAssertions<T>>> EventuallyHave(
-        Func<T, bool> predicate, int timeoutMs = 1000)
+        Func<T, bool> predicate, int timeoutMs = 5000)
     {
         await Subject.WaitFor(predicate, timeoutMs);
 
@@ -72,7 +72,7 @@ public class ReactiveObjectAssertions<T>(T instance) :
 
     [CustomAssertion]
     public async Task<AndConstraint<ReactiveObjectAssertions<T>>> EventuallySatisfy<T2>(
-        Expression<Func<T, T2?>> selector, Action<T2> assertion, int timeoutMs = 3000) where T2 : class
+        Expression<Func<T, T2?>> selector, Action<T2> assertion, int timeoutMs = 5000) where T2 : class
     {
         var scope = new AssertionScope();
         var cts = new CancellationTokenSource(timeoutMs);

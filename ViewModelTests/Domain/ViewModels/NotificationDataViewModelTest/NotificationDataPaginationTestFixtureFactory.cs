@@ -20,7 +20,7 @@ public class NotificationDataPaginationTestFixtureDataFactory(IFixture fixture, 
             .Select((x, i) =>
             {
                 x.Id = i + 1;
-                x.Name = Guid.NewGuid().ToString();
+                x.Name = $"Notification {x.Id}";
                 return x;
             })
             .Cast<INotification>()

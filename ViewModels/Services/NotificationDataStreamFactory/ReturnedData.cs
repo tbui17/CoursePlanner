@@ -1,10 +1,12 @@
 using Lib.Interfaces;
-using ViewModels.Domain;
+using Lib.Models;
 using ViewModels.Domain.NotificationDataViewModel;
 
 namespace ViewModels.Services.NotificationDataStreamFactory;
 
-public record CompleteInputData : IFilterData
+
+
+public record ReturnedData : IInputData
 {
     public IList<INotification> Notifications { get; init; } = [];
     public string FilterText { get; init; } = "";
@@ -23,4 +25,15 @@ public record CompleteInputData : IFilterData
         currentPage = CurrentPage;
         pageSize = PageSize;
     }
+}
+
+public record InputData : IInputData
+{
+    public string FilterText { get; init; } = "";
+    public string TypeFilter { get; init; } = "";
+    public ShouldNotifyIndex NotificationSelectedIndex { get; init; }
+    public int CurrentPage { get; init; }
+    public int PageSize { get; init; }
+    public IDateTimeRange DateRange { get; init; } = new DateTimeRange();
+
 }

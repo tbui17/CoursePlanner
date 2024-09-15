@@ -27,18 +27,20 @@ public class NotificationDataPaginationTest : BaseTest
                     .HaveCount(10)
                     .And.Subject.Select(s => s.Id)
                     .Should()
-                    .BeSubsetOf(oneToTen));
+                    .BeSubsetOf(oneToTen)
+            );
 
         f.Model.ChangePageCommand.Execute(2);
 
         await f.Model.Should().EventuallySatisfy(_ => { f.Model.CurrentPage.Should().Be(2); });
 
         await f.Model.Should()
-            .EventuallySatisfy(x => x.PageResult, x => x.CurrentPageData.Should()
-                .HaveCount(10)
-                .And.Subject.Select(s => s.Id)
-                .Should()
-                .BeSubsetOf(elevenToTwenty)
+            .EventuallySatisfy(x => x.PageResult,
+                x => x.CurrentPageData.Should()
+                    .HaveCount(10)
+                    .And.Subject.Select(s => s.Id)
+                    .Should()
+                    .BeSubsetOf(elevenToTwenty)
             );
     }
 
@@ -46,6 +48,7 @@ public class NotificationDataPaginationTest : BaseTest
     public async Task Pages_PartitionedBy10_GreaterThan1()
     {
         var f = CreateFixture();
+        await f.ModelEventuallyHasData();
 
         await f.Model.Should()
             .EventuallySatisfy(x => x.PageResult, x => x.PageCount.Should().BeGreaterThan(1));
@@ -59,8 +62,6 @@ public class NotificationDataPaginationTest : BaseTest
 
         await f.ModelEventuallyHasData();
         f.Model.ChangePageCommand.Execute(1000);
-
-        await f.Model.Should().EventuallySatisfy(x => x.CurrentPage.Should().NotBe(1));
 
         await f.Model.Should().EventuallySatisfy(x => x.CurrentPage.Should().Be(5));
     }

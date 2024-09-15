@@ -1,0 +1,104 @@
+using FluentAssertions;
+using FluentAssertions.Execution;
+using Lib.Interfaces;
+using Lib.Models;
+using ViewModels.Domain.NotificationDataViewModel;
+using ViewModels.Services.NotificationDataStreamFactory;
+using ViewModelTests.TestSetup;
+
+namespace ViewModelTests.Domain.ViewModels.NotificationDataViewModelTest;
+
+public class PageResultTest : BaseTest
+{
+    private static ReturnedData CreateReturnedData()
+    {
+        var data = CreateNotificationData();
+        // should cause no filters to be applied
+        var input = new ReturnedData
+        {
+            Notifications = data,
+            FilterText = "",
+            TypeFilter = "",
+            NotificationSelectedIndex = ShouldNotifyIndex.None,
+            CurrentPage = 1,
+            PageSize = 10,
+        };
+
+        return input;
+    }
+
+    private static IList<INotification> CreateNotificationData()
+    {
+        var dateRange = new DateTimeRange
+        {
+            Start = new DateTime(2000, 1, 1),
+            End = new DateTime(2000, 2, 1)
+        };
+
+        var data = Enumerable.Range(1, 50)
+            .Select(x => new NotificationData
+                {
+                    Id = x,
+                    Name = $"Notification {x}",
+                    Start = dateRange.Start,
+                    End = dateRange.End,
+                    ShouldNotify = true
+                }
+            )
+            .Cast<INotification>()
+            .ToList()
+            .As<IList<INotification>>();
+        return data;
+    }
+
+    [Test]
+    public void AssertTestDataValid()
+    {
+        var data = CreateReturnedData();
+        data.ValidateFull();
+    }
+
+    [Test]
+    public void PageCount_NoFilters50Items10PageSize_ShouldBe5()
+    {
+        var data = CreateReturnedData();
+        var res = Resolve<PageResultFactory>()
+            .Create(data);
+
+        // TODO: refactor into separate tests
+        res.PageCount.Should().Be(5);
+        res.ItemCount.Should().Be(10);
+    }
+}
+
+file static class ValidationExtensions
+{
+    public static void Validate(this INotification data)
+    {
+        using var _ = new AssertionScope();
+        data.Start.Should().BeBefore(data.End);
+        data.Name.Should().NotBeNullOrEmpty();
+        data.Id.Should().BePositive().And.NotBe(0);
+    }
+
+    public static void Validate(this ReturnedData data)
+    {
+        using var _ = new AssertionScope();
+        data.CurrentPage.Should().BePositive().And.NotBe(0);
+        data.PageSize.Should().BePositive().And.NotBe(0);
+        data.FilterText.Should().NotBeNull();
+        data.TypeFilter.Should().NotBeNull();
+        data.NotificationSelectedIndex.Should().Be(ShouldNotifyIndex.None);
+    }
+
+    public static void ValidateFull(this ReturnedData data)
+    {
+        using var _ = new AssertionScope();
+        data.Validate();
+        data.Notifications
+            .Should()
+            .NotBeNullOrEmpty()
+            .And.AllSatisfy(x => x.Validate())
+            .And.HaveCount(50);
+    }
+}

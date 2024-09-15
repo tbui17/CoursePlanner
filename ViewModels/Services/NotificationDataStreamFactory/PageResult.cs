@@ -14,30 +14,30 @@ public interface IPageResult
 
 public record EmptyPageResult : IPageResult
 {
-    public int PageCount { get; init; } = 0;
-    public int ItemCount { get; init; } = 0;
-    public int CurrentPage { get; init; } = 1;
-    public IReadOnlyList<INotification> CurrentPageData { get; init; } = [];
+    public int PageCount { get; } = 0;
+    public int ItemCount { get; } = 0;
+    public int CurrentPage { get; } = 1;
+    public IReadOnlyList<INotification> CurrentPageData { get; } = [];
 }
 
-public class PageResult(Func<INotification, bool> filter, CompleteInputData data) : IPageResult
+public class PageResult(Func<INotification, bool> filter, ReturnedData data) : IPageResult
 {
-    private CompleteInputData Data => data;
-    private int PageIndex => Math.Max(0, Data.CurrentPage - 1);
-    private int PartitionSize => Math.Max(1, Data.PageSize);
-    public int PageCount => Data.Notifications.Count.DivideRoundedUp(PartitionSize);
-    public int TotalItemCount => Data.Notifications.Count;
+    internal ReturnedData Data => data;
+    internal int PageIndex => Math.Max(0, Data.CurrentPage - 1);
+    internal int PartitionSize => Math.Max(1, Data.PageSize);
+    public int PageCount => TotalItemCount.DivideRoundedUp(PartitionSize);
+    internal int TotalItemCount => Data.Notifications.Count;
     public int CurrentPage => Data.CurrentPage;
     private IReadOnlyList<INotification>? _pageData;
     public IReadOnlyList<INotification> CurrentPageData => _pageData ??= GetCurrentPage();
     public int ItemCount => CurrentPageData.Count;
 
-    private ParallelQuery<INotification> GetFilteredData()
+    internal ParallelQuery<INotification> GetFilteredData()
     {
         return Data.Notifications.AsParallel().Where(filter).OrderBy(x => x.Id);
     }
 
-    private List<INotification[]> GetPaginatedData() =>
+    internal List<INotification[]> GetPaginatedData() =>
         GetFilteredData()
             .Chunk(PartitionSize)
             .ToList();
@@ -51,7 +51,7 @@ public class PageResult(Func<INotification, bool> filter, CompleteInputData data
 [Inject]
 public class PageResultFactory
 {
-    public PageResult Create(CompleteInputData data)
+    public PageResult Create(ReturnedData data)
     {
         var factory = new NotificationDataFilterFactory(data);
         var filter = factory.CreateFilter();

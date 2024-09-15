@@ -44,7 +44,7 @@ public class NotificationDataStreamService(
                 inputSource.CurrentPage,
                 inputSource.PageSize
             )
-            .Select(x => new CompleteInputData
+            .Select(x => new ReturnedData
                 {
                     Notifications = x.Item1,
                     FilterText = x.Item2,
