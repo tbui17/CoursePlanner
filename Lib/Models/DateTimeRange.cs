@@ -4,6 +4,16 @@ namespace Lib.Models;
 
 public record DateTimeRange : IDateTimeRange
 {
-    public DateTime Start { get; set; }
-    public DateTime End { get; set; }
+    public DateTimeRange(){}
+
+    public DateTimeRange(DateTime start, DateTime end)
+    {
+        Start = start;
+        End = end;
+    }
+
+
+
+    public DateTime Start { get; init; }
+    public DateTime End { get; init; }
 }

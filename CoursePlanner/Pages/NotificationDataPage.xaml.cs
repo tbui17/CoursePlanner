@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Reactive;
 using System.Reactive.Linq;
-using Lib.Utils;
 using Plainer.Maui.Controls;
 using ReactiveUI;
 using ViewModels.Domain.NotificationDataViewModel;
@@ -40,19 +39,19 @@ public partial class NotificationDataPage : IRefreshableView<NotificationDataVie
     private void Bind()
     {
         // bind dates
-        StartDatePickerField.DatePickerView.Thru(ToDateSelectedObservable)
-            .Select(x => x.EventArgs.NewDate)
-            .Subscribe(x => ViewModel.ChangeStartDateCommand.Execute(x));
+        StartDatePickerField.DatePickerView
+            .ToDateSelectedObservable()
+            .Select(x => x.EventArgs)
+            .Subscribe(ViewModel.ChangeStartDate);
 
-        this.WhenAnyValue(x => x.ViewModel.Start)
-            .BindTo(this, x => x.StartDatePickerField.Date);
+        ViewModel.StartDateObservable.BindTo(this, x => x.StartDatePickerField.Date);
 
-        this.WhenAnyValue(x => x.ViewModel.End)
-            .BindTo(this, x => x.EndDatePickerField.Date);
+        EndDatePickerField.DatePickerView
+            .ToDateSelectedObservable()
+            .Select(x => x.EventArgs)
+            .Subscribe(ViewModel.ChangeEndDate);
 
-        EndDatePickerField.DatePickerView.Thru(ToDateSelectedObservable)
-            .Select(x => x.EventArgs.NewDate)
-            .Subscribe(x => ViewModel.ChangeEndDateCommand.Execute(x));
+        ViewModel.EndDateObservable.BindTo(this, x => x.EndDatePickerField.Date);
 
 
         // text filters
@@ -117,12 +116,13 @@ public partial class NotificationDataPage : IRefreshableView<NotificationDataVie
             x => x.ClearButton.Command
         );
     }
+}
 
-    private static IObservable<EventPattern<DateChangedEventArgs>> ToDateSelectedObservable(DatePickerView view)
-    {
-        return Observable.FromEventPattern<DateChangedEventArgs>(
+file static class ObservableExtensions
+{
+    public static IObservable<EventPattern<DateChangedEventArgs>> ToDateSelectedObservable(this DatePickerView view) =>
+        Observable.FromEventPattern<DateChangedEventArgs>(
             h => view.DateSelected += h,
             h => view.DateSelected -= h
         );
-    }
 }

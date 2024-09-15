@@ -4,7 +4,6 @@ using DynamicData;
 using Lib.Attributes;
 using Lib.Services.NotificationService;
 using ReactiveUI;
-using ViewModels.Config;
 
 namespace ViewModels.Domain.NotificationDataViewModel;
 

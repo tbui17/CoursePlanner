@@ -1,4 +1,7 @@
 using FluentAssertions;
+using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
+using ViewModels.Domain.NotificationDataViewModel;
 using ViewModelTests.TestSetup;
 using ViewModelTests.Utils;
 
@@ -7,23 +10,23 @@ namespace ViewModelTests.Domain.ViewModels.NotificationDataViewModelTest;
 public class DateValidationTest : BaseTest
 {
     [Test]
-    public async Task Dates_StartGtEnd_CapsAtEnd()
+    public async Task ChangeStartDate_StartGtEnd_CapsAtEnd()
     {
         var f = Resolve<NotificationDataPaginationTestFixture>();
 
         var today = DateTime.Today.Date;
         var tomorrow = today.AddDays(1);
-        f.Model.ChangeStartDateCommand.Execute(today);
-        f.Model.ChangeEndDateCommand.Execute(tomorrow);
+        f.Model.ChangeStartDate(today);
+        f.Model.ChangeEndDate(tomorrow);
 
         var dayAfter = tomorrow.AddDays(1);
-        f.Model.ChangeStartDateCommand.Execute(dayAfter);
+        f.Model.ChangeStartDate(dayAfter);
 
-        await f.Model.Should().EventuallySatisfy(x => x.Start.Should().Be(tomorrow).And.Be(f.Model.End));
+        await f.Model.Should().EventuallySatisfy(x => x.Start.Should().Be(tomorrow).And.Be(x.End));
     }
 
     [Test]
-    public async Task Dates_EndLtStart_CapsAtStart()
+    public async Task ChangeEndDate_EndLtStart_CapsAtStart()
     {
         var f = Resolve<NotificationDataPaginationTestFixture>();
 
@@ -33,13 +36,13 @@ public class DateValidationTest : BaseTest
 
         var setRangeToTodayAndTomorrow = () =>
             {
-                f.Model.ChangeStartDateCommand.Execute(today);
-                f.Model.ChangeEndDateCommand.Execute(tomorrow);
+                f.Model.ChangeStartDate(today);
+                f.Model.ChangeEndDate(tomorrow);
             };
 
         var setEndToYesterday = () =>
         {
-            f.Model.ChangeEndDateCommand.Execute(yesterday);
+            f.Model.ChangeEndDate(yesterday);
 
         };
 
@@ -47,6 +50,36 @@ public class DateValidationTest : BaseTest
         setRangeToTodayAndTomorrow();
         setEndToYesterday();
 
-        await f.Model.Should().EventuallySatisfy(x => x.End.Should().Be(today).And.Be(f.Model.Start));
+        await f.Model.Should().EventuallySatisfy(x => x.End.Should().Be(today).And.Be(x.End));
+    }
+
+    [Test]
+    public async Task ChangeStartDate_EqualToOver_CapsAtEnd()
+    {
+        var f = Resolve<NotificationDataPaginationTestFixture>();
+
+        var today = DateTime.Today.Date;
+        f.Model.ChangeStartDate(today);
+        f.Model.ChangeEndDate(today);
+
+        var dayAfter = today.AddDays(1);
+        f.Model.ChangeStartDate(dayAfter);
+
+        await f.Model.Should().EventuallySatisfy(x => x.Start.Should().Be(today).And.Be(x.End));
+    }
+
+    [Test]
+    public async Task ChangeEndDate_EqualToOver_CapsAtStart()
+    {
+        var f = Resolve<NotificationDataPaginationTestFixture>();
+
+        var today = DateTime.Today.Date;
+        f.Model.ChangeStartDate(today);
+        f.Model.ChangeEndDate(today);
+
+        var yesterday = today.AddDays(-1);
+        f.Model.ChangeEndDate(yesterday);
+
+        await f.Model.Should().EventuallySatisfy(x => x.Start.Should().Be(today).And.Be(x.End));
     }
 }

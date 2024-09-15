@@ -12,7 +12,7 @@ public class CallTest : BaseTest
     {
         var f = Resolve<NotificationDataPaginationTestFixture>();
 
-        await f.Model.Should().EventuallySatisfy(x => x.PageResult?.CurrentPageData.Should().HaveCountGreaterThan(1));
+        await f.Model.Should().EventuallySatisfy(x => x.PageResult.CurrentPageData.Should().HaveCountGreaterThan(1));
 
 
         f.DataService.ShouldCall(x => nameof(x.GetNotificationsWithinDateRange), 1);

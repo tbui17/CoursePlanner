@@ -29,7 +29,7 @@ public class InitializationTest : BasePageViewModelTest
     public async Task Properties_Initialize_UpdateWithDbValues()
     {
         var model = Resolve<NotificationDataViewModel>();
-        model.ChangeStartDateCommand.Execute(DateTime.Now.AddMinutes(-2));
+        model.ChangeStartDate(DateTime.Now.AddMinutes(-2));
         await model.Should().EventuallyHave(x => x.PageResult.CurrentPageData.Count > 1);
 
         model.PageResult.CurrentPageData.Should()
@@ -43,7 +43,7 @@ public class InitializationTest : BasePageViewModelTest
     public async Task Properties_UserInput_UpdateWithDbValues()
     {
         var model = Resolve<NotificationDataViewModel>();
-        model.ChangeStartDateCommand.Execute(DateTime.Now.AddMinutes(-2));
+        model.ChangeStartDate(DateTime.Now.AddMinutes(-2));
         const string filter = "Assessment";
         model.FilterText = filter;
 

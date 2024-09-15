@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Windows.Input;
 using Lib.Attributes;
 using Microsoft.Extensions.Logging;
@@ -8,6 +9,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using ViewModels.Interfaces;
 using ViewModels.Services.NotificationDataStreamFactory;
+using OneOf;
 
 namespace ViewModels.Domain.NotificationDataViewModel;
 
@@ -17,10 +19,10 @@ partial class NotificationDataViewModel
     public string FilterText { get; set; }
 
     [Reactive]
-    public DateTime Start { get; private set; }
+    public DateTime Start { get; internal set; }
 
     [Reactive]
-    public DateTime End { get; private set; }
+    public DateTime End { get; internal set; }
 
     [Reactive]
     public string TypeFilter { get; set; }
@@ -38,6 +40,12 @@ partial class NotificationDataViewModel
     [Reactive]
     public int PageSize { get; set; }
 
+    internal readonly Subject<DateTime> _startDateOverride = new();
+    internal readonly Subject<DateTime> _endDateOverride = new();
+
+
+    public IObservable<DateTime> StartDateObservable { get; }
+    public IObservable<DateTime> EndDateObservable { get; }
 
     private readonly ObservableAsPropertyHelper<IPageResult> _pageResult;
     public IPageResult PageResult => _pageResult.Value;
@@ -45,8 +53,6 @@ partial class NotificationDataViewModel
 
     public ICommand ChangePageCommand { get; }
     public ICommand ClearCommand { get; }
-    public ICommand ChangeStartDateCommand { get; set; }
-    public ICommand ChangeEndDateCommand { get; set; }
 }
 
 [Inject]
@@ -89,6 +95,9 @@ public partial class NotificationDataViewModel : ReactiveObject, INotificationFi
             .Do(x => _logger.LogInformation("Page result {PageResult}", x))
             .ToProperty(this, x => x.PageResult, scheduler: RxApp.MainThreadScheduler);
 
+        StartDateObservable = this.WhenAnyValue(x => x.Start).Merge(_startDateOverride);
+        EndDateObservable = this.WhenAnyValue(x => x.End).Merge(_endDateOverride);
+
         #endregion
 
 
@@ -96,25 +105,21 @@ public partial class NotificationDataViewModel : ReactiveObject, INotificationFi
 
         ChangePageCommand = ReactiveCommand.Create<int>(page =>
             {
-                var max = GetOrThrowMaxPage();
+                if (GetMaxPage() is not { } max)
+                {
+                    return;
+                }
 
 
                 var newPage = Math.Clamp(page, 1, max);
                 CurrentPage = newPage;
                 return;
 
-                int GetOrThrowMaxPage()
+                int? GetMaxPage()
                 {
                     if (PageResult is not { PageCount: var pageCount and > 0 })
                     {
-                        var err = new UnreachableException("Unexpected page result state.");
-                        logger.LogError(err,
-                            "Unexpected page result state. {PageResult} {Page} {CurrentPage}",
-                            PageResult,
-                            page,
-                            CurrentPage
-                        );
-                        throw err;
+                        return null;
                     }
 
                     return pageCount;
@@ -125,54 +130,62 @@ public partial class NotificationDataViewModel : ReactiveObject, INotificationFi
         ClearCommand = ReactiveCommand.Create(() =>
             {
                 _logger.LogDebug("Clearing filters");
-                var today = DateTime.Today.Date;
-                Start = new DateTime(today.Year, today.Month, today.Day);
-                End = new DateTime(today.Year, today.Month, DateTime.DaysInMonth(today.Year, today.Month));
+                var dateRange2 = defaultsProvider.DateRange;
+                Start = dateRange2.Start;
+                End = dateRange2.End;
                 FilterText = "";
                 TypeFilter = "";
                 SelectedNotificationOptionIndex = 0;
             }
         );
 
-        ChangeStartDateCommand = ReactiveCommand.Create<DateTime>(newStart =>
-            {
-                if (newStart > End)
-                {
-                    Start = End;
-                    return;
-                }
-
-                if (newStart == Start)
-                {
-                    Refresh();
-                    return;
-                }
-
-                Start = newStart;
-            }
-        );
-
-        ChangeEndDateCommand = ReactiveCommand.Create<DateTime>(newEnd =>
-            {
-                if (Start > newEnd)
-                {
-                    End = Start;
-                    return;
-                }
-
-                if (newEnd == End)
-                {
-                    Refresh();
-                    return;
-                }
-
-                End = newEnd;
-            }
-        );
-
         #endregion
     }
 
+
+    internal void ChangeEndDate(DateTime newEnd)
+    {
+        if (Start > newEnd)
+        {
+            End = Start;
+            return;
+        }
+
+        End = newEnd;
+    }
+
+    public void ChangeEndDate(DateChangedEventArgs args)
+    {
+        if (args.OldDate == End && args.NewDate < Start)
+        {
+            _endDateOverride.OnNext(Start);
+            return;
+        }
+
+        ChangeEndDate(args.NewDate);
+    }
+
+    internal void ChangeStartDate(DateTime newStart)
+    {
+        if (newStart > End)
+        {
+            Start = End;
+            return;
+        }
+
+        Start = newStart;
+    }
+
+    public void ChangeStartDate(DateChangedEventArgs dateChangedEventArgs)
+    {
+        if (dateChangedEventArgs.OldDate == Start && dateChangedEventArgs.NewDate > End)
+        {
+            _startDateOverride.OnNext(End);
+            return;
+        }
+
+        ChangeStartDate(dateChangedEventArgs.NewDate);
+    }
 
     private void Refresh()
     {
