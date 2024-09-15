@@ -27,18 +27,20 @@ public class NotificationDataPaginationTest : BaseTest
                     .HaveCount(10)
                     .And.Subject.Select(s => s.Id)
                     .Should()
-                    .BeSubsetOf(oneToTen));
+                    .BeSubsetOf(oneToTen)
+            );
 
         f.Model.ChangePageCommand.Execute(2);
 
         await f.Model.Should().EventuallySatisfy(_ => { f.Model.CurrentPage.Should().Be(2); });
 
         await f.Model.Should()
-            .EventuallySatisfy(x => x.PageResult, x => x.CurrentPageData.Should()
-                .HaveCount(10)
-                .And.Subject.Select(s => s.Id)
-                .Should()
-                .BeSubsetOf(elevenToTwenty)
+            .EventuallySatisfy(x => x.PageResult,
+                x => x.CurrentPageData.Should()
+                    .HaveCount(10)
+                    .And.Subject.Select(s => s.Id)
+                    .Should()
+                    .BeSubsetOf(elevenToTwenty)
             );
     }
 
