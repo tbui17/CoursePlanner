@@ -2,6 +2,7 @@ using AutoFixture;
 using Lib.Interfaces;
 using Lib.Services.NotificationService;
 using Moq;
+using Moq.Language.Flow;
 using ViewModels.Domain.NotificationDataViewModel;
 using ViewModelTests.Utils;
 
@@ -31,6 +32,12 @@ public class NotificationDataPaginationTestFixture
             .Chunk(10)
             .ElementAt(index)
             .ToList();
+    }
+
+    public ISetup<INotificationDataService, Task<IList<INotification>>> SetupGetNotificationsWithinDateRange(IDateTimeRange? range = null)
+    {
+        range??= It.IsAny<IDateTimeRange>();
+        return DataService.Setup(x => x.GetNotificationsWithinDateRange(range));
     }
 
     public List<int> GetIdSubset(int index)
