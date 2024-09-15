@@ -48,6 +48,7 @@ public class NotificationDataPaginationTest : BaseTest
     public async Task Pages_PartitionedBy10_GreaterThan1()
     {
         var f = CreateFixture();
+        await f.ModelEventuallyHasData();
 
         await f.Model.Should()
             .EventuallySatisfy(x => x.PageResult, x => x.PageCount.Should().BeGreaterThan(1));
