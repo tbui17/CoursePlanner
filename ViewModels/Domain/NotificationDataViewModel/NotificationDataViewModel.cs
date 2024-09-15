@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Windows.Input;
 using Lib.Attributes;
 using Microsoft.Extensions.Logging;
@@ -8,8 +9,12 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using ViewModels.Interfaces;
 using ViewModels.Services.NotificationDataStreamFactory;
+using OneOf;
 
 namespace ViewModels.Domain.NotificationDataViewModel;
+
+
+using DateArgs = OneOf<DateTime, DateChangedEventArgs>;
 
 partial class NotificationDataViewModel
 {
@@ -17,10 +22,10 @@ partial class NotificationDataViewModel
     public string FilterText { get; set; }
 
     [Reactive]
-    public DateTime Start { get; private set; }
+    public DateTime Start { get; internal set; }
 
     [Reactive]
-    public DateTime End { get; private set; }
+    public DateTime End { get; internal set; }
 
     [Reactive]
     public string TypeFilter { get; set; }
@@ -38,6 +43,12 @@ partial class NotificationDataViewModel
     [Reactive]
     public int PageSize { get; set; }
 
+    internal readonly Subject<DateTime> _startDateOverride = new();
+    internal readonly Subject<DateTime> _endDateOverride = new();
+
+
+    public IObservable<DateTime> StartDateObservable { get; }
+    public IObservable<DateTime> EndDateObservable { get; }
 
     private readonly ObservableAsPropertyHelper<IPageResult> _pageResult;
     public IPageResult PageResult => _pageResult.Value;
@@ -45,8 +56,6 @@ partial class NotificationDataViewModel
 
     public ICommand ChangePageCommand { get; }
     public ICommand ClearCommand { get; }
-    public ICommand ChangeStartDateCommand { get; set; }
-    public ICommand ChangeEndDateCommand { get; set; }
 }
 
 [Inject]
@@ -64,6 +73,7 @@ public partial class NotificationDataViewModel : ReactiveObject, INotificationFi
     )
     {
         #region init
+
 
         _notificationFilterService = notificationFilterService;
         _logger = logger;
@@ -88,6 +98,9 @@ public partial class NotificationDataViewModel : ReactiveObject, INotificationFi
         _pageResult = notificationFilterService.Connect(this)
             .Do(x => _logger.LogInformation("Page result {PageResult}", x))
             .ToProperty(this, x => x.PageResult, scheduler: RxApp.MainThreadScheduler);
+
+        StartDateObservable = this.WhenAnyValue(x => x.Start).Merge(_startDateOverride);
+        EndDateObservable = this.WhenAnyValue(x => x.End).Merge(_endDateOverride);
 
         #endregion
 
@@ -125,54 +138,80 @@ public partial class NotificationDataViewModel : ReactiveObject, INotificationFi
         ClearCommand = ReactiveCommand.Create(() =>
             {
                 _logger.LogDebug("Clearing filters");
-                var today = DateTime.Today.Date;
-                Start = new DateTime(today.Year, today.Month, today.Day);
-                End = new DateTime(today.Year, today.Month, DateTime.DaysInMonth(today.Year, today.Month));
+                var dateRange2 = defaultsProvider.DateRange;
+                Start = dateRange2.Start;
+                End = dateRange2.End;
                 FilterText = "";
                 TypeFilter = "";
                 SelectedNotificationOptionIndex = 0;
             }
         );
 
-        ChangeStartDateCommand = ReactiveCommand.Create<DateTime>(newStart =>
-            {
-                if (newStart > End)
-                {
-                    Start = End;
-                    return;
-                }
-
-                if (newStart == Start)
-                {
-                    Refresh();
-                    return;
-                }
-
-                Start = newStart;
-            }
-        );
-
-        ChangeEndDateCommand = ReactiveCommand.Create<DateTime>(newEnd =>
-            {
-                if (Start > newEnd)
-                {
-                    End = Start;
-                    return;
-                }
-
-                if (newEnd == End)
-                {
-                    Refresh();
-                    return;
-                }
-
-                End = newEnd;
-            }
-        );
-
         #endregion
     }
 
+    public void ChangeDate(DateState snapshot)
+    {
+        var handler = new HandlerFactory(this).Create(snapshot);
+        handler.Invoke();
+    }
+
+    internal void ChangeEndDate(DateArgs args)
+    {
+        args.Switch(HandleDateTime, HandleDateChangedEventArgs);
+
+        return;
+
+        void HandleDateTime(DateTime newEnd)
+        {
+            if (Start > newEnd)
+            {
+                End = Start;
+                return;
+            }
+
+            End = newEnd;
+        }
+
+        void HandleDateChangedEventArgs(DateChangedEventArgs dargs)
+        {
+            if (dargs.OldDate == End && dargs.NewDate < Start)
+            {
+                _endDateOverride.OnNext(Start);
+                return;
+            }
+
+            HandleDateTime(dargs.NewDate);
+        }
+    }
+
+    internal void ChangeStartDate(DateArgs args)
+    {
+        args.Switch(HandleDateTime, HandleDateChangedEventArgs);
+        return;
+
+        void HandleDateTime(DateTime newStart)
+        {
+            if (newStart > End)
+            {
+                Start = End;
+                return;
+            }
+
+            Start = newStart;
+        }
+
+        void HandleDateChangedEventArgs(DateChangedEventArgs dateChangedEventArgs)
+        {
+            if (dateChangedEventArgs.OldDate == Start && dateChangedEventArgs.NewDate > End)
+            {
+                _startDateOverride.OnNext(End);
+                return;
+            }
+
+            HandleDateTime(dateChangedEventArgs.NewDate);
+        }
+    }
 
     private void Refresh()
     {

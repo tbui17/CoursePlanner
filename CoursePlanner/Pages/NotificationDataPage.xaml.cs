@@ -1,6 +1,8 @@
 ﻿using System.Collections;
+using System.ComponentModel;
 using System.Reactive;
 using System.Reactive.Linq;
+using Lib.Interfaces;
 using Lib.Utils;
 using Plainer.Maui.Controls;
 using ReactiveUI;
@@ -40,19 +42,39 @@ public partial class NotificationDataPage : IRefreshableView<NotificationDataVie
     private void Bind()
     {
         // bind dates
-        StartDatePickerField.DatePickerView.Thru(ToDateSelectedObservable)
-            .Select(x => x.EventArgs.NewDate)
-            .Subscribe(x => ViewModel.ChangeStartDateCommand.Execute(x));
+        StartDatePickerField.DatePickerView
+            .Thru(ToDateSelectedObservable)
+            .Select(x => x.EventArgs)
+            .Subscribe(x => ViewModel.ChangeDate(new DateState
+                    {
+                        Args = new DateStartChangedArgs
+                        {
+                            NewDate = x.NewDate,
+                            OldDate = x.OldDate
+                        },
+                        ModelRange = ViewModel
+                    }
+                )
+            );
 
-        this.WhenAnyValue(x => x.ViewModel.Start)
-            .BindTo(this, x => x.StartDatePickerField.Date);
+        ViewModel.StartDateObservable.BindTo(this, x => x.StartDatePickerField.Date);
 
-        this.WhenAnyValue(x => x.ViewModel.End)
-            .BindTo(this, x => x.EndDatePickerField.Date);
+        EndDatePickerField.DatePickerView
+            .Thru(ToDateSelectedObservable)
+            .Select(x => x.EventArgs)
+            .Subscribe(x => ViewModel.ChangeDate(new DateState
+                    {
+                        Args = new DateEndChangedArgs
+                        {
+                            NewDate = x.NewDate,
+                            OldDate = x.OldDate
+                        },
+                        ModelRange = ViewModel
+                    }
+                )
+            );
 
-        EndDatePickerField.DatePickerView.Thru(ToDateSelectedObservable)
-            .Select(x => x.EventArgs.NewDate)
-            .Subscribe(x => ViewModel.ChangeEndDateCommand.Execute(x));
+        ViewModel.EndDateObservable.BindTo(this, x => x.EndDatePickerField.Date);
 
 
         // text filters
@@ -117,6 +139,14 @@ public partial class NotificationDataPage : IRefreshableView<NotificationDataVie
             x => x.ClearButton.Command
         );
     }
+
+    // private void OnViewModelOnPropertyChanged(object? sender, PropertyChangedEventArgs args)
+    // {
+    //     if (args.PropertyName == nameof(ViewModel.Start))
+    //     {
+    //         StartDatePickerField.Date = ViewModel.Start;
+    //     }
+    // }
 
     private static IObservable<EventPattern<DateChangedEventArgs>> ToDateSelectedObservable(DatePickerView view)
     {
