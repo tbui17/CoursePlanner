@@ -1,9 +1,6 @@
 ﻿using System.Collections;
-using System.ComponentModel;
 using System.Reactive;
 using System.Reactive.Linq;
-using Lib.Interfaces;
-using Lib.Utils;
 using Plainer.Maui.Controls;
 using ReactiveUI;
 using ViewModels.Domain.NotificationDataViewModel;
@@ -43,36 +40,16 @@ public partial class NotificationDataPage : IRefreshableView<NotificationDataVie
     {
         // bind dates
         StartDatePickerField.DatePickerView
-            .Thru(ToDateSelectedObservable)
+            .ToDateSelectedObservable()
             .Select(x => x.EventArgs)
-            .Subscribe(x => ViewModel.ChangeDate(new DateState
-                    {
-                        Args = new DateStartChangedArgs
-                        {
-                            NewDate = x.NewDate,
-                            OldDate = x.OldDate
-                        },
-                        ModelRange = ViewModel
-                    }
-                )
-            );
+            .Subscribe(ViewModel.ChangeStartDate);
 
         ViewModel.StartDateObservable.BindTo(this, x => x.StartDatePickerField.Date);
 
         EndDatePickerField.DatePickerView
-            .Thru(ToDateSelectedObservable)
+            .ToDateSelectedObservable()
             .Select(x => x.EventArgs)
-            .Subscribe(x => ViewModel.ChangeDate(new DateState
-                    {
-                        Args = new DateEndChangedArgs
-                        {
-                            NewDate = x.NewDate,
-                            OldDate = x.OldDate
-                        },
-                        ModelRange = ViewModel
-                    }
-                )
-            );
+            .Subscribe(ViewModel.ChangeEndDate);
 
         ViewModel.EndDateObservable.BindTo(this, x => x.EndDatePickerField.Date);
 
@@ -139,20 +116,13 @@ public partial class NotificationDataPage : IRefreshableView<NotificationDataVie
             x => x.ClearButton.Command
         );
     }
+}
 
-    // private void OnViewModelOnPropertyChanged(object? sender, PropertyChangedEventArgs args)
-    // {
-    //     if (args.PropertyName == nameof(ViewModel.Start))
-    //     {
-    //         StartDatePickerField.Date = ViewModel.Start;
-    //     }
-    // }
-
-    private static IObservable<EventPattern<DateChangedEventArgs>> ToDateSelectedObservable(DatePickerView view)
-    {
-        return Observable.FromEventPattern<DateChangedEventArgs>(
+file static class ObservableExtensions
+{
+    public static IObservable<EventPattern<DateChangedEventArgs>> ToDateSelectedObservable(this DatePickerView view) =>
+        Observable.FromEventPattern<DateChangedEventArgs>(
             h => view.DateSelected += h,
             h => view.DateSelected -= h
         );
-    }
 }

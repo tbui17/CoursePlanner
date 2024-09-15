@@ -13,9 +13,6 @@ using OneOf;
 
 namespace ViewModels.Domain.NotificationDataViewModel;
 
-
-using DateArgs = OneOf<DateTime, DateChangedEventArgs>;
-
 partial class NotificationDataViewModel
 {
     [Reactive]
@@ -74,7 +71,6 @@ public partial class NotificationDataViewModel : ReactiveObject, INotificationFi
     {
         #region init
 
-
         _notificationFilterService = notificationFilterService;
         _logger = logger;
 
@@ -109,25 +105,21 @@ public partial class NotificationDataViewModel : ReactiveObject, INotificationFi
 
         ChangePageCommand = ReactiveCommand.Create<int>(page =>
             {
-                var max = GetOrThrowMaxPage();
+                if (GetMaxPage() is not { } max)
+                {
+                    return;
+                }
 
 
                 var newPage = Math.Clamp(page, 1, max);
                 CurrentPage = newPage;
                 return;
 
-                int GetOrThrowMaxPage()
+                int? GetMaxPage()
                 {
                     if (PageResult is not { PageCount: var pageCount and > 0 })
                     {
-                        var err = new UnreachableException("Unexpected page result state.");
-                        logger.LogError(err,
-                            "Unexpected page result state. {PageResult} {Page} {CurrentPage}",
-                            PageResult,
-                            page,
-                            CurrentPage
-                        );
-                        throw err;
+                        return null;
                     }
 
                     return pageCount;
@@ -150,67 +142,49 @@ public partial class NotificationDataViewModel : ReactiveObject, INotificationFi
         #endregion
     }
 
-    public void ChangeDate(DateState snapshot)
+
+    internal void ChangeEndDate(DateTime newEnd)
     {
-        var handler = new HandlerFactory(this).Create(snapshot);
-        handler.Invoke();
+        if (Start > newEnd)
+        {
+            End = Start;
+            return;
+        }
+
+        End = newEnd;
     }
 
-    internal void ChangeEndDate(DateArgs args)
+    public void ChangeEndDate(DateChangedEventArgs args)
     {
-        args.Switch(HandleDateTime, HandleDateChangedEventArgs);
-
-        return;
-
-        void HandleDateTime(DateTime newEnd)
+        if (args.OldDate == End && args.NewDate < Start)
         {
-            if (Start > newEnd)
-            {
-                End = Start;
-                return;
-            }
-
-            End = newEnd;
+            _endDateOverride.OnNext(Start);
+            return;
         }
 
-        void HandleDateChangedEventArgs(DateChangedEventArgs dargs)
-        {
-            if (dargs.OldDate == End && dargs.NewDate < Start)
-            {
-                _endDateOverride.OnNext(Start);
-                return;
-            }
-
-            HandleDateTime(dargs.NewDate);
-        }
+        ChangeEndDate(args.NewDate);
     }
 
-    internal void ChangeStartDate(DateArgs args)
+    internal void ChangeStartDate(DateTime newStart)
     {
-        args.Switch(HandleDateTime, HandleDateChangedEventArgs);
-        return;
-
-        void HandleDateTime(DateTime newStart)
+        if (newStart > End)
         {
-            if (newStart > End)
-            {
-                Start = End;
-                return;
-            }
-
-            Start = newStart;
+            Start = End;
+            return;
         }
 
-        void HandleDateChangedEventArgs(DateChangedEventArgs dateChangedEventArgs)
-        {
-            if (dateChangedEventArgs.OldDate == Start && dateChangedEventArgs.NewDate > End)
-            {
-                _startDateOverride.OnNext(End);
-                return;
-            }
+        Start = newStart;
+    }
 
-            HandleDateTime(dateChangedEventArgs.NewDate);
+    public void ChangeStartDate(DateChangedEventArgs dateChangedEventArgs)
+    {
+        if (dateChangedEventArgs.OldDate == Start && dateChangedEventArgs.NewDate > End)
+        {
+            _startDateOverride.OnNext(End);
+            return;
         }
+
+        ChangeStartDate(dateChangedEventArgs.NewDate);
     }
 
     private void Refresh()
