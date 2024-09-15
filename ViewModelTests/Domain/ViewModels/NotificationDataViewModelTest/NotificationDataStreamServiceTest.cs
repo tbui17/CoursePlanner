@@ -6,6 +6,7 @@ using FluentAssertions.Extensions;
 using Lib.Models;
 using Microsoft.Extensions.Logging.Testing;
 using ReactiveUI;
+using Serilog;
 using ViewModels.Domain.NotificationDataViewModel;
 using ViewModels.Models;
 using ViewModels.Services.NotificationDataStreamFactory;
@@ -61,7 +62,7 @@ public class NotificationDataStreamServiceTest : BaseTest
 
         var pageCount = (data.Count / 10).Should().Be(5).And.Subject;
 
-        res.PageCount.Should().Be(pageCount);
+        res.TotalPageCount.Should().Be(pageCount);
 
         res.CurrentPage.Should().Be(1);
 
@@ -84,21 +85,24 @@ public class NotificationDataStreamServiceTest : BaseTest
         );
 
         var input = CreateDefaultInputSource();
-        var name = data[0].Name;
+        var name = data.First(x => x.Name is "Notification 39").Name;
         var textFilter = (ReactiveProperty<string>)input.TextFilter;
 
         var obs = dataFactory.GetPageData(input);
 
 
         var res = await obs.FirstAsync(x => x.CurrentPageData.Count > 0)
+            .Do(x => Log.Information("Passed step 1 {Data}", x))
             .Do(_ => textFilter.Value = name)
-            .Concat(obs.FirstAsync(x => x.CurrentPageData.Count == 1))
+            .Concat(obs.FirstAsync(x => x.CurrentPageData.Count == 1)
+                .Do(x => Log.Information("Passed step 2 {Data}", x))
+            )
             .Timeout(5.Seconds());
 
         using var _ = new AssertionScope();
         res.CurrentPageData.Should().ContainSingle().And.ContainSingle(x => x.Name == name);
         res.ItemCount.Should().Be(1);
         res.CurrentPage.Should().Be(1);
-        res.PageCount.Should().Be(5);
+        res.TotalPageCount.Should().Be(5);
     }
 }

@@ -106,6 +106,6 @@ public class InitializationTest : BasePageViewModelTest
         var model = Resolve<NotificationDataViewModel>();
         await model.RefreshAsync();
 
-        await model.Should().EventuallySatisfy(x => x.PageResult, x => x.PageCount.Should().BeGreaterThan(1));
+        await model.Should().EventuallySatisfy(x => x.PageResult.TotalPageCount.Should().BeGreaterThan(1));
     }
 }
