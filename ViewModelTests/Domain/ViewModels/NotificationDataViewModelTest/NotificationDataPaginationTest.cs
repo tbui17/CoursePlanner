@@ -1,5 +1,6 @@
 using FluentAssertions;
 using FluentAssertions.Execution;
+using Moq;
 using ViewModels.Services.NotificationDataStreamFactory;
 using ViewModelTests.TestSetup;
 using ViewModelTests.Utils;
@@ -80,17 +81,22 @@ public class NotificationDataPaginationTest : BaseTest
     [Test]
     public async Task ChangePage_FilterApplied_PageCountAdjustsForReducedAmount()
     {
+        // given 50 items
         var f = CreateFixture();
+        f.SetupGetNotificationsWithinDateRange();
         await f.ModelEventuallyHasData();
+
+        // when filter applied
 
         f.Model.FilterText = "Notification 10";
 
-        await f.Model.Should()
+        await f.Model
+            .Should()
             .EventuallySatisfy(x =>
                 {
                     using var _ = new AssertionScope();
                     var page = x.PageResult;
-                    page.PageCount.Should().Be(1);
+                    page.PageCount.Should().Be(5);
                     page.ItemCount.Should().Be(1);
                     page.CurrentPageData.Should().ContainSingle();
                 }
