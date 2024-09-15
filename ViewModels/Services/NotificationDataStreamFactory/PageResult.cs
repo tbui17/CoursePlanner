@@ -10,23 +10,26 @@ public interface IPageResult
     int ItemCount { get; }
     int CurrentPage { get; }
     IReadOnlyList<INotification> CurrentPageData { get; }
+    // internal int TotalPageCount { get; }
 }
 
 public record EmptyPageResult : IPageResult
 {
-    public int PageCount { get; init; } = 0;
-    public int ItemCount { get; init; } = 0;
-    public int CurrentPage { get; init; } = 1;
-    public IReadOnlyList<INotification> CurrentPageData { get; init; } = [];
+    public int PageCount { get; } = 0;
+    public int ItemCount { get; } = 0;
+    public int CurrentPage { get; } = 1;
+    public IReadOnlyList<INotification> CurrentPageData { get; } = [];
+    // public int TotalPageCount { get; } = 0;
 }
 
 public class PageResult(Func<INotification, bool> filter, CompleteInputData data) : IPageResult
 {
-    private CompleteInputData Data => data;
-    private int PageIndex => Math.Max(0, Data.CurrentPage - 1);
-    private int PartitionSize => Math.Max(1, Data.PageSize);
-    public int PageCount => Data.Notifications.Count.DivideRoundedUp(PartitionSize);
-    public int TotalItemCount => Data.Notifications.Count;
+    internal CompleteInputData Data => data;
+    internal int PageIndex => Math.Max(0, Data.CurrentPage - 1);
+    internal int PartitionSize => Math.Max(1, Data.PageSize);
+    public int PageCount => ItemCount.DivideRoundedUp(PartitionSize);
+    public int TotalPageCount => TotalItemCount.DivideRoundedUp(PartitionSize);
+    internal int TotalItemCount => Data.Notifications.Count;
     public int CurrentPage => Data.CurrentPage;
     private IReadOnlyList<INotification>? _pageData;
     public IReadOnlyList<INotification> CurrentPageData => _pageData ??= GetCurrentPage();
