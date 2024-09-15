@@ -1,5 +1,4 @@
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Windows.Input;
@@ -9,7 +8,6 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using ViewModels.Interfaces;
 using ViewModels.Services.NotificationDataStreamFactory;
-using OneOf;
 
 namespace ViewModels.Domain.NotificationDataViewModel;
 
@@ -40,8 +38,8 @@ partial class NotificationDataViewModel
     [Reactive]
     public int PageSize { get; set; }
 
-    internal readonly Subject<DateTime> _startDateOverride = new();
-    internal readonly Subject<DateTime> _endDateOverride = new();
+    private readonly Subject<DateTime> _startDateOverride = new();
+    private readonly Subject<DateTime> _endDateOverride = new();
 
 
     public IObservable<DateTime> StartDateObservable { get; }
