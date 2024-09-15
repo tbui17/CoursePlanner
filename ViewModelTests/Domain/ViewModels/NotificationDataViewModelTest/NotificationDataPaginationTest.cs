@@ -63,8 +63,6 @@ public class NotificationDataPaginationTest : BaseTest
         await f.ModelEventuallyHasData();
         f.Model.ChangePageCommand.Execute(1000);
 
-        await f.Model.Should().EventuallySatisfy(x => x.CurrentPage.Should().NotBe(1));
-
         await f.Model.Should().EventuallySatisfy(x => x.CurrentPage.Should().Be(5));
     }
 }
