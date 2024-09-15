@@ -117,12 +117,12 @@ public partial class NotificationDataViewModel : ReactiveObject, INotificationFi
 
                 int? GetMaxPage()
                 {
-                    if (PageResult is not { PageCount: var pageCount and > 0 })
+                    if (PageResult is not PageResult { TotalPageCount: var totalPageCount and > 0 })
                     {
                         return null;
                     }
 
-                    return pageCount;
+                    return totalPageCount;
                 }
             }
         );

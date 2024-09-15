@@ -42,9 +42,11 @@ public abstract class BaseTest : IBaseTest
             .AddTransient<ISessionService, SessionService>()
             .AddTransient<AppShellViewModel>()
             .AddTransient<NotificationDataPaginationTestFixtureDataFactory>(x =>
-                new NotificationDataPaginationTestFixtureDataFactory(CreateFixture(), x))
+                new NotificationDataPaginationTestFixtureDataFactory(CreateFixture(), x)
+            )
             .AddTransient<NotificationDataPaginationTestFixture>(x =>
-                x.GetRequiredService<NotificationDataPaginationTestFixtureDataFactory>().CreateFixture());
+                x.GetRequiredService<NotificationDataPaginationTestFixtureDataFactory>().CreateFixture()
+            );
         vmConfig.AddServices();
 
         return services.BuildServiceProvider();
