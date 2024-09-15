@@ -59,12 +59,13 @@ public class PageResultTest : BaseTest
     }
 
     [Test]
-    public void Test1()
+    public void PageCount_NoFilters50Items10PageSize_ShouldBe5()
     {
         var data = CreateReturnedData();
         var res = Resolve<PageResultFactory>()
             .Create(data);
 
+        // TODO: refactor into separate tests
         res.PageCount.Should().Be(5);
         res.ItemCount.Should().Be(10);
     }
