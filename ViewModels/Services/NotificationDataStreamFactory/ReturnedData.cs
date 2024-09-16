@@ -10,6 +10,9 @@ public record ReturnedData
 {
     public IList<INotification> Notifications { get; init; } = [];
     public IPartialInputData InputData { get; init; } = new PartialInputData();
+    public int Index => InputData.CurrentPage - 1;
+
+
 }
 
 public record PartialInputData : IPartialInputData
