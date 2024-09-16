@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Windows.Input;
+using Lib;
 using Lib.Attributes;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
@@ -101,28 +102,7 @@ public partial class NotificationDataViewModel : ReactiveObject, INotificationFi
 
         #region commands
 
-        ChangePageCommand = ReactiveCommand.Create<int>(page =>
-            {
-                if (GetMaxPage() is not { } max)
-                {
-                    return;
-                }
-
-
-                var newPage = Math.Clamp(page, 1, max);
-                CurrentPage = newPage;
-                return;
-
-                int? GetMaxPage()
-                {
-                    if (PageResult is not { PageCount: var pageCount and > 0 })
-                    {
-                        return null;
-                    }
-
-                    return pageCount;
-                }
-            }
+        ChangePageCommand = ReactiveCommand.Create<int>(ChangePage
         );
 
         ClearCommand = ReactiveCommand.Create(() =>
@@ -140,6 +120,31 @@ public partial class NotificationDataViewModel : ReactiveObject, INotificationFi
         #endregion
     }
 
+    private void ChangePage(int page)
+    {
+        _logger.LogDebug("Received {Page}", page);
+        if (GetMaxPage() is not { } max)
+        {
+            return;
+        }
+
+
+        var newPage = Math.Clamp(page, 1, max);
+        _logger.LogDebug("Changing page to {NewPage}", newPage);
+        CurrentPage = newPage;
+        return;
+
+        int? GetMaxPage()
+        {
+            if (PageResult is not { PageCount: var pageCount and > 0 })
+            {
+                return null;
+            }
+
+            return pageCount;
+        }
+    }
+
 
     internal void ChangeEndDate(DateTime newEnd)
     {
@@ -148,7 +153,6 @@ public partial class NotificationDataViewModel : ReactiveObject, INotificationFi
             End = Start;
             return;
         }
-
         End = newEnd;
     }
 
@@ -156,6 +160,7 @@ public partial class NotificationDataViewModel : ReactiveObject, INotificationFi
     {
         if (args.OldDate == End && args.NewDate < Start)
         {
+
             _endDateOverride.OnNext(Start);
             return;
         }
@@ -165,6 +170,7 @@ public partial class NotificationDataViewModel : ReactiveObject, INotificationFi
 
     internal void ChangeStartDate(DateTime newStart)
     {
+        using var _ = _logger.MethodScope();
         if (newStart > End)
         {
             Start = End;
@@ -193,6 +199,7 @@ public partial class NotificationDataViewModel : ReactiveObject, INotificationFi
 
     public Task RefreshAsync()
     {
+        using var _ = _logger.MethodScope();
         Refresh();
         return Task.CompletedTask;
     }

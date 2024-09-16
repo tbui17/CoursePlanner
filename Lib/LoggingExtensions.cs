@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Logging;
 
 namespace Lib;
@@ -5,9 +6,9 @@ namespace Lib;
 public static class LoggingExtensions
 {
 
-    public static IDisposable? BeginScope2<T>(this ILogger<T> logger, string name, IReadOnlyDictionary<string,object> values)
+    public static IDisposable? MethodScope<T>(this ILogger<T> logger, [CallerMemberName] string? methodName = null)
     {
-        return logger.BeginScope(name, values);
+        return logger.BeginScope("{Method}", methodName);
 
     }
 }

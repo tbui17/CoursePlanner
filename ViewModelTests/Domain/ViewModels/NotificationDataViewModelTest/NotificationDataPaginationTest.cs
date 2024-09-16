@@ -4,7 +4,7 @@ using ViewModelTests.Utils;
 
 namespace ViewModelTests.Domain.ViewModels.NotificationDataViewModelTest;
 
-[Timeout(5000)]
+[Timeout(8000)]
 public class NotificationDataPaginationTest : BaseTest
 {
     private NotificationDataPaginationTestFixture CreateFixture()
@@ -42,6 +42,39 @@ public class NotificationDataPaginationTest : BaseTest
                     .Should()
                     .BeSubsetOf(elevenToTwenty)
             );
+    }
+
+    [Test]
+    public async Task ChangePage_RandomOrder_ConsistentlyRetrievesCorrectSubset()
+    {
+        var f = CreateFixture();
+        await f.ModelEventuallyHasData();
+
+        var range = Enumerable.Range(1, 5).ToList();
+
+        var rnd = new Random();
+
+        for (var i = 0; i < 100; i++)
+        {
+            var index = rnd.Next(range.Count);
+            var stePage = range[index];
+            await Step(stePage);
+        }
+
+        return;
+
+        async Task Step(int setPage)
+        {
+            f.Model.ChangePageCommand.Execute(setPage);
+            await f.Model.Should()
+                .EventuallySatisfy(x => x.PageResult,
+                    x => x.CurrentPageData.Should()
+                        .HaveCount(10)
+                        .And.Subject.Select(s => s.Id)
+                        .Should()
+                        .BeSubsetOf(f.GetIdSubset(Math.Max(setPage - 1, 0)))
+                );
+        }
     }
 
     [Test]

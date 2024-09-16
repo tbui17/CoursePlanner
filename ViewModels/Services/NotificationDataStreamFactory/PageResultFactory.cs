@@ -11,18 +11,21 @@ public class PageResultFactory(ILogger<PageResultFactory> logger)
         logger.LogDebug("Processing {Data}", data);
         var filter = new NotificationDataFilterFactory(data.InputData).CreateFilter();
 
-        var model = new PaginationModel
-        {
-            Count = data.Notifications.Count,
-            Index = data.Index,
-            PageSize = data.InputData.PageSize
-        };
-
-        var processedData = data.Notifications
+        var filteredData = data.Notifications
             .AsParallel()
             .Where(filter)
             .OrderBy(x => x.Id)
-            .Chunk(model.PageSize)
+            .ToList();
+
+        var model = new PaginationModel
+        {
+            PageSize = data.InputData.PageSize,
+            Index = data.Index,
+            Count = filteredData.Count
+        };
+
+        var processedData = filteredData
+            .Chunk(data.InputData.PageSize)
             .ElementAtOrDefault(model.Index) ?? [];
 
         var res = new PageResult(model, processedData);
