@@ -22,7 +22,7 @@ public record EmptyPageResult : IPageResult
     public bool HasPrevious { get; } = false;
 }
 
-public class PageResult(PaginationModel model, DataProcessingService dataProcessingService) : IPageResult
+internal class PageResult(PaginationModel model, DataProcessingService dataProcessingService) : IPageResult
 {
     // private readonly ImplHelper _helper;
 

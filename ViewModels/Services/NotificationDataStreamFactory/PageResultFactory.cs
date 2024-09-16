@@ -6,7 +6,7 @@ namespace ViewModels.Services.NotificationDataStreamFactory;
 [Inject]
 public class PageResultFactory(ILogger<PageResultFactory> logger)
 {
-    public PageResult Create(ReturnedData data)
+    public IPageResult Create(ReturnedData data)
     {
         var model = new PaginationModel
         {

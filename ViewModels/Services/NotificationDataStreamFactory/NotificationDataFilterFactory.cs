@@ -23,7 +23,7 @@ public class NotificationDataFilterFactory(IFilterData data)
         {
             if (n is Assessment assessment)
             {
-                return $"{assessment.Type} Assessment".Contains(data.TypeFilter,
+                return $"{assessment.Type} {nameof(Assessment)}".Contains(data.TypeFilter,
                     StringComparison.CurrentCultureIgnoreCase
                 );
             }
