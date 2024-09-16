@@ -17,7 +17,7 @@ public class PageResultTest : BaseTest
         var input = new NotificationsInputData
         {
             Notifications = data,
-            InputData = new PartialInputData
+            InputData = new InputData()
             {
                 FilterText = "",
                 TypeFilter = "",
