@@ -65,7 +65,7 @@ public class PageResultTest : BaseTest
     public void PageCount_NoFilters50Items10PageSize_HasExpectedProperties()
     {
         var data = CreateReturnedData();
-        PageResult x = Resolve<PageResultFactory>()
+        IPageResult x = Resolve<PageResultFactory>()
             .Create(data);
 
         using var _ = new AssertionScope();
@@ -75,8 +75,8 @@ public class PageResultTest : BaseTest
         x.CurrentPage.Should().Be(1);
         x.CurrentPageData.Should().HaveCount(10);
         x.CurrentPageData.Should().BeSubsetOf(data.Notifications);
-        x.PartitionSize.Should().Be(10);
-        x.TotalItemCount.Should().Be(50);
+        x.HasPrevious.Should().BeFalse();
+        x.HasNext.Should().BeTrue();
     }
 }
 

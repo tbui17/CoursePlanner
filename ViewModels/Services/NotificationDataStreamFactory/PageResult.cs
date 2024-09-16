@@ -1,6 +1,5 @@
 using Lib.Attributes;
 using Lib.Interfaces;
-using Lib.Utils;
 using Microsoft.Extensions.Logging;
 
 namespace ViewModels.Services.NotificationDataStreamFactory;
@@ -25,60 +24,42 @@ public record EmptyPageResult : IPageResult
     public bool HasPrevious { get; } = false;
 }
 
-public class PageResult : IPageResult
+public class PageResult(PaginationModel model, FilteredDataResultProvider filteredDataResultProvider) : IPageResult
 {
-    public PageResult(Func<INotification, bool> filter, ReturnedData data)
+    // private readonly ImplHelper _helper;
+
+    public int PageCount => model.PageCount;
+    public bool HasNext => model.HasNext;
+    public bool HasPrevious => model.HasPrevious;
+    public int CurrentPage => model.CurrentPage;
+
+    public IReadOnlyList<INotification> CurrentPageData => filteredDataResultProvider.CurrentPageData;
+    public int ItemCount => filteredDataResultProvider.ItemCount;
+
+
+}
+
+public class FilteredDataResultProvider(IPaginationDetails details, IList<INotification> notifications, Func<INotification, bool> filter)
+{
+    private IReadOnlyList<INotification>? _pageData;
+    public IReadOnlyList<INotification> CurrentPageData => _pageData ??= GetCurrentPage();
+    public int ItemCount => CurrentPageData.Count;
+
+
+    private ParallelQuery<INotification> GetFilteredData()
     {
-        _helper = new ImplHelper(data);
-        _helper2 = new ImplHelper2(_helper, data.Notifications, filter);
+        return notifications
+            .AsParallel()
+            .Where(filter)
+            .OrderBy(x => x.Id);
     }
 
-    private readonly ImplHelper _helper;
-    private readonly ImplHelper2 _helper2;
+    private IEnumerable<INotification[]> GetPaginatedData() =>
+        GetFilteredData()
+            .Chunk(details.PageSize);
 
-    public int PageCount => _helper.PageCount;
-    internal int TotalItemCount => _helper.TotalItemCount;
-    internal int PartitionSize => _helper.PartitionSize;
-    public bool HasNext => _helper.HasNext;
-    public bool HasPrevious => _helper.HasPrevious;
-    public int CurrentPage => _helper.CurrentPage;
-
-    public IReadOnlyList<INotification> CurrentPageData => _helper2.CurrentPageData;
-    public int ItemCount => _helper2.ItemCount;
-
-    private class ImplHelper(ReturnedData data)
-    {
-        internal int PartitionSize => Math.Max(1, data.InputData.PageSize);
-        internal int CurrentPage => data.InputData.CurrentPage;
-        internal int TotalItemCount => data.Notifications.Count;
-        internal int PageIndex => Math.Max(0, CurrentPage - 1);
-        internal int PageCount => TotalItemCount.DivideRoundedUp(PartitionSize);
-        internal bool HasNext => PageIndex < PageCount - 1;
-        internal bool HasPrevious => PageIndex > 0;
-    }
-
-    private class ImplHelper2(ImplHelper helper, IList<INotification> notifications, Func<INotification, bool> filter)
-    {
-        private IReadOnlyList<INotification>? _pageData;
-        public IReadOnlyList<INotification> CurrentPageData => _pageData ??= GetCurrentPage();
-        public int ItemCount => CurrentPageData.Count;
-
-
-        private ParallelQuery<INotification> GetFilteredData()
-        {
-            return notifications
-                .AsParallel()
-                .Where(filter)
-                .OrderBy(x => x.Id);
-        }
-
-        private IEnumerable<INotification[]> GetPaginatedData() =>
-            GetFilteredData()
-                .Chunk(helper.PartitionSize);
-
-        private INotification[] GetCurrentPage() => GetPaginatedData()
-            .ElementAtOrDefault(helper.PageIndex) ?? [];
-    }
+    private INotification[] GetCurrentPage() => GetPaginatedData()
+        .ElementAtOrDefault(details.Index) ?? [];
 }
 
 [Inject]
@@ -86,10 +67,17 @@ public class PageResultFactory(ILogger<PageResultFactory> logger)
 {
     public PageResult Create(ReturnedData data)
     {
+        var model = new PaginationModel
+        {
+            Count = data.Notifications.Count,
+            Index = data.InputData.CurrentPage - 1,
+            PageSize = data.InputData.PageSize
+        };
         logger.LogDebug("Creating PageResult for {data}", data);
         var factory = new NotificationDataFilterFactory(data.InputData);
         var filter = factory.CreateFilter();
+        var dataProvider = new FilteredDataResultProvider(model, data.Notifications, filter);
 
-        return new PageResult(filter, data);
+        return new PageResult(model, dataProvider);
     }
 }
