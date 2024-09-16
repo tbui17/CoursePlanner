@@ -47,11 +47,14 @@ public class NotificationDataStreamService(
             .Select(x => new ReturnedData
                 {
                     Notifications = x.Item1,
-                    FilterText = x.Item2,
-                    TypeFilter = x.Item3,
-                    NotificationSelectedIndex = x.Item4,
-                    CurrentPage = x.Item5,
-                    PageSize = x.Item6
+                    InputData = new PartialInputData
+                    {
+                        FilterText = x.Item2,
+                        TypeFilter = x.Item3,
+                        NotificationSelectedIndex = x.Item4,
+                        CurrentPage = x.Item5,
+                        PageSize = x.Item6,
+                    }
                 }
                 .Thru(completeInputModelFactory.Create)
             );

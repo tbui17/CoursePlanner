@@ -17,11 +17,14 @@ public class PageResultTest : BaseTest
         var input = new ReturnedData
         {
             Notifications = data,
-            FilterText = "",
-            TypeFilter = "",
-            NotificationSelectedIndex = ShouldNotifyIndex.None,
-            CurrentPage = 1,
-            PageSize = 10,
+            InputData = new PartialInputData
+            {
+                FilterText = "",
+                TypeFilter = "",
+                NotificationSelectedIndex = ShouldNotifyIndex.None,
+                CurrentPage = 1,
+                PageSize = 10,
+            }
         };
 
         return input;
@@ -70,14 +73,10 @@ public class PageResultTest : BaseTest
         x.PageCount.Should().Be(5);
         x.ItemCount.Should().Be(10);
         x.CurrentPage.Should().Be(1);
-        x.Data.Should().BeEquivalentTo(data);
         x.CurrentPageData.Should().HaveCount(10);
         x.CurrentPageData.Should().BeSubsetOf(data.Notifications);
         x.PartitionSize.Should().Be(10);
         x.TotalItemCount.Should().Be(50);
-        x.DataSource.Should().BeEquivalentTo(data.Notifications);
-
-
     }
 }
 
@@ -91,8 +90,9 @@ file static class ValidationExtensions
         data.Id.Should().BePositive().And.NotBe(0);
     }
 
-    public static void Validate(this ReturnedData data)
+    public static void Validate(this ReturnedData rdata)
     {
+        var data = rdata.InputData;
         using var _ = new AssertionScope();
         data.CurrentPage.Should().BePositive().And.NotBe(0);
         data.PageSize.Should().BePositive().And.NotBe(0);
