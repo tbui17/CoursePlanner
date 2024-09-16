@@ -6,7 +6,7 @@ namespace ViewModels.Services.NotificationDataStreamFactory;
 [Inject]
 public class PageResultFactory(ILogger<PageResultFactory> logger)
 {
-    public IPageResult Create(NotificationDatabaseData data)
+    public IPageResult Create(NotificationsInputData data)
     {
         logger.LogDebug("Processing {Data}", data);
         var filter = new NotificationDataFilterFactory(data.InputData).CreateFilter();
