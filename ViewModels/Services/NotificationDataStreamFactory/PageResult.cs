@@ -1,6 +1,7 @@
 using Lib.Attributes;
 using Lib.Interfaces;
 using Lib.Utils;
+using Microsoft.Extensions.Logging;
 
 namespace ViewModels.Services.NotificationDataStreamFactory;
 
@@ -23,38 +24,38 @@ public record EmptyPageResult : IPageResult
 public class PageResult(Func<INotification, bool> filter, ReturnedData data) : IPageResult
 {
     internal ReturnedData Data => data;
+    internal IList<INotification> DataSource => Data.Notifications;
     internal int PageIndex => Math.Max(0, Data.CurrentPage - 1);
     internal int PartitionSize => Math.Max(1, Data.PageSize);
     public int PageCount => TotalItemCount.DivideRoundedUp(PartitionSize);
-    internal int TotalItemCount => Data.Notifications.Count;
+    internal int TotalItemCount => DataSource.Count;
     public int CurrentPage => Data.CurrentPage;
     private IReadOnlyList<INotification>? _pageData;
     public IReadOnlyList<INotification> CurrentPageData => _pageData ??= GetCurrentPage();
     public int ItemCount => CurrentPageData.Count;
 
-    internal ParallelQuery<INotification> GetFilteredData()
+    private ParallelQuery<INotification> GetFilteredData()
     {
         return Data.Notifications.AsParallel().Where(filter).OrderBy(x => x.Id);
     }
 
-    internal List<INotification[]> GetPaginatedData() =>
+    private IEnumerable<INotification[]> GetPaginatedData() =>
         GetFilteredData()
-            .Chunk(PartitionSize)
-            .ToList();
+            .Chunk(PartitionSize);
 
-    private IReadOnlyList<INotification> GetCurrentPage() => GetPaginatedData()
+    private INotification[] GetCurrentPage() => GetPaginatedData()
         .ElementAtOrDefault(PageIndex) ?? [];
 }
 
-
-
 [Inject]
-public class PageResultFactory
+public class PageResultFactory(ILogger<PageResultFactory> logger)
 {
     public PageResult Create(ReturnedData data)
     {
+        logger.LogDebug("Creating PageResult for {data}", data);
         var factory = new NotificationDataFilterFactory(data);
         var filter = factory.CreateFilter();
+
         return new PageResult(filter, data);
     }
 }
