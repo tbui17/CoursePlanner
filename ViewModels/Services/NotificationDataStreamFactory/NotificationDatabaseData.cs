@@ -6,7 +6,7 @@ namespace ViewModels.Services.NotificationDataStreamFactory;
 
 
 
-public record ReturnedData
+internal record NotificationDatabaseData
 {
     public IList<INotification> Notifications { get; init; } = [];
     public IPartialInputData InputData { get; init; } = new PartialInputData();

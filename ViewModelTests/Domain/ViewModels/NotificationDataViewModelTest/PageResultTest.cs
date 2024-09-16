@@ -10,11 +10,11 @@ namespace ViewModelTests.Domain.ViewModels.NotificationDataViewModelTest;
 
 public class PageResultTest : BaseTest
 {
-    private static ReturnedData CreateReturnedData()
+    private static NotificationDatabaseData CreateReturnedData()
     {
         var data = CreateNotificationData();
         // should cause no filters to be applied
-        var input = new ReturnedData
+        var input = new NotificationDatabaseData
         {
             Notifications = data,
             InputData = new PartialInputData
@@ -90,7 +90,7 @@ file static class ValidationExtensions
         data.Id.Should().BePositive().And.NotBe(0);
     }
 
-    public static void Validate(this ReturnedData rdata)
+    public static void Validate(this NotificationDatabaseData rdata)
     {
         var data = rdata.InputData;
         using var _ = new AssertionScope();
@@ -101,7 +101,7 @@ file static class ValidationExtensions
         data.NotificationSelectedIndex.Should().Be(ShouldNotifyIndex.None);
     }
 
-    public static void ValidateFull(this ReturnedData data)
+    public static void ValidateFull(this NotificationDatabaseData data)
     {
         using var _ = new AssertionScope();
         data.Validate();

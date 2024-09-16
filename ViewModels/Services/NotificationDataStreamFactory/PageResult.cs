@@ -22,7 +22,7 @@ public record EmptyPageResult : IPageResult
     public bool HasPrevious { get; } = false;
 }
 
-internal class PageResult(PaginationModel model, DataProcessingService dataProcessingService) : IPageResult
+internal class PageResult(PaginationModel model, IReadOnlyList<INotification> data) : IPageResult
 {
     // private readonly ImplHelper _helper;
 
@@ -31,8 +31,8 @@ internal class PageResult(PaginationModel model, DataProcessingService dataProce
     public bool HasPrevious => model.HasPrevious;
     public int CurrentPage => model.CurrentPage;
 
-    public IReadOnlyList<INotification> CurrentPageData => dataProcessingService.CurrentPageData;
-    public int ItemCount => dataProcessingService.ItemCount;
+    public IReadOnlyList<INotification> CurrentPageData => data;
+    public int ItemCount => data.Count;
 
 
 }
