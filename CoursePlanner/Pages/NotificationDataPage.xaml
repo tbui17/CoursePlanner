@@ -43,8 +43,7 @@
 
                 <CollectionView x:Name="NotificationItemInstance"
                                 SelectionMode="None"
-                                MaximumHeightRequest="300"
-                                ItemTemplate="{StaticResource NotificationCard}" />
+                                MaximumHeightRequest="300"/>
 
 
             </VerticalStackLayout>

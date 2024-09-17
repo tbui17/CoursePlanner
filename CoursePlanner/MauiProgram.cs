@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Maui;
+using CommunityToolkit.Maui.Markup;
 using CoursePlanner.Exceptions;
 using CoursePlanner.Pages;
 using CoursePlanner.Services;
@@ -17,6 +18,7 @@ public static class MauiProgram
         var builder = MauiApp.CreateBuilder()
             .UseMauiApp<App>()
             .UseMauiCommunityToolkit()
+            .UseMauiCommunityToolkitMarkup()
             .UseLocalNotification()
             .UseUraniumUI()
             .UseUraniumUIMaterial();
