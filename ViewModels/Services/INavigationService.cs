@@ -1,4 +1,6 @@
-﻿namespace ViewModels.Services;
+﻿using Lib.Interfaces;
+
+namespace ViewModels.Services;
 
 
 public interface INavigationService
@@ -12,6 +14,7 @@ public interface INavigationService
     Task GotoEditInstructorPageAsync(int id);
     Task GoToAssessmentDetailsPageAsync(int id);
     Task GoToNoteDetailsPageAsync(int id);
+    Task GoToNotificationDetailsPage(INotification notification);
 
     Task PopAsync();
 }

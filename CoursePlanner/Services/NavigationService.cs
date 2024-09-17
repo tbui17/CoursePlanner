@@ -1,4 +1,6 @@
 using CoursePlanner.Pages;
+using Lib.Interfaces;
+using Lib.Models;
 using Microsoft.Extensions.Logging;
 using ViewModels.Domain;
 using ViewModels.Interfaces;
@@ -101,6 +103,18 @@ public class NavigationService : INavigationService
     {
         await page.Model.Init(id);
         await PushAsync(page);
+    }
+
+    public async Task GoToNotificationDetailsPage(INotification notification)
+    {
+        var t = notification switch
+        {
+            Course x => GoToDetailedCoursesPageAsync(x.Id),
+            Assessment x => GoToAssessmentDetailsPageAsync(x.CourseId),
+            _ => throw new ArgumentOutOfRangeException(nameof(notification), notification, "Unknown item type")
+        };
+        await t;
+
     }
 
     private async Task GoToAsync<T>(T page) where T : Page

@@ -2,15 +2,11 @@
 using System.Reactive;
 using System.Reactive.Linq;
 using CommunityToolkit.Maui.Markup;
-using CommunityToolkit.Maui.Markup.LeftToRight;
-using Lib.Interfaces;
-using Lib.Models;
+using CoursePlanner.Templates;
 using Plainer.Maui.Controls;
 using ReactiveUI;
-using ViewModels.Converters;
 using ViewModels.Domain.NotificationDataViewModel;
 using ViewModels.Interfaces;
-using ViewModels.Services;
 
 #pragma warning disable CS8767 // Nullability of reference types in type of parameter doesn't match implicitly implemented member (possibly because of nullability attributes).
 
@@ -19,7 +15,6 @@ namespace CoursePlanner.Pages;
 public partial class NotificationDataPage : IRefreshableView<NotificationDataViewModel>,
     IViewFor<NotificationDataViewModel>
 {
-
     public NotificationDataViewModel Model { get; set; }
 
     object? IViewFor.ViewModel
@@ -34,15 +29,15 @@ public partial class NotificationDataPage : IRefreshableView<NotificationDataVie
         set => Model = value;
     }
 
-    public NotificationDataPage(NotificationDataViewModel model, INavigationService navigationService)
+    public NotificationDataPage(NotificationDataViewModel model, NotificationCardTemplate template)
     {
         Model = model;
         InitializeComponent();
         HideSoftInputOnTapped = true;
         BindingContext = model;
 
-        var factory = new NotificationCardTemplateFactory(navigationService);
-        NotificationItemInstance.ItemTemplate(factory.CreateTemplate());
+
+        NotificationItemInstance.ItemTemplate(template.Create());
         Bind();
     }
 
@@ -143,54 +138,5 @@ file static class ObservableExtensions
         Observable.FromEventPattern<DateChangedEventArgs>(
             h => view.DateSelected += h,
             h => view.DateSelected -= h
-        );
-}
-
-file class NotificationCardTemplateFactory(INavigationService navigationService)
-{
-    private readonly Command<INotification> _cmd = new(entity => _ = entity switch
-        {
-            Course x => navigationService.GoToDetailedCoursesPageAsync(x.Id),
-            Assessment x => navigationService.GoToAssessmentDetailsPageAsync(x.CourseId),
-            _ => throw new ArgumentOutOfRangeException(nameof(entity), entity, "Unknown item type")
-        }
-    );
-
-    public DataTemplate CreateTemplate() =>
-        new(() => new Border
-            {
-                Content = new VerticalStackLayout
-                {
-                    Resources =
-                        new ResourceDictionary
-                        {
-                            new Style(typeof(Label))
-                            {
-                                BasedOn = Application.Current!.Resources["BaseLabel"] as Style,
-                                Setters =
-                                {
-                                    new Setter
-                                    {
-                                        Property = View.MarginProperty, Value = new Thickness(0, 0, 0, 5)
-                                    },
-                                    new Setter
-                                    {
-                                        Property = Label.FontAttributesProperty, Value = FontAttributes.Bold
-                                    },
-                                }
-                            }
-                        },
-                    Spacing = 5,
-                    Children =
-                    {
-                        new Label().Bind(nameof(INotification.Name), stringFormat: "Name: {0}"),
-                        new Label().Bind(nameof(INotification.Start), stringFormat: "Start: {0}"),
-                        new Label().Bind(nameof(INotification.End), stringFormat: "End: {0}"),
-                        new Label().Bind(nameof(INotification.ShouldNotify), stringFormat: "Notifications: {0}"),
-                        new Label().Bind(stringFormat: "Type: {0}", converter: new TypeToStringConverter()),
-                        new Button { Command = _cmd, Text = "Details" }.Bind(Button.CommandParameterProperty).Left(),
-                    }
-                }
-            }
         );
 }
