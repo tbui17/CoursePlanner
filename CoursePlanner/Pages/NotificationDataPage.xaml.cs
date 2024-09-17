@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Linq;
 using Plainer.Maui.Controls;
@@ -87,22 +88,46 @@ public partial class NotificationDataPage : IRefreshableView<NotificationDataVie
 
         // page result
 
-        var pageResult = this.WhenAnyValue(x => x.ViewModel.PageResult).WhereNotNull();
+        var pageResult = this.WhenAnyValue(x => x.ViewModel.PageResult).WhereNotNull().ObserveOn(RxApp.MainThreadScheduler);
 
-        pageResult.Select(x => x.CurrentPage)
-            .BindTo(this, x => x.PaginatorInstance.CurrentPage);
-
-        pageResult
-            .Select(x => x.PageCount)
-            .BindTo(this, x => x.PaginatorInstance.TotalPageCount);
-
-
+        this.OneWayBind(ViewModel,
+            x => x.NextCommand,
+            x => x.NextButton.Command
+        );
+        this.OneWayBind(ViewModel,
+            x => x.PreviousCommand,
+            x => x.PreviousButton.Command
+        );
+        //
+        // pageResult
+        //     .Select(x => x.CurrentPage)
+        //     .ObserveOn(RxApp.MainThreadScheduler)
+        //     .Subscribe(x => PaginatorInstance.CurrentPage = x);
+        //
+        // pageResult
+        //     .Select(x => x.PageCount)
+        //     .ObserveOn(RxApp.MainThreadScheduler)
+        //     .Subscribe(x => PaginatorInstance.TotalPageCount = x);
+        //
         pageResult
             .Select(x => x.CurrentPageData)
-            .BindTo(this, x => x.NotificationItemInstance.ItemsSource);
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Subscribe(x => NotificationItemInstance.ItemsSource = x);
 
-        pageResult.Select(x => $"Page Count: {x.PageCount}")
-            .BindTo(this, x => x.ItemCountLabel.Text);
+        pageResult
+            .Select(x => $"Page Count: {x.PageCount}")
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Subscribe(x => ItemCountLabel.Text = x);
+
+        // pageResult
+        //     .Select(x => x.HasPrevious)
+        //     .ObserveOn(RxApp.MainThreadScheduler)
+        //     .Subscribe(x => PaginatorInstance.CanGoPrevious = x);
+        //
+        // pageResult
+        //     .Select(x => x.HasNext)
+        //     .ObserveOn(RxApp.MainThreadScheduler)
+        //     .Subscribe(x => PaginatorInstance.CanGoNext = x);
 
         // command
 

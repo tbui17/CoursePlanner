@@ -33,6 +33,8 @@
                 <VerticalStackLayout>
                     <Label x:Name="ItemCountLabel" HorizontalOptions="Center" />
                     <material:Paginator x:Name="PaginatorInstance" PageStepCount="2" HorizontalOptions="Center" />
+                    <Button x:Name="PreviousButton" Text="Previous" />
+                    <Button x:Name="NextButton" Text="Next" />
                 </VerticalStackLayout>
 
 

@@ -1,26 +1,11 @@
 using System.Reactive.Linq;
 using Lib.Models;
 using ReactiveUI;
-using ViewModels.Models;
 
 namespace ViewModels.Domain.NotificationDataViewModel;
 
 public class NotificationFilterInputSourceFactory(INotificationFilter viewModel)
 {
-    public InputSource CreateInputSource()
-    {
-        var (textFilter, typeFilter) = CreateTextFilters();
-        var inputSource = new InputSource
-        {
-            DateFilter = CreateDateFilterSource(),
-            TextFilter = textFilter,
-            TypeFilter = typeFilter,
-            PickerFilter = CreatePickerFilterSource(),
-            CurrentPage = viewModel.WhenAnyValue(x => x.CurrentPage),
-            PageSize = viewModel.WhenAnyValue(x => x.PageSize)
-        };
-        return inputSource;
-    }
 
     public IObservable<DateTimeRange> CreateDateFilterSource()
     {

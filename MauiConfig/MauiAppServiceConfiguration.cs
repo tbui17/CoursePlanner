@@ -2,6 +2,7 @@
 using Lib.Config;
 using Lib.Models;
 using Microsoft.EntityFrameworkCore;
+using ReactiveUI;
 using Serilog;
 using Serilog.Events;
 using Serilog.Formatting.Compact;
@@ -25,6 +26,8 @@ public class MauiAppServiceConfiguration
     public void RunStartupActions(MauiApp app)
     {
         var handler = app.Services.GetRequiredService<IClientExceptionHandler>();
+        var rxHandler = app.Services.GetRequiredService<RxExceptionHandler>();
+        RxApp.DefaultExceptionHandler = rxHandler;
         ExceptionHandlerRegistration((_, e) => handler.OnUnhandledException(e));
         var client = app.Services.GetRequiredService<ISetupClient>();
         client.Setup();

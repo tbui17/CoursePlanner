@@ -17,12 +17,15 @@ public class PageResultFactory(ILogger<PageResultFactory> logger)
             .OrderBy(x => x.Id)
             .ToList();
 
-        var model = new PaginationModel
-        {
-            PageSize = data.InputData.PageSize,
-            Index = data.Index,
-            Count = filteredData.Count
-        };
+        logger.LogDebug("Filtered {Data}", filteredData);
+
+        var model = PaginationModel.Create(
+            index: data.Index,
+            count: filteredData.Count,
+            pageSize: data.InputData.PageSize
+        );
+
+        logger.LogDebug("Created {Model}", model);
 
         var processedData = filteredData
             .Chunk(data.InputData.PageSize)

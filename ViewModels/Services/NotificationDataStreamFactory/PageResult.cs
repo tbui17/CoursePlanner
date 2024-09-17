@@ -22,17 +22,22 @@ public record EmptyPageResult : IPageResult
     public bool HasPrevious { get; } = false;
 }
 
-internal class PageResult(PaginationModel model, IReadOnlyList<INotification> data) : IPageResult
+internal record PageResult : IPageResult
 {
-    // private readonly ImplHelper _helper;
+    public PageResult(PaginationModel model, IReadOnlyList<INotification> data)
+    {
+        PageCount = model.PageCount;
+        HasNext = model.HasNext;
+        HasPrevious = model.HasPrevious;
+        CurrentPage = model.CurrentPage;
+        CurrentPageData = data;
+        ItemCount = data.Count;
+    }
 
-    public int PageCount => model.PageCount;
-    public bool HasNext => model.HasNext;
-    public bool HasPrevious => model.HasPrevious;
-    public int CurrentPage => model.CurrentPage;
-
-    public IReadOnlyList<INotification> CurrentPageData => data;
-    public int ItemCount => data.Count;
-
-
+    public int PageCount { get; }
+    public bool HasNext { get; }
+    public bool HasPrevious { get; }
+    public int CurrentPage { get; }
+    public IReadOnlyList<INotification> CurrentPageData { get; }
+    public int ItemCount { get; }
 }
