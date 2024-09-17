@@ -48,8 +48,8 @@ partial class NotificationDataViewModel
     public IObservable<DateTime> StartDateObservable { get; }
     public IObservable<DateTime> EndDateObservable { get; }
 
-    [Reactive]
-    public IPageResult PageResult { get; private set; }
+    private readonly ObservableAsPropertyHelper<IPageResult> _pageResult;
+    public IPageResult PageResult => _pageResult.Value;
 
     public ReadOnlyObservableCollection<string> Types { get; }
 
@@ -75,8 +75,6 @@ public partial class NotificationDataViewModel : ReactiveObject, INotificationFi
     {
         #region init
 
-        PageResult = new EmptyPageResult();
-
         _notificationFilterService = notificationFilterService;
         _logger = logger;
 
@@ -97,11 +95,12 @@ public partial class NotificationDataViewModel : ReactiveObject, INotificationFi
 
         #region properties
 
-        notificationFilterService
+        _pageResult = notificationFilterService
             .Connect(this)
             .Do(x => _logger.LogInformation("Page result {PageResult}", x))
             .ObserveOn(RxApp.MainThreadScheduler)
-            .Subscribe(x => PageResult = x);
+            .ToProperty(this, x => x.PageResult, new EmptyPageResult());
+
 
         notificationFilterService.CurrentPageOverridden.Subscribe(x => CurrentPage = x);
 
