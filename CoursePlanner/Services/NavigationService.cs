@@ -31,14 +31,28 @@ public class NavigationService : INavigationService
             Shell.Current?.CurrentPage?.Title,
             Shell.Current?.Items?.Count
         );
-        if (args.Source is not ShellNavigationSource.ShellItemChanged ||
-            Current.CurrentPage is not IRefreshableView<IRefresh> refreshable)
+
+        if (GetRefreshable() is not { } refreshable)
         {
             return;
         }
 
         _logger.LogInformation("Refreshing page for shell navigation: {PageName}", Current.CurrentPage.Title);
         await refreshable.Model.RefreshAsync();
+
+        return;
+
+        IRefreshableView<IRefresh>? GetRefreshable()
+        {
+            if (Current.CurrentPage is not IRefreshableView<IRefresh> refreshable2)
+            {
+                return null;
+            }
+
+            return args.Source is ShellNavigationSource.Pop or ShellNavigationSource.PopToRoot
+                ? refreshable2
+                : null;
+        }
     }
 
     private async void OnNavigating(object? sender, ShellNavigatingEventArgs args)
