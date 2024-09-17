@@ -28,7 +28,9 @@ partial class NotificationDataViewModel
 
 
     public IList<string> NotificationOptions { get; } = new List<string>
-        { "All", "Notifications Enabled", "Notifications Disabled" };
+    {
+        "All", "Notifications Enabled", "Notifications Disabled"
+    };
 
     [Reactive]
     public ShouldNotifyIndex SelectedNotificationOptionIndex { get; set; }
@@ -48,10 +50,13 @@ partial class NotificationDataViewModel
 
     private readonly ObservableAsPropertyHelper<IPageResult> _pageResult;
     public IPageResult PageResult => _pageResult.Value;
+
     public ReadOnlyObservableCollection<string> Types { get; }
 
     public ICommand ChangePageCommand { get; }
     public ICommand ClearCommand { get; }
+    public ICommand NextCommand { get; }
+    public ICommand PreviousCommand { get; }
 }
 
 [Inject]
@@ -90,9 +95,14 @@ public partial class NotificationDataViewModel : ReactiveObject, INotificationFi
 
         #region properties
 
-        _pageResult = notificationFilterService.Connect(this)
+        _pageResult = notificationFilterService
+            .Connect(this)
             .Do(x => _logger.LogInformation("Page result {PageResult}", x))
-            .ToProperty(this, x => x.PageResult, scheduler: RxApp.MainThreadScheduler);
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .ToProperty(this, x => x.PageResult, new EmptyPageResult());
+
+
+        notificationFilterService.CurrentPageOverridden.Subscribe(x => CurrentPage = x);
 
         StartDateObservable = this.WhenAnyValue(x => x.Start).Merge(_startDateOverride);
         EndDateObservable = this.WhenAnyValue(x => x.End).Merge(_endDateOverride);
@@ -102,7 +112,21 @@ public partial class NotificationDataViewModel : ReactiveObject, INotificationFi
 
         #region commands
 
-        ChangePageCommand = ReactiveCommand.Create<int>(ChangePage
+        ChangePageCommand = ReactiveCommand.Create<int>(
+            ChangePage,
+            this.WhenAnyValue(x => x.PageResult).Select(x => x.PageCount > 1),
+            RxApp.MainThreadScheduler
+        );
+
+        NextCommand = ReactiveCommand.Create(
+            () => ChangePage(CurrentPage + 1),
+            this.WhenAnyValue(x => x.PageResult).Select(x => x.HasNext),
+            RxApp.MainThreadScheduler
+        );
+        PreviousCommand = ReactiveCommand.Create(
+            () => ChangePage(CurrentPage - 1),
+            this.WhenAnyValue(x => x.PageResult).Select(x => x.HasPrevious),
+            RxApp.MainThreadScheduler
         );
 
         ClearCommand = ReactiveCommand.Create(() =>
@@ -123,7 +147,7 @@ public partial class NotificationDataViewModel : ReactiveObject, INotificationFi
     private void ChangePage(int page)
     {
         _logger.LogDebug("Received {Page}", page);
-        if (GetMaxPage() is not { } max)
+        if (PageResult is not PageResult { PageCount: var max })
         {
             return;
         }
@@ -132,17 +156,6 @@ public partial class NotificationDataViewModel : ReactiveObject, INotificationFi
         var newPage = Math.Clamp(page, 1, max);
         _logger.LogDebug("Changing page to {NewPage}", newPage);
         CurrentPage = newPage;
-        return;
-
-        int? GetMaxPage()
-        {
-            if (PageResult is not { PageCount: var pageCount and > 0 })
-            {
-                return null;
-            }
-
-            return pageCount;
-        }
     }
 
 
@@ -153,6 +166,7 @@ public partial class NotificationDataViewModel : ReactiveObject, INotificationFi
             End = Start;
             return;
         }
+
         End = newEnd;
     }
 
@@ -160,7 +174,6 @@ public partial class NotificationDataViewModel : ReactiveObject, INotificationFi
     {
         if (args.OldDate == End && args.NewDate < Start)
         {
-
             _endDateOverride.OnNext(Start);
             return;
         }
