@@ -10,18 +10,21 @@ namespace ViewModelTests.Domain.ViewModels.NotificationDataViewModelTest;
 
 public class PageResultTest : BaseTest
 {
-    private static ReturnedData CreateReturnedData()
+    private static NotificationsInputData CreateReturnedData()
     {
         var data = CreateNotificationData();
         // should cause no filters to be applied
-        var input = new ReturnedData
+        var input = new NotificationsInputData
         {
             Notifications = data,
-            FilterText = "",
-            TypeFilter = "",
-            NotificationSelectedIndex = ShouldNotifyIndex.None,
-            CurrentPage = 1,
-            PageSize = 10,
+            InputData = new InputData()
+            {
+                FilterText = "",
+                TypeFilter = "",
+                NotificationSelectedIndex = ShouldNotifyIndex.None,
+                CurrentPage = 1,
+                PageSize = 10,
+            }
         };
 
         return input;
@@ -62,7 +65,7 @@ public class PageResultTest : BaseTest
     public void PageCount_NoFilters50Items10PageSize_HasExpectedProperties()
     {
         var data = CreateReturnedData();
-        PageResult x = Resolve<PageResultFactory>()
+        IPageResult x = Resolve<PageResultFactory>()
             .Create(data);
 
         using var _ = new AssertionScope();
@@ -70,14 +73,10 @@ public class PageResultTest : BaseTest
         x.PageCount.Should().Be(5);
         x.ItemCount.Should().Be(10);
         x.CurrentPage.Should().Be(1);
-        x.Data.Should().BeEquivalentTo(data);
         x.CurrentPageData.Should().HaveCount(10);
         x.CurrentPageData.Should().BeSubsetOf(data.Notifications);
-        x.PartitionSize.Should().Be(10);
-        x.TotalItemCount.Should().Be(50);
-        x.DataSource.Should().BeEquivalentTo(data.Notifications);
-
-
+        x.HasPrevious.Should().BeFalse();
+        x.HasNext.Should().BeTrue();
     }
 }
 
@@ -91,8 +90,9 @@ file static class ValidationExtensions
         data.Id.Should().BePositive().And.NotBe(0);
     }
 
-    public static void Validate(this ReturnedData data)
+    public static void Validate(this NotificationsInputData rdata)
     {
+        var data = rdata.InputData;
         using var _ = new AssertionScope();
         data.CurrentPage.Should().BePositive().And.NotBe(0);
         data.PageSize.Should().BePositive().And.NotBe(0);
@@ -101,7 +101,7 @@ file static class ValidationExtensions
         data.NotificationSelectedIndex.Should().Be(ShouldNotifyIndex.None);
     }
 
-    public static void ValidateFull(this ReturnedData data)
+    public static void ValidateFull(this NotificationsInputData data)
     {
         using var _ = new AssertionScope();
         data.Validate();
