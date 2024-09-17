@@ -10,7 +10,6 @@
 
              x:DataType="notificationDataViewModel:NotificationDataViewModel">
     <ContentPage.Resources>
-
     </ContentPage.Resources>
     <ContentPage.Content>
         <ScrollView>
@@ -30,11 +29,15 @@
                     </HorizontalStackLayout>
                 </VerticalStackLayout>
 
-                <VerticalStackLayout>
+
+
+                <VerticalStackLayout HorizontalOptions="Center">
                     <Label x:Name="ItemCountLabel" HorizontalOptions="Center" />
-                    <material:Paginator x:Name="PaginatorInstance" PageStepCount="2" HorizontalOptions="Center" />
-                    <Button x:Name="PreviousButton" Text="Previous" />
-                    <Button x:Name="NextButton" Text="Next" />
+                    <HorizontalStackLayout HorizontalOptions="Center">
+                        <Button x:Name="PreviousButton" Text="Previous" />
+                        <Button x:Name="NextButton" Text="Next" />
+                    </HorizontalStackLayout>
+
                 </VerticalStackLayout>
 
 

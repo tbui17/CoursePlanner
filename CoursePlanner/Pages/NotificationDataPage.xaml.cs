@@ -45,14 +45,23 @@ public partial class NotificationDataPage : IRefreshableView<NotificationDataVie
             .Select(x => x.EventArgs)
             .Subscribe(ViewModel.ChangeStartDate);
 
-        ViewModel.StartDateObservable.BindTo(this, x => x.StartDatePickerField.Date);
+
+        this.Bind(
+            ViewModel,
+            x => x.Start,
+            x => x.StartDatePickerField.Date
+        );
 
         EndDatePickerField.DatePickerView
             .ToDateSelectedObservable()
             .Select(x => x.EventArgs)
             .Subscribe(ViewModel.ChangeEndDate);
 
-        ViewModel.EndDateObservable.BindTo(this, x => x.EndDatePickerField.Date);
+        this.Bind(
+            ViewModel,
+            x => x.End,
+            x => x.EndDatePickerField.Date
+        );
 
 
         // text filters
@@ -98,17 +107,7 @@ public partial class NotificationDataPage : IRefreshableView<NotificationDataVie
             x => x.PreviousCommand,
             x => x.PreviousButton.Command
         );
-        //
-        // pageResult
-        //     .Select(x => x.CurrentPage)
-        //     .ObserveOn(RxApp.MainThreadScheduler)
-        //     .Subscribe(x => PaginatorInstance.CurrentPage = x);
-        //
-        // pageResult
-        //     .Select(x => x.PageCount)
-        //     .ObserveOn(RxApp.MainThreadScheduler)
-        //     .Subscribe(x => PaginatorInstance.TotalPageCount = x);
-        //
+
         pageResult
             .Select(x => x.CurrentPageData)
             .ObserveOn(RxApp.MainThreadScheduler)
@@ -119,22 +118,7 @@ public partial class NotificationDataPage : IRefreshableView<NotificationDataVie
             .ObserveOn(RxApp.MainThreadScheduler)
             .Subscribe(x => ItemCountLabel.Text = x);
 
-        // pageResult
-        //     .Select(x => x.HasPrevious)
-        //     .ObserveOn(RxApp.MainThreadScheduler)
-        //     .Subscribe(x => PaginatorInstance.CanGoPrevious = x);
-        //
-        // pageResult
-        //     .Select(x => x.HasNext)
-        //     .ObserveOn(RxApp.MainThreadScheduler)
-        //     .Subscribe(x => PaginatorInstance.CanGoNext = x);
-
         // command
-
-        this.OneWayBind(ViewModel,
-            x => x.ChangePageCommand,
-            x => x.PaginatorInstance.ChangePageCommand
-        );
 
         this.OneWayBind(ViewModel,
             x => x.ClearCommand,
