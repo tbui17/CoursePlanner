@@ -39,7 +39,7 @@ public partial class NotificationDataPage : IRefreshableView<NotificationDataVie
 
     private void Bind()
     {
-        // bind dates
+        //  dates
         StartDatePickerField.DatePickerView
             .ToDateSelectedObservable()
             .Select(x => x.EventArgs)
@@ -88,7 +88,7 @@ public partial class NotificationDataPage : IRefreshableView<NotificationDataVie
 
         // page result
 
-        var pageResult = this.WhenAnyValue(x => x.ViewModel.PageResult).WhereNotNull().ObserveOn(RxApp.MainThreadScheduler);
+        var pageResult = this.WhenAnyValue(x => x.ViewModel.PageResult);
 
         this.OneWayBind(ViewModel,
             x => x.NextCommand,
@@ -115,7 +115,7 @@ public partial class NotificationDataPage : IRefreshableView<NotificationDataVie
             .Subscribe(x => NotificationItemInstance.ItemsSource = x);
 
         pageResult
-            .Select(x => $"Page Count: {x.PageCount}")
+            .Select(x => $"Page: {x.CurrentPage} of {x.PageCount}")
             .ObserveOn(RxApp.MainThreadScheduler)
             .Subscribe(x => ItemCountLabel.Text = x);
 

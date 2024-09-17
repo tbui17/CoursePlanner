@@ -50,6 +50,7 @@ partial class NotificationDataViewModel
 
     [Reactive]
     public IPageResult PageResult { get; private set; }
+
     public ReadOnlyObservableCollection<string> Types { get; }
 
     public ICommand ChangePageCommand { get; }
@@ -101,6 +102,8 @@ public partial class NotificationDataViewModel : ReactiveObject, INotificationFi
             .Do(x => _logger.LogInformation("Page result {PageResult}", x))
             .ObserveOn(RxApp.MainThreadScheduler)
             .Subscribe(x => PageResult = x);
+
+        notificationFilterService.CurrentPageOverridden.Subscribe(x => CurrentPage = x);
 
         StartDateObservable = this.WhenAnyValue(x => x.Start).Merge(_startDateOverride);
         EndDateObservable = this.WhenAnyValue(x => x.End).Merge(_endDateOverride);

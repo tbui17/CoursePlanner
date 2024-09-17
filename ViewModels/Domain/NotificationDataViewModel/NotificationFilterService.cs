@@ -10,6 +10,7 @@ namespace ViewModels.Domain.NotificationDataViewModel;
 
 public interface INotificationFilterService
 {
+    IObservable<int> CurrentPageOverridden { get; }
     IObservable<IPageResult> Connect(INotificationFilter fields);
     void Refresh();
 }
@@ -18,7 +19,8 @@ public interface INotificationFilterService
 public class NotificationFilterService(NotificationDataStreamService service) : INotificationFilterService
 {
     private readonly BehaviorSubject<Unit> _refresh = new(Unit.Default);
-    private readonly Subject<int> _currentPageSubject = new();
+    private readonly Subject<int> _currentPageOverridden = new();
+    public IObservable<int> CurrentPageOverridden => _currentPageOverridden;
 
     public IObservable<IPageResult> Connect(INotificationFilter fields)
     {
@@ -31,6 +33,7 @@ public class NotificationFilterService(NotificationDataStreamService service) : 
             .StartWith(new EmptyPageResult());
     }
 
+
     public void Refresh()
     {
         _refresh.OnNext(_refresh.Value);
@@ -38,34 +41,42 @@ public class NotificationFilterService(NotificationDataStreamService service) : 
 
     private InputSource CreateInputSource(INotificationFilter input)
     {
-        var f = new NotificationFilterInputSourceFactory(input);
-        var (textFilter, typeFilter) = f.CreateTextFilters();
+        var factory = new NotificationFilterInputSourceFactory(input);
+        var (textFilter, typeFilter) = factory.CreateTextFilters();
         var inputSource = new InputSource
         {
-            DateFilter = f.CreateDateFilterSource(),
+            DateFilter = factory.CreateDateFilterSource(),
             TextFilter = textFilter,
             TypeFilter = typeFilter,
-            PickerFilter = f.CreatePickerFilterSource(),
+            PickerFilter = factory.CreatePickerFilterSource(),
             PageSize = input.WhenAnyValue(x => x.PageSize),
-            CurrentPage = Observable.Return(1)
+            CurrentPage = Observable.Empty<int>()
         };
 
-        inputSource.WhenAnyObservable(
-                x => x.DateFilter,
-                x => x.TextFilter,
-                x => x.TypeFilter,
-                x => x.PickerFilter,
-                x => x.PageSize,
-                // @formatter:off
-                (_, _, _, _, _) => Unit.Default
-                // @formatter:on
-            )
-            .Subscribe(_ => { _currentPageSubject.OnNext(1); });
+        OnAnyFieldExceptCurrentPage();
+
 
         var currentPage = input
-            .WhenAnyValue(x => x.CurrentPage)
-            .Merge(_currentPageSubject);
+            .WhenAnyValue(x => x.CurrentPage) // by default WhenAnyValue applies DistinctUntilChanged
+            .Merge(CurrentPageOverridden);
 
         return inputSource with { CurrentPage = currentPage };
+
+        void OnAnyFieldExceptCurrentPage()
+        {
+            // force current page to 1 when any filter changes
+            // vm needs to be aware and set current page to 1 on exposed observable
+            inputSource.WhenAnyObservable(
+                    x => x.DateFilter,
+                    x => x.TextFilter,
+                    x => x.TypeFilter,
+                    x => x.PickerFilter,
+                    x => x.PageSize,
+                    // @formatter:off
+                    (_, _, _, _, _) => Unit.Default
+                    // @formatter:on
+                )
+                .Subscribe(_ => { _currentPageOverridden.OnNext(1); });
+        }
     }
 }
