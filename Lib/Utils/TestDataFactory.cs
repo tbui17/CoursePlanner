@@ -1,4 +1,6 @@
-﻿using Lib.Models;
+﻿using System.Collections;
+using Lib.Interfaces;
+using Lib.Models;
 using Serilog;
 
 namespace Lib.Utils;
@@ -10,7 +12,6 @@ public class TestDataFactory
 
     public Term CreateC6Data()
     {
-
         var baseDate = new DateTime(2020, 1, 1);
         var oneMonthLater = baseDate.AddMonths(1);
         var sixMonthsLater = baseDate.AddMonths(6);
@@ -20,11 +21,13 @@ public class TestDataFactory
             Name = "Test Term 1",
             Start = baseDate,
             End = sixMonthsLater,
-            Courses = [
+            Courses =
+            [
                 new()
                 {
                     Name = "Test Course 1",
-                    Assessments = [
+                    Assessments =
+                    [
                         new()
                         {
                             Name = "Test Assessment 1",
@@ -67,8 +70,8 @@ public class TestDataFactory
         var assessments = new List<Assessment>();
 
         var range = Enumerable
-           .Range(1, 6)
-           .ToList();
+            .Range(1, 6)
+            .ToList();
 
         var courseIdCounter = 1;
         foreach (var term in terms)
@@ -132,8 +135,8 @@ public class TestDataFactory
             Courses = courses,
             Notes = notes,
             Assessments = assessments,
-            Users = [new User{Id = 1, Username = "TestAccount12345", Password = "TestPassword12345"}],
-            UserSettings = [new UserSetting{Id = 1, UserId = 1, NotificationRange = TimeSpan.FromDays(5)}]
+            Users = [new User { Id = 1, Username = "TestAccount12345", Password = "TestPassword12345" }],
+            UserSettings = [new UserSetting { Id = 1, UserId = 1, NotificationRange = TimeSpan.FromDays(5) }]
         };
 
         Log.ForContext<TestDataFactory>().Verbose("Created test data {Data}", res);
@@ -256,5 +259,35 @@ public record TestDataResult
         courses = Courses;
         notes = Notes;
         assessments = Assessments;
+    }
+
+    public IEnumerable<IDateTimeEntity> GetDateTimeEntities()
+    {
+        return GetType()
+            .GetProperties()
+            .Select(x =>
+                {
+                    var prop = x.PropertyType;
+
+                    if (!prop.IsGenericType)
+                    {
+                        return null;
+                    }
+
+                    if (!prop.GetGenericArguments().Any(arg => arg.IsAssignableTo(typeof(IDateTimeEntity))))
+                    {
+                        return null;
+                    }
+
+
+                    return x;
+                }
+            )
+            .WhereNotNull()
+            .SelectMany(x =>
+            {
+                var value = x.GetValue(this)!;
+                return ((IList)value).Cast<IDateTimeEntity>().ToList();
+            });
     }
 }

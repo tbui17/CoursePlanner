@@ -34,6 +34,11 @@ public sealed class MultiDbContext<TDbContext, T>(
             .Select(x => query(x.First, x.Second))
             .Thru(Task.WhenAll);
 
+    public async Task<IList<TResult>> QueryParallel<TResult>()
+    {
+
+    }
+
     public async ValueTask DisposeAsync()
     {
         await contexts

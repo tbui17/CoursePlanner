@@ -9,7 +9,19 @@ public class AggregateDurationReportFactory
     public DateTime Date { get; set; } = DateTime.Now.Date;
 
     private TimeSpan TotalTime() => MaxDate() - MinDate();
-    private TimeSpan CompletedTime() => (Date - MinDate()).Max(default);
+
+    private TimeSpan CompletedTime()
+    {
+        var min = MinDate();
+        if (min == default)
+        {
+            return default;
+        }
+
+        return Date.Subtract(min).Max(default);
+
+
+    }
     private TimeSpan RemainingTime() => (MaxDate() - Date).Clamp(default, TotalTime());
     private TimeSpan AverageDuration() => Reports.AverageOrDefault(x => x.AverageDuration);
     private DateTime MinDate() => Reports.MinOrDefault(x => x.MinDate);
