@@ -2,7 +2,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using FluentAssertions;
 using FluentAssertions.Execution;
-using FluentValidation;
 using Lib.Interfaces;
 using Lib.Models;
 using Lib.Services.ReportService;
@@ -10,28 +9,6 @@ using Lib.Utils;
 
 namespace LibTests.ReportTests;
 
-public class DurationReportValidator : AbstractValidator<IDurationReport>
-{
-    public DurationReportValidator()
-    {
-        RuleFor(x => x.CompletedTime).GreaterThanOrEqualTo(default(TimeSpan));
-        RuleFor(x => x.AverageDuration).GreaterThanOrEqualTo(default(TimeSpan));
-        RuleFor(x => x.RemainingTime).GreaterThanOrEqualTo(default(TimeSpan));
-        RuleFor(x => x.TotalTime).GreaterThanOrEqualTo(default(TimeSpan));
-        RuleFor(x => x.CompletedItems).GreaterThanOrEqualTo(0);
-        RuleFor(x => x.PercentComplete).GreaterThanOrEqualTo(0);
-        RuleFor(x => x.PercentRemaining).GreaterThanOrEqualTo(0);
-        RuleFor(x => x.RemainingItems).GreaterThanOrEqualTo(0);
-        RuleFor(x => x.TotalItems).GreaterThanOrEqualTo(0);
-        RuleFor(x => x.MaxDate).GreaterThanOrEqualTo(default(DateTime));
-        RuleFor(x => x.MinDate).GreaterThanOrEqualTo(default(DateTime));
-        RuleFor(x => x.CompletedItems).LessThanOrEqualTo(x => x.TotalItems);
-        RuleFor(x => x.AverageDuration).LessThanOrEqualTo(x => x.TotalTime);
-        RuleFor(x => x.CompletedTime).LessThanOrEqualTo(x => x.TotalTime);
-        RuleFor(x => x.MaxDate).GreaterThanOrEqualTo(x => x.MinDate);
-        RuleFor(x => new[] { x.PercentComplete, x.PercentRemaining }.Sum()).Must(value => value is 0 or 100);
-    }
-}
 
 [SuppressMessage("ReSharper", "UnusedMember.Local")]
 public class ReportBoundaryUtil(IDurationReport report)
