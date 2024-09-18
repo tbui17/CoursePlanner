@@ -3,7 +3,6 @@ using FluentAssertions.Execution;
 using Lib.Interfaces;
 using Lib.Models;
 using Lib.Services.ReportService;
-using Lib.Utils;
 
 namespace LibTests.ReportTests;
 
@@ -15,10 +14,13 @@ public class ReportTest : BaseDbTest
     {
         var service = Resolve<ReportService>();
 
-        var res = await service.GetAggregateReport();
+        var res = await service.GetAggregateDurationReportData();
+        using var scope = new AssertionScope();
+        scope.AddReportable("data", res.Serialize);
+        res.Dump();
         new ReportBoundaryUtil(res).AssertIDurationBoundaries();
-    }
 
+    }
 
     [Test]
     public async Task SubReports_HaveValidProperties()
@@ -26,8 +28,10 @@ public class ReportTest : BaseDbTest
         var service = Resolve<ReportService>();
 
 
-        var res = await service.GetAggregateReport();
-        using var _ = new AssertionScope();
+        var res = await service.GetAggregateDurationReportData();
+
+        using var scope = new AssertionScope();
+        scope.AddReportable("data",res.Serialize);
 
         res.Should()
             .BeAssignableTo<AggregateDurationReport>()
@@ -45,22 +49,19 @@ public class ReportTest : BaseDbTest
     {
         var service = Resolve<ReportService>();
 
-        var rep = await service.GetAggregateReport();
+        var rep = await service.GetAggregateDurationReportData(DateTime.MinValue);
 
-        var sub = rep.Should()
-            .BeAssignableTo<AggregateDurationReport>()
-            .Which.SubReports.SelectMany(x => x)
-            .ToList();
 
-        using var _ = new AssertionScope();
-        rep.MaxDate.Should().Be(sub.MaxOrDefault(x => x.MaxDate));
-        rep.MinDate.Should().Be(sub.MinOrDefault(x => x.MinDate));
-        rep.RemainingItems.Should()
-            .Be(sub.SumOrDefault(x => x.RemainingItems));
-        rep.TotalItems.Should()
-            .Be(sub.SumOrDefault(x => x.TotalItems));
-        rep.RemainingTime.Should()
-            .BeLessThanOrEqualTo(sub.MaxOrDefault(x => x.RemainingTime))
-            .And.BeGreaterThanOrEqualTo(sub.MinOrDefault(x => x.RemainingTime));
+        using var scope = new AssertionScope();
+        scope.AddReportable("data",rep.Serialize);
+
+        var util = new ReportBoundaryUtil(rep);
+        util.AssertIDurationBoundaries();
+        util.AssertSubReportRelationalBoundaries();
+
+
+
+
+
     }
 }

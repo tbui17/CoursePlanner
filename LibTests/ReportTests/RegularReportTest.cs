@@ -37,7 +37,7 @@ public class RegularReportTest
             Date = now
         };
 
-        var res = fac.Create();
+        var res = fac.ToData();
 
 
         res.RemainingTime.Should().Be(fiveYears);
@@ -53,7 +53,7 @@ public class RegularReportTest
             Date = reference
         };
 
-        var report = fac.Create();
+        var report = fac.ToData();
         new ReportBoundaryUtil(report).AssertIDurationBoundaries();
     }
 
@@ -110,7 +110,7 @@ public class RegularReportTest
         };
 
 
-        var res = fac.Create();
+        var res = fac.ToData();
 
 
         res.CompletedTime.Should().Be(Year(3));

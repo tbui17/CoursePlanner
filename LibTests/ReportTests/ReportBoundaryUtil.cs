@@ -2,9 +2,36 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using FluentAssertions;
 using FluentAssertions.Execution;
+using FluentValidation;
 using Lib.Interfaces;
+using Lib.Models;
+using Lib.Services.ReportService;
+using Lib.Utils;
 
 namespace LibTests.ReportTests;
+
+public class DurationReportValidator : AbstractValidator<IDurationReport>
+{
+    public DurationReportValidator()
+    {
+        RuleFor(x => x.CompletedTime).GreaterThanOrEqualTo(default(TimeSpan));
+        RuleFor(x => x.AverageDuration).GreaterThanOrEqualTo(default(TimeSpan));
+        RuleFor(x => x.RemainingTime).GreaterThanOrEqualTo(default(TimeSpan));
+        RuleFor(x => x.TotalTime).GreaterThanOrEqualTo(default(TimeSpan));
+        RuleFor(x => x.CompletedItems).GreaterThanOrEqualTo(0);
+        RuleFor(x => x.PercentComplete).GreaterThanOrEqualTo(0);
+        RuleFor(x => x.PercentRemaining).GreaterThanOrEqualTo(0);
+        RuleFor(x => x.RemainingItems).GreaterThanOrEqualTo(0);
+        RuleFor(x => x.TotalItems).GreaterThanOrEqualTo(0);
+        RuleFor(x => x.MaxDate).GreaterThanOrEqualTo(default(DateTime));
+        RuleFor(x => x.MinDate).GreaterThanOrEqualTo(default(DateTime));
+        RuleFor(x => x.CompletedItems).LessThanOrEqualTo(x => x.TotalItems);
+        RuleFor(x => x.AverageDuration).LessThanOrEqualTo(x => x.TotalTime);
+        RuleFor(x => x.CompletedTime).LessThanOrEqualTo(x => x.TotalTime);
+        RuleFor(x => x.MaxDate).GreaterThanOrEqualTo(x => x.MinDate);
+        RuleFor(x => new[] { x.PercentComplete, x.PercentRemaining }.Sum()).Must(value => value is 0 or 100);
+    }
+}
 
 [SuppressMessage("ReSharper", "UnusedMember.Local")]
 public class ReportBoundaryUtil(IDurationReport report)
@@ -41,6 +68,40 @@ public class ReportBoundaryUtil(IDurationReport report)
         _report.CompletedTime.Should().BeLessThanOrEqualTo(_report.TotalTime);
         _report.MaxDate.Should().BeOnOrAfter(_report.MinDate);
         new[] { _report.PercentComplete, _report.PercentRemaining }.Sum().Should().BeOneOf(default, 100);
+    }
+
+    public void AssertSubReportRelationalBoundaries()
+    {
+        var data = _report.Should().BeOfType<AggregateDurationReport>().Subject;
+        using var scope = new AssertionScope();
+        var sub = data.SubReports.Values().ToList();
+
+
+        data.AverageDuration.Should()
+            .BeLessThanOrEqualTo(sub.Max(x => x.AverageDuration), nameof(data.AverageDuration))
+            .And.BeGreaterThanOrEqualTo(sub.Min(x => x.AverageDuration), nameof(data.AverageDuration));
+
+        data.CompletedItems.Should()
+            .Be(sub.Sum(x => x.CompletedItems), nameof(data.CompletedItems));
+
+        data.TotalItems.Should()
+            .Be(sub.Sum(x => x.TotalItems), nameof(data.TotalItems));
+
+        data.RemainingItems.Should().Be(sub.Sum(x => x.RemainingItems), nameof(data.RemainingItems));
+
+        data.MaxDate.Should().Be(sub.Max(x => x.MaxDate), nameof(data.MaxDate));
+        data.MinDate.Should().Be(sub.Min(x => x.MinDate), nameof(data.MinDate));
+        sub.OfType<IDurationReportFactory>()
+            .Select(x => x.Date)
+            .Distinct()
+            .Should()
+            .HaveCountLessOrEqualTo(1);
+
+        if (data.PercentComplete is 100 || data.PercentRemaining is 0)
+        {
+            scope.AppendTracing("PercentComplete is 100 or PercentRemaining is 0");
+            data.RemainingTime.Should().Be(default, nameof(data.RemainingTime));
+        }
     }
 
     public IEnumerable<MethodInfo> GetSubAssertions()

@@ -25,19 +25,22 @@ public class ReportFactoryTest
     public void DurationReportCreate_Empty_ShouldNotThrow()
     {
         var fac = new DurationReportFactory();
-        fac.Invoking(x => x.Create()).Should().NotThrow();
+        fac.Invoking(x => x.ToData()).Should().NotThrow();
     }
 
     [Test]
     public void Reports_Empty_ShouldBeWithinBounds()
     {
-        var aggFac = new AggregateDurationReportFactory();
-        var fac = new DurationReportFactory();
 
-        var aggReportEmpty = aggFac.Create();
+        var report = new DurationReportFactory();
 
-        var report = fac.Create();
-        aggFac.Reports.Add(report);
+        var aggReportEmpty = new AggregateDurationReportFactory().Create();
+
+
+        var aggFac = new AggregateDurationReportFactory
+        {
+            Reports = [report]
+        };
 
         var aggReport = aggFac.Create();
 
@@ -47,7 +50,7 @@ public class ReportFactoryTest
         using (var scope = new AssertionScope())
         {
             scope.AddReportable("variable", (nameof(report)));
-            new ReportBoundaryUtil(report).AssertIDurationBoundaries();
+            new ReportBoundaryUtil(report.ToData()).AssertIDurationBoundaries();
         }
 
         using (var scope = new AssertionScope())

@@ -5,11 +5,11 @@ using Lib.Services.ReportService;
 
 namespace LibTests;
 
-public class EntityFakerFactory
+public class EntityFakerUtil
 {
     public DateTime Reference = DateTime.Now.Date;
 
-    public Faker<T> CreateEntityFaker<T>() where T : class, IDateTimeEntity
+    public Faker<T> CreateFaker<T>() where T : class, IDateTimeEntity
     {
         var faker = new Faker<T>()
             .RuleFor(x => x.Start, f => f.Date.Past())
@@ -18,9 +18,9 @@ public class EntityFakerFactory
         return faker;
     }
 
-    public DurationReport CreateReport<T>() where T : class, IDateTimeEntity
+    public DurationReportFactory CreateReport<T>() where T : class, IDateTimeEntity
     {
-        var faker = CreateEntityFaker<T>();
+        var faker = CreateFaker<T>();
         var entities = faker.Generate(100).Cast<IDateTimeEntity>().ToList();
 
         var fac = new DurationReportFactory
@@ -29,7 +29,6 @@ public class EntityFakerFactory
             Date = Reference
         };
 
-        var report = fac.Create();
-        return report;
+        return fac;
     }
 }
