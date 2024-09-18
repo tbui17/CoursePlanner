@@ -18,7 +18,7 @@ public partial class StatsViewModel(ReportService reportService, ILogger<StatsVi
     public async Task RefreshAsync()
     {
         logger.LogDebug("RefreshAsync triggered");
-        var res = await reportService.GetAggregateReport();
+        var res = await reportService.GetAggregateDurationReportData();
         logger.LogDebug("{DurationReport}", res);
         DurationReport = (AggregateDurationReport)res;
     }
