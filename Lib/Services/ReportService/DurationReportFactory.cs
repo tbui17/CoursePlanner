@@ -1,41 +1,68 @@
 using Lib.Interfaces;
 using Lib.Models;
 using Lib.Utils;
+
 namespace Lib.Services.ReportService;
 
-public class DurationReportFactory
+public interface IDurationReportFactory : IDurationReport
 {
-    public IList<IDateTimeEntity> Entities { get; set; } = [];
-    public DateTime Date { get; set; } = DateTime.Now.Date;
+    IReadOnlyCollection<IDateTimeRange> Entities { get; init; }
+    DateTime Date { get; init; }
+    Type Type { get; }
+    DurationReport ToData();
+}
 
-    private int TotalItems() => Entities.Count;
+public class DurationReportFactory : IDurationReportFactory
+{
+    public IReadOnlyCollection<IDateTimeRange> Entities { get; init; } = [];
+    public DateTime Date { get; init; } = DateTime.Now.Date;
+    public Type Type { get; init; } = typeof(IDateTimeRange);
 
-    private int CompletedItems() => Entities.Count(x => x.End <= Date);
 
-    private TimeSpan TotalTime() => MaxDate() - MinDate();
-
-    private TimeSpan CompletedTime() => (Date - MinDate()).Clamp(default, TotalTime());
-
-    private TimeSpan RemainingTime() => MaxDate().Subtract(Date).Max(default);
-
-    private TimeSpan AverageDuration() =>
-        Entities.AverageOrDefault(x => x.Duration());
-
-    private Type Type() => Entities.FirstOrDefault()?.GetType() ?? typeof(IDateTimeEntity);
-
-    private DateTime MinDate() => Entities.MinOrDefault(x => x.Start);
-    private DateTime MaxDate() => Entities.MaxOrDefault(x => x.End);
-
-    public DurationReport Create() => new()
+    private DateTime GetDate()
     {
-        TotalTime = TotalTime(),
-        CompletedTime = CompletedTime(),
-        RemainingTime = RemainingTime(),
-        AverageDuration = AverageDuration(),
-        TotalItems = TotalItems(),
-        CompletedItems = CompletedItems(),
-        Type = Type(),
-        MinDate = MinDate(),
-        MaxDate = MaxDate()
-    };
+        return Date.Clamp(MinDate, MaxDate);
+    }
+
+    private DateTime? _minDate;
+    public DateTime MinDate => _minDate ??= Entities.MinOrDefault(x => x.Start);
+    private DateTime? _maxDate;
+    public DateTime MaxDate => _maxDate ??= Entities.MaxOrDefault(x => x.End);
+    private int? _totalItems;
+    public int TotalItems => _totalItems ??= Entities.Count;
+
+
+    private int? _completedItems;
+    public int CompletedItems => _completedItems ??= Entities.Count(x => x.End <= GetDate());
+    public int RemainingItems => this.RemainingItems();
+    public double PercentComplete => this.PercentComplete();
+    public double PercentRemaining => this.PercentRemaining();
+
+    private TimeSpan? _totalTime;
+    public TimeSpan TotalTime => _totalTime ??= MaxDate - MinDate;
+
+    private TimeSpan? _completedTime;
+    public TimeSpan CompletedTime => _completedTime ??= (GetDate() - MinDate).Clamp(default, TotalTime);
+
+    private TimeSpan? _remainingTime;
+    public TimeSpan RemainingTime => _remainingTime ??= MaxDate.Subtract(GetDate()).Max(default);
+
+    private TimeSpan? _averageDuration;
+    public TimeSpan AverageDuration => _averageDuration ??= Entities.AverageOrDefault(x => x.Duration());
+
+
+    public DurationReport ToData() => Entities.Count == 0
+        ? new()
+        : new()
+        {
+            TotalTime = TotalTime,
+            CompletedTime = CompletedTime,
+            RemainingTime = RemainingTime,
+            AverageDuration = AverageDuration,
+            TotalItems = TotalItems,
+            CompletedItems = CompletedItems,
+            Type = Type,
+            MinDate = MinDate,
+            MaxDate = MaxDate
+        };
 }

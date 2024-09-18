@@ -1,5 +1,6 @@
 using Lib.Attributes;
 using Lib.Interfaces;
+using Lib.Providers;
 
 namespace ViewModels.Domain.NotificationDataViewModel;
 
@@ -9,8 +10,8 @@ public interface INotificationDataViewModelDefaultsProvider : IDefaultDateProvid
 public class NotificationDataViewModelDefaultsProvider : INotificationDataViewModelDefaultsProvider
 {
 
-    private readonly DefaultDateProvider _defaultDateProvider = new();
-    private readonly DefaultPageProvider _defaultPageProvider = new();
+    private readonly IDefaultDateProvider _defaultDateProvider = new DefaultDateProvider();
+    private readonly IDefaultPageProvider _defaultPageProvider = new DefaultPageProvider();
 
     public IDateTimeRange DateRange => _defaultDateProvider.DateRange;
 

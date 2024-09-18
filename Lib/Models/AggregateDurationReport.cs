@@ -1,11 +1,10 @@
-using System.Collections.Immutable;
 using Lib.Interfaces;
 
 namespace Lib.Models;
 
 public record AggregateDurationReport : IDurationReport
 {
-    public IDictionary<Type, IDurationReport> SubReports { get; init; } = ImmutableDictionary<Type, IDurationReport>.Empty;
+    public IReadOnlyList<IGrouping<Type, IDurationReport>> SubReports { get; init; } = [];
 
     public TimeSpan TotalTime { get; init; }
     public TimeSpan RemainingTime { get; init; }

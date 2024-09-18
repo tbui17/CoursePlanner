@@ -41,4 +41,11 @@ public class AppService(ILogger<AppService> logger) : IAppService
         logger.LogInformation("Showing user alert message: {Message}", message);
         await Current.DisplayAlert("Alert", message, "OK");
     }
+
+    public T GetResource<T>(string key)
+    {
+        return (T)Application.Current!.Resources[key];
+    }
+
+    public Style GetStyle(string key) => GetResource<Style>(key);
 }

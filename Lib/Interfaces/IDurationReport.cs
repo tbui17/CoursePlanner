@@ -19,6 +19,21 @@ public interface IDurationReport
 public static class DurationReportExtensions
 {
     public static int RemainingItems(this IDurationReport report) => report.TotalItems - report.CompletedItems;
-    public static double PercentComplete(this IDurationReport report) => (double) report.CompletedItems / report.TotalItems * 100;
-    public static double PercentRemaining(this IDurationReport report) => (double) report.RemainingItems / report.TotalItems * 100;
+    public static double PercentComplete(this IDurationReport report)
+    {
+        if (report.TotalItems == default)
+        {
+            return default;
+        }
+        return (double) report.CompletedItems / report.TotalItems * 100;
+    }
+
+    public static double PercentRemaining(this IDurationReport report)
+    {
+        if (report.TotalItems == default)
+        {
+            return default;
+        }
+        return (double)report.RemainingItems / report.TotalItems * 100;
+    }
 }

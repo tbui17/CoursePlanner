@@ -1,4 +1,6 @@
 using CoursePlanner.Pages;
+using Lib.Interfaces;
+using Lib.Models;
 using Microsoft.Extensions.Logging;
 using ViewModels.Domain;
 using ViewModels.Interfaces;
@@ -44,12 +46,18 @@ public class NavigationService : INavigationService
 
         IRefreshableView<IRefresh>? GetRefreshable()
         {
+
             if (Current.CurrentPage is not IRefreshableView<IRefresh> refreshable2)
             {
                 return null;
             }
 
-            return args.Source is ShellNavigationSource.Pop or ShellNavigationSource.PopToRoot
+            return args.Source
+                is ShellNavigationSource.Pop
+                or ShellNavigationSource.PopToRoot
+                or ShellNavigationSource.ShellContentChanged
+                or ShellNavigationSource.ShellItemChanged
+                or ShellNavigationSource.ShellSectionChanged
                 ? refreshable2
                 : null;
         }
@@ -93,14 +101,25 @@ public class NavigationService : INavigationService
     private async Task GoToAsync<T>(int id) where T : Page, IRefreshableView<IRefreshId>
     {
         var page = Resolve<T>();
-        _logger.LogInformation("Navigating to {PageName}", page.Title);
         await GoToAsync(page, id);
     }
 
     private async Task GoToAsync<T>(T page, int id) where T : Page, IRefreshableView<IRefreshId>
     {
+        _logger.LogInformation("Initializing model {ModelName} with id {Id} for {PageTitle}", page.Model.GetType().Name, id, page.Title);
         await page.Model.Init(id);
         await PushAsync(page);
+    }
+
+    public async Task GoToNotificationDetailsPage(INotification notification)
+    {
+        var t = notification switch
+        {
+            Course x => GoToDetailedCoursesPageAsync(x.Id),
+            Assessment x => GoToAssessmentDetailsPageAsync(x.CourseId),
+            _ => throw new ArgumentOutOfRangeException(nameof(notification), notification, "Unknown item type")
+        };
+        await t;
     }
 
     private async Task GoToAsync<T>(T page) where T : Page

@@ -54,12 +54,19 @@ public static class UtilExtensions
         return value;
     }
 
-    public static IEnumerable<Grouping<TKey, TResult>> SelectValues<TKey, TValue, TResult>(
+    public static IEnumerable<IGrouping<TKey, TResult>> SelectValues<TKey, TValue, TResult>(
         this IEnumerable<IGrouping<TKey, TValue>> groups,
         Func<IGrouping<TKey, TValue>, IEnumerable<TResult>> selector
     ) =>
         from g in groups
         select new Grouping<TKey, TResult>(g.Key, selector(g));
+
+    public static IEnumerable<IGrouping<TKey, TResult>> SelectInnerValues<TKey, TValue, TResult>(
+        this IEnumerable<IGrouping<TKey, TValue>> groups,
+        Func<TValue, TResult> selector
+    ) =>
+        from g in groups
+        select new Grouping<TKey, TResult>(g.Key, g.Select(selector));
 
     public static (IList<T>True, IList<T>False) PartitionBy<T>(this IEnumerable<T> collection, Predicate<T> predicate)
     {
@@ -86,11 +93,28 @@ public static class UtilExtensions
     public static Func<T, bool> ToAnyPredicate<T>(this IEnumerable<Func<T, bool>> predicates) =>
         x => predicates.Any(p => p(x));
 
-    public static Func<T,bool> ToAllPredicate<T>(this IEnumerable<Func<T,bool>> predicates) =>
+    public static Func<T, bool> ToAllPredicate<T>(this IEnumerable<Func<T, bool>> predicates) =>
         x => predicates.All(p => p(x));
 
     public static int DivideRoundedUp(this int dividend, int divisor) =>
         (dividend + divisor - 1) / divisor;
+
+    public static IEnumerable<TValue> Values<TKey, TValue>(this IEnumerable<IGrouping<TKey, TValue>> groupings) =>
+        groupings.SelectMany(x => x);
+
+
+    public static int Delete<T>(this IList<T> list, Func<T, bool> predicate)
+    {
+        var items = list.Where(predicate).ToList();
+        var i = 0;
+        foreach (var item in items)
+        {
+            list.Remove(item);
+            i++;
+        }
+
+        return i;
+    }
 }
 
 public static class Grouping
@@ -105,6 +129,8 @@ public record Grouping<TKey, TValue>(TKey Key, IEnumerable<TValue> Values) : IGr
     {
         return new Grouping<TKey, TValue>(grouping.Key, grouping);
     }
+
+    public static Grouping<TKey?, TValue> Empty => new(default, Array.Empty<TValue>());
 
     public IEnumerator<TValue> GetEnumerator()
     {
