@@ -11,7 +11,6 @@ public sealed class MultiDbContext<TDbContext, T>(
     where T : class
     where TDbContext : DbContext
 {
-
     public async Task<IList<TResult>> Query<TResult>(Func<IQueryable<T>, IQueryable<TResult>> query)
     {
         var results = await dbSets
@@ -34,9 +33,9 @@ public sealed class MultiDbContext<TDbContext, T>(
             .Select(x => query(x.First, x.Second))
             .Thru(Task.WhenAll);
 
-    public async Task<IList<TResult>> QueryParallel<TResult>()
+    public async Task<IList<TResult>> QueryThreaded<TResult>(Func<IQueryable<T>, Task<TResult>> query)
     {
-
+        return await Query(q => Task.Run(async () => await query(q)));
     }
 
     public async ValueTask DisposeAsync()
