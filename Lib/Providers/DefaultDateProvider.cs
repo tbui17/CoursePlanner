@@ -2,7 +2,7 @@ using Lib.Attributes;
 using Lib.Interfaces;
 using Lib.Models;
 
-namespace ViewModels.Domain.NotificationDataViewModel;
+namespace Lib.Providers;
 
 [Inject(typeof(IDefaultDateProvider))]
 public sealed class DefaultDateProvider : IDefaultDateProvider
@@ -17,7 +17,6 @@ public sealed class DefaultDateProvider : IDefaultDateProvider
                 Start = now,
                 End = now.AddMonths(1)
             };
-
         }
     }
 }

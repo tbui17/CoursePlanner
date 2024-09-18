@@ -1,6 +1,4 @@
-using Lib.Interfaces;
-
-namespace ViewModels.Domain.NotificationDataViewModel;
+namespace Lib.Interfaces;
 
 public interface IDefaultDateProvider
 {
