@@ -1,5 +1,6 @@
 using Lib.Interfaces;
 using Lib.Models;
+using Microsoft.Extensions.Logging;
 using OneOf;
 using ViewModels.Domain;
 using ViewModels.Interfaces;
@@ -12,14 +13,17 @@ public partial class StatsPage : IRefreshableView<StatsViewModel>
 {
     public StatsViewModel Model { get; set; }
 
-    public StatsPage(StatsViewModel model)
+    public StatsPage(StatsViewModel model, ILogger<StatsPage> logger)
     {
+        logger.LogDebug("Creating StatsPage");
         Model = model;
         InitializeComponent();
+        logger.LogDebug("StatsPage Initialized");
         BindingContext = Model;
         HideSoftInputOnTapped = true;
         Model.PropertyChanged += (_, x) =>
         {
+            logger.LogDebug("Property changed: {PropertyName}", x.PropertyName);
             if (x.PropertyName is not nameof(model.DurationReport)) return;
             ReportsLayout.Children.Clear();
             ReportsLayout.Children.Add(CreateContent());
@@ -49,7 +53,7 @@ file class ReportViewFactory(AggregateDurationReport report)
     {
         var tableSections = new[] { report }
             .AsParallel()
-            .Concat(report.SubReports.Select(x => x.Value))
+            .Concat(report.SubReports.SelectMany(x => x))
             .Select(CreateTableSection)
             .OrderBy(x => x.Title, StringComparer.CurrentCultureIgnoreCase)
             .ThenBy(x => x.Title is AggregateReport);

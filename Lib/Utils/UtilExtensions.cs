@@ -106,6 +106,8 @@ public record Grouping<TKey, TValue>(TKey Key, IEnumerable<TValue> Values) : IGr
         return new Grouping<TKey, TValue>(grouping.Key, grouping);
     }
 
+    public static Grouping<TKey?, TValue> Empty => new(default, Array.Empty<TValue>());
+
     public IEnumerator<TValue> GetEnumerator()
     {
         foreach (var value in Values)
