@@ -35,7 +35,8 @@ public class ReportTest : BaseDbTest
             .BeAssignableTo<AggregateDurationReport>()
             .Which.SubReports.Should()
             .HaveCountGreaterThan(1)
-            .And.Subject.Values.Should()
+            .And.Subject.SelectMany(x => x)
+            .Should()
             .AllBeAssignableTo<IDurationReport>()
             .Which.Should()
             .AllSatisfy(x => new ReportBoundaryUtil(x).AssertIDurationBoundaries());
@@ -50,7 +51,8 @@ public class ReportTest : BaseDbTest
 
         var sub = rep.Should()
             .BeAssignableTo<AggregateDurationReport>()
-            .Which.SubReports.Values.ToList();
+            .Which.SubReports.SelectMany(x => x)
+            .ToList();
 
         using var _ = new AssertionScope();
         rep.MaxDate.Should().Be(sub.MaxOrDefault(x => x.MaxDate));
@@ -226,6 +228,14 @@ public class RegularReportTest
 
         res.CompletedTime.Should().Be(Year(3));
     }
+
+
+    [Test]
+    public void MethodsRetrieved()
+    {
+        new ReportBoundaryUtil(new DurationReport()).GetSubAssertions().Should().NotBeEmpty();
+
+    }
 }
 
 [SuppressMessage("ReSharper", "UnusedMember.Local")]
@@ -234,10 +244,10 @@ file class ReportBoundaryUtil(IDurationReport report)
     private readonly IDurationReport _report = report.Should().BeAssignableTo<IDurationReport>().Subject;
 
     [AttributeUsage(AttributeTargets.Method)]
-    private class SubAssertionAttribute : Attribute;
+    public class SubAssertionAttribute : Attribute;
 
     [SubAssertion]
-    private void AssertMinBoundaries()
+    public void AssertMinBoundaries()
     {
         using var _ = new AssertionScope();
         _report.CompletedTime.Should().BeGreaterThanOrEqualTo(default);
@@ -254,18 +264,26 @@ file class ReportBoundaryUtil(IDurationReport report)
     }
 
     [SubAssertion]
-    private void AssertRelationalBoundaries()
+    public void AssertRelationalBoundaries()
     {
         using var _ = new AssertionScope();
         _report.CompletedItems.Should().BeLessThanOrEqualTo(_report.TotalItems);
         _report.AverageDuration.Should().BeLessThanOrEqualTo(_report.TotalTime);
-        _report.CompletedTime.Should().BeLessThanOrEqualTo(_report.TotalTime);
+        _report.CompletedTime.Should().BeLessThan(_report.TotalTime);
         _report.MaxDate.Should().BeOnOrAfter(_report.MinDate);
         new[] { _report.PercentComplete, _report.PercentRemaining }.Sum().Should().BeOneOf(default, 100);
     }
 
+    public IEnumerable<MethodInfo> GetSubAssertions()
+    {
+        return GetType()
+            .GetMethods()
+            .Where(x => x.GetCustomAttribute<SubAssertionAttribute>() is not null);
+    }
+
     public void AssertIDurationBoundaries()
     {
+
         foreach (var method in GetType()
                      .GetMethods()
                      .Where(x => x.GetCustomAttribute<SubAssertionAttribute>() is not null)
