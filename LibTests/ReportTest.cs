@@ -269,7 +269,7 @@ file class ReportBoundaryUtil(IDurationReport report)
         using var _ = new AssertionScope();
         _report.CompletedItems.Should().BeLessThanOrEqualTo(_report.TotalItems);
         _report.AverageDuration.Should().BeLessThanOrEqualTo(_report.TotalTime);
-        _report.CompletedTime.Should().BeLessThan(_report.TotalTime);
+        _report.CompletedTime.Should().BeLessThanOrEqualTo(_report.TotalTime);
         _report.MaxDate.Should().BeOnOrAfter(_report.MinDate);
         new[] { _report.PercentComplete, _report.PercentRemaining }.Sum().Should().BeOneOf(default, 100);
     }
