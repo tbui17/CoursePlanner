@@ -21,22 +21,15 @@ public static class MauiProgram
             .UseMauiCommunityToolkitMarkup()
             .UseLocalNotification()
             .UseUraniumUI()
-            .UseUraniumUIMaterial()
-            .ConfigureFonts
-            (
-                fonts =>
-                {
-                    fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
-                    fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
-                }
-            );;
+            .UseUraniumUIMaterial();
         var setup = new MauiAppServiceConfiguration
         {
             AppDataDirectory = () => FileSystem.Current.AppDataDirectory,
             MessageDisplayService = MessageDisplayService.Create(),
             ExceptionHandlerRegistration = x => MauiExceptions.UnhandledException += x,
             Services = builder.Services,
-            ServiceBuilder = new MauiServiceBuilder(builder.Services)
+            ServiceBuilder = new MauiServiceBuilder(builder.Services),
+            Builder = builder
         };
         setup.AddServices();
 

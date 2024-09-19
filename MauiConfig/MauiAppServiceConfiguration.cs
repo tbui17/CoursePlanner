@@ -21,6 +21,7 @@ public class MauiAppServiceConfiguration
     public required Func<string> AppDataDirectory { get; set; }
     public required IMessageDisplay MessageDisplayService { get; set; }
     public required Action<UnhandledExceptionEventHandler> ExceptionHandlerRegistration { get; set; }
+    public required MauiAppBuilder Builder { get; set; }
 
 
     public void RunStartupActions(MauiApp app)
@@ -33,8 +34,21 @@ public class MauiAppServiceConfiguration
         client.Setup();
     }
 
+    private void ConfigBuilder()
+    {
+        Builder.ConfigureFonts
+        (
+            fonts =>
+            {
+                fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
+                fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+            }
+        );
+    }
+
     public void AddServices()
     {
+        ConfigBuilder();
         Services.AddInjectables(false);
         Services.AddLoggingUseCase(new MauiLoggingUseCase(AppDataDirectory()));
         var serviceBuilder = ServiceBuilder;
