@@ -21,7 +21,15 @@ public static class MauiProgram
             .UseMauiCommunityToolkitMarkup()
             .UseLocalNotification()
             .UseUraniumUI()
-            .UseUraniumUIMaterial();
+            .UseUraniumUIMaterial()
+            .ConfigureFonts
+            (
+                fonts =>
+                {
+                    fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
+                    fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+                }
+            );;
         var setup = new MauiAppServiceConfiguration
         {
             AppDataDirectory = () => FileSystem.Current.AppDataDirectory,
