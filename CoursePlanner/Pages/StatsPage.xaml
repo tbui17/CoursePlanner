@@ -18,6 +18,14 @@
                     </Style>
                 </VerticalStackLayout.Resources>
 
+
+
+                <CollectionView x:Name="CollectionViewInstance"
+                                SelectionMode="None"
+                                MaximumHeightRequest="300"/>
+
+
+
             </VerticalStackLayout>
         </ScrollView>
     </ContentPage.Content>

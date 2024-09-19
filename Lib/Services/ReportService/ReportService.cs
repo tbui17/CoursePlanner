@@ -9,7 +9,7 @@ namespace Lib.Services.ReportService;
 [Inject]
 public class ReportService(MultiLocalDbContextFactory dbFactory)
 {
-    public async Task<IDurationReport> GetAggregateDurationReportData(DateTime? date = null)
+    public async Task<AggregateDurationReport> GetAggregateDurationReportData(DateTime? date = null)
     {
         var time = date ?? DateTime.Now.Date;
         return new AggregateDurationReportFactory { Reports = await GetDurationReportData(time)}.Create();
