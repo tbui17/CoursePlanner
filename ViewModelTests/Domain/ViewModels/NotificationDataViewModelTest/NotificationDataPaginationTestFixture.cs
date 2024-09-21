@@ -22,7 +22,7 @@ public class NotificationDataPaginationTestFixture
 
     public async Task ModelEventuallyHasData()
     {
-        await Model.Should().EventuallyHave(x => x.PageResult is { CurrentPageData.Count: > 0 });
+        await Model.Should().EventuallyHave(x => x.PageResult is { CurrentPageData.Count: > 0,ItemCount:>=10 });
     }
 
 

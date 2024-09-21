@@ -71,10 +71,6 @@ public abstract class BaseConfigTest : IBaseTest
     {
         var services = new ServiceCollection();
 
-        var telemetryOptions = new TelemetryOptions()
-        {
-        };
-
         services
             .AddResiliencePipeline("Retry",
                 builder => builder.AddRetry(new RetryStrategyOptions

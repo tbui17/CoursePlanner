@@ -23,7 +23,7 @@ public abstract class BaseDbTest : BaseTest
     [TearDown]
     public override async Task TearDown()
     {
-        await base.Setup();
+        await base.TearDown();
         using var _ = TestContextProvider();
         await ResolveResiliencePipeline("Retry")
             .ExecuteAsync(async token =>

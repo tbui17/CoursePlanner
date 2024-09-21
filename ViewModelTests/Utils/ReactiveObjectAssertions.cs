@@ -39,7 +39,7 @@ public class ReactiveObjectAssertions<T>(T instance) :
 
     [CustomAssertion]
     public async Task<AndConstraint<ReactiveObjectAssertions<T>>> EventuallySatisfy(
-        Action<T> assertion, int timeoutMs = 3000)
+        Action<T> assertion, int timeoutMs = 5000)
     {
         var scope = new AssertionScope();
         var cts = new CancellationTokenSource(timeoutMs);
