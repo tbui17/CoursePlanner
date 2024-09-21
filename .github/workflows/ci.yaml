@@ -5,7 +5,8 @@ on:
     branches:
       - '*'
   pull_request:
-    branches: [ "*" ]
+    branches:
+      - "*"
 
 jobs:
   build:
@@ -21,6 +22,19 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
       - name: Build
-        run: dotnet build CoursePlanner/CoursePlanner.csproj -f net8.0-android
-      - name: Test
-        run: dotnet test
+        run: dotnet build CoursePlanner/CoursePlanner.csproj -f net8.0-android --no-restore
+      - name: Run Unit Tests
+        run: dotnet test --no-build --logger "trx;LogFileName=TestResults/test_results.trx" /p:CollectCoverage=true /p:CoverletOutput=./TestResults/coverlet/coverage.cobertura.xml /p:CoverletOutputFormat=cobertura
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v3
+        with:
+          name: TestResults
+          path: ./TestResults
+      - name: Test Report
+        uses: bibipkins/dotnet-test-reporter@v1.4.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          comment-title: 'Unit Test Results'
+          results-path: './TestResults/test_results.trx'
+          coverage-path: './TestResults/coverlet/coverage.cobertura.xml'
+          coverage-threshold: 80
