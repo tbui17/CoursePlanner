@@ -2,6 +2,7 @@ using System.Text;
 using Lib.Config;
 using Lib.Utils;
 using Serilog;
+using Serilog.Context;
 using Serilog.Events;
 using Serilog.Formatting.Json;
 
@@ -26,23 +27,27 @@ internal sealed class LogConfigurationTestUseCase : ILoggingUseCase
 
     public void AddSinks()
     {
-        if (Environment.GetEnvironmentVariable("CI") is null)
+        if (Environment.GetEnvironmentVariable("CI") is not null)
         {
-            Configuration.WriteTo.Console(LogEventLevel.Error, DefaultLogConfigurationUseCase.LogTemplate);
+            Configuration.WriteTo.Console(new JsonFormatter(), LogEventLevel.Error);
+            Configuration.WriteTo.File(Options with { RestrictedToMinimumLevel = LogEventLevel.Warning });
             return;
-
         }
-        Base.AddSinks();
+
+
+
+
         Configuration
-            .WriteTo.Debug(LogEventLevel.Information, DefaultLogConfigurationUseCase.LogTemplate)
             .WriteTo.Console(LogEventLevel.Information, DefaultLogConfigurationUseCase.LogTemplate);
+
+        Configuration.WriteTo.File(Options);
         AddSeq();
     }
 
     private static readonly FileSinkOptions Options = new()
     {
         Formatter = new JsonFormatter(),
-        Path = Path.Combine(Path.GetTempPath(), "TestLogs", "logs.txt"),
+        Path = Path.Combine(Path.GetTempPath(), "TestReports", "logs.txt"),
         RestrictedToMinimumLevel = LogEventLevel.Information,
         RollingInterval = RollingInterval.Day,
         RetainedFileCountLimit = 3,
@@ -52,13 +57,6 @@ internal sealed class LogConfigurationTestUseCase : ILoggingUseCase
         Encoding = Encoding.UTF8,
         RetainedFileTimeLimit = TimeSpan.FromDays(1)
     };
-
-    public void AddFileSink(Func<FileSinkOptions, FileSinkOptions>? options = null)
-    {
-        var opts = options?.Invoke(Options) ?? Options;
-
-        Configuration.WriteTo.File(opts);
-    }
 
     public void AddEnrichments()
     {
@@ -71,7 +69,9 @@ internal sealed class LogConfigurationTestUseCase : ILoggingUseCase
     public void AddLogFilters()
     {
         var filterHandler = new FilterHandler();
-        filterHandler.AddStringFilter(
+
+        filterHandler
+            .AddStringFilter(
                 [
                     x => x.Contains("CREATE"),
                     x => x.Contains("PRAGMA"),
@@ -80,7 +80,16 @@ internal sealed class LogConfigurationTestUseCase : ILoggingUseCase
             )
             .AddLogFilter(
                 [
-                    x => x.HasSourceContext("Microsoft.EntityFrameworkCore.Database.Command"),
+                    x => x.HasSourceContext(nameof(Microsoft.EntityFrameworkCore.ChangeTracking).ToNamespaceString()),
+                    x => x.HasSourceContext(nameof(Microsoft.EntityFrameworkCore.ChangeTracking).ToNamespaceString()),
+                    x => x.HasSourceContext(
+                        $"{nameof(Microsoft.EntityFrameworkCore).ToNamespaceString()}.Database.Command"
+                    )
+                ]
+            )
+            .AddInclusionFilter(
+                [
+                    x => x.Level is LogEventLevel.Information && x.SourceContextContains("Base")
                 ]
             );
         Configuration.Filter.ByExcluding(filterHandler.FilterByExcluding);
@@ -110,6 +119,7 @@ file class FilterHandler
 {
     public List<Func<string, bool>> StringExclusionFilters { get; } = [];
     public List<Func<LogEvent, bool>> LogExclusionFilters { get; } = [];
+    public List<Func<LogEvent, bool>> InclusionFilters { get; } = [];
 
     public FilterHandler AddStringFilter(Func<string, bool> filter)
     {
@@ -135,13 +145,26 @@ file class FilterHandler
         return this;
     }
 
+    public FilterHandler AddInclusionFilter(IEnumerable<Func<LogEvent, bool>> filters)
+    {
+        InclusionFilters.AddRange(filters);
+        return this;
+    }
+
     public bool FilterByExcluding(LogEvent logEvent)
     {
+        if (InclusionFilters.Any(x => x(logEvent)))
+        {
+            return false;
+        }
+
+        if (LogExclusionFilters.Any(x => x(logEvent)))
+        {
+            return true;
+        }
+
         var renderedMessage = logEvent.RenderMessage();
-        return LogExclusionFilters
-            .Select(x => x(logEvent))
-            .Concat(StringExclusionFilters.Select(x => x(renderedMessage)))
-            .Any(x => x);
+        return StringExclusionFilters.Any(x => x(renderedMessage));
     }
 }
 
@@ -152,6 +175,19 @@ public static class LogEventExtensions
     public static bool HasSourceContext(this LogEvent logEvent, string sourceContext)
     {
         return logEvent.GetSourceContextString() is { } s && s == sourceContext;
+    }
+
+    public static bool HasSourceContextClass(this LogEvent logEvent, string sourceContext)
+    {
+        return logEvent.GetSourceContextClass() == sourceContext;
+    }
+
+    public static string? GetSourceContextClass(this LogEvent logEvent)
+    {
+        return logEvent
+            .GetSourceContextString()
+            ?.Split(".")
+            .LastOrDefault();
     }
 
     public static bool SourceContextContains(this LogEvent logEvent, string sourceContext)

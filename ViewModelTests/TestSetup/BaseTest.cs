@@ -1,7 +1,4 @@
 using BaseTestSetup;
-using Lib.Attributes;
-using Lib.Models;
-using Microsoft.Data.Sqlite;
 using ViewModels.Config;
 using ViewModels.Domain;
 using ViewModels.Services;
@@ -15,6 +12,23 @@ public abstract class BaseTest : BaseConfigTest, IBaseTest
     public override async Task Setup()
     {
         await base.Setup();
+    }
+
+    protected override IDisposable TestContextProvider()
+    {
+        var test = TestContext.CurrentContext.Test;
+
+        return CreateLogContext(new()
+        {
+            ["TestId"] = test.ID,
+            ["TestName"] = test.Name,
+            ["TestClass"] = test.ClassName,
+            ["TestMethodName"] = test.MethodName,
+            ["TestArguments"] = test.Arguments,
+            ["TestFullName"] = test.FullName,
+            ["TestProperties"] = test.Properties,
+
+        });
     }
 
 

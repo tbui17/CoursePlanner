@@ -41,4 +41,22 @@ public record NamespaceData
             FullNamespace = path
         };
     }
+
+    public static string NameofExpressionToString(string nameofExpression)
+    {
+        return FromNameofExpression(nameofExpression).FullNamespace;
+    }
+}
+
+public static class NamespaceDataExtensions
+{
+    public static NamespaceData ToNamespaceData(this string value, [CallerArgumentExpression(nameof(value))] string nameofExpression = "")
+    {
+        return NamespaceData.FromNameofExpression(value, nameofExpression);
+    }
+
+    public static string ToNamespaceString(this string value, [CallerArgumentExpression(nameof(value))] string nameofExpression = "")
+    {
+        return NamespaceData.FromNameofExpression(value, nameofExpression).FullNamespace;
+    }
 }
