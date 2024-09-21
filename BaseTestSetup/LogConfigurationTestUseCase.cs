@@ -66,6 +66,7 @@ internal sealed class LogConfigurationTestUseCase : ILoggingUseCase
         {
             x => x.Contains("CREATE"),
             x => x.Contains("PRAGMA"),
+            x => x.Contains("Microsoft.EntityFrameworkCore.Database")
         }
         .ToAnyPredicate();
 
