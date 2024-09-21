@@ -62,17 +62,22 @@ internal sealed class LogConfigurationTestUseCase : ILoggingUseCase
             .Enrich(Configuration);
     }
 
-    private static readonly Func<string, bool> InclusionFilters = new Func<string, bool>[]
-        {
-            x => x.Contains("CREATE"),
-            x => x.Contains("PRAGMA"),
-            x => x.Contains("Microsoft.EntityFrameworkCore.Database")
-        }
-        .ToAnyPredicate();
-
     public void AddLogFilters()
     {
-        Configuration.Filter.ByExcluding(x => x.RenderMessage().Thru(InclusionFilters));
+        var filterHandler = new FilterHandler();
+        filterHandler.AddStringFilter(
+                [
+                    x => x.Contains("CREATE"),
+                    x => x.Contains("PRAGMA"),
+                    x => x.Contains("query uses the 'First'/'FirstOrDefault' operator")
+                ]
+            )
+            .AddLogFilter(
+                [
+                    x => x.HasSourceContext("Microsoft.EntityFrameworkCore.Database.Command"),
+                ]
+            );
+        Configuration.Filter.ByExcluding(filterHandler.FilterByExcluding);
     }
 
     private void AddSeq()
@@ -95,3 +100,64 @@ internal sealed class LogConfigurationTestUseCase : ILoggingUseCase
     }
 }
 
+file class FilterHandler
+{
+    public List<Func<string, bool>> StringExclusionFilters { get; } = [];
+    public List<Func<LogEvent, bool>> LogExclusionFilters { get; } = [];
+
+    public FilterHandler AddStringFilter(Func<string, bool> filter)
+    {
+        StringExclusionFilters.Add(filter);
+        return this;
+    }
+
+    public FilterHandler AddStringFilter(IEnumerable<Func<string, bool>> filters)
+    {
+        StringExclusionFilters.AddRange(filters);
+        return this;
+    }
+
+    public FilterHandler AddLogFilter(Func<LogEvent, bool> filter)
+    {
+        LogExclusionFilters.Add(filter);
+        return this;
+    }
+
+    public FilterHandler AddLogFilter(IEnumerable<Func<LogEvent, bool>> filters)
+    {
+        LogExclusionFilters.AddRange(filters);
+        return this;
+    }
+
+    public bool FilterByExcluding(LogEvent logEvent)
+    {
+        var renderedMessage = logEvent.RenderMessage();
+        return LogExclusionFilters
+            .Select(x => x(logEvent))
+            .Concat(StringExclusionFilters.Select(x => x(renderedMessage)))
+            .Any(x => x);
+    }
+}
+
+public static class LogEventExtensions
+{
+    private const string SourceContext = "SourceContext";
+
+    public static bool HasSourceContext(this LogEvent logEvent, string sourceContext)
+    {
+        return logEvent.GetSourceContextString() is { } s && s == sourceContext;
+    }
+
+    public static bool SourceContextContains(this LogEvent logEvent, string sourceContext)
+    {
+        return logEvent.GetSourceContextString() is { } s && s.Contains(sourceContext);
+    }
+
+    public static string? GetSourceContextString(this LogEvent logEvent)
+    {
+        return logEvent.Properties.TryGetValue(SourceContext, out var value) &&
+               value is ScalarValue { Value: string sourceContext }
+            ? sourceContext
+            : null;
+    }
+}
