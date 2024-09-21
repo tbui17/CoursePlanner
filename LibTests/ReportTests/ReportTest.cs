@@ -17,7 +17,6 @@ public class ReportTest : BaseDbTest
         var res = await service.GetAggregateDurationReportData();
         using var scope = new AssertionScope();
         scope.AddReportable("data", res.Serialize);
-        res.Dump();
         new ReportBoundaryUtil(res).AssertIDurationBoundaries();
 
     }

@@ -90,8 +90,6 @@ public class AggregateReportTest
 
         var res = fac.Create();
 
-        res.Dump();
-
         new ReportBoundaryUtil(res).AssertIDurationBoundaries();
     }
 
