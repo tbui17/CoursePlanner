@@ -8,6 +8,7 @@
 obj/
 bin/
 .*
+!.github
 CoursePlanner.sln.DotSettings.user
 /packages/
 riderModule.iml
