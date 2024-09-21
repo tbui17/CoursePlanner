@@ -64,6 +64,7 @@ public class ConfigTest
             AppDataDirectory = appDataDirectoryGetter.Object,
             MessageDisplayService = messageDisplay.Object,
             ExceptionHandlerRegistration = registration.Object,
+            Builder = builder
         };
 
         config.AddServices();
