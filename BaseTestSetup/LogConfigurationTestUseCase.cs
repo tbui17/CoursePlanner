@@ -97,7 +97,7 @@ internal sealed class LogConfigurationTestUseCase : ILoggingUseCase
         var log = Log.ForContext<LogConfigurationTestUseCase>();
         if (string.IsNullOrWhiteSpace(url) || string.IsNullOrWhiteSpace(key))
         {
-            log.Warning("Seq URL or API key not found. Seq sink not added.");
+            log.Information("Seq URL or API key not found. Seq sink not added.");
             return;
         }
 
