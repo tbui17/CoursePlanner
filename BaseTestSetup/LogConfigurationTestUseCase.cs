@@ -26,6 +26,12 @@ internal sealed class LogConfigurationTestUseCase : ILoggingUseCase
 
     public void AddSinks()
     {
+        if (Environment.GetEnvironmentVariable("CI") is null)
+        {
+            Configuration.WriteTo.Console(LogEventLevel.Error, DefaultLogConfigurationUseCase.LogTemplate);
+            return;
+
+        }
         Base.AddSinks();
         Configuration
             .WriteTo.Debug(LogEventLevel.Information, DefaultLogConfigurationUseCase.LogTemplate)
