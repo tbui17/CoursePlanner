@@ -21,6 +21,6 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
       - name: Build
-        run: dotnet build
+        run: dotnet build CoursePlanner/CoursePlanner.csproj -f net8.0-android
       - name: Test
         run: dotnet test
