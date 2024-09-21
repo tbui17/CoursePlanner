@@ -8,38 +8,18 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace LibTests;
 
-public abstract class BaseTest : IBaseTest
+public abstract class BaseTest : BaseConfigTest, IBaseTest
 {
-    public IServiceProvider Provider { get; set; }
 
     [SetUp]
-    public virtual Task Setup()
+    public override async Task Setup()
     {
-        Provider = CreateProvider();
-        return Task.CompletedTask;
-    }
-
-    private IServiceProvider CreateProvider()
-    {
-        var services = new ServiceCollection();
-
-        services
-            .AddLogger()
-            .AddInjectables()
-            .AddBackendServices()
-            .AddTestDatabase()
-            .AddLogging();
-
-        return services.BuildServiceProvider();
+        await base.Setup();
     }
 
     [TearDown]
-    public virtual async Task TearDown()
+    public override async Task TearDown()
     {
-        await Task.CompletedTask;
+        await base.Setup();
     }
-
-    public T Resolve<T>() where T : notnull => Provider.GetRequiredService<T>();
-
-    public async Task<LocalDbCtx> GetDb() => await Resolve<IDbContextFactory<LocalDbCtx>>().CreateDbContextAsync();
 }
