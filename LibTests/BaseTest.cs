@@ -4,42 +4,40 @@ using Lib.Config;
 using Lib.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog.Context;
 
 
 namespace LibTests;
 
-public abstract class BaseTest : IBaseTest
+public abstract class BaseTest : BaseConfigTest, IBaseTest
 {
-    public IServiceProvider Provider { get; set; }
-
-    [SetUp]
-    public virtual Task Setup()
+    protected override IDisposable TestContextProvider()
     {
-        Provider = CreateProvider();
-        return Task.CompletedTask;
+        var test = TestContext.CurrentContext.Test;
+
+        return CreateLogContext(new()
+        {
+            ["TestId"] = test.ID,
+            ["TestName"] = test.Name,
+            ["TestClass"] = test.ClassName,
+            ["TestMethodName"] = test.MethodName,
+            ["TestArguments"] = test.Arguments,
+            ["TestFullName"] = test.FullName,
+            ["TestProperties"] = test.Properties,
+
+        });
     }
 
-    private IServiceProvider CreateProvider()
+    [SetUp]
+    public override async Task Setup()
     {
-        var services = new ServiceCollection();
-
-        services
-            .AddLogger()
-            .AddInjectables()
-            .AddBackendServices()
-            .AddTestDatabase()
-            .AddLogging();
-
-        return services.BuildServiceProvider();
+        await base.Setup();
     }
 
     [TearDown]
-    public virtual async Task TearDown()
+    public override async Task TearDown()
     {
-        await Task.CompletedTask;
+
+        await base.TearDown();
     }
-
-    public T Resolve<T>() where T : notnull => Provider.GetRequiredService<T>();
-
-    public async Task<LocalDbCtx> GetDb() => await Resolve<IDbContextFactory<LocalDbCtx>>().CreateDbContextAsync();
 }

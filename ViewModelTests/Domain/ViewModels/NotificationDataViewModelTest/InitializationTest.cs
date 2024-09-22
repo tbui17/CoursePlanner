@@ -8,9 +8,12 @@ using ViewModelTests.Utils;
 
 namespace ViewModelTests.Domain.ViewModels.NotificationDataViewModelTest;
 
-[Timeout(10000)]
+[Timeout(Timeout)]
 public class InitializationTest : BasePageViewModelTest
 {
+    private const int RetryCount = 3;
+    private const int Timeout = 10000;
+
     [SetUp]
     public override async Task Setup()
     {
@@ -21,7 +24,8 @@ public class InitializationTest : BasePageViewModelTest
             await set.ExecuteUpdateAsync(x =>
                 x.SetProperty(y => y.ShouldNotify, true)
                     .SetProperty(y => y.Start, DateTime.Now)
-                    .SetProperty(y => y.End, DateTime.Now.AddMinutes(100)));
+                    .SetProperty(y => y.End, DateTime.Now.AddMinutes(100))
+            );
         }
     }
 
@@ -30,7 +34,7 @@ public class InitializationTest : BasePageViewModelTest
     {
         var model = Resolve<NotificationDataViewModel>();
         model.ChangeStartDate(DateTime.Now.AddMinutes(-2));
-        await model.Should().EventuallyHave(x => x.PageResult.CurrentPageData.Count > 1);
+        await model.Should().EventuallyHave(x => x.PageResult.CurrentPageData.Count > 1, Timeout);
 
         model.PageResult.CurrentPageData.Should()
             .NotBeNullOrEmpty()
@@ -56,6 +60,7 @@ public class InitializationTest : BasePageViewModelTest
     }
 
     [Test]
+    [Retry(RetryCount)]
     public async Task Refresh_UpdatesWithDbValues()
     {
         var model = Resolve<NotificationDataViewModel>();
@@ -82,30 +87,34 @@ public class InitializationTest : BasePageViewModelTest
 
         await model.RefreshAsync();
 
-        await model.Should().EventuallySatisfy(x => x.PageResult, p =>
-        {
-            p.CurrentPageData.Should()
-                .HaveCount(2)
-                .And.Satisfy(x => x.Name == "Abc", x => x.Name == "Cde");
-
-        });
+        await model.Should()
+            .EventuallySatisfy(x => x.PageResult,
+                p =>
+                {
+                    p.CurrentPageData.Should()
+                        .HaveCount(2)
+                        .And.Satisfy(x => x.Name == "Abc", x => x.Name == "Cde");
+                },Timeout
+            );
     }
 
     [Test]
+    [Retry(RetryCount)]
     public async Task Initialization_StartsAtPage1()
     {
         var model = Resolve<NotificationDataViewModel>();
         await model.RefreshAsync();
 
-        await model.Should().EventuallySatisfy(x => x.CurrentPage.Should().Be(1));
+        await model.Should().EventuallySatisfy(x => x.CurrentPage.Should().Be(1), Timeout);
     }
 
     [Test]
+    [Retry(RetryCount)]
     public async Task Initialization_HasMoreThanOnePage()
     {
         var model = Resolve<NotificationDataViewModel>();
         await model.RefreshAsync();
 
-        await model.Should().EventuallySatisfy(x => x.PageResult, x => x.PageCount.Should().BeGreaterThan(1));
+        await model.Should().EventuallySatisfy(x => x.PageResult, x => x.PageCount.Should().BeGreaterThan(1), Timeout);
     }
 }

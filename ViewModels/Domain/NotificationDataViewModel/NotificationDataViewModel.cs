@@ -98,8 +98,7 @@ public partial class NotificationDataViewModel : ReactiveObject, INotificationFi
         _pageResult = notificationFilterService
             .Connect(this)
             .Do(x => _logger.LogInformation("Page result {PageResult}", x))
-            .ObserveOn(RxApp.MainThreadScheduler)
-            .ToProperty(this, x => x.PageResult, new EmptyPageResult());
+            .ToProperty(this, x => x.PageResult, new EmptyPageResult(),scheduler:RxApp.MainThreadScheduler);
 
 
         notificationFilterService.CurrentPageOverridden.Subscribe(x => CurrentPage = x);
