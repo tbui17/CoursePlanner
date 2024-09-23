@@ -7,7 +7,7 @@ using ViewModelTests.TestSetup;
 using ViewModelTests.Utils;
 
 namespace ViewModelTests.Domain.ViewModels.NotificationDataViewModelTest;
-
+[NonParallelizable]
 [Timeout(Timeout)]
 public class InitializationTest : BasePageViewModelTest
 {

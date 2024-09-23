@@ -3,7 +3,7 @@ using ViewModelTests.TestSetup;
 using ViewModelTests.Utils;
 
 namespace ViewModelTests.Domain.ViewModels.NotificationDataViewModelTest;
-
+[NonParallelizable]
 [Timeout(8000)]
 public class NotificationDataPaginationTest : BaseTest
 {

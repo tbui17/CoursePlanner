@@ -10,7 +10,7 @@ using ViewModels.Domain.NotificationDataViewModel;
 using ViewModels.Services.NotificationDataStreamFactory;
 
 namespace ViewModelTests.Domain.ViewModels.NotificationDataViewModelTest;
-
+[NonParallelizable]
 public class NotificationDataPaginationTestFixtureDataFactory(IFixture fixture, IServiceProvider provider)
 {
 

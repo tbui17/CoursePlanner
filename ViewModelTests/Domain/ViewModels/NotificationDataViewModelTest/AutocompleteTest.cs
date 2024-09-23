@@ -7,6 +7,7 @@ using ViewModelTests.TestSetup;
 
 namespace ViewModelTests.Domain.ViewModels.NotificationDataViewModelTest;
 
+[NonParallelizable]
 public class AutocompleteTest : BaseTest
 {
     [Test]
