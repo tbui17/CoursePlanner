@@ -7,7 +7,7 @@ using ViewModels.Services.NotificationDataStreamFactory;
 using ViewModelTests.TestSetup;
 
 namespace ViewModelTests.Domain.ViewModels.NotificationDataViewModelTest;
-
+[NonParallelizable]
 public class PageResultTest : BaseTest
 {
     private static NotificationsInputData CreateReturnedData()

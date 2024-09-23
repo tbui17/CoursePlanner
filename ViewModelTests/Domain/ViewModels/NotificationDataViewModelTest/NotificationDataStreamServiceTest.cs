@@ -13,7 +13,7 @@ using ViewModels.Services.NotificationDataStreamFactory;
 using ViewModelTests.TestSetup;
 
 namespace ViewModelTests.Domain.ViewModels.NotificationDataViewModelTest;
-
+[NonParallelizable]
 [Timeout(10000)]
 public class NotificationDataStreamServiceTest : BaseTest
 {
