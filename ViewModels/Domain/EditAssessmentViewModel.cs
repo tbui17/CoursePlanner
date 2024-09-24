@@ -10,6 +10,7 @@ using Lib.Attributes;
 using Lib.Exceptions;
 using Lib.Interfaces;
 using Lib.Models;
+using Lib.Services;
 using Lib.Traits;
 using Lib.Utils;
 using Microsoft.EntityFrameworkCore;
@@ -40,7 +41,8 @@ public partial class EditAssessmentViewModel(
     ILocalDbCtxFactory factory,
     INavigationService navService,
     IAppService appService,
-    ILogger<EditAssessmentViewModel> logger
+    ILogger<EditAssessmentViewModel> logger,
+    IAssessmentService assessmentService
 )
     : ObservableObject, IEditAssessmentViewModel
 {
@@ -55,18 +57,17 @@ public partial class EditAssessmentViewModel(
 
     private Course Course { get; set; } = new();
 
-    private HashSet<int> LocalDeleteLog { get; } = [];
+    private DeleteLogCollection LocalDeleteLog { get; } = new();
 
 
     public IEnumerable<Assessment> CreateDbModels() => Assessments.Select(x => x.ToAssessment());
 
-    private bool HasNoChanges => Assessments.Count == 0 && LocalDeleteLog.Count == 0;
+    private bool HasNoChanges => Assessments.Count == 0 && LocalDeleteLog.IsEmpty;
 
     [RelayCommand]
     private async Task SaveAsync()
     {
-        var assessmentCount = Assessments.Count;
-        logger.LogInformation("Assessment count: {AssessmentCount}", assessmentCount);
+        logger.LogInformation("Assessment count: {AssessmentCount}", Assessments.Count);
         if (HasNoChanges)
         {
             logger.LogInformation("No assessments to save.");
@@ -87,106 +88,15 @@ public partial class EditAssessmentViewModel(
 
         logger.LogInformation("Assessments are valid. Saving changes.");
 
-        await SaveChanges();
+        await assessmentService.SaveChanges(assessments,LocalDeleteLog);
         await BackAsync();
         return;
 
-        async Task SaveChanges()
-        {
-            await using var db = await factory.CreateDbContextAsync();
-            await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable);
 
-            var updateLog = await GetUpdateLog(assessments, db);
-
-            var addLog = GetAddLog(assessments);
-
-            var deleteLog = GetDeleteLog();
-
-
-            var deleteQuery = db.Assessments
-                .Where(x => deleteLog.Contains(x.Id));
-
-            foreach (var (dbModel, localModel) in updateLog)
-            {
-                dbModel.SetFromAssessmentForm(localModel);
-            }
-
-            foreach (var model in addLog)
-            {
-                db.Assessments.Add(model);
-            }
-
-
-            LogChanges(db.ChangeTracker, deleteLog);
-            await deleteQuery.ExecuteDeleteAsync();
-            await db.SaveChangesAsync();
-            await tx.CommitAsync();
-        }
     }
 
-    private void LogChanges(ChangeTracker changeTracker, List<int> deleteLog)
-    {
-        var addUpdateChanges = GetAddAndUpdateChanges(changeTracker);
-        var deleteChanges = deleteLog.Select(x => new LogEntry(EntityState.Deleted, new Assessment { Id = x }));
-        var changeMessage = addUpdateChanges
-            .Concat(deleteChanges)
-            .Select(x => x.ToString())
-            .StringJoin(Environment.NewLine);
 
-        logger.LogInformation("Changes: {Changes}", changeMessage);
-    }
 
-    private List<int> GetDeleteLog()
-    {
-        var deleteLog = LocalDeleteLog.Where(x => x is not 0).ToList();
-        return deleteLog;
-    }
-
-    private static IEnumerable<Assessment> GetAddLog(ImmutableList<Assessment> assessments)
-    {
-        var addLog = assessments.Where(x => x.Id == 0);
-        return addLog;
-    }
-
-    private static async Task<IEnumerable<(Assessment dbModel, Assessment localModel)>> GetUpdateLog(
-        ImmutableList<Assessment> assessments,
-        LocalDbCtx db
-    )
-    {
-
-        var idsOfItemsToUpdate = assessments.Select(x => x.Id).ToList();
-
-        var toUpdateData = await db
-            .Assessments
-            .AsTracking()
-            .Where(x => idsOfItemsToUpdate.Contains(x.Id))
-            .ToListAsync();
-
-        var updateLog = from dbModel in toUpdateData
-            join localModel in assessments on dbModel.Id equals localModel.Id
-            select (dbModel, localModel);
-        return updateLog;
-    }
-
-    private static IEnumerable<LogEntry> GetAddAndUpdateChanges(ChangeTracker tracker)
-    {
-        return tracker
-            .Entries<Assessment>()
-            .Select(x => new LogEntry(x.State, x.Entity));
-    }
-
-    private record LogEntry(EntityState State, Assessment Assessment)
-    {
-        public override string ToString()
-        {
-            var res = new
-            {
-                State, Assessment.Id, Assessment.Name, Assessment.Type, Assessment.Start, Assessment.End,
-                Assessment.CourseId, Assessment.ShouldNotify
-            };
-            return res.ToString() ?? "";
-        }
-    };
 
 
     [RelayCommand]

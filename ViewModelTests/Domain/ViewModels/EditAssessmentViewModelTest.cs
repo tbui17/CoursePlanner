@@ -2,6 +2,7 @@
 using FluentAssertions;
 using FluentAssertions.Execution;
 using Lib.Models;
+using Lib.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -18,8 +19,13 @@ public class EditAssessmentViewModelTest : BasePageViewModelTest
     public override async Task Setup()
     {
         await base.Setup();
-        Model = new EditAssessmentViewModel(factory: DbFactory, navService: NavMock.Object, appService: AppMock.Object,
-            logger: Resolve<ILogger<EditAssessmentViewModel>>());
+        Model = new EditAssessmentViewModel(
+            factory: DbFactory,
+            navService: NavMock.Object,
+            appService: AppMock.Object,
+            logger: Resolve<ILogger<EditAssessmentViewModel>>(),
+            assessmentService: Resolve<IAssessmentService>()
+        );
     }
 
 
@@ -29,7 +35,9 @@ public class EditAssessmentViewModelTest : BasePageViewModelTest
         const int courseId = 1;
         await Model.Init(courseId);
 
-        var res = await FluentActions.Awaiting(() => Db.Courses
+        var res = await FluentActions
+            .Awaiting(() => Db
+                .Courses
                 .Where(x => x.Id == courseId)
                 .Include(x => x.Assessments)
                 .FirstAsync()
@@ -55,19 +63,23 @@ public class EditAssessmentViewModelTest : BasePageViewModelTest
 
         vmAssessments.Should().BeEquivalentTo(dbAssessments);
 
-        Model.Assessments
+        Model
+            .Assessments
             .Should()
             .HaveCount(2)
             .And.AllSatisfy(x =>
-            {
-                x.Type.Should()
-                    .BeOneOf(Assessment.Types);
+                {
+                    x
+                        .Type.Should()
+                        .BeOneOf(Assessment.Types);
 
-                x.AssessmentTypes
-                    .ToList()
-                    .Should()
-                    .BeEquivalentTo(Assessment.Types.ToList());
-            });
+                    x
+                        .AssessmentTypes
+                        .ToList()
+                        .Should()
+                        .BeEquivalentTo(Assessment.Types.ToList());
+                }
+            );
     }
 
     [Test]
@@ -132,7 +144,8 @@ public class EditAssessmentViewModelTest : BasePageViewModelTest
         using var _ = new AssertionScope();
         var dbAssessments = await Db.Assessments.Where(x => x.CourseId == 1).ToListAsync();
 
-        dbAssessments.Should()
+        dbAssessments
+            .Should()
             .HaveCount(2)
             .And.ContainSingle(x => x.Name == firstName && x.Type == Assessment.Performance)
             .And.ContainSingle(x => x.Name == secondName && x.Type == Assessment.Objective)
@@ -145,22 +158,18 @@ public class EditAssessmentViewModelTest : BasePageViewModelTest
     [Test]
     public async Task Delete_NoItems_ShouldNotThrow()
     {
-
         await DeleteAssessments();
         await Model.Init(1);
         Model.DeleteAssessmentCommand.Execute();
         await Model.SaveCommand.Awaiting(x => x.ExecuteAsync()).Should().NotThrowAsync();
-
     }
 
     [Test]
     public async Task SaveAsync_NoItems_ShouldNotThrow()
     {
-
         await DeleteAssessments();
         await Model.Init(1);
         await Model.SaveCommand.Awaiting(x => x.ExecuteAsync()).Should().NotThrowAsync();
-
     }
 
     [Test]
