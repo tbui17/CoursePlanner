@@ -25,7 +25,7 @@ public record DurationReportData
             Title = report switch
             {
                 AggregateDurationReport => "Aggregate Report",
-                DurationReport x => x.Type.Name + " Report",
+                DurationReport x when x.Type != typeof(DurationReport) => x.Type.Name,
                 _ => "Report"
             },
             TimeProgress = $"{report.CompletedTime.TotalDays}/{report.TotalTime.TotalDays} days",
