@@ -2,7 +2,6 @@ using System.Text;
 using Lib.Config;
 using Lib.Utils;
 using Serilog;
-using Serilog.Context;
 using Serilog.Events;
 using Serilog.Formatting.Json;
 
@@ -10,14 +9,27 @@ namespace BaseTestSetup;
 
 internal sealed class LogConfigurationTestUseCase : ILoggingUseCase
 {
-    public LoggerConfiguration Configuration { get; set; } = new();
-
-    private DefaultLogConfigurationUseCase Base { get; set; }
+    private static readonly FileSinkOptions Options = new()
+    {
+        Formatter = new JsonFormatter(),
+        Path = Path.Combine(Path.GetTempPath(), "TestReports", "logs.txt"),
+        RestrictedToMinimumLevel = LogEventLevel.Information,
+        RollingInterval = RollingInterval.Day,
+        RetainedFileCountLimit = 3,
+        RollOnFileSizeLimit = true,
+        FileSizeLimitBytes = (long)(300 * Math.Pow(1024, 2)),
+        Shared = true,
+        Encoding = Encoding.UTF8,
+        RetainedFileTimeLimit = TimeSpan.FromDays(1)
+    };
 
     public LogConfigurationTestUseCase()
     {
         Base = new DefaultLogConfigurationUseCase { Configuration = Configuration };
     }
+
+    private DefaultLogConfigurationUseCase Base { get; }
+    public LoggerConfiguration Configuration { get; set; } = new();
 
 
     public void SetMinimumLogLevel()
@@ -35,28 +47,12 @@ internal sealed class LogConfigurationTestUseCase : ILoggingUseCase
         }
 
 
-
-
         Configuration
-            .WriteTo.Console(LogEventLevel.Information, DefaultLogConfigurationUseCase.LogTemplate);
+            .WriteTo.Console(LogEventLevel.Debug, DefaultLogConfigurationUseCase.LogTemplate);
 
         Configuration.WriteTo.File(Options);
         AddSeq();
     }
-
-    private static readonly FileSinkOptions Options = new()
-    {
-        Formatter = new JsonFormatter(),
-        Path = Path.Combine(Path.GetTempPath(), "TestReports", "logs.txt"),
-        RestrictedToMinimumLevel = LogEventLevel.Information,
-        RollingInterval = RollingInterval.Day,
-        RetainedFileCountLimit = 3,
-        RollOnFileSizeLimit = true,
-        FileSizeLimitBytes = (long)(300 * Math.Pow(1024, 2)),
-        Shared = true,
-        Encoding = Encoding.UTF8,
-        RetainedFileTimeLimit = TimeSpan.FromDays(1)
-    };
 
     public void AddEnrichments()
     {
@@ -153,15 +149,9 @@ file class FilterHandler
 
     public bool FilterByExcluding(LogEvent logEvent)
     {
-        if (InclusionFilters.Any(x => x(logEvent)))
-        {
-            return false;
-        }
+        if (InclusionFilters.Any(x => x(logEvent))) return false;
 
-        if (LogExclusionFilters.Any(x => x(logEvent)))
-        {
-            return true;
-        }
+        if (LogExclusionFilters.Any(x => x(logEvent))) return true;
 
         var renderedMessage = logEvent.RenderMessage();
         return StringExclusionFilters.Any(x => x(renderedMessage));

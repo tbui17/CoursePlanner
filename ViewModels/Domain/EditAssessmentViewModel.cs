@@ -1,20 +1,15 @@
 ﻿using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
 using CommunityToolkit.Maui.Core.Extensions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Lib.Attributes;
-using Lib.Exceptions;
 using Lib.Interfaces;
 using Lib.Models;
 using Lib.Services;
-using Lib.Traits;
-using Lib.Utils;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Logging;
 using ViewModels.Interfaces;
 using ViewModels.Services;
@@ -25,13 +20,13 @@ namespace ViewModels.Domain;
 public interface IEditAssessmentViewModel : IRefreshId
 {
     int Id { get; set; }
-    IEnumerable<Assessment> CreateDbModels();
     ObservableCollection<AssessmentItemViewModel> Assessments { get; set; }
     AssessmentItemViewModel? SelectedAssessment { get; set; }
     IAsyncRelayCommand BackCommand { get; }
     IRelayCommand DeleteAssessmentCommand { get; }
     IAsyncRelayCommand SaveCommand { get; }
     IAsyncRelayCommand AddAssessmentCommand { get; }
+    IEnumerable<Assessment> CreateDbModels();
     event PropertyChangedEventHandler? PropertyChanged;
     event PropertyChangingEventHandler? PropertyChanging;
 }
@@ -47,62 +42,24 @@ public partial class EditAssessmentViewModel(
     : ObservableObject, IEditAssessmentViewModel
 {
     [ObservableProperty]
-    private int _id;
+    private ObservableCollection<AssessmentItemViewModel> _assessments = [];
 
     [ObservableProperty]
-    private ObservableCollection<AssessmentItemViewModel> _assessments = [];
+    private int _id;
 
     [ObservableProperty]
     private AssessmentItemViewModel? _selectedAssessment;
 
     private Course Course { get; set; } = new();
 
-    private DeleteLogCollection LocalDeleteLog { get; } = new();
-
-
-    public IEnumerable<Assessment> CreateDbModels() => Assessments.Select(x => x.ToAssessment());
+    private DeleteLog LocalDeleteLog { get; } = new();
 
     private bool HasNoChanges => Assessments.Count == 0 && LocalDeleteLog.IsEmpty;
 
-    [RelayCommand]
-    private async Task SaveAsync()
+
+    public IEnumerable<Assessment> CreateDbModels()
     {
-        logger.LogInformation("Assessment count: {AssessmentCount}", Assessments.Count);
-        if (HasNoChanges)
-        {
-            logger.LogInformation("No assessments to save.");
-            await BackAsync();
-            return;
-        }
-
-        var assessments = CreateDbModels().ToImmutableList();
-
-        logger.LogInformation("Validating assessments.");
-
-        if (assessments.GetUniqueValidationException() is {} exc)
-        {
-            logger.LogInformation("Assessment validation failed: {Message}", exc.Message);
-            await appService.ShowErrorAsync(exc.Message);
-            return;
-        }
-
-        logger.LogInformation("Assessments are valid. Saving changes.");
-
-        await assessmentService.SaveChanges(assessments,LocalDeleteLog);
-        await BackAsync();
-        return;
-
-
-    }
-
-
-
-
-
-    [RelayCommand]
-    public async Task BackAsync()
-    {
-        await navService.PopAsync();
+        return Assessments.Select(x => x.ToAssessment());
     }
 
 
@@ -128,14 +85,51 @@ public partial class EditAssessmentViewModel(
             .ToObservableCollection();
     }
 
+    public async Task RefreshAsync()
+    {
+        await Init(Id);
+    }
+
+    [RelayCommand]
+    private async Task SaveAsync()
+    {
+        logger.LogInformation("Assessment count: {AssessmentCount}", Assessments.Count);
+        if (HasNoChanges)
+        {
+            logger.LogInformation("No assessments to save.");
+            await BackAsync();
+            return;
+        }
+
+        var assessments = CreateDbModels().ToImmutableList();
+
+        logger.LogInformation("Validating assessments.");
+
+        if (assessments.GetUniqueValidationException() is { } exc)
+        {
+            logger.LogInformation("Assessment validation failed: {Message}", exc.Message);
+            await appService.ShowErrorAsync(exc.Message);
+            return;
+        }
+
+        logger.LogInformation("Assessments are valid. Saving changes.");
+
+        await assessmentService.SaveChanges(assessments, LocalDeleteLog);
+        await BackAsync();
+    }
+
+
+    [RelayCommand]
+    public async Task BackAsync()
+    {
+        await navService.PopAsync();
+    }
+
 
     [RelayCommand]
     private void DeleteAssessment()
     {
-        if (SelectedAssessment is null)
-        {
-            return;
-        }
+        if (SelectedAssessment is null) return;
 
         var assessment = SelectedAssessment;
         Assessments.Remove(assessment);
@@ -179,10 +173,5 @@ public partial class EditAssessmentViewModel(
                     return newAssessment;
             }
         }
-    }
-
-    public async Task RefreshAsync()
-    {
-        await Init(Id);
     }
 }
