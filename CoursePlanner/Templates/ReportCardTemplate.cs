@@ -39,24 +39,28 @@ public class ReportCardTemplate(IAppService app)
 
     VerticalStackLayout CreateCard()
     {
-        var stack = new VerticalStackLayout
-        {
-            Spacing = 5,
-        };
-
         var labels = DurationReportData
             .GetLabelProperties()
             .Select(x => new Label().Bind(
                     path: x.Name,
                     stringFormat: $"{x.Name.Humanize(LetterCasing.Title)}: {{0}}"
                 )
-            )
-            .ToList();
+            );
 
-
-        foreach (var label in labels)
+        return new VerticalStackLayout
         {
-            stack.Add(label);
+            Spacing = 5
+        }.AddChildren(labels);
+    }
+}
+
+public static class StackExtensions
+{
+    public static T AddChildren<T>(this T stack, IEnumerable<IView> views) where T : StackBase
+    {
+        foreach (var view in views)
+        {
+            stack.Add(view);
         }
 
         return stack;

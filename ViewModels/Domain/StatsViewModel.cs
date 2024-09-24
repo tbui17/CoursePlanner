@@ -21,6 +21,12 @@ public partial class StatsViewModel(ReportService reportService, ILogger<StatsVi
     public async Task RefreshAsync()
     {
         var res = await reportService.GetAggregateDurationReportData();
-        DurationReport = DurationReportData.FromDurationReport(res).ToObservableCollection();
+        var data = res
+            .ToDurationReportData()
+            .ToObservableCollection();
+
+        logger.LogDebug("Received {Count} {Data}", data.Count, data);
+
+        DurationReport = data;
     }
 }
