@@ -41,7 +41,7 @@ public class EditAssessmentViewModelTest : BasePageViewModelTest
 
         using var _ = new AssertionScope();
 
-        var vmAssessments = Model.GetDbModels().ToList();
+        var vmAssessments = Model.CreateDbModels().ToList();
         var dbAssessments = dbCourse.Assessments.ToList();
 
         vmAssessments

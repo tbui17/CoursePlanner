@@ -24,7 +24,7 @@ namespace ViewModels.Domain;
 public interface IEditAssessmentViewModel : IRefreshId
 {
     int Id { get; set; }
-    IEnumerable<Assessment> GetDbModels();
+    IEnumerable<Assessment> CreateDbModels();
     ObservableCollection<AssessmentItemViewModel> Assessments { get; set; }
     AssessmentItemViewModel? SelectedAssessment { get; set; }
     IAsyncRelayCommand BackCommand { get; }
@@ -34,6 +34,7 @@ public interface IEditAssessmentViewModel : IRefreshId
     event PropertyChangedEventHandler? PropertyChanged;
     event PropertyChangingEventHandler? PropertyChanging;
 }
+
 [Inject(typeof(IEditAssessmentViewModel))]
 public partial class EditAssessmentViewModel(
     ILocalDbCtxFactory factory,
@@ -57,56 +58,30 @@ public partial class EditAssessmentViewModel(
     private HashSet<int> LocalDeleteLog { get; } = [];
 
 
-    public IEnumerable<Assessment> GetDbModels() =>
-        Assessments
-            .Select<AssessmentItemViewModel, Assessment>(x => new Assessment().SetFromAssessmentForm(x));
+    public IEnumerable<Assessment> CreateDbModels() => Assessments.Select(x => x.ToAssessment());
 
-
-    private static IEnumerable<DomainException> Validate(ICollection<Assessment> assessments)
-    {
-        var exceptions = new List<string>();
-        foreach (var assessment in assessments)
-        {
-            if (assessment.ValidateNameAndDates() is { } exc)
-            {
-                exceptions.Add($"Type: '{assessment.Type}', Name: '{assessment.Name}', Message: {exc.Message}");
-            }
-        }
-
-        if (ValidateUnique(assessments) is { } uniqueExc)
-        {
-            exceptions.Add(uniqueExc.Message);
-        }
-
-        return exceptions.Select(x => new DomainException(x));
-    }
-
-    private static DomainException? ValidateUnique(ICollection<Assessment> assessments)
-    {
-        return assessments.DistinctBy(x => x.Type).Count() != assessments.Count
-            ? new DomainException("Assessment types must be unique.")
-            : null;
-    }
+    private bool HasNoChanges => Assessments.Count == 0 && LocalDeleteLog.Count == 0;
 
     [RelayCommand]
     private async Task SaveAsync()
     {
         var assessmentCount = Assessments.Count;
         logger.LogInformation("Assessment count: {AssessmentCount}", assessmentCount);
-        if (Assessments.Count == 0 && LocalDeleteLog.Count == 0)
+        if (HasNoChanges)
         {
             logger.LogInformation("No assessments to save.");
             await BackAsync();
             return;
         }
 
-        var assessments = GetDbModels().ToImmutableList();
+        var assessments = CreateDbModels().ToImmutableList();
 
         logger.LogInformation("Validating assessments.");
 
-        if (Validate(assessments).ToList() is { Count: > 0 } exceptions)
+        if (assessments.GetUniqueValidationException() is {} exc)
         {
-            await ShowMessage();
+            logger.LogInformation("Assessment validation failed: {Message}", exc.Message);
+            await appService.ShowErrorAsync(exc.Message);
             return;
         }
 
@@ -115,23 +90,6 @@ public partial class EditAssessmentViewModel(
         await SaveChanges();
         await BackAsync();
         return;
-
-        async Task ShowMessage()
-        {
-            var message = GetMessage();
-
-            logger.LogInformation("Assessment validation failed: {Message}", message);
-            var appMessage = "The assessments failed to meet the following criteria: \n" + message;
-
-            await appService.ShowErrorAsync(appMessage);
-        }
-
-        string GetMessage()
-        {
-            return exceptions.Select(x => x.Message)
-                .StringJoin(Environment.NewLine);
-        }
-
 
         async Task SaveChanges()
         {
@@ -148,9 +106,9 @@ public partial class EditAssessmentViewModel(
             var deleteQuery = db.Assessments
                 .Where(x => deleteLog.Contains(x.Id));
 
-            foreach (var x in updateLog)
+            foreach (var (dbModel, localModel) in updateLog)
             {
-                x.dbModel.SetFromAssessmentForm(x.localModel);
+                dbModel.SetFromAssessmentForm(localModel);
             }
 
             foreach (var model in addLog)
@@ -191,11 +149,15 @@ public partial class EditAssessmentViewModel(
     }
 
     private static async Task<IEnumerable<(Assessment dbModel, Assessment localModel)>> GetUpdateLog(
-        ImmutableList<Assessment> assessments, LocalDbCtx db)
+        ImmutableList<Assessment> assessments,
+        LocalDbCtx db
+    )
     {
+
         var idsOfItemsToUpdate = assessments.Select(x => x.Id).ToList();
 
-        var toUpdateData = await db.Assessments
+        var toUpdateData = await db
+            .Assessments
             .AsTracking()
             .Where(x => idsOfItemsToUpdate.Contains(x.Id))
             .ToListAsync();
@@ -208,7 +170,8 @@ public partial class EditAssessmentViewModel(
 
     private static IEnumerable<LogEntry> GetAddAndUpdateChanges(ChangeTracker tracker)
     {
-        return tracker.Entries<Assessment>()
+        return tracker
+            .Entries<Assessment>()
             .Select(x => new LogEntry(x.State, x.Entity));
     }
 
