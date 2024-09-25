@@ -8,11 +8,15 @@ public class DeleteLog
 
     public IEnumerable<int> Value()
     {
-        return Data.Where(x => x is not 0);
+        return Data;
     }
 
     public void Add(int id)
     {
+        if (id is 0)
+        {
+            return;
+        }
         Data.Add(id);
     }
 

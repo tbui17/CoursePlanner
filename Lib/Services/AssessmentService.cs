@@ -1,6 +1,7 @@
 using System.Data;
 using FluentResults;
 using Lib.Attributes;
+using Lib.Exceptions;
 using Lib.Interfaces;
 using Lib.Models;
 using Lib.Traits;
@@ -13,13 +14,13 @@ namespace Lib.Services;
 
 public interface IAssessmentService
 {
-    Task<Result<int>> Merge(IReadOnlyCollection<Assessment> assessments, DeleteLog deleteLog);
+    Task<DomainException?> Merge(IReadOnlyCollection<Assessment> assessments, DeleteLog deleteLog);
 }
 
 [Inject(typeof(IAssessmentService))]
 public class AssessmentService(ILocalDbCtxFactory factory, ILogger<AssessmentService> logger) : IAssessmentService
 {
-    public async Task<Result<int>> Merge(IReadOnlyCollection<Assessment> assessments, DeleteLog deleteLog)
+    public async Task<DomainException?> Merge(IReadOnlyCollection<Assessment> assessments, DeleteLog deleteLog)
     {
         using var _ = logger.MethodScope();
         logger.LogInformation("Received Assessment count: {AssessmentCount}", assessments.Count);
@@ -27,20 +28,30 @@ public class AssessmentService(ILocalDbCtxFactory factory, ILogger<AssessmentSer
         if (HasNoChanges(assessments, deleteLog))
         {
             logger.LogInformation("No changes detected.");
-            return 0;
+            return null;
         }
-
-        await using var db = await factory.CreateDbContextAsync();
-        await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable);
 
         logger.LogInformation("Validating assessments.");
         if (assessments.GetUniqueValidationException() is { } exc)
         {
             logger.LogInformation("Validation failed: {Message}", exc.Message);
-            return Result.Fail(exc.Message);
+            return exc;
         }
 
         logger.LogInformation("Assessments are valid. Saving changes.");
+
+        var count = await MergeImpl(assessments, deleteLog);
+
+        logger.LogInformation("Changes saved. Count: {Count}", count);
+
+        return null;
+    }
+
+    private async Task<int> MergeImpl(IReadOnlyCollection<Assessment> assessments, DeleteLog deleteLog)
+    {
+        await using var db = await factory.CreateDbContextAsync();
+        await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable);
+
 
         var updateLog = await db.Assessments.JoinAsync(assessments);
 
@@ -53,7 +64,10 @@ public class AssessmentService(ILocalDbCtxFactory factory, ILogger<AssessmentSer
 
         db.Assessments.AddRange(addLog);
 
-        foreach (var (localModel, dbModel) in updateLog) dbModel.SetFromAssessmentForm(localModel);
+        foreach (var (localModel, dbModel) in updateLog)
+        {
+            dbModel.SetFromAssessmentForm(localModel);
+        }
 
 
         LogChanges(db.ChangeTracker, deleteData);
@@ -61,11 +75,7 @@ public class AssessmentService(ILocalDbCtxFactory factory, ILogger<AssessmentSer
         var count2 = await db.SaveChangesAsync();
         await tx.CommitAsync();
 
-        var sum = count1 + count2;
-
-        logger.LogInformation("Changes saved. Count: {Count}", sum);
-
-        return sum;
+        return count1 + count2;
     }
 
     private static bool HasNoChanges(IReadOnlyCollection<Assessment> assessments, DeleteLog localDeleteLog)
@@ -76,7 +86,7 @@ public class AssessmentService(ILocalDbCtxFactory factory, ILogger<AssessmentSer
     private static IEnumerable<LogEntry> GetAddAndUpdateChanges(ChangeTracker tracker)
     {
         return tracker
-            .Entries<Assessment>()
+            .Entries()
             .Select(x => new LogEntry(x.State, x.Entity));
     }
 
@@ -88,5 +98,5 @@ public class AssessmentService(ILocalDbCtxFactory factory, ILogger<AssessmentSer
         logger.LogInformation("Changes: {@Changes}", addUpdateChanges.Concat(deleteChanges));
     }
 
-    private record LogEntry(EntityState State, Assessment Assessment);
+    private record LogEntry(EntityState State, object Entity);
 }

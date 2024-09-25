@@ -78,9 +78,9 @@ public partial class EditAssessmentViewModel(
         var res = await assessmentService.Merge(assessments, LocalDeleteLog);
 
 
-        if (res.IsFailed)
+        if (res is not null)
         {
-            await appService.ShowErrorAsync(res.ToErrorString());
+            await appService.ShowErrorAsync(res.Message);
             return;
         }
 
