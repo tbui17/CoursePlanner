@@ -1,12 +1,13 @@
 using Lib.Interfaces;
+using Lib.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Lib.Utils;
 
 public static class DbSetExtensions
 {
-    public static async Task<IEnumerable<(T Local, T Database)>> JoinAsync<T>(
-        this DbSet<T> dbSet,
+    public static async Task<IEnumerable<UpdateLog<T>>> JoinAsync<T>(
+        this IQueryable<T> dbSet,
         IReadOnlyCollection<T> localModels
     ) where T : class, IDatabaseEntry
     {
@@ -20,6 +21,6 @@ public static class DbSetExtensions
         return
             from local in localModels
             join result in results on local.Id equals result.Id
-            select (local, result);
+            select new UpdateLog<T>(local,result);
     }
 }

@@ -13,18 +13,18 @@ namespace ViewModelTests.Domain.ViewModels;
 
 public class EditAssessmentViewModelTest : BasePageViewModelTest
 {
-    private EditAssessmentViewModel Model { get; set; }
+    private IEditAssessmentViewModel Model { get; set; }
 
     [SetUp]
     public override async Task Setup()
     {
         await base.Setup();
         Model = new EditAssessmentViewModel(
-            factory: DbFactory,
-            navService: NavMock.Object,
-            appService: AppMock.Object,
-            logger: Resolve<ILogger<EditAssessmentViewModel>>(),
-            assessmentService: Resolve<IAssessmentService>()
+            Resolve<ICourseService>(),
+            NavMock.Object,
+            AppMock.Object,
+            Resolve<ILogger<EditAssessmentViewModel>>(),
+            Resolve<IAssessmentService>()
         );
     }
 
@@ -49,7 +49,7 @@ public class EditAssessmentViewModelTest : BasePageViewModelTest
 
         using var _ = new AssertionScope();
 
-        var vmAssessments = Model.CreateDbModels().ToList();
+        var vmAssessments = Model.Assessments.Select(x => x.ToAssessment()).ToList();
         var dbAssessments = dbCourse.Assessments.ToList();
 
         vmAssessments
@@ -213,6 +213,21 @@ public class EditAssessmentViewModelTest : BasePageViewModelTest
 
         AppMock.VerifyReceivedError(0);
         NavMock.Verify(x => x.PopAsync(), Times.Once);
+    }
+
+
+    [TestCase(Assessment.Performance)]
+    [TestCase(Assessment.Objective)]
+    public async Task AddAssessment_OneExistingItem_SetsNewTypeToOppositeType(string assessmentType)
+    {
+        Model.Assessments.Clear();
+        Model.Assessments.Add(new AssessmentItemViewModel { Type = assessmentType });
+        await Model.AddAssessmentCommand.ExecuteAsync();
+        Model
+            .Assessments
+            .Should()
+            .HaveCount(2)
+            .And.OnlyHaveUniqueItems(x => x.Type);
     }
 
     [Test]
