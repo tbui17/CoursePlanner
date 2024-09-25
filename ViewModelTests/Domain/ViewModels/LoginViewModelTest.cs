@@ -31,7 +31,7 @@ public class LoginViewModelTest : BasePageViewModelTest
         var accountService = Resolve<IAccountService>();
         var res = await accountService.CreateAsync(_loginInfo);
 
-        res.IsFailed.Should().BeFalse();
+        res.IsError.Should().BeFalse();
     }
 
     private LoginViewModel Model { get; set; }
