@@ -1,7 +1,7 @@
-﻿using FluentResults.Extensions;
-using Lib.Attributes;
+﻿using Lib.Attributes;
 using Lib.Interfaces;
 using Lib.Services.NotificationService;
+using Lib.Utils;
 using Microsoft.Extensions.Logging;
 using Plugin.LocalNotification;
 
@@ -33,19 +33,24 @@ public class LocalNotificationService(
 
         var res = await sessionService
             .GetUserSettingsAsync()
-            .Map(notificationDataService.GetUpcomingNotifications)
-            .Map(x => x.Result.ToList());
+            .MapAsync(notificationDataService.GetUpcomingNotifications)
+            .Map(x => x.ToList());
 
-        var notificationCount = res.IsFailed ? 0 : res.Value.Count;
-
-        logger.LogInformation("Found {NotificationsCount} notifications.", notificationCount);
-
-        if (notificationCount == 0)
+        if (res.IsError)
         {
-            return notificationCount;
+            return 0;
         }
 
-        var notificationRequest = CreateNotificationRequest(res.Value);
+        var notifications = res.Unwrap();
+
+        logger.LogInformation("Found {NotificationsCount} notifications.", notifications.Count);
+
+        if (notifications.Count is 0)
+        {
+            return 0;
+        }
+
+        var notificationRequest = CreateNotificationRequest(notifications);
 
         logger.LogInformation("Showing notification {NotificationId}: {NotificationTitle}",
             notificationRequest.NotificationId, notificationRequest.Title
@@ -53,7 +58,7 @@ public class LocalNotificationService(
         await Notify(notificationRequest);
         logger.LogInformation("Successfully sent notification.");
 
-        return notificationCount;
+        return notifications.Count;
 
         static NotificationRequest CreateNotificationRequest(IReadOnlyList<INotificationDataResult> notifications)
         {
