@@ -21,6 +21,7 @@ public class AssessmentService(ILocalDbCtxFactory factory, ILogger<AssessmentSer
 {
     public async Task<Result<int>> Merge(IReadOnlyCollection<Assessment> assessments, DeleteLog deleteLog)
     {
+        using var _ = logger.MethodScope();
         logger.LogInformation("Received Assessment count: {AssessmentCount}", assessments.Count);
         logger.LogInformation("Assessments: {@Assessments}", assessments);
         if (HasNoChanges(assessments, deleteLog))
