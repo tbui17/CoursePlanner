@@ -44,10 +44,19 @@ public static class ValidatorExtensions
         return obj;
     }
 
-    public static Exception? GetError<T>(this IValidator<T> validator, T obj)
+    public static DomainException? GetError<T>(this IValidator<T> validator, T obj)
     {
         var res = validator.Validate(obj);
-        if (res.IsValid) return null;
-        return new DomainException(res.ToString());
+        return res.IsValid
+            ? null
+            : new DomainException(res.ToString());
+    }
+
+    public static async Task<DomainException?> GetErrorAsync<T>(this IValidator<T> validator, T obj)
+    {
+        var res = await validator.ValidateAsync(obj);
+        return res.IsValid
+            ? null
+            : new DomainException(res.ToString());
     }
 }
