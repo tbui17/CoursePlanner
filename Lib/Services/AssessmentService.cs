@@ -60,7 +60,12 @@ public class AssessmentService(ILocalDbCtxFactory factory, ILogger<AssessmentSer
         var count1 = await deleteQuery.ExecuteDeleteAsync();
         var count2 = await db.SaveChangesAsync();
         await tx.CommitAsync();
-        return count1 + count2;
+
+        var sum = count1 + count2;
+
+        logger.LogInformation("Changes saved. Count: {Count}", sum);
+
+        return sum;
     }
 
     private static bool HasNoChanges(IReadOnlyCollection<Assessment> assessments, DeleteLog localDeleteLog)
