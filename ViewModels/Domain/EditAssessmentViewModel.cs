@@ -108,6 +108,7 @@ public partial class EditAssessmentViewModel(
     [RelayCommand]
     private async Task AddAssessmentAsync()
     {
+        // validate
         var count = Assessments.Count;
         logger.LogInformation("Adding Assessment. {AssessmentCount}", count);
         if (Assessments.ValidateLength() is { } exc)
@@ -117,6 +118,7 @@ public partial class EditAssessmentViewModel(
             return;
         }
 
+        // create instance
         var targetAssessment = Course.CreateAssessment();
         if (Assessments.SingleOrDefault() is { } remainingAssessment)
         {
@@ -126,8 +128,9 @@ public partial class EditAssessmentViewModel(
             );
             targetAssessment.EnsureOppositeType(remainingAssessment);
         }
-
         var vm = new AssessmentItemViewModel(targetAssessment);
+
+        // register to state
         logger.LogInformation("Created ViewModel: {@ViewModel}", vm);
         Assessments.Add(vm);
         SelectedAssessment = vm;
