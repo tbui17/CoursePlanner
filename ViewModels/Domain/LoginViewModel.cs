@@ -24,43 +24,29 @@ public partial class LoginViewModel(
     [RelayCommand]
     public async Task LoginAsync()
     {
-        var res = await sessionService.LoginAsync(new LoginDetails(this));
-
-        if (res.IsFailed)
-        {
-            await appService.ShowErrorAsync(res.ToErrorString());
-            return;
-        }
-
-        await navService.GoToMainPageAsync();
+        await sessionService
+            .LoginAsync(new LoginDetails(this))
+            .MatchAsync(
+                async _ => await navService.GoToMainPageAsync(),
+                async e => await appService.ShowErrorAsync(e.Message)
+            );
     }
 
     [RelayCommand]
     public async Task DeleteAsync()
     {
-        var res = await sessionService.LoginAsync(new LoginDetails(this));
-
-        if (res.IsFailed)
-        {
-            await appService.ShowErrorAsync(res.ToErrorString());
-            return;
-        }
-
-        await navService.GoToMainPageAsync();
+        throw new NotImplementedException();
     }
 
 
     [RelayCommand]
     public async Task RegisterAsync()
     {
-        var res = await sessionService.RegisterAsync(new LoginDetails(this));
-        if (res.IsFailed)
-        {
-            await appService.ShowErrorAsync(res.ToErrorString());
-            return;
-        }
-
-        await navService.GoToMainPageAsync();
+        await sessionService.RegisterAsync(new LoginDetails(this))
+            .MatchAsync(
+                _ => navService.GoToMainPageAsync(),
+                e => appService.ShowErrorAsync(e.Message)
+            );
     }
 
     public async Task RefreshAsync()

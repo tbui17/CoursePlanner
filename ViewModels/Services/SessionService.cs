@@ -1,5 +1,5 @@
-using FluentResults;
 using Lib.Attributes;
+using Lib.Exceptions;
 using Lib.Interfaces;
 using Lib.Models;
 using Lib.Services;
@@ -19,7 +19,8 @@ public interface ISessionService
     Task<Result<User>> RegisterAsync(ILogin loginDetails);
     Task<Result<IUserSetting>> GetUserSettingsAsync();
 }
-[Inject(typeof(ISessionService),ServiceLifetime.Singleton)]
+
+[Inject(typeof(ISessionService), ServiceLifetime.Singleton)]
 public class SessionService(IAccountService accountService, ILogger<ISessionService> logger) : ISessionService
 {
     private User? _user;
@@ -51,17 +52,19 @@ public class SessionService(IAccountService accountService, ILogger<ISessionServ
         logger.LogInformation("Login attempt: {Username}", loginDetails.Username);
         var res = await accountService.LoginAsync(loginDetails);
 
-
-        if (res.IsSuccess)
-        {
-            logger.LogInformation("Login success: {Username}", res.Value.Username);
-            User = res.Value;
-        }
-        else
-        {
-            logger.LogInformation("Login failed: {Error}", res.ToErrorString());
-            User = null;
-        }
+        res
+            .IfOk(u =>
+                {
+                    logger.LogInformation("Login success: {Username}", u.Username);
+                    User = u;
+                }
+            )
+            .IfError(e =>
+                {
+                    logger.LogInformation("Login failed: {Error}", e.Message);
+                    User = null;
+                }
+            );
 
         return res;
     }
@@ -71,16 +74,20 @@ public class SessionService(IAccountService accountService, ILogger<ISessionServ
         logger.LogInformation("Register attempt: {Username}", loginDetails.Username);
         var res = await accountService.CreateAsync(loginDetails);
 
-        if (res.IsFailed)
-        {
-            logger.LogInformation("Register failed: {Error}", res.ToErrorString());
-            User = null;
-        }
-        else
-        {
-            logger.LogInformation("Register success: {Id} {Username}", res.Value.Id, res.Value.Username);
-            User = res.Value;
-        }
+
+        res
+            .IfError(e =>
+                {
+                    logger.LogInformation("Register failed: {Error}", e.Message);
+                    User = null;
+                }
+            )
+            .IfOk(u =>
+                {
+                    logger.LogInformation("Register success: {Id} {Username}", u.Id, u.Username);
+                    User = u;
+                }
+            );
 
 
         return res;
@@ -90,11 +97,10 @@ public class SessionService(IAccountService accountService, ILogger<ISessionServ
     {
         if (User is null)
         {
-            return Result.Fail("User is not logged in");
+            return new DomainException("User is not logged in");
         }
 
         return await accountService.GetUserSettingsAsync(User);
-
     }
 
 

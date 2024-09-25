@@ -17,58 +17,11 @@ public partial class Instructor : IContact
 
     public ICollection<Course> Courses { get; set; } = [];
 
-    private const string PhoneRegexPattern = @"^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}$";
-
-    [GeneratedRegex(PhoneRegexPattern)]
-    private static partial Regex PhoneRegex();
-
-
-
     public override string ToString()
     {
         return Name;
     }
 
-    private Dictionary<string, string> Fields() =>
-        new()
-        {
-            [nameof(Name)] = Name, [nameof(Email)] = Email, [nameof(Phone)] = Phone,
-        };
 
-    public DomainException? Validate()
-    {
-        var fields = Fields();
-
-        var messages = GetValidationMessages();
-
-        if (messages.Count <= 0) return null;
-
-        var msg = messages.StringJoin("\n");
-
-
-        return new DomainException(msg);
-
-        List<string> GetValidationMessages()
-        {
-            var list = fields
-               .Select(x => (x.Key, string.IsNullOrWhiteSpace(x.Value)))
-               .Where(x => x.Item2)
-               .Select(x => x.Item1)
-               .Select(fieldName => $"{fieldName} cannot be empty.")
-               .ToList();
-
-            if (!MailAddress.TryCreate(Email, out _))
-            {
-                list.Add("Email is not valid.");
-            }
-
-            if (!PhoneRegex().IsMatch(Phone))
-            {
-                list.Add("Invalid phone format.");
-            }
-
-            return list;
-        }
-    }
 
 }

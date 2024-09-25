@@ -2,6 +2,7 @@
 using FluentAssertions.Execution;
 using Lib.Interfaces;
 using Lib.Models;
+using Lib.Services;
 using Lib.Utils;
 using Microsoft.EntityFrameworkCore;
 using Moq;
@@ -18,7 +19,11 @@ public class InstructorFormViewModelTests : BasePageViewModelTest
         await base.Setup();
 
         ViewModelFactory =
-            new InstructorFormViewModelFactory(factory: Resolve<ILocalDbCtxFactory>(), NavMock.Object, AppMock.Object);
+            new InstructorFormViewModelFactory(factory: Resolve<ILocalDbCtxFactory>(),
+                NavMock.Object,
+                AppMock.Object,
+                Resolve<InstructorService>()
+            );
     }
 
     private InstructorFormViewModelFactory ViewModelFactory { get; set; }

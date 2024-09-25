@@ -115,6 +115,9 @@ public static class UtilExtensions
 
         return i;
     }
+
+    public static Lazy<T2> ToLazy<T, T2>(this IEnumerable<T> collection, Func<IEnumerable<T>, T2> selector) =>
+        new(() => selector(collection));
 }
 
 public static class Grouping
