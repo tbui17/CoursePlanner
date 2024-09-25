@@ -3,6 +3,7 @@ using System.Diagnostics;
 using CommunityToolkit.Maui.Core.Extensions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Lib;
 using Lib.Attributes;
 using Lib.Interfaces;
 using Lib.Models;
@@ -110,7 +111,9 @@ public partial class EditAssessmentViewModel(
     {
         // validate
         var count = Assessments.Count;
+        using var _ = logger.MethodScope();
         logger.LogInformation("Adding Assessment. {AssessmentCount}", count);
+        logger.LogDebug("Assessment state: {Assessments}", Assessments);
         if (Assessments.ValidateLength() is { } exc)
         {
             logger.LogInformation("Validation failed: {Message}", exc.Message);
