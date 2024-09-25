@@ -118,21 +118,28 @@ public partial class EditAssessmentViewModel(
             return;
         }
 
-        // create instance
-        var targetAssessment = Course.CreateAssessment();
-        if (Assessments.SingleOrDefault() is { } remainingAssessment)
-        {
-            logger.LogInformation("Ensuring opposite type for assessment. {@TargetAssessment} {@RemainingAssessment}",
-                targetAssessment,
-                remainingAssessment
-            );
-            targetAssessment.EnsureOppositeType(remainingAssessment);
-        }
-        var vm = new AssessmentItemViewModel(targetAssessment);
+        var vm = CreateItemInstance();
 
         // register to state
         logger.LogInformation("Created ViewModel: {@ViewModel}", vm);
         Assessments.Add(vm);
         SelectedAssessment = vm;
+        return;
+
+        AssessmentItemViewModel CreateItemInstance()
+        {
+
+            var targetAssessment = Course.CreateAssessment();
+            if (Assessments.SingleOrDefault() is { } remainingAssessment)
+            {
+                logger.LogInformation("Ensuring opposite type for assessment. {@TargetAssessment} {@RemainingAssessment}",
+                    targetAssessment,
+                    remainingAssessment
+                );
+                targetAssessment.EnsureOppositeType(remainingAssessment);
+            }
+            var assessmentItemViewModel = new AssessmentItemViewModel(targetAssessment);
+            return assessmentItemViewModel;
+        }
     }
 }
