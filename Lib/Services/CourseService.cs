@@ -8,6 +8,7 @@ public interface ICourseService
 {
     Task<Course?> GetFullCourse(int id);
     Task<(Course?, List<Instructor>)> GetDetailedCourseViewData(int id);
+    Task<Course?> GetCourseAndAssessments(int id);
 }
 
 [Inject(typeof(ICourseService))]
@@ -26,6 +27,18 @@ public class CourseService(ILocalDbCtxFactory factory) : ICourseService
            .AsNoTracking()
            .AsSplitQuery()
            .FirstOrDefaultAsync(x => x.Id == id);
+
+        return course;
+    }
+
+    public async Task<Course?> GetCourseAndAssessments(int id)
+    {
+        await using var db = await factory.CreateDbContextAsync();
+        var course = await db
+            .Courses
+            .Where(x => x.Id == id)
+            .Include(x => x.Assessments)
+            .FirstOrDefaultAsync();
 
         return course;
     }

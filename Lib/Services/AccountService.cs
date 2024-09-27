@@ -2,9 +2,9 @@
 using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
-using FluentResults;
 using FluentValidation;
 using Lib.Attributes;
+using Lib.Exceptions;
 using Lib.Interfaces;
 using Lib.Models;
 using Lib.Utils;
@@ -32,11 +32,11 @@ public class AccountService(
 {
     public async Task<Result<User>> LoginAsync(ILogin login)
     {
-        using var _ = logger.BeginScope("{Method}", nameof(LoginAsync));
+        using var _ = logger.MethodScope();
         logger.LogInformation("Login attempt for {Username}", login.Username);
         return await fieldValidator.Check(login)
             .Map(HashedLogin.Create)
-            .BindAsync(async hashedLogin =>
+            .FlatMapAsync(async hashedLogin =>
             {
                 await using var db = await factory.CreateDbContextAsync();
                 var res = await db.Accounts
@@ -50,7 +50,7 @@ public class AccountService(
                 return res switch
                 {
                     [var user] => user.ToResult(),
-                    [] => Result.Fail("Invalid username or password"),
+                    [] => new DomainException("Invalid username or password"),
                     var entries => throw new UnreachableException($"Unexpected duplicate entries: {entries}")
                     {
                         Data =
@@ -66,9 +66,9 @@ public class AccountService(
     {
         using var _ = logger.BeginScope("{Method}", nameof(CreateAsync));
         logger.LogInformation("Create attempt for {Username}", login.Username);
-        if (fieldValidator.Check(login) is { IsFailed: true } exc)
+        if (fieldValidator.GetError(login) is {} exc)
         {
-            return exc.ToResult();
+            return exc;
         }
 
         var hashedLogin = HashedLogin.Create(login);
@@ -82,7 +82,7 @@ public class AccountService(
 
         if (username is not null)
         {
-            return Result.Fail($"Username {login.Username} already exists");
+            return new DomainException($"Username {login.Username} already exists");
         }
 
         var account = new User

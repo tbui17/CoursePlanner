@@ -18,14 +18,21 @@ public record DurationReportData
     public string PercentItemsComplete { get; init; } = "";
     public string PercentItemsRemaining { get; init; } = "";
 
-    public static DurationReportData FromDurationReport(IDurationReport report)
+    public static IEnumerable<PropertyInfo> GetLabelProperties() =>
+        typeof(DurationReportData).GetProperties()
+            .Where(x => x.Name is not nameof(Title));
+}
+
+public static class DurationReportExtensions
+{
+    public static DurationReportData ToDurationReportData(this IDurationReport report)
     {
         return new DurationReportData
         {
             Title = report switch
             {
                 AggregateDurationReport => "Aggregate Report",
-                DurationReport x => x.Type.Name + " Report",
+                DurationReport x when x.Type != typeof(DurationReport) => $"{x.Type.Name} Report",
                 _ => "Report"
             },
             TimeProgress = $"{report.CompletedTime.TotalDays}/{report.TotalTime.TotalDays} days",
@@ -40,12 +47,8 @@ public record DurationReportData
         };
     }
 
-    public static IEnumerable<DurationReportData> FromDurationReport(AggregateDurationReport data)
+    public static IEnumerable<DurationReportData> ToDurationReportData(this AggregateDurationReport data)
     {
-        return data.SubReports.SelectMany(x => x).Prepend(data).Select(FromDurationReport);
+        return data.SubReports.SelectMany(x => x).Prepend(data).Select(report => report.ToDurationReportData());
     }
-
-    public static IEnumerable<PropertyInfo> GetLabelProperties() =>
-        typeof(DurationReportData).GetProperties()
-            .Where(x => x.Name is not nameof(Title));
 }

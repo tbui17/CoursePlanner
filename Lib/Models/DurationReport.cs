@@ -4,7 +4,7 @@ namespace Lib.Models;
 
 public record DurationReport : IDurationReport
 {
-    public Type Type { get; init; } = typeof(object);
+    public Type Type { get; init; } = typeof(DurationReport);
     public TimeSpan TotalTime { get; init; }
     public TimeSpan RemainingTime { get; init; }
     public TimeSpan CompletedTime { get; init; }

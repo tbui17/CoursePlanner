@@ -1,11 +1,11 @@
 ﻿using Lib.Exceptions;
 using Lib.Interfaces;
+using Lib.Utils;
 
 namespace Lib.Traits;
 
 public static class ValidationTrait
 {
-
     public static DomainException? ValidateName<T>(this T entity) where T : IEntity
     {
         return string.IsNullOrWhiteSpace(entity.Name)
@@ -25,9 +25,19 @@ public static class ValidationTrait
         return AggregateValidation(entity.ValidateName(), entity.ValidateDates());
     }
 
+    public static DomainException? ValidateUnique<T, T2>(this IReadOnlyCollection<T> entities, Func<T, T2> selector)
+    {
+        return entities.DistinctBy(selector).Count() != entities.Count
+            ? new DomainException("Entities must be unique")
+            : null;
+    }
+
     private static DomainException? AggregateValidation(params DomainException?[] exceptions)
     {
-        var res = exceptions.OfType<DomainException>().Select(x => x.Message).ToList();
+        var res = exceptions
+            .WhereNotNull()
+            .Select(x => x.Message)
+            .ToList();
         if (res.Count == 0)
         {
             return null;
@@ -35,5 +45,4 @@ public static class ValidationTrait
 
         return new DomainException(string.Join(Environment.NewLine, res));
     }
-
 }

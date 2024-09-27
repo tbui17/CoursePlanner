@@ -1,9 +1,9 @@
 ﻿using FluentAssertions;
 using FluentAssertions.Execution;
-using FluentResults;
 using Lib.Interfaces;
 using Lib.Models;
 using Lib.Services.NotificationService;
+using Lib.Utils;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Plugin.LocalNotification;
@@ -39,7 +39,7 @@ public class LocalNotificationServiceTests : BaseDbTest
         var sessionMock = CreateMock<ISessionService>();
         sessionMock
             .Setup(x => x.GetUserSettingsAsync())
-            .ReturnsAsync(userSetting.ToResult());
+            .ReturnsAsync(Result.Ok(userSetting));
         var notificationMock = CreateMock<INotificationService>();
         var service = new LocalNotificationService(
             notificationDataService: Resolve<INotificationDataService>(),

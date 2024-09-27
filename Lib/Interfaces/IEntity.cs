@@ -1,10 +1,6 @@
 ﻿namespace Lib.Interfaces;
 
-
-
-
-public interface IEntity
+public interface IEntity : IDatabaseEntry
 {
-    int Id { get; set; }
     string Name { get; set; }
 }
