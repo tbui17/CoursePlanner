@@ -18,8 +18,16 @@ jobs:
       - name: Install .NET MAUI
         run: dotnet workload install maui
 
-      - name: Write Keytool File
-        run: echo ${{ secrets.COURSEPLANNER_KEYSTORE_CONTENTS_BASE64 }} | base64 --decode > ${{ runner.workspace }}/.keystore
+      - name: Write Keystore File
+        run: |  
+          function ConvertFrom-Base64{
+            param(
+            [string]$base64
+            )
+            return [System.Text.Encoding]::ASCII.GetString([System.Convert]::FromBase64String($base64))
+          }
+          $res = ConvertFrom-Base64 ${{ secrets.COURSEPLANNER_KEYSTORE_CONTENTS_BASE64 }}
+          $res > ${{ runner.workspace }}/.keystore
 
       - name: Generate APK
         env:
