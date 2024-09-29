@@ -7,9 +7,6 @@ jobs:
   build:
     runs-on: windows-latest
 
-    env:
-      SIGNING_KEYSTORE_PATH: ${{ runner.workspace }}/.keystore
-
     steps:
       - uses: actions/checkout@v4
 
@@ -22,7 +19,7 @@ jobs:
         run: dotnet workload install maui
 
       - name: Write Keytool File
-        run: echo ${{ secrets.COURSEPLANNER_KEYSTORE_CONTENTS_BASE64 }} | base64 --decode > ${{ env.SIGNING_KEYSTORE_PATH }}
+        run: echo ${{ secrets.COURSEPLANNER_KEYSTORE_CONTENTS_BASE64 }} | base64 --decode > ${{ runner.workspace }}/.keystore
 
       - name: Generate APK
         env:
@@ -31,7 +28,7 @@ jobs:
           COURSEPLANNER_KEY: ${{ secrets.COURSEPLANNER_KEY }}
         run: dotnet publish CoursePlanner/CoursePlanner.csproj -f net8.0-android -c Release `
           -p:AndroidKeyStore=true `
-          -p:AndroidSigningKeyStore=${{ env.SIGNING_KEYSTORE_PATH }} `
+          -p:AndroidSigningKeyStore=${{ runner.workspace }}/.keystore`
           -p:AndroidSigningKeyAlias=$env:COURSEPLANNER_ANDROID_SIGNING_KEY_ALIAS `
           -p:AndroidSigningKeyPass=$env:COURSEPLANNER_KEY `
           -p:AndroidSigningStorePass=$env:COURSEPLANNER_KEY
