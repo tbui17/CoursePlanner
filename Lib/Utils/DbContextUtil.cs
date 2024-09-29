@@ -15,6 +15,6 @@ public static class DbContextUtil
     public static IEnumerable<Type> GetEntityTypes<TDbContext, TType>() where TType : class
     {
         return GetDbSets<TDbContext, TType>()
-            .Select(x => x.PropertyType.GenericTypeArguments[0]).ToList();
+            .Select(x => x.PropertyType.GenericTypeArguments[0]);
     }
 }
