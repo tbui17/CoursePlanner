@@ -30,16 +30,12 @@ jobs:
           $res > ${{ runner.workspace }}/.keystore
 
       - name: Generate APK
-        env:
-          COURSEPLANNER_ANDROID_SIGNING_KEY_STORE: ${{ secrets.COURSEPLANNER_ANDROID_SIGNING_KEY_STORE }}
-          COURSEPLANNER_ANDROID_SIGNING_KEY_ALIAS: ${{ secrets.COURSEPLANNER_ANDROID_SIGNING_KEY_ALIAS }}
-          COURSEPLANNER_KEY: ${{ secrets.COURSEPLANNER_KEY }}
-        run: dotnet publish CoursePlanner/CoursePlanner.csproj -f net8.0-android -c Release `
+        run: dotnet publish CoursePlanner/CoursePlanner.csproj -f net8.0-android -c Release`
           -p:AndroidKeyStore=true `
           -p:AndroidSigningKeyStore=${{ runner.workspace }}/.keystore`
-          -p:AndroidSigningKeyAlias=$env:COURSEPLANNER_ANDROID_SIGNING_KEY_ALIAS `
-          -p:AndroidSigningKeyPass=$env:COURSEPLANNER_KEY `
-          -p:AndroidSigningStorePass=$env:COURSEPLANNER_KEY
+          -p:AndroidSigningKeyAlias=${{ secrets.COURSEPLANNER_ANDROID_SIGNING_KEY_ALIAS }}`
+          -p:AndroidSigningKeyPass=${{ secrets.COURSEPLANNER_KEY }}`
+          -p:AndroidSigningStorePass=${{ secrets.COURSEPLANNER_KEY }}
 
       - name: Publish Google Play
         uses: r0adkll/upload-google-play@v1
