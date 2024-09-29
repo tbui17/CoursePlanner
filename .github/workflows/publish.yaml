@@ -1,0 +1,48 @@
+on:
+  push:
+    branches:
+      - publish-ci
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Install .NET MAUI
+        run: dotnet workload install maui
+      - name: Write Keytool File
+        run: echo ${{ secrets.COURSEPLANNER_KEYSTORE_CONTENTS_BASE64 }} > ${{ runner.workspace }}/.keystore
+      - name: Generate APK
+        env:
+          COURSEPLANNER_ANDROID_SIGNING_KEY_STORE: ${{ secrets.COURSEPLANNER_ANDROID_SIGNING_KEY_STORE }}
+          COURSEPLANNER_ANDROID_SIGNING_KEY_ALIAS: ${{ secrets.COURSEPLANNER_ANDROID_SIGNING_KEY_ALIAS }}
+          COURSEPLANNER_KEY: ${{ secrets.COURSEPLANNER_KEY }}
+        run: dotnet publish CoursePlanner/CoursePlanner.csproj -f net8.0-android -c Release `
+          -p:AndroidKeyStore=true `
+          -p:AndroidSigningKeyStore=$env:COURSEPLANNER_ANDROID_SIGNING_KEY_STORE `
+          -p:AndroidSigningKeyAlias=$env:COURSEPLANNER_ANDROID_SIGNING_KEY_ALIAS `
+          -p:AndroidSigningKeyPass=$env:COURSEPLANNER_KEY `
+          -p:AndroidSigningStorePass=$env:COURSEPLANNER_KEY
+      - name: Generate APK
+        env:
+          COURSEPLANNER_ANDROID_SIGNING_KEY_STORE: ${{ secrets.COURSEPLANNER_ANDROID_SIGNING_KEY_STORE }}
+          COURSEPLANNER_ANDROID_SIGNING_KEY_ALIAS: ${{ secrets.COURSEPLANNER_ANDROID_SIGNING_KEY_ALIAS }}
+          COURSEPLANNER_KEY: ${{ secrets.COURSEPLANNER_KEY }}
+        run: dotnet publish CoursePlanner/CoursePlanner.csproj -f net8.0-android -c Release `
+          -p:AndroidKeyStore=true `
+          -p:AndroidSigningKeyStore=$env:COURSEPLANNER_ANDROID_SIGNING_KEY_STORE `
+          -p:AndroidSigningKeyAlias=$env:COURSEPLANNER_ANDROID_SIGNING_KEY_ALIAS `
+          -p:AndroidSigningKeyPass=$env:COURSEPLANNER_KEY `
+          -p:AndroidSigningStorePass=$env:COURSEPLANNER_KEY
+      - name: Publish Google Play
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          packageName: com.tbui17.courseplanner
+          releaseFiles: CoursePlanner/bin/Release/net8.0-android/publish/com.tbui17.courseplanner-Signed.aab
+          track: internal
+          status: completed
