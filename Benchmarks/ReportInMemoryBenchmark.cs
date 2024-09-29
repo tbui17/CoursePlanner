@@ -30,7 +30,7 @@ public class ReportInMemoryBenchmark
     }
 
     [Benchmark]
-    public int Multithreading()
+    public async Task<int> Multithreading()
     {
         List<DurationReportFactory> reports = [
             new(){Entities = _dateTimeRanges},
@@ -38,7 +38,11 @@ public class ReportInMemoryBenchmark
             new(){Entities = _dateTimeRanges}
         ];
 
-        return reports.AsParallel().Select(x => x.ToData()).Sum(x => x.TotalItems);
+        var tasks = reports.Select(x => Task.Run(x.ToData));
+
+        var res = await Task.WhenAll(tasks);
+
+        return res.Sum(x => x.TotalItems);
     }
 
 
