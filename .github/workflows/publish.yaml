@@ -1,47 +1,76 @@
 on:
-  push:
-    branches:
-      - publish-ci
+    push:
+        branches:
+            - publish-ci
 
 jobs:
-  build:
-    runs-on: windows-latest
+    prep:
+        runs-on: windows-latest
+        outputs:
+            SERVICE_ACCOUNT_JSON: ${{ steps.decode.outputs.SERVICE_ACCOUNT_JSON }}
+        steps:
+            - name: Decode JSON
+              id: decode
+              run: |
+                  $base64 = "${{ secrets.SERVICE_ACCOUNT_JSON }}"
+                  $json = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($base64))
+                  if ([string]::IsNullOrWhiteSpace($json)) {
+                      throw "Failed to decode JSON"
+                  }
+                  echo "SERVICE_ACCOUNT_JSON=$json" >> "$GITHUB_OUTPUT"
+            - name: Validate JSON
+              run: |
+                  $json = "${{ steps.decode.outputs.SERVICE_ACCOUNT_JSON }}"
+                  if (-not $json -or $json -eq "null") {
+                      throw "Failed to decode JSON"
+                  }
 
-    steps:
-      - uses: actions/checkout@v4
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 8.0.x
+    # build:
+    #     needs: prep
+    #     runs-on: windows-latest
+    #     env:
+    #         COURSEPLANNER_KEYSTORE_CONTENTS_BASE64: ${{ secrets.COURSEPLANNER_KEYSTORE_CONTENTS_BASE64 }}
+    #         COURSEPLANNER_KEY: ${{ secrets.COURSEPLANNER_KEY }}
+    #         COURSEPLANNER_ANDROID_SIGNING_KEY_ALIAS: ${{ secrets.COURSEPLANNER_ANDROID_SIGNING_KEY_ALIAS }}
 
-      - name: Install .NET MAUI
-        run: dotnet workload install maui
+    #     steps:
+    #         - uses: actions/checkout@v4
+    #         - name: Setup Keystore File
+    #           run: |
 
-      - name: Write Keystore File
-        run: |  
-          function ConvertFrom-Base64{
-            param(
-            [string]$base64
-            )
-            return [System.Text.Encoding]::ASCII.GetString([System.Convert]::FromBase64String($base64))
-          }
-          $res = ConvertFrom-Base64 ${{ secrets.COURSEPLANNER_KEYSTORE_CONTENTS_BASE64 }}
-          $res > ${{ runner.workspace }}/.keystore
+    #               echo "${{ env.COURSEPLANNER_KEYSTORE_CONTENTS_BASE64 }}" > courseplanner.keystore.asc
+    #               gpg -d --passphrase "${{ env.COURSEPLANNER_KEY }}" --batch courseplanner.keystore.asc > courseplanner.keystore
+    #               $discard = keytool -list -v -keystore courseplanner.keystore -storepass ${{ env.COURSEPLANNER_KEY }}
 
-      - name: Generate APK
-        run: dotnet publish CoursePlanner/CoursePlanner.csproj -f net8.0-android -c Release`
-          -p:AndroidKeyStore=true `
-          -p:AndroidSigningKeyStore=${{ runner.workspace }}/.keystore`
-          -p:AndroidSigningKeyAlias=${{ secrets.COURSEPLANNER_ANDROID_SIGNING_KEY_ALIAS }}`
-          -p:AndroidSigningKeyPass=${{ secrets.COURSEPLANNER_KEY }}`
-          -p:AndroidSigningStorePass=${{ secrets.COURSEPLANNER_KEY }}
+    #         - name: Setup .NET
+    #           uses: actions/setup-dotnet@v4
+    #           with:
+    #               dotnet-version: 8.0.x
 
-      - name: Publish Google Play
-        uses: r0adkll/upload-google-play@v1
-        with:
-          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
-          packageName: com.tbui17.courseplanner
-          releaseFiles: CoursePlanner/bin/Release/net8.0-android/publish/com.tbui17.courseplanner-Signed.aab
-          track: internal
-          status: completed
+    #         - name: Install .NET MAUI
+    #           run: dotnet workload install maui 
+
+
+    #         - name: Generate APK
+    #           if: success()
+    #           # run: dotnet build CoursePlanner/CoursePlanner.csproj -c Release -f net8.0-android -p:AndroidSigningKeyStore=courseplanner.keystore -p:AndroidSigningKeyAlias=${{ env.COURSEPLANNER_ANDROID_SIGNING_KEY_ALIAS }} -p:AndroidSigningKeyPass=${{ env.COURSEPLANNER_KEY }} -p:AndroidSigningStorePass=${{ env.COURSEPLANNER_KEY }}
+    #           run: dotnet build CoursePlanner/CoursePlanner.csproj -c Debug -f net8.0-android -p:AndroidSigningKeyStore=courseplanner.keystore -p:AndroidSigningKeyAlias=${{ env.COURSEPLANNER_ANDROID_SIGNING_KEY_ALIAS }} -p:AndroidSigningKeyPass=${{ env.COURSEPLANNER_KEY }} -p:AndroidSigningStorePass=${{ env.COURSEPLANNER_KEY }}
+
+    #         - name: Upload APK
+    #           if: success()
+    #           uses: actions/upload-artifact@v4
+    #           with:
+    #               path: |
+    #                   ./**/*.aab
+    #                   ./**/*.apk
+
+    #         - name: Publish Google Play
+    #           if: success()
+    #           uses: r0adkll/upload-google-play@v1
+    #           with:
+    #               serviceAccountJsonPlainText: ${{ needs.prep.outputs.SERVICE_ACCOUNT_JSON }}
+    #               packageName: com.tbui17.courseplanner
+    #               releaseFiles: CoursePlanner/bin/Release/net8.0-android/publish/com.tbui17.courseplanner-Signed.aab
+    #               track: internal
+    #               status: completed
