@@ -5,26 +5,37 @@ on:
             - publish-ci
 
 jobs:
-    prep:
-        runs-on: windows-latest
-        outputs:
-            SERVICE_ACCOUNT_JSON: ${{ steps.decode.outputs.SERVICE_ACCOUNT_JSON }}
+
+    test-step1:
+        runs-on: ubuntu-latest
         steps:
-            - name: Decode JSON
-              id: decode
-              run: |
-                  $base64 = ${{ secrets.SERVICE_ACCOUNT_JSON }}
-                  $json = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String('$base64'))
-                  if ([string]::IsNullOrWhiteSpace($json)) {
-                      throw "Failed to decode JSON"
-                  }
-                  echo "SERVICE_ACCOUNT_JSON=$json" >> "$GITHUB_OUTPUT"
-            - name: Validate JSON
-              run: |
-                  $json = "${{ steps.decode.outputs.SERVICE_ACCOUNT_JSON }}"
-                  if (-not $json -or $json -eq "null") {
-                      throw "Failed to decode JSON"
-                  }
+            - name: Run Action
+              uses: ./actions/build
+              with:
+                  milliseconds: 2000
+
+
+    # prep:
+    #     runs-on: windows-latest
+    #     outputs:
+    #         SERVICE_ACCOUNT_JSON: ${{ steps.decode.outputs.SERVICE_ACCOUNT_JSON }}
+    #     steps:
+    #         - name: Decode JSON
+    #           id: decode
+    #           run: |
+    #               $base64 = ${{ secrets.SERVICE_ACCOUNT_JSON }}
+    #               $json = $base64
+    #               #   $json = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String('$base64'))
+    #               if ([string]::IsNullOrWhiteSpace($json)) {
+    #                   throw "Failed to decode JSON"
+    #               }
+    #               echo "SERVICE_ACCOUNT_JSON=$json" >> "$GITHUB_OUTPUT"
+    #         - name: Validate JSON
+    #           run: |
+    #               $json = "${{ steps.decode.outputs.SERVICE_ACCOUNT_JSON }}"
+    #               if (-not $json -or $json -eq "null") {
+    #                   throw "Failed to decode JSON"
+    #               }
 
 
     # build:
