@@ -7,11 +7,12 @@
  */
 
 import * as core from '@actions/core'
-import * as main from '../src/main'
+import * as example from '../src/example'
+
 import { vi, describe, beforeEach, expect, it, MockInstance } from 'vitest'
 
 // Mock the action's main function
-const runMock = vi.spyOn(main, 'run')
+const runMock = vi.spyOn(example, 'run')
 // Other utilities
 const timeRegex = /^\d{2}:\d{2}:\d{2}/
 
@@ -48,7 +49,7 @@ describe('action', () => {
       }
     })
 
-    await main.run()
+    await example.run()
     expect(runMock).toHaveReturned()
 
     // Verify that all of the core library functions were called correctly
@@ -80,7 +81,7 @@ describe('action', () => {
       }
     })
 
-    await main.run()
+    await example.run()
     expect(runMock).toHaveReturned()
 
     // Verify that all of the core library functions were called correctly
