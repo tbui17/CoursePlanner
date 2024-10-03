@@ -25,6 +25,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MauiConfigTests", "MauiConf
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "build\_build.csproj", "{28234B9C-4E68-4B2B-84AA-45000B7D75BD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuildTests", "BuildTests\BuildTests.csproj", "{A4D95D71-91FD-4835-AC35-29A0B2564ABA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuildLib", "BuildLib\BuildLib.csproj", "{06203C37-98FA-4FFF-AE25-68236CCFA10F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +73,14 @@ Global
 		{82AAD65D-7B0F-4386-B723-8B5B50402639}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{82AAD65D-7B0F-4386-B723-8B5B50402639}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{82AAD65D-7B0F-4386-B723-8B5B50402639}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4D95D71-91FD-4835-AC35-29A0B2564ABA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4D95D71-91FD-4835-AC35-29A0B2564ABA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4D95D71-91FD-4835-AC35-29A0B2564ABA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4D95D71-91FD-4835-AC35-29A0B2564ABA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{06203C37-98FA-4FFF-AE25-68236CCFA10F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06203C37-98FA-4FFF-AE25-68236CCFA10F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06203C37-98FA-4FFF-AE25-68236CCFA10F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06203C37-98FA-4FFF-AE25-68236CCFA10F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
