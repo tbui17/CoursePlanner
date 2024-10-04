@@ -3,22 +3,22 @@ using BuildLib.Clients;
 using BuildLib.Secrets;
 using BuildLib.Utils;
 using BuildTests.Attributes;
+using BuildTests.Utils;
 using FluentAssertions;
-using Microsoft.Extensions.Hosting;
 
 namespace BuildTests.BuildProject;
 
 public class ConnectionTest
 {
-    Container GetContainer() => Container.Init<Build>();
-    HostApplicationBuilder GetBuilder() => Container.CreateBuilder<Build>();
+    private readonly Container _container = new ContainerInitializer().GetContainer();
+
 
     [SkipIfDev]
     public void SecretClient_CanConnect()
     {
         const string name = nameof(CoursePlannerSecrets.KeyUri);
-        var container = GetContainer();
-        var client = container.Resolve<SecretClient>();
+
+        var client = _container.Resolve<SecretClient>();
         client
             .GetSecret(name)
             .Value.Name.Should()
@@ -26,19 +26,33 @@ public class ConnectionTest
     }
 
     [SkipIfDev]
-    public void AndroidPublisherClient_CanConnect()
+    public async Task AndroidPublisherClient_CanConnect()
     {
-        var container = GetContainer();
-        var client = container.Resolve<AndroidPublisherClient>();
-
-        var req = client.ProbeInsertRequest();
+        var client = _container.Resolve<AndroidPublisherClient>();
 
 
-        req
-            .Invoking(x => x.Execute())
+        var res = await client
+            .Awaiting(x => x.Probe())
             .Should()
-            .NotThrow()
-            .Which.Id.Should()
-            .NotBeNullOrWhiteSpace();
+            .NotThrowAsync();
+
+        res.Which.Id.Should().NotBeNullOrWhiteSpace();
+    }
+
+    [SkipIfDev]
+    public async Task GetBundles_HasResult()
+    {
+        var client = _container.Resolve<AndroidPublisherClient>();
+
+
+        var res = await client
+            .Awaiting(x => x.GetBundles())
+            .Should()
+            .NotThrowAsync();
+
+        res
+            .Which.Bundles.Should()
+            .NotBeNullOrEmpty()
+            .And.Contain(x => x.VersionCode == 1);
     }
 }

@@ -8,7 +8,18 @@ namespace BuildLib.Utils;
 public static class UtilExtensions
 {
     public static T2 Thru<T1, T2>(this T1 t1, Func<T1, T2> func) => func(t1);
-    public static void Thru<T1>(this T1 t1, Action<T1> func) => func(t1);
+
+    public static T1 Tap<T1>(this T1 t1, Action<T1> func)
+    {
+        func(t1);
+        return t1;
+    }
+
+    public static T1 Tap<T1, T2>(this T1 t1, Func<T1, T2> func)
+    {
+        func(t1);
+        return t1;
+    }
 
     public static Dictionary<string, object> ToPropertyDictionary<T>(this T obj) where T : class
     {
@@ -29,7 +40,7 @@ public static class UtilExtensions
             var next = queue.Dequeue();
 
             var nodes = next
-                .Value
+                .Value!
                 .GetPublicProperties()
                 .Select(x => new ObjectNode
                     {
@@ -86,9 +97,18 @@ public static class UtilExtensions
         items.Select(x => new KeyValuePair<T, T3>(x.Key, selector(x)));
 
 
+    public static IEnumerable<KeyValuePair<T3, T2>> SelectKeys<T, T2, T3>(
+        this IEnumerable<KeyValuePair<T, T2>> items,
+        Func<KeyValuePair<T, T2>, T3> selector
+    ) =>
+        items.Select(x => new KeyValuePair<T3, T2>(selector(x), x.Value));
+
+
     public static IEnumerable<Task<KeyValuePair<T, T3>>> SelectValues<T, T2, T3>(
         this IEnumerable<KeyValuePair<T, T2>> items,
         Func<KeyValuePair<T, T2>, Task<T3>> selector
     ) =>
         items.Select(async x => new KeyValuePair<T, T3>(x.Key, await selector(x)));
+
+    public static string WrapIn(this string value, string wrapper) => $"{wrapper}{value}{wrapper}";
 }

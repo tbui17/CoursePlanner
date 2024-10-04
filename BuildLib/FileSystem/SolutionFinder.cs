@@ -7,9 +7,9 @@ public class SolutionFinder(SolutionFileName solutionFileName)
     public FileInfo? FindSolutionFile(CancellationToken token = default)
     {
         var fileName = solutionFileName.GetValue();
-        var directory = StartingDirectory;
 
-        while (directory is not null)
+
+        for (var directory = StartingDirectory; directory is not null; directory = directory.Parent)
         {
             token.ThrowIfCancellationRequested();
             var children = directory.EnumerateFiles();
@@ -22,8 +22,6 @@ public class SolutionFinder(SolutionFileName solutionFileName)
             {
                 return solutionFile;
             }
-
-            directory = directory.Parent;
         }
 
         return null;

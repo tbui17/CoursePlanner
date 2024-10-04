@@ -42,8 +42,8 @@ jobs:
         run: ./build.cmd Publish
         env:
           KeystoreContents: ${{ secrets.KEYSTORE_CONTENTS }}
-          GoogleServiceAccount: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
           AndroidSigningKeyAlias: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS }}
           Key: ${{ secrets.KEY }}
           ApplicationId: ${{ secrets.APPLICATION_ID }}
+          GoogleServiceAccountBase64: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_BASE64 }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

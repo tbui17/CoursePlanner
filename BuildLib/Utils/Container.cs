@@ -2,11 +2,11 @@ using Azure.Identity;
 using BuildLib.Clients;
 using BuildLib.Secrets;
 using Google.Apis.Services;
-using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Scrutor;
+using Serilog;
 
 namespace BuildLib.Utils;
 
@@ -44,18 +44,13 @@ public class Container(IHost host)
             c.GetRequiredService<InitializerFactory>().Create()
         );
 
-        builder.Services.AddAzureClients(cb =>
-            {
-                var uri = builder.Configuration.GetValue<string>(nameof(CoursePlannerSecrets.KeyUri));
-                if (string.IsNullOrWhiteSpace(uri))
-                {
-                    throw new ArgumentException("KeyUri is missing");
-                }
+        nameof(CoursePlannerSecrets.KeyUri)
+            .Thru(builder.Configuration.GetValue<string>)
+            .Thru(str => string.IsNullOrWhiteSpace(str) ? throw new ArgumentException("KeyUri is missing") : str)
+            .Thru(str => new Uri(str))
+            .Tap(uri => builder.Configuration.AddAzureKeyVault(uri, new DefaultAzureCredential()));
 
-                cb.AddSecretClient(new Uri(uri));
-                cb.UseCredential(new DefaultAzureCredential());
-            }
-        );
+        builder.Logging.AddSerilog();
 
         return builder;
     }

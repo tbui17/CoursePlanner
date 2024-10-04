@@ -12,6 +12,7 @@ using Azure.Security.KeyVault.Secrets;
 using BuildLib.Secrets;
 using BuildLib.Serialization;
 using BuildLib.Utils;
+using CaseConverter;
 using Entry.FileSystem;
 using Google.Apis.AndroidPublisher.v3;
 using Google.Apis.AndroidPublisher.v3.Data;
@@ -52,9 +53,6 @@ using Serilog;
 )]
 public class Build : NukeBuild
 {
-    public static object Data = null;
-
-
     [Parameter] readonly string AndroidFramework = "net8.0-android";
     [Parameter] [Secret] readonly string AndroidSigningKeyAlias;
 
@@ -70,7 +68,6 @@ public class Build : NukeBuild
     [Solution(GenerateProjects = true)] readonly Solution Solution;
 
     [Parameter] readonly string UserIdentifier = "service_account";
-    [PathVariable("dotnet user-secrets set")] readonly Tool UserSecrets;
     [CanBeNull] private Container _container;
 
 
@@ -80,25 +77,40 @@ public class Build : NukeBuild
     AndroidDirectoryManager AndroidDirectory => new(() => OutputDirectory);
     Container Container => _container ??= Container.Init<Build>();
 
-    public Target Run => _ => _
-        .Executes(() =>
-            {
-                var jsonFilePath = Solution.Directory / "secrets.json";
-
-                var obj = new CoursePlannerSecrets
-                {
-                    KeyUri = "a"
-                };
-
-                Data = obj;
-
-                UserSecrets("a b");
-            }
-        );
-
     public Target UpdateEnv => _ => _
         .Executes(() =>
             {
+                var secrets = Container.GetConfig<CoursePlannerSecrets>();
+                var serializer = Container.Resolve<SnakeCaseSerializer>();
+                var envFilePath = Solution.Directory / ".env";
+
+                secrets
+                    .ToPropertyDictionary()
+                    .SelectKeys(x => x.Key.ToSnakeCase().ToUpperInvariant())
+                    .SelectValues(x => EscapeJson(x.Value))
+                    .Select(x => $"{x.Key}={x.Value}")
+                    .Thru(x => envFilePath.WriteAllLines(x));
+
+                Log.Information("Updated .env file at {EnvFilePath}", envFilePath);
+                return;
+
+                string EscapeJson(object value)
+                {
+                    if (value is string s)
+                    {
+                        return s;
+                    }
+
+                    var serialized = serializer.Serialize(value);
+
+                    if (value.GetType().IsPrimitive)
+                    {
+                        return serialized;
+                    }
+
+                    var escaped = serialized.Replace("'", "\\'");
+                    return escaped.WrapIn("'");
+                }
             }
         );
 
@@ -115,7 +127,7 @@ public class Build : NukeBuild
                     .Serialize(secrets.GoogleServiceAccount)
                     .Thru(Encoding.UTF8.GetBytes)
                     .Thru(Convert.ToBase64String)
-                    .Thru(x => SetJsonSecrets(new()
+                    .Tap(x => SetJsonSecrets(new()
                             {
                                 [secrets.ConfigurationKeyName(x => x.GoogleServiceAccountBase64)] = x
                             }
@@ -175,7 +187,6 @@ public class Build : NukeBuild
     public Target UploadSecrets => _ => _
         .Executes(() =>
             {
-                using var _ = Solution.Directory.SwitchWorkingDirectory();
                 var envFilePath = Solution.Directory / ".env";
                 if (!File.Exists(envFilePath))
                 {
@@ -184,7 +195,7 @@ public class Build : NukeBuild
 
                 Log.Information("Found .env file at {EnvFilePath}", envFilePath);
                 Log.Information("Uploading secrets to GitHub through gh CLI...");
-                Gh("secret set -f .env ");
+                Gh("secret set -f .env", workingDirectory: Solution.Directory);
                 Log.Information("Secrets uploaded to GitHub.");
             }
         );
