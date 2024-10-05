@@ -32,11 +32,13 @@ using Serilog;
 
 [assembly: InternalsVisibleTo("BuildTests")]
 
+
 [GitHubActions(
     "publish",
     GitHubActionsImage.WindowsLatest,
-    AutoGenerate = true,
-    OnWorkflowDispatchOptionalInputs = [],
+    AutoGenerate = false,
+    On = [GitHubActionsTrigger.WorkflowDispatch],
+    // OnPushBranches = [RepoBranches.PublishCi],
     InvokedTargets = [nameof(Publish)],
     ImportSecrets =
     [
@@ -46,7 +48,6 @@ using Serilog;
         nameof(CoursePlannerSecrets.ApplicationId),
         nameof(CoursePlannerSecrets.GoogleServiceAccountBase64)
     ],
-    OnPushBranches = [RepoBranches.PublishCi],
     EnableGitHubToken = true,
     ConcurrencyGroup = "publish",
     ConcurrencyCancelInProgress = true
@@ -79,14 +80,21 @@ public class Build : NukeBuild
 
 
     public Target Publish => _ => _
-        .Consumes(BuildAndroidPackage)
-        .DependsOn(EnsureOAuthClient)
         .Executes(() =>
             {
-                var files = AndroidDirectory.GetOrThrowAndroidFiles();
-                Log.Information("Found {Count} Android files: {Files}", files.Count, files);
+                Log.Information("Publishing...");
             }
         );
+
+    // public Target Publish => _ => _
+    //     .Consumes(BuildAndroidPackage)
+    //     .DependsOn(EnsureOAuthClient)
+    //     .Executes(() =>
+    //         {
+    //             var files = AndroidDirectory.GetOrThrowAndroidFiles();
+    //             Log.Information("Found {Count} Android files: {Files}", files.Count, files);
+    //         }
+    //     );
 
     public Target UpdateEnv => _ => _
         .Executes(() =>

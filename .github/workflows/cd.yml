@@ -1,0 +1,10 @@
+name: cd.yml
+on:
+  push:
+    branches:
+      - publish-ci
+
+jobs:
+
+  cd:
+    uses: ./.github/workflows/publish.yml

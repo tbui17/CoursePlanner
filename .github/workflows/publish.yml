@@ -16,10 +16,7 @@
 
 name: publish
 
-on:
-  push:
-    branches:
-      - publish-ci2
+on: [ workflow_dispatch ]
 
 concurrency:
   group: publish
