@@ -1,4 +1,3 @@
-using Azure.Identity;
 using BuildLib.Clients;
 using BuildLib.Secrets;
 using Google.Apis.Services;
@@ -44,11 +43,11 @@ public class Container(IHost host)
             c.GetRequiredService<InitializerFactory>().Create()
         );
 
-        nameof(CoursePlannerSecrets.KeyUri)
-            .Thru(builder.Configuration.GetValue<string>)
-            .Thru(str => string.IsNullOrWhiteSpace(str) ? throw new ArgumentException("KeyUri is missing") : str)
-            .Thru(str => new Uri(str))
-            .Tap(uri => builder.Configuration.AddAzureKeyVault(uri, new DefaultAzureCredential()));
+        // nameof(CoursePlannerSecrets.KeyUri)
+        //     .Thru(builder.Configuration.GetValue<string>)
+        //     .Thru(str => string.IsNullOrWhiteSpace(str) ? throw new ArgumentException("KeyUri is missing") : str)
+        //     .Thru(str => new Uri(str))
+        //     .Tap(uri => builder.Configuration.AddAzureKeyVault(uri, new DefaultAzureCredential()));
 
         builder.Logging.AddSerilog();
 

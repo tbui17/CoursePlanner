@@ -77,21 +77,38 @@ public class Build : NukeBuild
     AndroidDirectoryManager AndroidDirectory => new(() => OutputDirectory);
     Container Container => _container ??= Container.Init<Build>();
 
+
+    public Target Publish => _ => _
+        .Consumes(BuildAndroidPackage)
+        .DependsOn(EnsureOAuthClient)
+        .Executes(() =>
+            {
+                var files = AndroidDirectory.GetOrThrowAndroidFiles();
+                Log.Information("Found {Count} Android files: {Files}", files.Count, files);
+            }
+        );
+
     public Target UpdateEnv => _ => _
         .Executes(() =>
             {
                 var secrets = Container.GetConfig<CoursePlannerSecrets>();
                 var serializer = Container.Resolve<SnakeCaseSerializer>();
                 var envFilePath = Solution.Directory / ".env";
+                var actEnv = Solution.Directory / "gh.secrets";
 
-                secrets
+
+                var text = secrets
                     .ToPropertyDictionary()
                     .SelectKeys(x => x.Key.ToSnakeCase().ToUpperInvariant())
                     .SelectValues(x => EscapeJson(x.Value))
                     .Select(x => $"{x.Key}={x.Value}")
-                    .Thru(x => envFilePath.WriteAllLines(x));
+                    .ToList();
 
-                Log.Information("Updated .env file at {EnvFilePath}", envFilePath);
+                actEnv.WriteAllLines(text);
+                envFilePath.WriteAllLines(text);
+
+
+                Log.Information("Updated .env file at {EnvFilePath} {ActEnvFilePath}", envFilePath, actEnv);
                 return;
 
                 string EscapeJson(object value)
@@ -249,16 +266,6 @@ public class Build : NukeBuild
             }
         );
 
-
-    public Target Publish => _ => _
-        .Consumes(BuildAndroidPackage)
-        .DependsOn(EnsureOAuthClient)
-        .Executes(() =>
-            {
-                var files = AndroidDirectory.GetOrThrowAndroidFiles();
-                Log.Information("Found {Count} Android files: {Files}", files.Count, files);
-            }
-        );
 
     public static int Main() => Execute<Build>();
 
