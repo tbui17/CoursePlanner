@@ -39,3 +39,9 @@ variable "key_uri" {
   sensitive   = true
 }
 
+variable "gh_token" {
+  description = "The GitHub access token"
+  type      = string
+  nullable  = false
+  sensitive = true
+}

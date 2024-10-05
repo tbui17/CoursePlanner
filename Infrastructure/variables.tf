@@ -42,9 +42,3 @@ variable "user_identifier" {
   description = "The identifier for the runner job"
 }
 
-variable "gh_token" {
-  description = "The GitHub access token"
-  type      = string
-  nullable  = false
-  sensitive = true
-}

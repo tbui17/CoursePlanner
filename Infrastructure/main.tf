@@ -80,6 +80,11 @@ resource "github_actions_variable" "action_var" {
     "ANDROID_FRAMEWORK" : var.android_framework,
     "USER_IDENTIFIER" : var.user_identifier,
     "WORKLOAD_IDENTITY_PROVIDER" : local.workload_identity_provider,
+    "REPOSITORY_OWNER" : var.repository_owner,
+    "REPOSITORY_NAME" : var.repository_name,
+    "PROJECT_ID" : var.project_id,
+    "PROJECT_REGION" : var.project_region,
+    "PROJECT_ZONE" : var.project_zone
   })
   repository    = var.repository_name
   variable_name = each.key
