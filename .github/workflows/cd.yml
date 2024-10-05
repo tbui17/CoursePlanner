@@ -13,7 +13,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: 'Run: CD'
-        run: echo ${{ env.PROJECT_ID }}
+        run: |
+          echo ${{ env.PROJECT_ID }}
+          echo "hello world"
 
 #    steps:
 #      - uses: actions/checkout@v4
