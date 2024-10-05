@@ -47,8 +47,7 @@ resource "google_iam_workload_identity_pool_provider" "main" {
     (local.attribute_repository_const) = "assertion.repository"
   }
   oidc {
-    issuer_uri = "https://token.actions.githubusercontent.com",
-    allowed_audiences = []
+    issuer_uri = "https://token.actions.githubusercontent.com"
   }
 }
 
