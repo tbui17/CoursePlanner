@@ -19,4 +19,4 @@ jobs:
         with:
           project_id: ${{ vars.PROJECT_ID }}
           create_credentials_file: true
-          workload_identity_provider: ${{ vars.WORKLOAD_IDENTITY_PROVIDER }}
+          workload_identity_provider: projects/courseplanner-437101/locations/global/workloadIdentityPools/github-actions-pool2/providers/github-actions-pool2
