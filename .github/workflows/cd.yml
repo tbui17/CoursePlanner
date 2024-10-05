@@ -14,7 +14,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: 'Run: CD'
         run: |
-          echo ${{ env.PROJECT_ID }}
+          echo "${{ github.event_name }}"
+          echo "${{ env.PROJECT_ID }}"
+          echo "${{ github.env.PROJECT_ID }} 2"
           echo "hello world"
 
 #    steps:
