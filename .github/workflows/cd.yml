@@ -10,10 +10,6 @@ jobs:
     permissions:
       contents: 'read'
       id-token: 'write'
-    env:
-      PROJECT_NUMBER: 650797680895,
-      POOL_ID: 2,
-      PROVIDER_ID: 3,
     steps:
       - uses: actions/checkout@v4
       - id: 'auth'
