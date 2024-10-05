@@ -10,19 +10,13 @@ jobs:
     permissions:
       contents: 'read'
       id-token: 'write'
+
     steps:
       - uses: actions/checkout@v4
-      - name: 'Run: CD'
-        run: echo ${{vars.PROJECT_ID}}
-        
-
-#    steps:
-#      - uses: actions/checkout@v4
-#      - id: 'auth'
-#        name: 'Authenticate to Google Cloud'
-#        uses: 'google-github-actions/auth@v2'
-#        with:
-#          project_id: ${{ env.PROJECT_ID }}
-#          create_credentials_file: true
-#          workload_identity_provider: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
-#          service_account: '${{env.SERVICE_ACCOUNT_EMAIL}}'
+      - id: 'auth'
+        name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          project_id: ${{ vars.PROJECT_ID }}
+          create_credentials_file: true
+          workload_identity_provider: ${{ vars.WORKLOAD_IDENTITY_PROVIDER }}
