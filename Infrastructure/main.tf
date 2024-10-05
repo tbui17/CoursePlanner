@@ -42,16 +42,13 @@ resource "google_iam_workload_identity_pool_provider" "main" {
   display_name                       = "${local.github_actions_display_name_const} Provider"
   attribute_condition                = "assertion.repository_owner=='${var.repository_owner}'"
   attribute_mapping = {
-    "google.subject"                   = "assertion.sub"
-    "attribute.actor"                  = "assertion.actor"
+    google.subject             = "assertion.sub"
+    attribute.actor            = "assertion.actor"
     (local.attribute_repository_const) = "assertion.repository"
+    attribute.repository_owner = "assertion.repository_owner"
   }
   oidc {
     issuer_uri = "https://token.actions.githubusercontent.com"
-    allowed_audiences = [
-      "https://token.actions.githubusercontent.com",
-      google_service_account_iam_member.wif-sa.member
-    ]
   }
 }
 
@@ -66,6 +63,7 @@ resource "github_actions_secret" "action_secret" {
     "KEYSTORE_CONTENTS" : var.keystore_contents,
     "GOOGLE_SERVICE_ACCOUNT_BASE64" : var.google_service_account_base64,
     "KEY_URI" : var.key_uri,
+    "WORKLOAD_IDENTITY_PROVIDER" : local.workload_identity_provider,
   })
   repository      = var.repository_name
   secret_name     = each.key
@@ -92,4 +90,5 @@ locals {
   attribute_repository_const        = "attribute.repository"
   github_actions_const              = "github-actions"
   github_actions_display_name_const = "GitHub Actions"
+  workload_identity_provider = "projects/${var.project_id}/locations/global/workloadIdentityPools/${google_iam_workload_identity_pool.main.workload_identity_pool_id}/providers/${google_iam_workload_identity_pool_provider.main.workload_identity_pool_id}"
 }
