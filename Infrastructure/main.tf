@@ -48,9 +48,7 @@ resource "google_iam_workload_identity_pool_provider" "main" {
   }
   oidc {
     issuer_uri = "https://token.actions.githubusercontent.com",
-    allowed_audiences = [
-      "https://token.actions.githubusercontent.com",
-    ]
+    allowed_audiences = []
   }
 }
 
