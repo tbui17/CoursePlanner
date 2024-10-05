@@ -4,6 +4,11 @@ provider "google" {
   zone    = var.project_zone
 }
 
+provider "github" {
+  token = var.gh_token
+  owner = var.repository_owner
+}
+
 resource "google_service_account" "github_actions" {
   account_id   = "${local.github_actions_const}-account"
   display_name = "${local.github_actions_display_name_const} Account"
@@ -46,32 +51,41 @@ resource "google_iam_workload_identity_pool_provider" "main" {
   }
 }
 
+data "github_actions_public_key" "github_public_key" {
+  repository = "${var.repository_name}"
+}
+
+resource "github_actions_secret" "action_secret" {
+  for_each = tomap({
+    "KEY" : var.key,
+    "GOOGLE_SERVICE_ACCOUNT" : jsonencode(var.google_service_account),
+    "KEYSTORE_CONTENTS" : var.keystore_contents,
+    "GOOGLE_SERVICE_ACCOUNT_BASE64" : var.google_service_account_base64,
+    "KEY_URI" : var.key_uri,
+  })
+  repository      = var.repository_name
+  secret_name     = each.key
+  plaintext_value = each.value
+}
+
+resource "github_actions_variable" "action_var" {
+  for_each = tomap({
+    "PROJECT_NUMBER" : var.project_number,
+    "POOL_ID" : google_iam_workload_identity_pool.main.workload_identity_pool_id,
+    "PROVIDER_ID" : google_iam_workload_identity_pool_provider.main.workload_identity_pool_provider_id,
+    "APPLICATION_ID" : var.application_id,
+    "ANDROID_SIGNING_KEY_STORE" : var.android_signing_key_store,
+    "ANDROID_SIGNING_KEY_ALIAS" : var.android_signing_key_alias,
+    "ANDROID_FRAMEWORK" : var.android_framework,
+    "USER_IDENTIFIER" : var.user_identifier,
+  })
+  repository    = var.repository_name
+  variable_name = each.key
+  value         = each.value
+}
+
 locals {
   attribute_repository_const        = "attribute.repository"
   github_actions_const              = "github-actions"
   github_actions_display_name_const = "GitHub Actions"
-}
-
-variable "repository_owner" {
-  default = "tbui17"
-}
-
-variable "repository_name" {
-  default = "courseplanner"
-}
-
-variable "project_id" {
-  default = "courseplanner-437101"
-}
-
-variable "project_region" {
-  default = "us-central1"
-}
-
-variable "project_zone" {
-  default = "us-central1-c"
-}
-
-variable "project_number" {
-  default = 650797680895
 }

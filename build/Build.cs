@@ -43,7 +43,6 @@ using Serilog;
     ImportSecrets =
     [
         nameof(CoursePlannerSecrets.KeystoreContents),
-        nameof(CoursePlannerSecrets.AndroidSigningKeyAlias),
         nameof(CoursePlannerSecrets.Key),
         nameof(CoursePlannerSecrets.ApplicationId),
         nameof(CoursePlannerSecrets.GoogleServiceAccountBase64)
@@ -54,11 +53,11 @@ using Serilog;
 )]
 public class Build : NukeBuild
 {
-    [Parameter] readonly string AndroidFramework = "net8.0-android";
-    [Parameter] [Secret] readonly string AndroidSigningKeyAlias;
+    [Parameter] readonly string AndroidFramework;
+    [Parameter] readonly string AndroidSigningKeyAlias;
 
-    [Parameter] readonly string AndroidSigningKeyStore = "courseplanner.keystore";
-    [Parameter] [Secret] readonly string ApplicationId;
+    [Parameter] readonly string AndroidSigningKeyStore;
+    [Parameter] readonly string ApplicationId;
 
     [Parameter] readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
     [PathVariable] readonly Tool Gh;
@@ -68,7 +67,7 @@ public class Build : NukeBuild
 
     [Solution(GenerateProjects = true)] readonly Solution Solution;
 
-    [Parameter] readonly string UserIdentifier = "service_account";
+    [Parameter] readonly string UserIdentifier;
     [CanBeNull] private Container _container;
 
 

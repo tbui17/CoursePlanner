@@ -10,6 +10,7 @@ bin/
 *.secrets
 .*
 **/*.tfstate*
+Infrastructure/secrets.auto.tfvars
 **/planfile
 !.github
 CoursePlanner.sln.DotSettings.user

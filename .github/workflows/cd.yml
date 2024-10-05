@@ -5,6 +5,21 @@ on:
       - publish-ci
 
 jobs:
-
   cd:
-    uses: ./.github/workflows/publish.yml
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    env:
+      PROJECT_NUMBER: 650797680895,
+      POOL_ID: 2,
+      PROVIDER_ID: 3,
+    steps:
+      - uses: actions/checkout@v4
+      - id: 'auth'
+        name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          create_credentials_file: true
+          workload_identity_provider: 'projects/${{env.PROJECT_NUMBER}}/locations/global/workloadIdentityPools/${{env.POOL_ID}}/providers/${{env.PROVIDER_ID}}'
+          service_account: '${{SERVICE_ACCOUNT_EMAIL}}'

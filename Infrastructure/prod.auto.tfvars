@@ -1,0 +1,11 @@
+repository_owner          = "tbui17"
+repository_name           = "courseplanner"
+project_id                = "courseplanner-437101"
+project_region            = "us-central1"
+project_zone              = "us-central1-c"
+project_number            = 650797680895
+application_id            = "com.tbui17.courseplanner"
+android_signing_key_store = ".keystore"
+android_signing_key_alias = "courseplanner_key"
+android_framework         = "net8.0-android"
+user_identifier           = "service_account"
