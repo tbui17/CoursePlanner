@@ -9,6 +9,8 @@ obj/
 bin/
 *.secrets
 .*
+**/*.tfstate*
+**/planfile
 !.github
 CoursePlanner.sln.DotSettings.user
 /packages/
