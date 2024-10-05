@@ -22,4 +22,4 @@ jobs:
         with:
           create_credentials_file: true
           workload_identity_provider: 'projects/${{env.PROJECT_NUMBER}}/locations/global/workloadIdentityPools/${{env.POOL_ID}}/providers/${{env.PROVIDER_ID}}'
-          service_account: '${{SERVICE_ACCOUNT_EMAIL}}'
+          service_account: '${{env.SERVICE_ACCOUNT_EMAIL}}'
