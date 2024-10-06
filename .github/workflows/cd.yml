@@ -5,8 +5,8 @@ on:
       - publish-ci
 
 jobs:
-  #  build:
-  #    uses: ./.github/workflows/publish.yml
+  build:
+    uses: ./.github/workflows/publish.yml
 
 
 
@@ -17,7 +17,6 @@ jobs:
       id-token: 'write'
     steps:
       - uses: actions/checkout@v4
-      - id: build
 
       - id: auth
         uses: google-github-actions/auth@v2
