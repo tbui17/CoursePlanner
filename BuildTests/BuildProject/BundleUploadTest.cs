@@ -1,9 +1,9 @@
 using System.Diagnostics.CodeAnalysis;
 using BuildLib.Clients;
-using BuildLib.Utils;
 using BuildTests.Utils;
 using Serilog;
 using Xunit.Abstractions;
+using Container = BuildLib.Utils.Container;
 
 namespace BuildTests.BuildProject;
 

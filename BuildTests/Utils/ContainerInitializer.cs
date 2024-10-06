@@ -4,5 +4,5 @@ namespace BuildTests.Utils;
 
 public class ContainerInitializer
 {
-    public Container GetContainer() => Container.Init<Build>();
+    public Container GetContainer() => Container.Init<Container>();
 }
