@@ -46,7 +46,7 @@ public class Build : NukeBuild
     [Parameter] [Secret] readonly string Key;
     [Parameter] [Secret] readonly string KeystoreContents;
 
-    [Solution(GenerateProjects = true)] readonly Solution Solution;
+    [Solution] readonly Solution Solution;
 
 
     [Parameter] readonly string UserIdentifier;
