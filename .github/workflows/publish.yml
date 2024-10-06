@@ -22,7 +22,15 @@ concurrency:
   group: publish
   cancel-in-progress: true
 
+env:
+  KeystoreContents: ${{ secrets.KEYSTORE_CONTENTS }}
+  AndroidSigningKeyAlias: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS }}
+  Key: ${{ secrets.KEY }}
+  ApplicationId: ${{ secrets.APPLICATION_ID }}
+  GoogleServiceAccountBase64: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_BASE64 }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 jobs:
+
   windows-latest:
     name: windows-latest
     runs-on: windows-latest
@@ -35,6 +43,9 @@ jobs:
             .nuke/temp
             ~/.nuget/packages
           key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj', '**/Directory.Packages.props') }}
+      - name: 'Run init'
+        run: ./build.cmd
+
   publish:
     runs-on: windows-latest
     needs: windows-latest
@@ -50,10 +61,3 @@ jobs:
       - name: 'Run build'
         if: steps.cache-step.outputs.cache-hit != 'true'
         run: ./build.cmd Publish
-        env:
-          KeystoreContents: ${{ secrets.KEYSTORE_CONTENTS }}
-          AndroidSigningKeyAlias: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS }}
-          Key: ${{ secrets.KEY }}
-          ApplicationId: ${{ secrets.APPLICATION_ID }}
-          GoogleServiceAccountBase64: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_BASE64 }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
