@@ -77,24 +77,23 @@ public class Build : NukeBuild
     AndroidDirectoryManager AndroidDirectory => new(() => OutputDirectory);
     Container Container => _container ??= Container.Init<Build>();
 
-
     public Target Publish => _ => _
+        .Consumes(BuildAndroidPackage)
         .Executes(() =>
             {
-                Log.Information("Publishing...");
+                var files = AndroidDirectory.GetOrThrowAndroidFiles();
+                Log.Information("Found {FileCount} files: {Files}", files.Count, files.Select(x => x.Name).ToList());
+                //
+                // var filePath = files
+                //     .Where(x => x.ToString().EndsWith(".aab"))
+                //     .Single(x => x.Contains("Signed"));
+                //
+                // Log.Information("Found AAB file at {FilePath}", filePath);
+                //
+                // filePath.CopyToDirectory(OutputDirectory);
+                // Log.Information("Copied AAB file to {OutputDirectory}", OutputDirectory);
             }
         );
-
-    // public Target Publish => _ => _
-    //     .Consumes(BuildAndroidPackage)
-    //     .DependsOn(EnsureOAuthClient)
-    //     .Executes(() =>
-    //         {
-    //
-    //             var files = AndroidDirectory.GetOrThrowAndroidFiles();
-    //             Log.Information("Found {Count} Android files: {Files}", files.Count, files);
-    //         }
-    //     );
 
     public Target UpdateEnv => _ => _
         .Executes(() =>
