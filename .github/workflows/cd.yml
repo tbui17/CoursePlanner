@@ -5,16 +5,18 @@ on:
       - publish-ci
 
 jobs:
+  build:
+    uses: ./.github/workflows/publish.yml
+
   cd:
     runs-on: ubuntu-latest
     permissions:
       contents: 'read'
       id-token: 'write'
-
     steps:
       - uses: actions/checkout@v4
       - id: build
-        uses: .github/workflows/publish.yml
+
       - id: auth
         uses: google-github-actions/auth@v2
         with:
