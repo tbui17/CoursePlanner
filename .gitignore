@@ -11,6 +11,7 @@ bin/
 .*
 **/*.tfstate*
 output/*
+output*.xml
 Infrastructure/secrets.auto.tfvars
 **/planfile
 !.github

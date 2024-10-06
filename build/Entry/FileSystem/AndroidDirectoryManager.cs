@@ -7,9 +7,9 @@ using Nuke.Common.IO;
 namespace Entry.FileSystem;
 
 [Ignore]
-public class AndroidDirectoryManager(Func<AbsolutePath> outputDirectory)
+public class AndroidDirectoryManager(AbsolutePath solutionDirectory)
 {
-    public AbsolutePath OutputDirectory => outputDirectory();
+    public AbsolutePath OutputDirectory => solutionDirectory / "output";
     public AbsolutePath PackagePattern => OutputDirectory / "*.apk";
     public AbsolutePath BundlePattern => OutputDirectory / "*.apb";
 

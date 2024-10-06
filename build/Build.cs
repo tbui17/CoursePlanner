@@ -32,25 +32,6 @@ using Serilog;
 
 [assembly: InternalsVisibleTo("BuildTests")]
 
-
-[GitHubActions(
-    "publish",
-    GitHubActionsImage.WindowsLatest,
-    AutoGenerate = false,
-    On = [GitHubActionsTrigger.WorkflowDispatch],
-    // OnPushBranches = [RepoBranches.PublishCi],
-    InvokedTargets = [nameof(Publish)],
-    ImportSecrets =
-    [
-        nameof(CoursePlannerSecrets.KeystoreContents),
-        nameof(CoursePlannerSecrets.Key),
-        nameof(CoursePlannerSecrets.ApplicationId),
-        nameof(CoursePlannerSecrets.GoogleServiceAccountBase64)
-    ],
-    EnableGitHubToken = true,
-    ConcurrencyGroup = "publish",
-    ConcurrencyCancelInProgress = true
-)]
 public class Build : NukeBuild
 {
     [Parameter] readonly string AndroidFramework;
@@ -67,21 +48,22 @@ public class Build : NukeBuild
 
     [Solution(GenerateProjects = true)] readonly Solution Solution;
 
+
     [Parameter] readonly string UserIdentifier;
     [CanBeNull] private Container _container;
 
 
     GitHubActions GitHubActions => GitHubActions.Instance;
 
-    AbsolutePath OutputDirectory => Solution is not null ? Solution.Directory / "output" : RootDirectory;
-    AndroidDirectoryManager AndroidDirectory => new(() => OutputDirectory);
+
     Container Container => _container ??= Container.Init<Build>();
 
     public Target Publish => _ => _
         .DependsOn(BuildAndroidPackage)
         .Executes(() =>
             {
-                var files = AndroidDirectory.GetOrThrowAndroidFiles();
+                var androidDirectory = new AndroidDirectoryManager(Solution.Directory);
+                var files = androidDirectory.GetOrThrowAndroidFiles();
                 Log.Information("Found {FileCount} files: {Files}", files.Count, files.Select(x => x.Name).ToList());
                 //
                 // var filePath = files
@@ -230,13 +212,9 @@ public class Build : NukeBuild
 
     public Target BuildAndroidPackage => _ => _
         .DependsOn(InstallMauiWorkload)
-        .Produces([
-                AndroidDirectory.PackagePattern,
-                AndroidDirectory.BundlePattern
-            ]
-        )
         .Executes(() =>
             {
+                var androidDirectory = new AndroidDirectoryManager(Solution.Directory);
                 using var _ = Solution.Directory.SwitchWorkingDirectory();
 
                 DotNetTasks.DotNetBuild(x => x
@@ -244,7 +222,7 @@ public class Build : NukeBuild
                     .SetConfiguration(Configuration)
                     .SetFramework(AndroidFramework)
                     .SetProperties(CreateAndroidBuildProperties().ToPropertyDictionary())
-                    .SetOutputDirectory(AndroidDirectory.OutputDirectory)
+                    .SetOutputDirectory(androidDirectory.OutputDirectory)
                 );
             }
         );
