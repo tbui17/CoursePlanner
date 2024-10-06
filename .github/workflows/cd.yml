@@ -5,9 +5,9 @@ on:
       - publish-ci
 
 jobs:
-  build:
-    uses: ./.github/workflows/publish.yml
-    with:
+  #  build:
+  #    uses: ./.github/workflows/publish.yml
+
 
 
   cd:
