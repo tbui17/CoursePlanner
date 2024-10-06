@@ -78,7 +78,7 @@ public class Build : NukeBuild
     Container Container => _container ??= Container.Init<Build>();
 
     public Target Publish => _ => _
-        .Consumes(BuildAndroidPackage)
+        .DependsOn(BuildAndroidPackage)
         .Executes(() =>
             {
                 var files = AndroidDirectory.GetOrThrowAndroidFiles();
@@ -225,7 +225,7 @@ public class Build : NukeBuild
         );
 
     public Target InstallMauiWorkload => _ => _
-        .DependsOn(EnsureOAuthClient)
+        .OnlyWhenDynamic(() => !IsLocalBuild)
         .Executes(() => DotNetTasks.DotNetWorkloadInstall(x => x.AddWorkloadId("maui")));
 
     public Target BuildAndroidPackage => _ => _
