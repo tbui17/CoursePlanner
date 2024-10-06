@@ -35,14 +35,20 @@ jobs:
             .nuke/temp
             ~/.nuget/packages
           key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj', '**/Directory.Packages.props') }}
+  publish:
+    runs-on: windows-latest
+    needs: windows-latest
+    steps:
+      - uses: actions/checkout@v4
       - name: Cache Artifacts
         id: cache-step
         uses: actions/cache@v4
         with:
           path: output
           key: ${{ runner.os }}-${{ hashFiles('output/*') }}
-      - name: 'Run: Publish'
-        if: steps.cache-step.outputs.cache-hit != 'true'
+
+      - name: 'Run build'
+      - if: steps.cache-step.outputs.cache-hit != 'true'
         run: ./build.cmd Publish
         env:
           KeystoreContents: ${{ secrets.KEYSTORE_CONTENTS }}
