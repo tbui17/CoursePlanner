@@ -21,8 +21,4 @@
         <Using Include="Xunit"/>
     </ItemGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\build\_build.csproj"/>
-    </ItemGroup>
-
 </Project>
