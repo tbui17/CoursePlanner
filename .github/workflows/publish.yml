@@ -48,7 +48,7 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('output/*') }}
 
       - name: 'Run build'
-      - if: steps.cache-step.outputs.cache-hit != 'true'
+        if: steps.cache-step.outputs.cache-hit != 'true'
         run: ./build.cmd Publish
         env:
           KeystoreContents: ${{ secrets.KEYSTORE_CONTENTS }}
