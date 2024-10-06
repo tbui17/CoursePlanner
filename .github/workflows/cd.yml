@@ -13,10 +13,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - id: 'auth'
-        name: 'Authenticate to Google Cloud'
-        uses: 'google-github-actions/auth@v1'
+      - id: auth
+        uses: google-github-actions/auth@v2
         with:
-          token_format: 'access_token'
-          workload_identity_provider: projects/650797680895/locations/global/workloadIdentityPools/example-pool
-          service_account: test-storage-sa@courseplanner-437101.iam.gserviceaccount.com
+          workload_identity_provider: ${{vars.WORKLOAD_IDENTITY_PROVIDER}}
+          service_account: ${{vars.SERVICE_ACCOUNT}}
+      - uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJson: ${{ steps.auth.outputs.credentials_file_path }}
+          packageName: ${{vars.APPLICATION_ID}}
+          releaseFiles: ${{vars.RELEASE_FILES}}
+          track: internal
+          status: draft
+          inAppUpdatePriority: 2
