@@ -58,6 +58,13 @@ public class Build : NukeBuild
 
     Container Container => _container ??= Container.Init<Build>();
 
+    public Target Run => _ => _
+        .Executes(() =>
+            {
+                Log.Information("Hello, World!");
+            }
+        );
+
     public Target Publish => _ => _
         .DependsOn(BuildAndroidPackage)
         .Executes(() =>
@@ -218,7 +225,7 @@ public class Build : NukeBuild
                 using var _ = Solution.Directory.SwitchWorkingDirectory();
 
                 DotNetTasks.DotNetBuild(x => x
-                    .SetProjectFile(Solution.CoursePlanner)
+                    .SetProjectFile(Solution.GetProject("CoursePlanner"))
                     .SetConfiguration(Configuration)
                     .SetFramework(AndroidFramework)
                     .SetProperties(CreateAndroidBuildProperties().ToPropertyDictionary())
@@ -252,12 +259,12 @@ public class Build : NukeBuild
         );
 
 
-    public static int Main() => Execute<Build>();
+    public static int Main() => Execute<Build>(x => x.Run);
 
     public static int ExecuteTarget(Expression<Func<Build, Target>> target) => Execute(target);
 
     private IReadOnlyCollection<Output> Exec(string arg) => PwshTasks.Pwsh(x => x
-        .SetProcessWorkingDirectory(Solution._build.Directory)
+        .SetProcessWorkingDirectory(Solution.Directory)
         .SetCommand(arg)
     );
 
@@ -282,7 +289,7 @@ public class Build : NukeBuild
                 path.WriteJson(secrets);
                 Log.Information(
                     "Setting secrets from {Path} into secrets store for project {Project} with Id {UserSecretsId}",
-                    path, Solution._build.Name, Solution._build.GetProperty("UserSecretsId")
+                    path, Solution.GetProject("Build"), Solution.GetProject("Build").GetProperty("UserSecretsId")
                 );
                 Exec($"cat {path} | dotnet user-secrets set");
             }
