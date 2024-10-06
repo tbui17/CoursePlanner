@@ -17,6 +17,6 @@ jobs:
         name: 'Authenticate to Google Cloud'
         uses: 'google-github-actions/auth@v2'
         with:
-          project_id: ${{ vars.PROJECT_ID }}
-          create_credentials_file: true
-          workload_identity_provider: projects/courseplanner-437101/locations/global/workloadIdentityPools/github-actions-pool2/providers/github-actions-pool2
+          token_format: 'access_token'
+          workload_identity_provider: projects/650797680895/locations/global/workloadIdentityPools/example-pool
+          service_account: test-storage-sa@courseplanner-437101.iam.gserviceaccount.com
