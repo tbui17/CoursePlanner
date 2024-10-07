@@ -3,24 +3,78 @@ on:
   push:
     branches:
       - publish-ci
-
+env:
+  RUN_KEY: "r1"
 jobs:
+  build:
+    runs-on: windows-latest
+    outputs:
+      artifact-path: ${{ steps.build_artifact.outputs.artifact-path }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup cache for .NET
+        uses: actions/cache@v4
+        with:
+          path: ~\AppData\Local\Microsoft\dotnet
+          key: ${{vars.RUN_KEY}}
+          restore-keys: |
+            -dotnetcore-
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Cache MAUI workload
+        uses: actions/cache@v4
+        with:
+          path: ~/.dotnet/maui
+          key: ${{vars.RUN_KEY}}
+          restore-keys: |
+            -maui-workload-
+
+      - name: Install .NET MAUI
+        run: dotnet workload install maui
+
+      - name: Cache .NET Build
+        uses: actions/cache@v4
+        with:
+          path: ${{vars.OUTPUT_FOLDER}}
+          key: ${{vars.RUN_KEY}}
+          restore-keys: |
+            -build-
+
+      - name: Release Build
+        run: dotnet build CoursePlanner/CoursePlanner.csproj -c Release -f net8.0-android -o ${{vars.OUTPUT_FOLDER}}
+
+      - name: Cache output artifact
+        uses: actions/cache@v4
+        with:
+          path: ${{vars.OUTPUT_FOLDER}}
+          key: ${{vars.RUN_KEY}}
+          restore-keys: |
+            -artifact-
+
+      - name: Upload artifact
+        id: build_artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-artifact
+          path: ${{vars.OUTPUT_FOLDER}}
   cd:
+    needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: 'read'
       id-token: 'write'
     steps:
       - uses: actions/checkout@v4
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
         with:
-          dotnet-version: 8.0.x
-      - name: Install .NET MAUI
-        run: dotnet workload install maui
-      - name: Release Build
-        run: dotnet build CoursePlanner/CoursePlanner.csproj -c Release -f net8.0-android -o ${{vars.OUTPUT_FOLDER}}
-
+          name: app-artifact
+          path: ${{vars.OUTPUT_FOLDER}}
       - id: auth
         uses: google-github-actions/auth@v2
         with:
