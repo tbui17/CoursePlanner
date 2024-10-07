@@ -6,9 +6,7 @@ on:
 jobs:
   cd:
     runs-on: ubuntu-latest
-    permissions:
-      contents: 'read'
-      id-token: 'write'
+    permissions: write-all
     env:
       GH_TOKEN: ${{ github.token }}
     steps:
