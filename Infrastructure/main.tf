@@ -28,6 +28,7 @@ locals {
   github_actions_const              = "github-actions"
   github_actions_display_name_const = "GitHub Actions"
   workload_identity_provider = "projects/${var.project_id}/locations/global/workloadIdentityPools/${google_iam_workload_identity_pool.main.workload_identity_pool_id}/providers/${google_iam_workload_identity_pool_provider.main.workload_identity_pool_id}"
-  release_files              = "output/${local.release_file_name}"
+  release_files = "${local.output_folder}/${local.release_file_name}"
   release_file_name          = "${var.application_id}-Signed.aab"
+  output_folder = "output"
 }

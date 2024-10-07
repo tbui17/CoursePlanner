@@ -32,6 +32,7 @@ resource "github_actions_variable" "action_var" {
     "PROJECT_REGION" : var.project_region,
     "PROJECT_ZONE" : var.project_zone,
     "RELEASE_FILES" : local.release_files,
+    "OUTPUT_FOLDER" : local.output_folder
   })
   repository    = var.repository_name
   variable_name = each.key
