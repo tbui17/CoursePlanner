@@ -13,7 +13,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: Download artifact from build job
         run: |
-          gh run download --name app-artifact --dir output
+          gh run download --name app-artifact --dir ${{vars.ARTIFACT_PATH}}
+          pwsh
+          Get-ChildItem ${{vars.ARTIFACT_PATH}} | Select-Object * | Write-Host
       - id: auth
         uses: google-github-actions/auth@v2
         with:
