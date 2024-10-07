@@ -15,7 +15,7 @@ jobs:
         run: |
           gh run download --name app-artifact --dir ${{vars.OUTPUT_FOLDER}}
           echo "Finding files in ${{vars.OUTPUT_FOLDER}}"
-          pwsh -Command "Get-ChildItem ${{vars.OUTPUT_FOLDER}} | Select-Object * | Write-Host"
+          pwsh -Command "Get-ChildItem ${{vars.OUTPUT_FOLDER}} | Select-Object Name"
       - id: auth
         uses: google-github-actions/auth@v2
         with:
