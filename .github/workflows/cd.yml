@@ -17,7 +17,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~\AppData\Local\Microsoft\dotnet
-          key: ${{vars.RUN_KEY}}
+          key: ${{env.RUN_KEY}}
           restore-keys: |
             -dotnetcore-
 
@@ -30,7 +30,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.dotnet/maui
-          key: ${{vars.RUN_KEY}}
+          key: ${{env.RUN_KEY}}
           restore-keys: |
             -maui-workload-
 
@@ -41,7 +41,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{vars.OUTPUT_FOLDER}}
-          key: ${{vars.RUN_KEY}}
+          key: ${{env.RUN_KEY}}
           restore-keys: |
             -build-
 
@@ -52,7 +52,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{vars.OUTPUT_FOLDER}}
-          key: ${{vars.RUN_KEY}}
+          key: ${{env.RUN_KEY}}
           restore-keys: |
             -artifact-
 
