@@ -5,8 +5,11 @@ on:
       - publish-ci
 
 jobs:
-  build:
-    runs-on: windows-latest
+  cd:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
     steps:
       - uses: actions/checkout@v4
       - name: Setup .NET
@@ -17,14 +20,6 @@ jobs:
         run: dotnet workload install maui
       - name: Release Build
         run: dotnet build CoursePlanner/CoursePlanner.csproj -c Release -f net8.0-android -o ${{vars.OUTPUT_FOLDER}}
-  cd:
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-    steps:
-      - uses: actions/checkout@v4
 
       - id: auth
         uses: google-github-actions/auth@v2
