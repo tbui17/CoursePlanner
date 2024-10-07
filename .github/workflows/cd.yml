@@ -9,6 +9,8 @@ jobs:
     permissions:
       contents: 'read'
       id-token: 'write'
+    env:
+      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
       - name: Download artifact from build job
