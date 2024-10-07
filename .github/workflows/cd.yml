@@ -4,74 +4,7 @@ on:
     branches:
       - publish-ci
 jobs:
-  build:
-    runs-on: windows-latest
-    env:
-      DOTNET_INSTALL_DIR: '.\.dotnet'
-    outputs:
-      artifact-path: ${{ steps.build_artifact.outputs.artifact-path }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Cache dotnet
-        id: cache-dotnet
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.DOTNET_INSTALL_DIR }}
-          key: ${{ runner.os }}-dotnet-8
-          restore-keys: ${{ runner.os }}-dotnet-8
-
-      - name: Install dotnet
-        if: ${{ steps.cache-dotnet.outputs.cache-hit != 'true' }}
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 8.0.x
-
-      - name: 'Cache: ~/.nuget/packages'
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.nuget/packages
-          key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj', '**/Directory.Packages.props') }}
-
-      - name: Cache MAUI workload
-        uses: actions/cache@v4
-        with:
-          path: ~/.dotnet/maui
-          key: 222
-          restore-keys: |
-            -maui-workload-
-
-      - name: Install .NET MAUI
-        run: dotnet workload install maui
-
-      - name: Cache .NET Build
-        uses: actions/cache@v4
-        with:
-          path: ${{vars.OUTPUT_FOLDER}}
-          key: 333
-          restore-keys: |
-            -build-
-
-      - name: Release Build
-        run: dotnet build CoursePlanner/CoursePlanner.csproj -c Release -f net8.0-android -o ${{vars.OUTPUT_FOLDER}}
-
-      - name: Cache output artifact
-        uses: actions/cache@v4
-        with:
-          path: ${{vars.OUTPUT_FOLDER}}
-          key: 444
-          restore-keys: |
-            -artifact-
-
-      - name: Upload artifact
-        id: build_artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-artifact
-          path: ${{vars.OUTPUT_FOLDER}}
   cd:
-    needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: 'read'
@@ -79,10 +12,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Download artifact from build job
-        uses: actions/download-artifact@v4
-        with:
-          name: app-artifact
-          path: ${{vars.OUTPUT_FOLDER}}
+        run: |
+          gh run download --name app-artifact --dir output
       - id: auth
         uses: google-github-actions/auth@v2
         with:
