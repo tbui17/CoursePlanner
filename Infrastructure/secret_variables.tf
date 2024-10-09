@@ -70,6 +70,12 @@ variable "service_principal_secret" {
   sensitive   = true
 }
 
+variable "connection_string" {
+  description = "The connection string for the Azure app configuration"
+  type        = string
+  sensitive   = true
+}
+
 
 locals {
   secrets = {
@@ -83,5 +89,6 @@ locals {
     tenant_id                     = var.tenant_id
     service_principal_id          = var.service_principal_id
     service_principal_secret      = var.service_principal_secret
+    connection_string = var.connection_string
   }
 }
