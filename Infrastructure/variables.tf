@@ -42,3 +42,18 @@ variable "user_identifier" {
   description = "The identifier for the runner job"
 }
 
+locals {
+  variables = {
+    repository_owner          = var.repository_owner
+    repository_name           = var.repository_name
+    project_id                = var.project_id
+    project_region            = var.project_region
+    project_zone              = var.project_zone
+    project_number            = var.project_number
+    application_id            = var.application_id
+    android_signing_key_store = var.android_signing_key_store
+    android_signing_key_alias = var.android_signing_key_alias
+    android_framework         = var.android_framework
+    user_identifier           = var.user_identifier
+  }
+}

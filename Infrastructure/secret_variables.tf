@@ -21,6 +21,12 @@ variable "google_service_account" {
   })
 }
 
+variable subscription_id {
+  description = "The Azure subscription ID"
+  type        = string
+  sensitive   = true
+}
+
 variable "keystore_contents" {
   description = "Contents of the keystore"
   type        = string
@@ -44,4 +50,38 @@ variable "gh_token" {
   type      = string
   nullable  = false
   sensitive = true
+}
+
+variable "tenant_id" {
+  description = "The Azure tenant ID"
+  type        = string
+  sensitive   = true
+}
+
+variable "service_principal_id" {
+  description = "The Azure service principal ID"
+  type        = string
+  sensitive   = true
+}
+
+variable "service_principal_secret" {
+  description = "The Azure service principal secret"
+  type        = string
+  sensitive   = true
+}
+
+
+locals {
+  secrets = {
+    key                           = var.key
+    google_service_account        = var.google_service_account
+    subscription_id               = var.subscription_id
+    keystore_contents             = var.keystore_contents
+    google_service_account_base64 = var.google_service_account_base64
+    key_uri                       = var.key_uri
+    gh_token                      = var.gh_token
+    tenant_id                     = var.tenant_id
+    service_principal_id          = var.service_principal_id
+    service_principal_secret      = var.service_principal_secret
+  }
 }

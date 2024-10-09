@@ -6,10 +6,11 @@ using Microsoft.Extensions.Options;
 
 namespace BuildLib.Clients;
 
-public class InitializerFactory(IOptions<CoursePlannerSecrets> secrets)
+public class InitializerFactory(IOptions<CoursePlannerConfiguration> secrets)
 {
     public BaseClientService.Initializer Create()
     {
+        secrets.Value.Validate();
         var serviceCredInitializer =
             new ServiceAccountCredential.Initializer(secrets.Value.GoogleServiceAccount.ClientEmail)
             {

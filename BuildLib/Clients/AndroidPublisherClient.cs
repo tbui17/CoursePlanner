@@ -9,7 +9,7 @@ namespace BuildLib.Clients;
 
 public class AndroidPublisherClient(
     BaseClientService.Initializer initializer,
-    IOptions<CoursePlannerSecrets> secrets,
+    IOptions<CoursePlannerConfiguration> secrets,
     ILogger<AndroidPublisherClient> logger)
 {
     private readonly AndroidPublisherService _service = new(initializer);

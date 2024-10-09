@@ -1,5 +1,7 @@
+using Azure.Identity;
 using BuildLib.Clients;
 using BuildLib.Secrets;
+using CaseConverter;
 using Google.Apis.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,10 +31,9 @@ public class Container(IHost host)
     public static HostApplicationBuilder CreateBuilder<T>() where T : class
     {
         var builder = Host.CreateApplicationBuilder();
-        AddSecrets<T>(builder);
         builder.Services.Scan(scan => scan
             .FromCallingAssembly()
-            .AddClasses(c => c.NotInNamespaceOf<CoursePlannerSecrets>().WithoutAttribute<IgnoreAttribute>())
+            .AddClasses(c => c.NotInNamespaceOf<CoursePlannerConfiguration>().WithoutAttribute<IgnoreAttribute>())
             .UsingRegistrationStrategy(RegistrationStrategy.Throw)
             .AsSelf()
             .WithLifetime(ServiceLifetime.Transient)
@@ -43,40 +44,85 @@ public class Container(IHost host)
             c.GetRequiredService<InitializerFactory>().Create()
         );
 
-        // nameof(CoursePlannerSecrets.KeyUri)
-        //     .Thru(builder.Configuration.GetValue<string>)
-        //     .Thru(str => string.IsNullOrWhiteSpace(str) ? throw new ArgumentException("KeyUri is missing") : str)
-        //     .Thru(str => new Uri(str))
-        //     .Tap(uri => builder.Configuration.AddAzureKeyVault(uri, new DefaultAzureCredential()));
+
+        new EnvVarSourceLoader().Load(builder.Configuration);
+        builder.Configuration.AddEnvironmentVariables();
+        builder.Configuration.AddUserSecrets<Container>();
+        builder
+            .Configuration.AsEnumerable()
+            .SelectKeys(x => x.Key.ToPascalCase())
+            .Thru(kvp =>
+                {
+                    var set = builder.Configuration.AsEnumerable().Select(x => x.Key).ToHashSet();
+                    return kvp.Where(x => !set.Contains(x.Key));
+                }
+            )
+            .Tap(x => builder.Configuration.AddInMemoryCollection(x));
+        nameof(CoursePlannerConfiguration.KeyUri)
+            .Thru(builder.Configuration.GetValue<string>)
+            .Thru(str => string.IsNullOrWhiteSpace(str) ? throw new ArgumentException("KeyUri is missing") : str)
+            .Thru(str => new Uri(str))
+            .Tap(uri => builder.Configuration.AddAzureKeyVault(uri, new DefaultAzureCredential()));
+
+
+        builder
+            .Configuration
+            .AddAzureAppConfiguration(options => options
+                .Connect(Environment.GetEnvironmentVariable("ConnectionString"))
+            );
+
+
+        builder
+            .Services
+            .AddOptions<CoursePlannerConfiguration>()
+            .Bind(builder.Configuration);
+
 
         builder.Logging.AddSerilog();
 
         return builder;
     }
+}
 
-    private static void AddSecrets<T>(IHostApplicationBuilder builder) where T : class
+file class EnvVarSourceLoader
+{
+    public Dictionary<string, string> GetSettings()
     {
-        builder.Configuration.AddUserSecrets<T>();
-        builder
-            .Services
-            .AddOptions<CoursePlannerSecrets>()
-            .Bind(builder.Configuration);
+        var dict = Environment.GetEnvironmentVariables();
 
-        var secrets = builder.Configuration.Get<CoursePlannerSecrets>()!;
-        var nulls = secrets
-            .GetPropertiesRecursive()
-            .Where(x => x.Value is string s
-                ? string.IsNullOrWhiteSpace(s)
-                : x.Value is null
-            )
-            .Select(x => x.GetPath())
-            .Select(x => string.Join(".", x))
-            .ToList();
+        var dict2 = new Dictionary<string, string>();
 
-        if (nulls.Count > 0)
+        foreach (string key in dict.Keys)
         {
-            var csv = string.Join(", ", nulls);
-            throw new ArgumentException($"Secrets are missing: {csv}");
+            var value = dict[key];
+            if (value is not string s)
+            {
+                throw new ArgumentException("Value is not a string");
+            }
+
+            dict2.Add(key, s);
         }
+
+        var dict3 = new Dictionary<string, string>();
+
+        foreach (var (key, value) in dict2)
+        {
+            var variants = new[]
+                { key.ToPascalCase() };
+
+            foreach (var variant in variants)
+            {
+                dict3[variant] = value;
+            }
+        }
+
+        return dict3;
+    }
+
+    public void Load(IConfigurationBuilder builder)
+    {
+        var dict = GetSettings();
+        builder.AddInMemoryCollection(dict!);
+        builder.AddEnvironmentVariables();
     }
 }
