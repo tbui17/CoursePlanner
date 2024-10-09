@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using BuildLib.Clients;
+using BuildLib.Secrets;
 using BuildTests.Utils;
 using Serilog;
 using Xunit.Abstractions;
@@ -29,8 +30,8 @@ public sealed class BundleUploadTest : IAsyncDisposable
     public async Task UploadBundle_Succeeds()
     {
         var client = _container.Resolve<AndroidPublisherClient>();
-        const string path =
-            "PATH_HERE";
+        var config = _container.GetConfiguration<CoursePlannerConfiguration>();
+        var path = config.BundlePath;
 
         await using var stream = File.Open(path, FileMode.Open);
         var cts = new CancellationTokenSource(TimeSpan.FromMinutes(3));

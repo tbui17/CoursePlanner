@@ -44,4 +44,5 @@ locals {
   release_files              = "${local.output_folder}/${local.release_file_name}"
   release_file_name          = "${var.application_id}-Signed.aab"
   output_folder              = "output"
+  azure_variables = merge(local.variables, { BundlePath = local.release_file_name })
 }

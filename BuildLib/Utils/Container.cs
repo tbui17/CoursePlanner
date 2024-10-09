@@ -1,4 +1,7 @@
+using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
+using Azure.Storage.Blobs;
 using BuildLib.Clients;
 using BuildLib.Secrets;
 using CaseConverter;
@@ -15,8 +18,7 @@ public class Container(IHost host)
 {
     public T Resolve<T>() where T : notnull => host.Services.GetRequiredService<T>();
 
-    public T GetConfig<T>() => host.Services.GetRequiredService<IConfiguration>().Get<T>() ??
-                               throw new NullReferenceException("Configuration was null.");
+    public T GetConfiguration<T>() => host.Services.GetConfiguration<T>();
 
     public static Container Init<T>() where T : class
     {
@@ -24,8 +26,9 @@ public class Container(IHost host)
 
         var host = builder.Build();
 
+        var container = new Container(host);
 
-        return new Container(host);
+        return container;
     }
 
     public static HostApplicationBuilder CreateBuilder<T>() where T : class
@@ -40,89 +43,98 @@ public class Container(IHost host)
         );
 
 
-        builder.Services.AddSingleton<BaseClientService.Initializer>(c =>
-            c.GetRequiredService<InitializerFactory>().Create()
-        );
-
-
-        new EnvVarSourceLoader().Load(builder.Configuration);
-        builder.Configuration.AddEnvironmentVariables();
-        builder.Configuration.AddUserSecrets<Container>();
         builder
-            .Configuration.AsEnumerable()
-            .SelectKeys(x => x.Key.ToPascalCase())
-            .Thru(kvp =>
-                {
-                    var set = builder.Configuration.AsEnumerable().Select(x => x.Key).ToHashSet();
-                    return kvp.Where(x => !set.Contains(x.Key));
-                }
+            .Services.AddSingleton<BaseClientService.Initializer>(c =>
+                c.GetRequiredService<InitializerFactory>().Create()
             )
-            .Tap(x => builder.Configuration.AddInMemoryCollection(x));
-        nameof(CoursePlannerConfiguration.KeyUri)
-            .Thru(builder.Configuration.GetValue<string>)
-            .Thru(str => string.IsNullOrWhiteSpace(str) ? throw new ArgumentException("KeyUri is missing") : str)
-            .Thru(str => new Uri(str))
-            .Tap(uri => builder.Configuration.AddAzureKeyVault(uri, new DefaultAzureCredential()));
-
-
-        builder
-            .Configuration
-            .AddAzureAppConfiguration(options => options
-                .Connect(Environment.GetEnvironmentVariable("ConnectionString"))
+            .AddSingleton<BlobServiceClient>(p =>
+                new BlobServiceClient(p.GetAppConfiguration(x => x.BlobConnectionString))
+            )
+            .AddSingleton<BlobContainerClient>(p =>
+                p
+                    .GetRequiredService<BlobServiceClient>()
+                    .GetBlobContainerClient(p.GetAppConfiguration(x => x.BlobContainerName))
             );
+
+        var uri = builder.Configuration.GetConfiguration<string>(nameof(CoursePlannerConfiguration.KeyUri));
+        var secretClient = new SecretClient(new(new(uri)), new DefaultAzureCredential());
+        var connectionString = secretClient.GetSecret(nameof(CoursePlannerConfiguration.ConnectionString)).Value.Value;
+        var config = builder.Configuration;
+
+        builder.Services.AddSingleton(secretClient);
+        config.AddEnvironmentVariables();
+        AddPascalCaseKeys(config);
+        config.AddAzureKeyVault(secretClient, new KeyVaultSecretManager());
+        config.AddAzureAppConfiguration(options => options.Connect(connectionString));
+        config.AddUserSecrets<T>();
 
 
         builder
             .Services
             .AddOptions<CoursePlannerConfiguration>()
-            .Bind(builder.Configuration);
+            .Bind(builder.Configuration)
+            .Validate(conf =>
+                {
+                    conf.Validate();
+                    return true;
+                }
+            )
+            .ValidateOnStart();
+
+        builder
+            .Services
+            .AddOptions<GoogleServiceAccount>()
+            .Bind(builder.Configuration.GetSection(nameof(CoursePlannerConfiguration.GoogleServiceAccount)) ??
+                  throw new NullReferenceException($"{nameof(GoogleServiceAccount)} was null")
+            );
 
 
         builder.Logging.AddSerilog();
 
         return builder;
     }
+
+    private static void AddPascalCaseKeys(IConfigurationManager config)
+    {
+        var originalKeys = config
+            .AsEnumerable()
+            .Select(x => x.Key)
+            .ToHashSet();
+
+        var pascalCollection = config
+            .AsEnumerable()
+            .SelectKeys(x => x.Key.ToPascalCase())
+            .Thru(kvp => kvp.Where(x => !originalKeys.Contains(x.Key)));
+
+
+        config.AddInMemoryCollection(pascalCollection);
+    }
 }
 
-file class EnvVarSourceLoader
+public static class ProviderExtensions
 {
-    public Dictionary<string, string> GetSettings()
-    {
-        var dict = Environment.GetEnvironmentVariables();
+    public static T GetConfiguration<T>(this IServiceProvider provider) =>
+        provider.GetRequiredService<IConfiguration>().Get<T>() ??
+        throw new ArgumentException($"{typeof(T)} was null.");
 
-        var dict2 = new Dictionary<string, string>();
+    public static T GetConfiguration<T>(this IConfiguration config) =>
+        config.Get<T>() ??
+        throw new ArgumentException($"{typeof(T)} was null.");
 
-        foreach (string key in dict.Keys)
-        {
-            var value = dict[key];
-            if (value is not string s)
-            {
-                throw new ArgumentException("Value is not a string");
-            }
+    public static T GetConfiguration<T>(this IConfiguration config, string name) => config.GetValue<T>(name) ??
+        throw new ArgumentException($"{name} {typeof(T)} was null.");
 
-            dict2.Add(key, s);
-        }
+    public static T GetConfiguration<T>(this IServiceProvider provider, string name) =>
+        provider.GetRequiredService<IConfiguration>().GetConfiguration<T>(name);
 
-        var dict3 = new Dictionary<string, string>();
+    public static T GetAppConfiguration<T>(
+        this IServiceProvider provider,
+        Func<CoursePlannerConfiguration, T> selector
+    ) =>
+        selector(provider.GetAppConfiguration());
 
-        foreach (var (key, value) in dict2)
-        {
-            var variants = new[]
-                { key.ToPascalCase() };
-
-            foreach (var variant in variants)
-            {
-                dict3[variant] = value;
-            }
-        }
-
-        return dict3;
-    }
-
-    public void Load(IConfigurationBuilder builder)
-    {
-        var dict = GetSettings();
-        builder.AddInMemoryCollection(dict!);
-        builder.AddEnvironmentVariables();
-    }
+    public static CoursePlannerConfiguration GetAppConfiguration(
+        this IServiceProvider provider
+    ) =>
+        provider.GetConfiguration<CoursePlannerConfiguration>();
 }

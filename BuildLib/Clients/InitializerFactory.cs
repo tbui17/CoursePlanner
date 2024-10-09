@@ -6,16 +6,17 @@ using Microsoft.Extensions.Options;
 
 namespace BuildLib.Clients;
 
-public class InitializerFactory(IOptions<CoursePlannerConfiguration> secrets)
+public class InitializerFactory(IOptions<GoogleServiceAccount> configs)
 {
     public BaseClientService.Initializer Create()
     {
-        secrets.Value.Validate();
+        var secrets = configs.Value;
+
         var serviceCredInitializer =
-            new ServiceAccountCredential.Initializer(secrets.Value.GoogleServiceAccount.ClientEmail)
+            new ServiceAccountCredential.Initializer(secrets.ClientEmail)
             {
                 Scopes = [AndroidPublisherService.Scope.Androidpublisher]
-            }.FromPrivateKey(secrets.Value.GoogleServiceAccount.PrivateKey);
+            }.FromPrivateKey(secrets.PrivateKey);
         var serviceCred = new ServiceAccountCredential(serviceCredInitializer);
 
         var initializer = new BaseClientService.Initializer

@@ -63,10 +63,17 @@ public static class UtilExtensions
         }
     }
 
+    public static PropertyInfo[] GetPublicProperties(this Type type) =>
+        type
+            .GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
     public static PropertyInfo[] GetPublicProperties<T>(this T next) where T : class =>
         next
             .GetType()
-            .GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            .GetPublicProperties();
+
+    public static bool IsObjectType(this Type type) =>
+        type is { IsClass: true, IsPrimitive: false } && type != typeof(string);
 
 
     public static string ConfigurationKeyName<T>(this T obj, Expression<Func<T, object>> expression) where T : notnull

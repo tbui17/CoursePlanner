@@ -10,10 +10,14 @@ public record CoursePlannerConfiguration
     public string AndroidSigningKeyAlias { get; set; } = null!;
     public string Key { get; set; } = null!;
     public GoogleServiceAccount GoogleServiceAccount { get; set; } = null!;
+    public string BlobContainerName { get; set; } = null!;
+    public string ConnectionString { get; set; } = null!;
+    public string BlobConnectionString { get; set; } = null!;
     public string KeystoreContents { get; set; } = null!;
     public string ApplicationId { get; set; } = null!;
     public string GoogleServiceAccountBase64 { get; set; } = null!;
     public string KeyUri { get; set; } = null!;
+    public string BundlePath { get; set; } = null!;
 
     public void Validate()
     {

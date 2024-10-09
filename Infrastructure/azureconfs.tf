@@ -1,7 +1,7 @@
 
 resource "azurerm_app_configuration_key" "appconf" {
   configuration_store_id = azurerm_app_configuration.appconf.id
-  for_each               = { for k, v in local.variables : provider::corefunc::str_pascal(k, false) => v }
+  for_each               = { for k, v in local.azure_variables : provider::corefunc::str_pascal(k, false) => v }
   key                    = each.key
   value                  = each.value
   depends_on             = [azurerm_role_assignment.appconf_dataowner]

@@ -42,6 +42,10 @@ variable "user_identifier" {
   description = "The identifier for the runner job"
 }
 
+variable "blob_container_name" {
+  description = "The name of the blob container"
+}
+
 locals {
   variables = {
     repository_owner          = var.repository_owner
@@ -55,5 +59,6 @@ locals {
     android_signing_key_alias = var.android_signing_key_alias
     android_framework         = var.android_framework
     user_identifier           = var.user_identifier
+    blob_container_name = var.blob_container_name
   }
 }

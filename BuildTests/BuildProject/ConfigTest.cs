@@ -12,7 +12,7 @@ public class ConfigTest
     [Fact]
     public void CanResolveConfig()
     {
-        var config = _container.GetConfig<CoursePlannerConfiguration>();
+        var config = _container.GetConfiguration<CoursePlannerConfiguration>();
         config.KeyUri.Should().NotBeNullOrWhiteSpace();
     }
 }

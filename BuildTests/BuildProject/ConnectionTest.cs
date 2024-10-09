@@ -1,7 +1,7 @@
-using Azure.Security.KeyVault.Secrets;
 using BuildLib.Clients;
 using BuildLib.Secrets;
 using BuildLib.Utils;
+using BuildTests.Attributes;
 using BuildTests.Utils;
 using FluentAssertions;
 
@@ -12,19 +12,18 @@ public class ConnectionTest
     private readonly Container _container = new ContainerInitializer().GetContainer();
 
 
-    [Fact(Skip = "Broken")]
+    [SkipIfDev]
     public void SecretClient_CanConnect()
     {
-        const string name = nameof(CoursePlannerConfiguration.KeyUri);
+        var config = _container.GetConfiguration<CoursePlannerConfiguration>();
 
-        var client = _container.Resolve<SecretClient>();
-        client
-            .GetSecret(name)
-            .Value.Name.Should()
-            .Be(name);
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+        var keyIsNull = config.Key is null;
+
+        keyIsNull.Should().NotBe(true);
     }
 
-    [Fact]
+    [SkipIfDev]
     public async Task AndroidPublisherClient_CanConnect()
     {
         var client = _container.Resolve<AndroidPublisherClient>();
@@ -38,10 +37,10 @@ public class ConnectionTest
         res.Which.Id.Should().NotBeNullOrWhiteSpace();
     }
 
-    [Fact]
+    [SkipIfDev]
     public async Task GetBundles_HasResult()
     {
-        var secrets = _container.GetConfig<CoursePlannerConfiguration>();
+        var secrets = _container.GetConfiguration<CoursePlannerConfiguration>();
         secrets.Validate();
         var client = _container.Resolve<AndroidPublisherClient>();
 

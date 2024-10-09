@@ -76,6 +76,11 @@ variable "connection_string" {
   sensitive   = true
 }
 
+variable "blob_connection_string" {
+  description = "The connection string for the Azure blob storage"
+  type        = string
+  sensitive   = true
+}
 
 locals {
   secrets = {
@@ -89,6 +94,7 @@ locals {
     tenant_id                     = var.tenant_id
     service_principal_id          = var.service_principal_id
     service_principal_secret      = var.service_principal_secret
-    connection_string = var.connection_string
+    connection_string      = var.connection_string
+    blob_connection_string = var.blob_connection_string
   }
 }
