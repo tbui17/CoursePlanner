@@ -16,6 +16,10 @@ terraform {
       source  = "northwood-labs/corefunc"
       version = "1.4.0"
     }
+    azuredevops = {
+      source  = "microsoft/azuredevops"
+      version = "1.3.0"
+    }
   }
 }
 
@@ -34,6 +38,18 @@ provider "azurerm" {
   features {}
   resource_provider_registrations = "none"
   subscription_id                 = var.subscription_id
+}
+
+provider "azuredevops" {
+  org_service_url = var.devops_org_url
+}
+
+module "azdo" {
+  source          = "./azdo"
+  repository_name = var.repository_name
+  providers = {
+    azuredevops = azuredevops
+  }
 }
 
 locals {

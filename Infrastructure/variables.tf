@@ -46,6 +46,12 @@ variable "blob_container_name" {
   description = "The name of the blob container"
 }
 
+variable "devops_org_url" {
+  description = "The Azure DevOps organization URL"
+  type        = string
+  sensitive   = true
+}
+
 locals {
   variables = {
     repository_owner          = var.repository_owner
@@ -60,5 +66,6 @@ locals {
     android_framework         = var.android_framework
     user_identifier           = var.user_identifier
     blob_container_name = var.blob_container_name
+    devops_org_url      = var.devops_org_url
   }
 }

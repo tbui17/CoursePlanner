@@ -57,7 +57,21 @@ public class Container(IHost host)
             );
 
         var uri = builder.Configuration.GetConfiguration<string>(nameof(CoursePlannerConfiguration.KeyUri));
-        var secretClient = new SecretClient(new(new(uri)), new DefaultAzureCredential());
+        var secretClient = new SecretClient(new(new(uri)),
+            new DefaultAzureCredential(new DefaultAzureCredentialOptions()
+                {
+                    ExcludeVisualStudioCredential = true,
+                    ExcludeEnvironmentCredential = true,
+                    ExcludeVisualStudioCodeCredential = true,
+                    ExcludeSharedTokenCacheCredential = true,
+                    ExcludeAzurePowerShellCredential = true,
+                    ExcludeInteractiveBrowserCredential = true,
+                    ExcludeManagedIdentityCredential = true,
+                    ExcludeWorkloadIdentityCredential = true,
+                    ExcludeAzureDeveloperCliCredential = true,
+                }
+            )
+        );
         var connectionString = secretClient.GetSecret(nameof(CoursePlannerConfiguration.ConnectionString)).Value.Value;
         var config = builder.Configuration;
 
@@ -96,15 +110,10 @@ public class Container(IHost host)
 
     private static void AddPascalCaseKeys(IConfigurationManager config)
     {
-        var originalKeys = config
-            .AsEnumerable()
-            .Select(x => x.Key)
-            .ToHashSet();
-
         var pascalCollection = config
             .AsEnumerable()
             .SelectKeys(x => x.Key.ToPascalCase())
-            .Thru(kvp => kvp.Where(x => !originalKeys.Contains(x.Key)));
+            .ExceptBy(config.AsEnumerable().Select(x => x.Key), x => x.Key);
 
 
         config.AddInMemoryCollection(pascalCollection);
