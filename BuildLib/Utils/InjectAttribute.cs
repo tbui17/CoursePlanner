@@ -1,6 +1,4 @@
 namespace BuildLib.Utils;
 
 [AttributeUsage(AttributeTargets.Class)]
-public class IgnoreAttribute : Attribute
-{
-}
+public class InjectAttribute : Attribute;

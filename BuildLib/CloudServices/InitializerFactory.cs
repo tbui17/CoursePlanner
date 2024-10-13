@@ -1,11 +1,13 @@
 using BuildLib.Secrets;
+using BuildLib.Utils;
 using Google.Apis.AndroidPublisher.v3;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Microsoft.Extensions.Options;
 
-namespace BuildLib.Clients;
+namespace BuildLib.CloudServices;
 
+[Inject]
 public class InitializerFactory(IOptions<GoogleServiceAccount> configs)
 {
     public BaseClientService.Initializer Create()

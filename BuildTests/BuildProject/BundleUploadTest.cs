@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
-using BuildLib.Clients;
-using BuildLib.Secrets;
+using BuildLib.CloudServices.GooglePlay;
 using BuildTests.Utils;
 using Serilog;
 using Xunit.Abstractions;
@@ -25,13 +24,16 @@ public sealed class BundleUploadTest : IAsyncDisposable
         await Log.CloseAndFlushAsync();
     }
 
-    [Fact(Skip = "This test is for manual use only.")]
+    [Fact(Skip = "This test is for manual testing only")]
     [SuppressMessage("Usage", "xUnit1004:Test methods should not be skipped")]
     public async Task UploadBundle_Succeeds()
     {
         var client = _container.Resolve<AndroidPublisherClient>();
-        var config = _container.GetConfiguration<CoursePlannerConfiguration>();
-        var path = config.BundlePath;
+
+
+        const string path =
+            "C:\\Users\\PCS\\Documents\\repos\\CoursePlanner\\output\\com.tbui17.courseplanner-Signed.aab";
+
 
         await using var stream = File.Open(path, FileMode.Open);
         var cts = new CancellationTokenSource(TimeSpan.FromMinutes(3));

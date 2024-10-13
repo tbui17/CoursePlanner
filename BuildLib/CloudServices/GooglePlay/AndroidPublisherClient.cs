@@ -1,12 +1,14 @@
 using BuildLib.Secrets;
+using BuildLib.Utils;
 using Google.Apis.AndroidPublisher.v3;
 using Google.Apis.AndroidPublisher.v3.Data;
 using Google.Apis.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace BuildLib.Clients;
+namespace BuildLib.CloudServices.GooglePlay;
 
+[Inject]
 public class AndroidPublisherClient(
     BaseClientService.Initializer initializer,
     IOptions<CoursePlannerConfiguration> secrets,
@@ -104,20 +106,4 @@ public class AndroidPublisherClient(
             };
         }
     }
-}
-
-public class ExpiryTime(int seconds = 3600)
-{
-    public int GetValue()
-    {
-        if (seconds <= 0)
-        {
-            throw new ArgumentException("Expiry time must be greater than 0");
-        }
-
-        return seconds;
-    }
-
-    public static implicit operator string(ExpiryTime expiryTime) => expiryTime.GetValue().ToString();
-    public static implicit operator ExpiryTime(int seconds) => new(seconds);
 }

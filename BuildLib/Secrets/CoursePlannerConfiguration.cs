@@ -4,6 +4,12 @@ using Newtonsoft.Json;
 
 namespace BuildLib.Secrets;
 
+public record NullDiffRecord
+{
+    public required IList<ObjectNode> Nulls { get; init; }
+    public required IList<ObjectNode> NotNulls { get; init; }
+}
+
 public record CoursePlannerConfiguration
 {
     public string AndroidSigningKeyStore { get; set; } = null!;
@@ -18,32 +24,50 @@ public record CoursePlannerConfiguration
     public string GoogleServiceAccountBase64 { get; set; } = null!;
     public string KeyUri { get; set; } = null!;
     public string BundlePath { get; set; } = null!;
+    public string ProjectName { get; set; } = null!;
+    public string SolutionName { get; set; } = null!;
 
-    public void Validate()
+
+    public NullDiffRecord GetNullDiff()
     {
-        var (nulls, notNulls) = this
+        var props = this
             .GetPropertiesRecursive()
             .Partition(x => x.Value is string s
                 ? string.IsNullOrWhiteSpace(s)
                 : x.Value is null
             );
+        return new NullDiffRecord { Nulls = props.True.ToList(), NotNulls = props.False.ToList() };
+    }
 
-        var nullsList = nulls.ToList();
+    public ArgumentException? Validate()
+    {
+        var record = GetNullDiff();
+        var nulls = record.Nulls;
+        var notNulls = record.NotNulls;
 
-        if (nullsList.Count == 0) return;
+
+        if (nulls.Count == 0) return null;
 
         var errorObj = new
         {
-            Nulls = CreatePathList(nullsList),
+            Nulls = CreatePathList(nulls),
             NotNulls = CreatePathList(notNulls),
             Message = "Secrets are missing"
         };
-        throw new ArgumentException(JsonConvert.SerializeObject(errorObj, Formatting.Indented))
+        return new ArgumentException(JsonConvert.SerializeObject(errorObj, Formatting.Indented))
             { Data = { ["Data"] = errorObj } };
 
         IEnumerable<string> CreatePathList(IEnumerable<ObjectNode> nodes) =>
             nodes
                 .Select(x => x.GetPath())
                 .Select(x => string.Join(".", x));
+    }
+
+    public void ValidateOrThrow()
+    {
+        if (Validate() is { } ex)
+        {
+            throw ex;
+        }
     }
 }

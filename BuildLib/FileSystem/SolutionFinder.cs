@@ -1,29 +1,70 @@
-﻿namespace BuildLib.FileSystem;
+﻿using BuildLib.Utils;
+using Microsoft.Extensions.FileSystemGlobbing;
+using Microsoft.Extensions.Logging;
+using Nuke.Common.ProjectModel;
 
-public class SolutionFinder(SolutionFileName solutionFileName)
+namespace BuildLib.FileSystem;
+
+[Inject]
+public class DirectoryService(ILogger<DirectoryService> logger)
 {
-    public DirectoryInfo StartingDirectory { get; set; } = new(".");
-
-    public FileInfo? FindSolutionFile(CancellationToken token = default)
+    public IEnumerable<FileInfo> GetFilesInAncestorDirectories(
+        FindFileArgs args
+    )
     {
-        var fileName = solutionFileName.GetValue();
-
-
-        for (var directory = StartingDirectory; directory is not null; directory = directory.Parent)
+        logger.LogInformation("Searching for solution files in {Directory}", args.StartingDirectory.FullName);
+        for (var current = args.StartingDirectory; current is not null; current = current.Parent)
         {
-            token.ThrowIfCancellationRequested();
-            var children = directory.EnumerateFiles();
-            var solutionFile = children.FirstOrDefault(x =>
-                x.Extension.Equals(".sln", StringComparison.OrdinalIgnoreCase) &&
-                x.Name.Equals(fileName, StringComparison.OrdinalIgnoreCase)
-            );
-
-            if (solutionFile is not null)
+            var solutionFiles = current.EnumerateFiles(args.FileName);
+            foreach (var solutionFile in solutionFiles)
             {
-                return solutionFile;
+                args.Token.ThrowIfCancellationRequested();
+                yield return solutionFile;
             }
         }
+    }
 
-        return null;
+    public Solution GetSolution()
+    {
+        var solutionFile =
+            GetFilesInAncestorDirectories(new FindSolutionArgs() { FileName = "*.sln" }).FirstOrDefault() ??
+            throw new FileNotFoundException("No solution file found");
+
+        var solution = SolutionModelTasks.ParseSolution(solutionFile.FullName);
+
+        return solution;
+    }
+
+    public FileInfo GetOrThrowSolutionFile(FindSolutionArgs args)
+    {
+        logger.LogInformation("Finding solution file {FileName}", args.FileName);
+        return GetFilesInAncestorDirectories(args).FirstOrDefault() ??
+               throw new FileNotFoundException($"No solution file found in {args.StartingDirectory}");
+    }
+
+    public IEnumerable<FileInfo> GetFilesInDescendantDirectories(
+        FindFileArgs args
+    )
+    {
+        logger.LogInformation("Searching for project files in {Directory}", args.StartingDirectory.FullName);
+
+
+        return new Matcher()
+            .AddInclude($"**/{args.FileName}")
+            .AddExclude("**/bin/**/*")
+            .GetResultsInFullPath(args.StartingDirectory.FullName)
+            .Select(x =>
+                {
+                    args.Token.ThrowIfCancellationRequested();
+                    return new FileInfo(x);
+                }
+            );
+    }
+
+    public FileInfo GetOrThrowProjectFile(FindProjectArgs args)
+    {
+        return GetFilesInDescendantDirectories(args)
+                   .FirstOrDefault() ??
+               throw new FileNotFoundException($"No project file found in {args.StartingDirectory}");
     }
 }

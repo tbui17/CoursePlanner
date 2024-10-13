@@ -17,8 +17,10 @@ namespace MauiConfigTests;
 
 public class ConfigTest
 {
-    private MauiTestFixture _fixture;
     private const string Prefix = "7f1aebf1-8e5a-4f3c-bdb1-00d3aee364bc";
+
+    private string _directory;
+    private MauiTestFixture _fixture;
 
     [OneTimeSetUp]
     public void OneTimeSetup()
@@ -26,13 +28,12 @@ public class ConfigTest
         var dir = new DirectoryInfo(Directory.GetCurrentDirectory());
 
 
-        dir.EnumerateDirectories()
+        dir
+            .EnumerateDirectories()
             .AsParallel()
             .Where(x => x.Name.StartsWith(Prefix))
             .ForAll(x => x.Delete(true));
     }
-
-    private string _directory;
 
     [SetUp]
     public void Setup()
@@ -49,7 +50,8 @@ public class ConfigTest
         fixture.Inject(testPage1);
 
         var fakeExceptionContext = fixture.Freeze<ExceptionContextFake>();
-        registration.Setup(x => x(It.IsAny<UnhandledExceptionEventHandler>()))
+        registration
+            .Setup(x => x(It.IsAny<UnhandledExceptionEventHandler>()))
             .Callback<UnhandledExceptionEventHandler>(x => fakeExceptionContext.Delegates.Add(x));
 
         var appDataDirectoryGetter = fixture.FreezeMock<Func<string>>();
@@ -100,14 +102,16 @@ public class ConfigTest
     [Test]
     public void Configuration_ContainsRequiredDependencies()
     {
-        _fixture.Builder.Services
+        _fixture
+            .Builder.Services
             .Select(x => x.ImplementationType)
             .Should()
             .Contain(x => x == typeof(AccountService))
             .And.Contain(x => x == typeof(LoginFieldValidator))
             .And.Contain(x => x == typeof(LoginViewModel));
 
-        _fixture.Builder.Services
+        _fixture
+            .Builder.Services
             .Should()
             .Contain(x => x.ServiceType == typeof(INotificationDataService) && x.ImplementationType != null);
     }
@@ -115,7 +119,8 @@ public class ConfigTest
     private static IFixture CreateFixture()
     {
         var fixture = new Fixture().Customize(new AutoMoqCustomization());
-        fixture.Behaviors.OfType<ThrowingRecursionBehavior>()
+        fixture
+            .Behaviors.OfType<ThrowingRecursionBehavior>()
             .ToList()
             .ForEach(b => fixture.Behaviors.Remove(b));
         fixture.Behaviors.Add(new OmitOnRecursionBehavior());
@@ -150,7 +155,8 @@ public class ConfigTest
             .Should()
             .HaveCount(2);
 
-        services.Should()
+        services
+            .Should()
             .ContainSingle(x => x.ServiceType == typeof(IAccountService));
     }
 }

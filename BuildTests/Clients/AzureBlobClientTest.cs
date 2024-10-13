@@ -1,9 +1,10 @@
-using BuildLib.Clients;
+using BuildLib.CloudServices.AzureBlob;
 using BuildTests.Attributes;
 using BuildTests.Utils;
 using FluentAssertions;
 using JetBrains.Annotations;
 using Xunit.Abstractions;
+using Version = BuildLib.CloudServices.AzureBlob.Version;
 
 namespace BuildTests.Clients;
 
@@ -48,5 +49,30 @@ public class AzureBlobClientTest
         await client.Awaiting(x => x.DownloadBlob(opts)).Should().NotThrowAsync();
         var file = new FileInfo(path);
         file.Exists.Should().Be(true);
+    }
+
+    [Fact]
+    public async Task GetLatestApbFile_ReturnsLatestApbFile()
+    {
+        var client = new ContainerInitializer()
+            .GetContainer()
+            .Resolve<AzureBlobClient>();
+
+        var res = await client.GetLatestAabFileGlob();
+
+        res.Should().NotBeNull();
+
+        res.Version.Should().Be(new Version { Major = 0, Minor = 0, Patch = 2 });
+    }
+
+    [Fact]
+    public async Task DownloadLatestApbFile_CreatesApbFile()
+    {
+        var client = new ContainerInitializer()
+            .GetContainer()
+            .Resolve<AzureBlobClient>();
+
+        var res = await client.DownloadLatestAabFile();
+        res.BlobName.Should().EndWith(".aab");
     }
 }

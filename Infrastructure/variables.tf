@@ -52,6 +52,16 @@ variable "devops_org_url" {
   sensitive   = true
 }
 
+variable solution_name {
+  description = "The name of the solution"
+  type        = string
+}
+
+variable project_name {
+  description = "The name of the project to be built"
+  type        = string
+}
+
 locals {
   variables = {
     repository_owner          = var.repository_owner
@@ -67,5 +77,7 @@ locals {
     user_identifier           = var.user_identifier
     blob_container_name = var.blob_container_name
     devops_org_url      = var.devops_org_url
+    solution_name       = var.solution_name
+    project_name        = var.project_name
   }
 }

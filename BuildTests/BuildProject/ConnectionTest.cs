@@ -1,4 +1,4 @@
-using BuildLib.Clients;
+using BuildLib.CloudServices.GooglePlay;
 using BuildLib.Secrets;
 using BuildLib.Utils;
 using BuildTests.Attributes;
@@ -41,7 +41,7 @@ public class ConnectionTest
     public async Task GetBundles_HasResult()
     {
         var secrets = _container.GetConfiguration<CoursePlannerConfiguration>();
-        secrets.Validate();
+        secrets.ValidateOrThrow();
         var client = _container.Resolve<AndroidPublisherClient>();
 
 

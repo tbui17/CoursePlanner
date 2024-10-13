@@ -118,4 +118,10 @@ public static class UtilExtensions
         items.Select(async x => new KeyValuePair<T, T3>(x.Key, await selector(x)));
 
     public static string WrapIn(this string value, string wrapper) => $"{wrapper}{value}{wrapper}";
+
+    public static bool ContainsIgnoreCase(this string text, string value) =>
+        text.Contains(value, StringComparison.OrdinalIgnoreCase);
+
+    public static bool EqualsIgnoreCase(this string text, string value) =>
+        text.Equals(value, StringComparison.OrdinalIgnoreCase);
 }

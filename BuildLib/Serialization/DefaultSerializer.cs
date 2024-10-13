@@ -1,18 +1,16 @@
 using BuildLib.Utils;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 
 namespace BuildLib.Serialization;
 
 [Inject]
-public class SnakeCaseSerializer : ISerializer
+public class DefaultSerializer : ISerializer
 {
     private readonly JsonSerializerSettings _settings = new()
     {
-        ContractResolver = new DefaultContractResolver
-        {
-            NamingStrategy = new SnakeCaseNamingStrategy(),
-        }
+        MaxDepth = 100,
+        ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+        Formatting = Formatting.Indented,
     };
 
     public string Serialize(object obj)

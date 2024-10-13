@@ -1,16 +1,7 @@
-using Azure.Extensions.AspNetCore.Configuration.Secrets;
-using Azure.Identity;
-using Azure.Security.KeyVault.Secrets;
-using Azure.Storage.Blobs;
-using BuildLib.Clients;
-using BuildLib.Secrets;
-using CaseConverter;
-using Google.Apis.Services;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Scrutor;
 using Serilog;
+using Host = Microsoft.Extensions.Hosting.Host;
 
 namespace BuildLib.Utils;
 
@@ -34,116 +25,15 @@ public class Container(IHost host)
     public static HostApplicationBuilder CreateBuilder<T>() where T : class
     {
         var builder = Host.CreateApplicationBuilder();
-        builder.Services.Scan(scan => scan
-            .FromCallingAssembly()
-            .AddClasses(c => c.NotInNamespaceOf<CoursePlannerConfiguration>().WithoutAttribute<IgnoreAttribute>())
-            .UsingRegistrationStrategy(RegistrationStrategy.Throw)
-            .AsSelf()
-            .WithLifetime(ServiceLifetime.Transient)
-        );
-
-
         builder
-            .Services.AddSingleton<BaseClientService.Initializer>(c =>
-                c.GetRequiredService<InitializerFactory>().Create()
-            )
-            .AddSingleton<BlobServiceClient>(p =>
-                new BlobServiceClient(p.GetAppConfiguration(x => x.BlobConnectionString))
-            )
-            .AddSingleton<BlobContainerClient>(p =>
-                p
-                    .GetRequiredService<BlobServiceClient>()
-                    .GetBlobContainerClient(p.GetAppConfiguration(x => x.BlobContainerName))
-            );
-
-        var uri = builder.Configuration.GetConfiguration<string>(nameof(CoursePlannerConfiguration.KeyUri));
-        var secretClient = new SecretClient(new(new(uri)),
-            new DefaultAzureCredential(new DefaultAzureCredentialOptions()
-                {
-                    ExcludeVisualStudioCredential = true,
-                    ExcludeEnvironmentCredential = true,
-                    ExcludeVisualStudioCodeCredential = true,
-                    ExcludeSharedTokenCacheCredential = true,
-                    ExcludeAzurePowerShellCredential = true,
-                    ExcludeInteractiveBrowserCredential = true,
-                    ExcludeManagedIdentityCredential = true,
-                    ExcludeWorkloadIdentityCredential = true,
-                    ExcludeAzureDeveloperCliCredential = true,
-                }
-            )
-        );
-        var connectionString = secretClient.GetSecret(nameof(CoursePlannerConfiguration.ConnectionString)).Value.Value;
-        var config = builder.Configuration;
-
-        builder.Services.AddSingleton(secretClient);
-        config.AddEnvironmentVariables();
-        AddPascalCaseKeys(config);
-        config.AddAzureKeyVault(secretClient, new KeyVaultSecretManager());
-        config.AddAzureAppConfiguration(options => options.Connect(connectionString));
-        config.AddUserSecrets<T>();
-
-
-        builder
-            .Services
-            .AddOptions<CoursePlannerConfiguration>()
-            .Bind(builder.Configuration)
-            .Validate(conf =>
-                {
-                    conf.Validate();
-                    return true;
-                }
-            )
-            .ValidateOnStart();
-
-        builder
-            .Services
-            .AddOptions<GoogleServiceAccount>()
-            .Bind(builder.Configuration.GetSection(nameof(CoursePlannerConfiguration.GoogleServiceAccount)) ??
-                  throw new NullReferenceException($"{nameof(GoogleServiceAccount)} was null")
-            );
-
+            .AddServices()
+            .AddCloudServices()
+            .AddPascalCaseKeys()
+            .AddConfiguration()
+            .BindConfiguration();
 
         builder.Logging.AddSerilog();
 
         return builder;
     }
-
-    private static void AddPascalCaseKeys(IConfigurationManager config)
-    {
-        var pascalCollection = config
-            .AsEnumerable()
-            .SelectKeys(x => x.Key.ToPascalCase())
-            .ExceptBy(config.AsEnumerable().Select(x => x.Key), x => x.Key);
-
-
-        config.AddInMemoryCollection(pascalCollection);
-    }
-}
-
-public static class ProviderExtensions
-{
-    public static T GetConfiguration<T>(this IServiceProvider provider) =>
-        provider.GetRequiredService<IConfiguration>().Get<T>() ??
-        throw new ArgumentException($"{typeof(T)} was null.");
-
-    public static T GetConfiguration<T>(this IConfiguration config) =>
-        config.Get<T>() ??
-        throw new ArgumentException($"{typeof(T)} was null.");
-
-    public static T GetConfiguration<T>(this IConfiguration config, string name) => config.GetValue<T>(name) ??
-        throw new ArgumentException($"{name} {typeof(T)} was null.");
-
-    public static T GetConfiguration<T>(this IServiceProvider provider, string name) =>
-        provider.GetRequiredService<IConfiguration>().GetConfiguration<T>(name);
-
-    public static T GetAppConfiguration<T>(
-        this IServiceProvider provider,
-        Func<CoursePlannerConfiguration, T> selector
-    ) =>
-        selector(provider.GetAppConfiguration());
-
-    public static CoursePlannerConfiguration GetAppConfiguration(
-        this IServiceProvider provider
-    ) =>
-        provider.GetConfiguration<CoursePlannerConfiguration>();
 }
