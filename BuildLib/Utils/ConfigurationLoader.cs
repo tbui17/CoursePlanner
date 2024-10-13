@@ -1,97 +1,155 @@
+using System.Reflection;
 using System.Runtime.InteropServices;
 using Azure.Data.AppConfiguration;
+using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
-using BuildLib.FileSystem;
 using BuildLib.Secrets;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.UserSecrets;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
-using Nuke.Common;
-using Nuke.Common.ProjectModel;
 using Serilog;
 
 namespace BuildLib.Utils;
 
-public class ConfigurationLoader(HostApplicationBuilder builder)
+public class RemoteConfigurationClient(SecretClient client)
 {
-    public int Tries = 0;
-
-    public async Task LoadAppSecretsJson()
+    public Dictionary<string, string> GetRemoteConfigurations()
     {
-        if (Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") is not "Development")
+        var secrets = client
+            .GetPropertiesOfSecrets()
+            .Select(x => client.GetSecret(x.Name))
+            .ToDictionary(x => x.Value.Name, x => x.Value.Value);
+
+        var configs = new ConfigurationClient(secrets[nameof(CoursePlannerConfiguration.ConnectionString)])
+            .GetConfigurationSettings(new SettingSelector
+                { Fields = SettingFields.Key | SettingFields.Value }
+            );
+
+
+        foreach (var config in configs)
         {
-            Log.Information("Environment is not Development, skipping secrets json load");
-            return;
+            secrets[config.Key] = config.Value;
         }
 
-        await using var provider = builder.Services.BuildServiceProvider();
-        var dirService = provider.GetRequiredService<DirectoryService>();
-        var solution = dirService.GetSolution();
-        var project = solution.GetProject("BuildLib").NotNull();
-        var secretsId = project.GetProperty("UserSecretsId");
-        if (secretsId is null)
+        return secrets.ToDictionary(x => x.Key.Replace("--", ":"), x => x.Value);
+    }
+}
+
+public class ConfigurationLoader(HostApplicationBuilder builder) : IDisposable
+{
+    private ServiceProvider? _serviceProviderInstance;
+    private ServiceProvider Provider => _serviceProviderInstance ??= builder.Services.BuildServiceProvider();
+
+    public void Dispose()
+    {
+        _serviceProviderInstance?.Dispose();
+    }
+
+    public void LoadAppConfigsStandard()
+    {
+        var secretClient = Provider.GetRequiredService<SecretClient>();
+        var connString = secretClient.GetSecret(nameof(CoursePlannerConfiguration.ConnectionString)).Value.Value;
+
+
+        builder
+            .Configuration
+            .AddAzureKeyVault(secretClient, new KeyVaultSecretManager())
+            .AddAzureAppConfiguration(options =>
+                options.Connect(connString).ConfigureKeyVault(s => s.Register(secretClient))
+            );
+    }
+
+    private static string GetUserSecretsId()
+    {
+        var assembly = Assembly.GetAssembly(typeof(Container));
+        if (assembly is null)
         {
-            throw new InvalidOperationException("UserSecretsId was null, cannot load secrets json");
+            throw new InvalidOperationException("Assembly was null");
+        }
+
+        var attribute = assembly.GetCustomAttribute<UserSecretsIdAttribute>() ??
+                        throw new InvalidOperationException("UserSecretsIdAttribute was null");
+        return attribute.UserSecretsId;
+    }
+
+    public void LoadAppConfigs()
+    {
+        var environment = builder.Configuration.GetValue<string>("DOTNET_ENVIRONMENT");
+        if (environment is not "Development")
+        {
+            Log.Information(
+                "Environment is not Development, skipping secrets json load. Loading from azure credentials {Environment}",
+                environment
+            );
+            LoadAppConfigsStandard();
+            return;
         }
 
         builder.Configuration.AddUserSecrets<Container>();
 
-        var courseConfiguration = new CoursePlannerConfiguration();
-        builder.Configuration.Bind(courseConfiguration);
-        if (courseConfiguration.Validate() is { } exc)
+        if (!NeedsRemoteSecrets())
         {
+            return;
+        }
+
+        var remoteClient = Provider.GetRequiredService<RemoteConfigurationClient>();
+        var dict = remoteClient.GetRemoteConfigurations();
+        var jsonFile = GetSecretJsonFile();
+        WriteJsonFile();
+        // add a second time to load new secrets
+        builder.Configuration.AddUserSecrets<Container>();
+        return;
+
+        bool NeedsRemoteSecrets()
+        {
+            var courseConfiguration = new CoursePlannerConfiguration();
+            builder.Configuration.Bind(courseConfiguration);
+            if (courseConfiguration.Validate() is not { } exc)
+            {
+                Log.Information("Secrets are valid, skipping secrets json load");
+                return false;
+            }
+
             Log.Information("Missing secrets, attempting to populate secrets json: {Message}", exc.Message);
+            return true;
         }
 
-        var keyUri = courseConfiguration.KeyUri;
-
-        if (keyUri is null)
+        FileInfo GetSecretJsonFile()
         {
-            throw new InvalidOperationException("KeyUri was null, cannot load secrets json");
+            var jsonPath = GetJsonPath();
+
+
+            var jsonPathResolved = Environment.ExpandEnvironmentVariables(jsonPath);
+            var jsonPathResolvedInfo = new FileInfo(jsonPathResolved);
+            return jsonPathResolvedInfo;
+
+            string GetJsonPath()
+            {
+                var secretsId = GetUserSecretsId();
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    return $"~/.microsoft/usersecrets/{secretsId}/secrets.json";
+                }
+
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    return $@"%APPDATA%\Microsoft\UserSecrets\{secretsId}\secrets.json";
+                }
+
+                throw new PlatformNotSupportedException($"Platform not supported {RuntimeInformation.OSDescription}");
+            }
         }
 
-        var client = GetSecretClient(keyUri);
-
-        var secrets = await client.GetPropertiesOfSecretsAsync().Select(x => client.GetSecret(x.Name)).ToListAsync();
-        var connectionString = secrets.First(x => x.Value.Name == "ConnectionString").Value.Value;
-        var configs = await new ConfigurationClient(connectionString)
-            .GetConfigurationSettingsAsync(new SettingSelector()
-                { Fields = SettingFields.Key | SettingFields.Value }
-            )
-            .ToListAsync();
-
-
-        var json = secrets.ToDictionary(x => x.Value.Name, x => x.Value.Value);
-        foreach (var config in configs)
+        void WriteJsonFile()
         {
-            json[config.Key] = config.Value;
+            File.WriteAllText(jsonFile.FullName,
+                JsonConvert.SerializeObject(dict, Formatting.Indented)
+            );
+            Log.Information("Wrote secrets json to {Path}", jsonFile.FullName);
         }
-
-        json = json.ToDictionary(x => x.Key.Replace("--", ":"), x => x.Value);
-
-
-        string jsonPath;
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-        {
-            jsonPath = $"~/.microsoft/usersecrets/{secretsId}/secrets.json";
-        }
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            jsonPath = $@"%APPDATA%\Microsoft\UserSecrets\{secretsId}\secrets.json";
-        }
-        else
-        {
-            throw new PlatformNotSupportedException($"Platform not supported {RuntimeInformation.OSDescription}");
-        }
-
-        var jsonPathResolved = Environment.ExpandEnvironmentVariables(jsonPath);
-        var jsonPathResolvedInfo = new FileInfo(jsonPathResolved);
-        await File.WriteAllTextAsync(jsonPathResolvedInfo.FullName,
-            JsonConvert.SerializeObject(json, Formatting.Indented)
-        );
-        Log.Information("Wrote secrets json to {Path}", jsonPathResolvedInfo.FullName);
     }
 
     private static SecretClient GetSecretClient(string keyUri)

@@ -6,4 +6,5 @@ public class Aabblob
 {
     public required BlobItem Blob { get; init; }
     public required Version Version { get; init; }
+    public string Name => Blob.Name.Split("/").Last();
 }

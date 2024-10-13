@@ -1,3 +1,5 @@
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
 using Azure.Storage.Blobs;
 using BuildLib.CloudServices;
 using BuildLib.FileSystem;
@@ -16,15 +18,16 @@ public static class HostApplicationBuilderExtensions
 {
     public static HostApplicationBuilder AddServices(this HostApplicationBuilder builder)
     {
-        builder.Services.Scan(scan => scan
-            .FromCallingAssembly()
-            .AddClasses(x => x.WithAttribute<InjectAttribute>())
-            .UsingRegistrationStrategy(RegistrationStrategy.Throw)
-            .AsSelf()
-            .AsMatchingInterface()
-            .WithLifetime(ServiceLifetime.Transient)
-        );
-        builder.Services.AddValidatorsFromAssemblyContaining<FileNameValidator>(ServiceLifetime.Transient);
+        builder
+            .Services.Scan(scan => scan
+                .FromCallingAssembly()
+                .AddClasses(x => x.WithAttribute<InjectAttribute>())
+                .UsingRegistrationStrategy(RegistrationStrategy.Throw)
+                .AsSelf()
+                .AsMatchingInterface()
+                .WithLifetime(ServiceLifetime.Transient)
+            )
+            .AddValidatorsFromAssemblyContaining<FileNameValidator>(ServiceLifetime.Transient);
         return builder;
     }
 
@@ -49,13 +52,25 @@ public static class HostApplicationBuilderExtensions
                 c.GetRequiredService<InitializerFactory>().Create()
             )
             .AddSingleton<BlobServiceClient>(p =>
-                new BlobServiceClient(p.GetAppConfiguration(x => x.BlobConnectionString))
+                new BlobServiceClient(p.GetAppConfigurationOrThrow(x => x.BlobConnectionString))
             )
             .AddSingleton<BlobContainerClient>(p =>
                 p
                     .GetRequiredService<BlobServiceClient>()
-                    .GetBlobContainerClient(p.GetAppConfiguration(x => x.BlobContainerName))
-            );
+                    .GetBlobContainerClient(p.GetAppConfigurationOrThrow(x => x.BlobContainerName))
+            )
+            .AddSingleton<SecretClient>(p =>
+                {
+                    var keyUri = p.GetAppConfigurationOrThrow(x => x.KeyUri);
+                    return new SecretClient(
+                        new(keyUri),
+                        new AzureCliCredential(new AzureCliCredentialOptions
+                            { Diagnostics = { IsLoggingEnabled = true, } }
+                        )
+                    );
+                }
+            )
+            .AddSingleton<RemoteConfigurationClient>();
         return builder;
     }
 
@@ -85,37 +100,8 @@ public static class HostApplicationBuilderExtensions
 
     public static HostApplicationBuilder AddConfiguration(this HostApplicationBuilder builder)
     {
-        new ConfigurationLoader(builder).LoadAppSecretsJson().Wait();
+        using var loader = new ConfigurationLoader(builder);
+        loader.LoadAppConfigs();
         return builder;
-
-        // var uri = builder.Configuration.GetConfiguration<string>(nameof(CoursePlannerConfiguration.KeyUri));
-        // var secretClient = new SecretClient(new(new(uri)),
-        //     new DefaultAzureCredential(new DefaultAzureCredentialOptions()
-        //         {
-        //             ExcludeVisualStudioCredential = true,
-        //             ExcludeEnvironmentCredential = true,
-        //             ExcludeVisualStudioCodeCredential = true,
-        //             ExcludeSharedTokenCacheCredential = true,
-        //             ExcludeAzurePowerShellCredential = true,
-        //             ExcludeInteractiveBrowserCredential = true,
-        //             ExcludeManagedIdentityCredential = true,
-        //             ExcludeWorkloadIdentityCredential = true,
-        //             ExcludeAzureDeveloperCliCredential = true,
-        //         }
-        //     )
-        // );
-        // var connectionString = secretClient.GetSecret(nameof(CoursePlannerConfiguration.ConnectionString)).Value.Value;
-        // var config = builder.Configuration;
-        //
-        // config
-        //     .AddAzureKeyVault(secretClient, new KeyVaultSecretManager())
-        //     .AddAzureAppConfiguration(options =>
-        //         options.Connect(connectionString).ConfigureKeyVault(s => s.Register(secretClient))
-        //     )
-        //     .AddUserSecrets<Container>();
-        //
-        // builder.Services.AddSingleton(secretClient);
-        //
-        // return builder;
     }
 }

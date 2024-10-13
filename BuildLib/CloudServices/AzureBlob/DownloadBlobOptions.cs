@@ -23,7 +23,7 @@ public static class DownloadBlobExtensions
         return new DownloadBlobOptions
         {
             BlobName = fileBlob.Blob.Name,
-            Path = fileBlob.Blob.Name,
+            Path = fileBlob.Name,
         };
     }
 }

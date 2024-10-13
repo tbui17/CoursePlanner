@@ -9,7 +9,7 @@ public class Container(IHost host)
 {
     public T Resolve<T>() where T : notnull => host.Services.GetRequiredService<T>();
 
-    public T GetConfiguration<T>() => host.Services.GetConfiguration<T>();
+    public T GetConfiguration<T>() => host.Services.GetConfigurationOrThrow<T>();
 
     public static Container Init<T>() where T : class
     {

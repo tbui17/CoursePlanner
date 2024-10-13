@@ -97,7 +97,7 @@ public class AzureBlobClient(BlobContainerClient client, ILogger<AzureBlobClient
         try
         {
             await client.GetBlobClient(options.BlobName).DownloadToAsync(options.Path, opts, cts.Token);
-            logger.LogInformation("Download complete");
+            logger.LogInformation("Download complete. Saved to {Path}", options.Path);
         }
         catch (RequestFailedException e) when (e.InnerException is TaskCanceledException)
         {

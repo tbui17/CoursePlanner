@@ -1,8 +1,8 @@
 using BuildLib.CloudServices.AzureBlob;
-using BuildTests.Attributes;
 using BuildTests.Utils;
 using FluentAssertions;
 using JetBrains.Annotations;
+using Serilog;
 using Xunit.Abstractions;
 using Version = BuildLib.CloudServices.AzureBlob.Version;
 
@@ -17,9 +17,12 @@ public class AzureBlobClientTest
     public AzureBlobClientTest(ITestOutputHelper testOutputHelper)
     {
         _testOutputHelper = testOutputHelper;
+        Log.Logger = new LoggerConfiguration()
+            .WriteTo.TestOutput(testOutputHelper)
+            .CreateLogger();
     }
 
-    [SkipIfDev]
+    [Fact]
     public async Task GetBlobNames_HasResults()
     {
         var client = new ContainerInitializer()
