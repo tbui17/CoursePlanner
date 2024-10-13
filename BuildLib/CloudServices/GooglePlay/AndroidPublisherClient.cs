@@ -11,7 +11,7 @@ namespace BuildLib.CloudServices.GooglePlay;
 [Inject]
 public class AndroidPublisherClient(
     BaseClientService.Initializer initializer,
-    IOptions<CoursePlannerConfiguration> secrets,
+    IOptions<AppConfiguration> secrets,
     ILogger<AndroidPublisherClient> logger)
 {
     private readonly AndroidPublisherService _service = new(initializer);

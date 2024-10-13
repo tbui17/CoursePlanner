@@ -78,7 +78,7 @@ public static class HostApplicationBuilderExtensions
     {
         builder
             .Services
-            .AddOptions<CoursePlannerConfiguration>()
+            .AddOptions<AppConfiguration>()
             .Bind(builder.Configuration)
             .Validate(conf =>
                 {
@@ -91,7 +91,7 @@ public static class HostApplicationBuilderExtensions
         builder
             .Services
             .AddOptions<GoogleServiceAccount>()
-            .Bind(builder.Configuration.GetSection(nameof(CoursePlannerConfiguration.GoogleServiceAccount)) ??
+            .Bind(builder.Configuration.GetSection(nameof(AppConfiguration.GoogleServiceAccount)) ??
                   throw new NullReferenceException($"{nameof(GoogleServiceAccount)} was null")
             );
 

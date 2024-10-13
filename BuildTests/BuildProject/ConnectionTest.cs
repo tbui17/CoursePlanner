@@ -15,7 +15,7 @@ public class ConnectionTest
     [SkipIfDev]
     public void SecretClient_CanConnect()
     {
-        var config = _container.GetConfiguration<CoursePlannerConfiguration>();
+        var config = _container.GetConfiguration<AppConfiguration>();
 
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         var keyIsNull = config.Key is null;
@@ -40,7 +40,7 @@ public class ConnectionTest
     [SkipIfDev]
     public async Task GetBundles_HasResult()
     {
-        var secrets = _container.GetConfiguration<CoursePlannerConfiguration>();
+        var secrets = _container.GetConfiguration<AppConfiguration>();
         secrets.ValidateOrThrow();
         var client = _container.Resolve<AndroidPublisherClient>();
 

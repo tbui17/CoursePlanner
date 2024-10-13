@@ -4,13 +4,7 @@ using Newtonsoft.Json;
 
 namespace BuildLib.Secrets;
 
-public record NullDiffRecord
-{
-    public required IList<ObjectNode> Nulls { get; init; }
-    public required IList<ObjectNode> NotNulls { get; init; }
-}
-
-public record CoursePlannerConfiguration
+public record AppConfiguration
 {
     public string AndroidSigningKeyStore { get; set; } = null!;
     public string AndroidSigningKeyAlias { get; set; } = null!;

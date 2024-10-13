@@ -20,16 +20,16 @@ public static class ProviderExtensions
 
     public static T? GetAppConfiguration<T>(
         this IServiceProvider provider,
-        Func<CoursePlannerConfiguration, T> selector
+        Func<AppConfiguration, T> selector
     ) =>
         provider.GetAppConfiguration() is { } config
             ? selector(config)
             : default;
 
-    public static CoursePlannerConfiguration? GetAppConfiguration(
+    public static AppConfiguration? GetAppConfiguration(
         this IServiceProvider provider
     ) =>
-        provider.GetConfiguration<CoursePlannerConfiguration>();
+        provider.GetConfiguration<AppConfiguration>();
 
     public static T GetConfigurationOrThrow<T>(this IServiceProvider provider) =>
         provider.GetConfiguration<T>() ??
@@ -49,12 +49,12 @@ public static class ProviderExtensions
 
     public static T GetAppConfigurationOrThrow<T>(
         this IServiceProvider provider,
-        Func<CoursePlannerConfiguration, T> selector
+        Func<AppConfiguration, T> selector
     ) =>
         selector(provider.GetAppConfigurationOrThrow());
 
-    public static CoursePlannerConfiguration GetAppConfigurationOrThrow(
+    public static AppConfiguration GetAppConfigurationOrThrow(
         this IServiceProvider provider
     ) =>
-        provider.GetConfigurationOrThrow<CoursePlannerConfiguration>();
+        provider.GetConfigurationOrThrow<AppConfiguration>();
 }

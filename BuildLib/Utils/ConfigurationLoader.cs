@@ -23,7 +23,7 @@ public class RemoteConfigurationClient(SecretClient client)
             .Select(x => client.GetSecret(x.Name))
             .ToDictionary(x => x.Value.Name, x => x.Value.Value);
 
-        var configs = new ConfigurationClient(secrets[nameof(CoursePlannerConfiguration.ConnectionString)])
+        var configs = new ConfigurationClient(secrets[nameof(AppConfiguration.ConnectionString)])
             .GetConfigurationSettings(new SettingSelector
                 { Fields = SettingFields.Key | SettingFields.Value }
             );
@@ -51,7 +51,7 @@ public class ConfigurationLoader(HostApplicationBuilder builder) : IDisposable
     public void LoadAppConfigsStandard()
     {
         var secretClient = Provider.GetRequiredService<SecretClient>();
-        var connString = secretClient.GetSecret(nameof(CoursePlannerConfiguration.ConnectionString)).Value.Value;
+        var connString = secretClient.GetSecret(nameof(AppConfiguration.ConnectionString)).Value.Value;
 
 
         builder
@@ -105,7 +105,7 @@ public class ConfigurationLoader(HostApplicationBuilder builder) : IDisposable
 
         bool NeedsRemoteSecrets()
         {
-            var courseConfiguration = new CoursePlannerConfiguration();
+            var courseConfiguration = new AppConfiguration();
             builder.Configuration.Bind(courseConfiguration);
             if (courseConfiguration.Validate() is not { } exc)
             {

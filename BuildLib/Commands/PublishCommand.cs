@@ -1,4 +1,4 @@
-using BuildLib.FileSystem;
+using BuildLib.Secrets;
 using BuildLib.Utils;
 using Microsoft.Extensions.Logging;
 using Nuke.Common.Tools.DotNet;
@@ -9,31 +9,14 @@ namespace BuildLib.Commands;
 public class PublishCommand(
     ILogger<PublishCommand> logger,
     PublishService publishService,
-    DirectoryService directoryService,
-    FileArgFactory fileArgFactory
+    AppConfiguration configs
 )
 {
-    public Task ExecuteAsync(string projectName)
+    public Task ExecuteAsync()
     {
-        logger.LogInformation("Publishing {ProjectName}", projectName);
-
-
-        var arg = fileArgFactory.CreateProject(projectName);
-        var projectPath = directoryService.GetOrThrowProjectFile(arg);
-
-        var settings =
-            publishService.CreateDotNetPublishSettings(projectPath,
-                publishService.CreateAndroidSigningKeyStoreOptions()
-            );
-
+        logger.LogInformation("Publishing {ProjectName}", configs.ProjectName);
+        var settings = publishService.CreateDotNetPublishSettings(configs.SolutionName, configs.ProjectName);
         DotNetTasks.DotNetPublish(settings);
-
         return Task.CompletedTask;
     }
-}
-
-public record PublishCommandArgs
-{
-    public required string ProjectPath { get; init; }
-    public required string Configuration { get; init; }
 }

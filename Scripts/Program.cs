@@ -10,7 +10,7 @@ var host = builder.Build();
 var app = CoconaApp.CreateBuilder().Build();
 
 
-app.AddCommand("run",
+app.AddCommand("example_command",
     () =>
     {
         var logger = ResolveLogger<CoconaApp>();
@@ -20,9 +20,8 @@ app.AddCommand("run",
 app.AddCommand("publish",
     async () =>
     {
-        const string projectPath = "CoursePlanner.csproj";
         var cmd = Resolve<PublishCommand>();
-        await cmd.ExecuteAsync(projectPath);
+        await cmd.ExecuteAsync();
     }
 );
 

@@ -2,15 +2,15 @@ namespace BuildLib.Secrets;
 
 public record GoogleServiceAccount
 {
-    public string Type { get; set; } = "";
-    public string ProjectId { get; set; } = "";
-    public string PrivateKeyId { get; set; } = "";
-    public string PrivateKey { get; set; } = "";
-    public string ClientEmail { get; set; } = "";
-    public string ClientId { get; set; } = "";
-    public string AuthUri { get; set; } = "";
-    public string TokenUri { get; set; } = "";
-    public string AuthProviderX509CertUrl { get; set; } = "";
-    public string ClientX509CertUrl { get; set; } = "";
-    public string UniverseDomain { get; set; } = "";
+    public string Type { get; set; } = null!;
+    public string ProjectId { get; set; } = null!;
+    public string PrivateKeyId { get; set; } = null!;
+    public string PrivateKey { get; set; } = null!;
+    public string ClientEmail { get; set; } = null!;
+    public string ClientId { get; set; } = null!;
+    public string AuthUri { get; set; } = null!;
+    public string TokenUri { get; set; } = null!;
+    public string AuthProviderX509CertUrl { get; set; } = null!;
+    public string ClientX509CertUrl { get; set; } = null!;
+    public string UniverseDomain { get; set; } = null!;
 }
