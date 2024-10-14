@@ -55,7 +55,7 @@ public class BlobClientTest : BaseContainerSetup
 
         res.Should().NotBeNull();
 
-        res.Version.Should().Be(new Version { Major = 0, Minor = 0, Patch = 2 });
+        res.Version.Should().Be(new Version { Major = 0, Minor = 0, Patch = 5 });
     }
 
     [SkipIfDev]

@@ -27,11 +27,11 @@ public class PublishService(
 
         if (projectName.EndsWith(".csproj"))
         {
-            logger.LogInformation("Removing .csproj to project name");
+            logger.LogDebug("Removing .csproj to project name");
             projectName = projectName.Replace(".csproj", "");
         }
 
-        logger.LogInformation("Parsed solution: {Solution}", solution);
+        logger.LogDebug("Parsed solution: {Solution}", solution);
         var project = solution.GetProject(projectName).NotNull();
         var projectFile = new FileInfo(project.Path);
         if (!projectFile.Exists)
@@ -67,9 +67,9 @@ public class PublishService(
             .SetProcessLogger(processLogger.Log)
             .SetFramework("net8.0-android");
 
-        logger.LogInformation("Created publish settings: {@Data}", settings.ClearProcessEnvironmentVariables());
+        logger.LogDebug("Created publish settings: {@Data}", settings.ClearProcessEnvironmentVariables());
         settings = settings.SetProperties(properties.ToPropertyDictionary());
-        logger.LogInformation("Set {Count} Android properties: {PropertyKeys}",
+        logger.LogDebug("Set {Count} Android properties: {PropertyKeys}",
             settings.Properties.Count,
             settings.Properties.Keys
         );
@@ -80,13 +80,13 @@ public class PublishService(
             throw new UnreachableException($"Unexpected value type for AndroidKeyStore: ${value.GetType()}");
         }
 
-        logger.LogInformation("AndroidKeyStore value: {AndroidKeyStore}", v);
+        logger.LogDebug("AndroidKeyStore value: {AndroidKeyStore}", v);
         return settings;
     }
 
     private AndroidSigningKeyStoreOptions CreateAndroidSigningKeyStoreOptions()
     {
-        logger.LogInformation("Retrieving Android properties from environment variables");
+        logger.LogDebug("Retrieving Android properties from environment variables");
         var opts = new AppBuildOptions
         {
             AndroidSigningKeyAlias = Environment.GetEnvironmentVariable("COURSEPLANNER_ANDROID_SIGNING_KEY_ALIAS"),
@@ -94,7 +94,7 @@ public class PublishService(
             AndroidSigningKeyStore = Environment.GetEnvironmentVariable("COURSEPLANNER_ANDROID_SIGNING_KEY_STORE"),
             AndroidSigningStorePass = Environment.GetEnvironmentVariable("COURSEPLANNER_KEY"),
         }.ToValidatedAndroidSigningKeyStoreOptions();
-        logger.LogInformation("Validated Android properties");
+        logger.LogDebug("Validated Android properties");
         return opts;
     }
 }

@@ -39,7 +39,7 @@ public class AndroidPublisherClient(
             .Edits
             .Insert(appEdit, secrets.Value.ApplicationId)
             .ExecuteAsync();
-        logger.LogInformation("Created edit {Id} {ETag} {ExpiryTimeSeconds}", res.Id, res.ETag, res.ExpiryTimeSeconds);
+        logger.LogDebug("Created edit {Id} {ETag} {ExpiryTimeSeconds}", res.Id, res.ETag, res.ExpiryTimeSeconds);
         return res;
     }
 
@@ -61,23 +61,23 @@ public class AndroidPublisherClient(
 
         AddProgressLogger();
 
-        logger.LogInformation("Starting upload for {Id}", resp.Id);
+        logger.LogDebug("Starting upload for {Id}", resp.Id);
         var res = await req.UploadAsync(token);
         if (res.Exception is { } e)
         {
             throw e;
         }
 
-        logger.LogInformation("Upload completed for {Id} {Exception} {BytesSent} {Status}",
+        logger.LogDebug("Upload completed for {Id} {Exception} {BytesSent} {Status}",
             resp.Id,
             res.Exception,
             res.BytesSent,
             res.Status
         );
 
-        logger.LogInformation("Committing edit for {Id}", resp.Id);
+        logger.LogDebug("Committing edit for {Id}", resp.Id);
         var res2 = await _service.Edits.Commit(secrets.Value.ApplicationId, resp.Id).ExecuteAsync(token);
-        logger.LogInformation("Edit committed for {Id} {@Response}", resp.Id, res2);
+        logger.LogDebug("Edit committed for {Id} {@Response}", resp.Id, res2);
 
         return;
 
@@ -85,7 +85,7 @@ public class AndroidPublisherClient(
         {
             req.ProgressChanged += progress =>
             {
-                logger.LogInformation("Progress details: {Status} {BytesSent} {@Exception}",
+                logger.LogDebug("Progress details: {Status} {BytesSent} {@Exception}",
                     progress.Status,
                     progress.BytesSent,
                     progress.Exception
@@ -93,17 +93,14 @@ public class AndroidPublisherClient(
             };
             req.ResponseReceived += bundle =>
             {
-                logger.LogInformation("Bundle details: {VersionCode} {Etag} {Sha256} {Sha1}",
+                logger.LogDebug("Bundle details: {VersionCode} {Etag} {Sha256} {Sha1}",
                     bundle.VersionCode,
                     bundle.ETag,
                     bundle.Sha256,
                     bundle.Sha1
                 );
             };
-            req.UploadSessionData += session =>
-            {
-                logger.LogInformation("Session details: {UploadUri}", session.UploadUri);
-            };
+            req.UploadSessionData += session => { logger.LogDebug("Session details: {UploadUri}", session.UploadUri); };
         }
     }
 }

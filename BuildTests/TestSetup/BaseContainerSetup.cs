@@ -13,6 +13,7 @@ public class BaseContainerSetup
     {
         Container = new ContainerInitializer().GetContainer();
         Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Debug()
             .WriteTo
             .TestOutput(testOutputHelper)
             .CreateLogger();

@@ -28,27 +28,27 @@ public class AzureBlobClient : IBlobClient
     {
         _client = client;
         _logger = logger;
-        _progressHandlerImpl = x => logger.LogInformation("Downloaded {Bytes} bytes", x);
+        _progressHandlerImpl = x => logger.LogDebug("Downloaded {Bytes} bytes", x);
         _progressHandler = new Progress<long>(_progressHandlerImpl);
     }
 
     public async Task<List<string>> GetBlobNames()
     {
-        _logger.LogInformation("Fetching blob names");
+        _logger.LogDebug("Fetching blob names");
         var res = await _client
             .GetBlobsAsync()
             .Select(x => x.Name)
             .Take(10)
             .ToListAsync();
 
-        _logger.LogInformation("Fetched blob names: {@BlobNames}", res);
+        _logger.LogDebug("Fetched blob names: {@BlobNames}", res);
 
         return res;
     }
 
     public IAsyncEnumerable<BlobItem> GetBlobs(CancellationToken token = default)
     {
-        _logger.LogInformation("Fetching blobs");
+        _logger.LogDebug("Fetching blobs");
         return _client.GetBlobsAsync(BlobTraits.Tags | BlobTraits.Metadata, cancellationToken: token);
     }
 
@@ -61,11 +61,11 @@ public class AzureBlobClient : IBlobClient
         };
 
         var cts = new CancellationTokenSource(options.Timeout);
-        _logger.LogInformation("Beginning download with arguments: {@Options}", options);
+        _logger.LogDebug("Beginning download with arguments: {@Options}", options);
         try
         {
             await _client.GetBlobClient(options.BlobName).DownloadToAsync(options.Path, opts, cts.Token);
-            _logger.LogInformation("Download complete. Saved to {Path}", options.Path);
+            _logger.LogDebug("Download complete. Saved to {Path}", options.Path);
         }
         catch (RequestFailedException e) when (e.InnerException is TaskCanceledException)
         {
@@ -76,7 +76,7 @@ public class AzureBlobClient : IBlobClient
     public async Task UploadBlob(IUploadBlobOptions options)
     {
         using var _ = _logger.MethodScope();
-        _logger.LogInformation("Uploading blob with arguments: {@Options}", options);
+        _logger.LogDebug("Uploading blob with arguments: {@Options}", options);
         var opts = new BlobUploadOptions // do not set tags on opts directly, NRE
         {
             ProgressHandler = _progressHandler,
@@ -89,8 +89,8 @@ public class AzureBlobClient : IBlobClient
 
         var res = await client.UploadAsync(options.Stream, opts, cancellationToken: options.Token);
 
-        _logger.LogInformation("Upload complete for {BlobPath} {@Data}", client.Name, res.Value);
+        _logger.LogDebug("Upload complete for {BlobPath} {@Data}", client.Name, res.Value);
         var res2 = await client.SetTagsAsync(tags);
-        _logger.LogInformation("Tags set for {BlobPath} {@Tags} {Response}", client.Name, tags, res2);
+        _logger.LogDebug("Tags set for {BlobPath} {@Tags} {Response}", client.Name, tags, res2);
     }
 }

@@ -13,7 +13,7 @@ public class DirectoryService(ILogger<DirectoryService> logger)
         FindFileArgs args
     )
     {
-        logger.LogInformation("Searching for solution files in {Directory}", args.StartingDirectory.FullName);
+        logger.LogDebug("Searching for solution files in {Directory}", args.StartingDirectory.FullName);
         for (var current = args.StartingDirectory; current is not null; current = current.Parent)
         {
             var solutionFiles = current.EnumerateFiles(args.FileName);
@@ -32,14 +32,14 @@ public class DirectoryService(ILogger<DirectoryService> logger)
             throw new FileNotFoundException("No solution file found");
 
         var solution = SolutionModelTasks.ParseSolution(solutionFile.FullName);
-        logger.LogInformation("Found solution {Solution}", solution);
+        logger.LogDebug("Found solution {Solution}", solution);
 
         return solution;
     }
 
     public FileInfo GetOrThrowSolutionFile(FindSolutionArgs args)
     {
-        logger.LogInformation("Finding solution file {FileName}", args.FileName);
+        logger.LogDebug("Finding solution file {FileName}", args.FileName);
         return GetFilesInAncestorDirectories(args).FirstOrDefault() ??
                throw new FileNotFoundException($"No solution file found in {args.StartingDirectory}");
     }
@@ -48,7 +48,7 @@ public class DirectoryService(ILogger<DirectoryService> logger)
         FindFileArgs args
     )
     {
-        logger.LogInformation("Searching for project files in {Directory}", args.StartingDirectory.FullName);
+        logger.LogDebug("Searching for project files in {Directory}", args.StartingDirectory.FullName);
 
 
         return new Matcher()

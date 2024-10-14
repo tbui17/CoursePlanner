@@ -19,7 +19,7 @@ public class AabCacheClient(IBlobClient blobClient, ILogger<AabCacheClient> logg
         var res = await GetAabFiles()
             .MaxByAsync(x => x.Version);
 
-        logger.LogInformation("Found latest AAB file: {@Blob}", res);
+        logger.LogDebug("Found latest AAB file: {@Blob}", res);
 
 
         if (res.Count <= 1) return res.SingleOrDefault();

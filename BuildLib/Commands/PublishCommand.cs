@@ -19,7 +19,7 @@ public class PublishCommand(
 {
     public Task ExecuteAsync()
     {
-        logger.LogInformation("Publishing {ProjectName}", options.Value.ProjectName);
+        logger.LogDebug("Publishing {ProjectName}", options.Value.ProjectName);
 
 
         var settings = publishService.CreateDotNetPublishSettings();
@@ -39,7 +39,7 @@ public class PublishCommand(
         var outputFolder = solution.Directory / "output";
         if (outputFolder.Exists())
         {
-            logger.LogInformation("Deleting output folder");
+            logger.LogDebug("Deleting output folder");
         }
 
         outputFolder.CreateOrCleanDirectory();
@@ -48,13 +48,13 @@ public class PublishCommand(
             throw new Exception("Unexpected error");
         }
 
-        logger.LogInformation("Copying {File} to {OutputFolder}", file, outputFolder);
+        logger.LogDebug("Copying {File} to {OutputFolder}", file, outputFolder);
         file.CopyToDirectory(outputFolder, ExistsPolicy.FileOverwriteIfNewer);
 
         var byteSize = ByteSize
             .FromBytes(new FileInfo(file).Length)
             .ToString(ByteSize.MegaByteSymbol);
 
-        logger.LogInformation("Created {File} with size {Mb}", file, byteSize);
+        logger.LogDebug("Created {File} with size {Mb}", file, byteSize);
     }
 }

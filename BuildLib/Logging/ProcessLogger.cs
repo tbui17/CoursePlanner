@@ -15,7 +15,7 @@ public class ProcessLogger<T>(ILogger<T> logger)
             return;
         }
 
-        logger.LogInformation("{Text}", output.Text);
+        logger.LogDebug("{Text}", output.Text);
     }
 
     public void Log(OutputType type, string text)
