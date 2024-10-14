@@ -1,4 +1,5 @@
 using BuildLib.FileSystem;
+using BuildTests.Attributes;
 using BuildTests.Utils;
 using FluentAssertions;
 
@@ -6,7 +7,7 @@ namespace BuildTests.Utilities;
 
 public class SolutionFinderTest
 {
-    [Fact]
+    [SkipIfDev]
     public void FindSolutionFile_GetsSolution()
     {
         var container = new ContainerInitializer().GetContainer();

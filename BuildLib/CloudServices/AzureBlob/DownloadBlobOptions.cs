@@ -15,15 +15,3 @@ public record DownloadBlobOptions : IDownloadBlobOptions
     public Action<long>? ProgressHandler { get; init; }
     public int Timeout { get; init; } = 60000;
 }
-
-public static class DownloadBlobExtensions
-{
-    public static IDownloadBlobOptions ToDownloadBlobOptions(this Aabblob fileBlob)
-    {
-        return new DownloadBlobOptions
-        {
-            BlobName = fileBlob.Blob.Name,
-            Path = fileBlob.Name,
-        };
-    }
-}

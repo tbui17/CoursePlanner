@@ -6,6 +6,7 @@ public record Version : IComparable<Version>
     public int Minor { get; init; }
     public int Patch { get; init; }
 
+
     public int CompareTo(Version? other)
     {
         if (other is null) return 1;
@@ -17,6 +18,34 @@ public record Version : IComparable<Version>
             .ThenBy(x => x.Patch);
 
         return items.First() == this ? -1 : 1;
+    }
+
+
+    public Version UpdatePatch() => this with
+    {
+        Patch = Patch + 1
+    };
+
+    public Version UpdateMinor() => this with
+    {
+        Minor = Minor + 1,
+        Patch = 0
+    };
+
+    public Version UpdateMajor() => new() { Major = Major + 1, Minor = 0, Patch = 0 };
+
+    public static bool TryParse(string versionStr, out Version version)
+    {
+        try
+        {
+            version = Parse(versionStr);
+            return true;
+        }
+        catch (FormatException)
+        {
+            version = null!;
+            return false;
+        }
     }
 
     public static Version Parse(string versionStr)
@@ -42,4 +71,8 @@ public record Version : IComparable<Version>
             throw new FormatException($"Failed to parse integers from parts in ${versionStr}", e);
         }
     }
+
+    public static implicit operator string(Version version) => version.ToString();
+
+    public override string ToString() => $"{Major}.{Minor}.{Patch}";
 }

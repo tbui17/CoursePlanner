@@ -10,24 +10,32 @@ using Google.Apis.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Scrutor;
+using Nuke.Common.ProjectModel;
 
 namespace BuildLib.Utils;
+
+public class ReleaseProject
+{
+    public required Project Project { get; init; }
+}
 
 public static class HostApplicationBuilderExtensions
 {
     public static HostApplicationBuilder AddServices(this HostApplicationBuilder builder)
     {
         builder
-            .Services.Scan(scan => scan
-                .FromCallingAssembly()
-                .AddClasses(x => x.WithAttribute<InjectAttribute>())
-                .UsingRegistrationStrategy(RegistrationStrategy.Throw)
-                .AsSelf()
-                .AsMatchingInterface()
-                .WithLifetime(ServiceLifetime.Transient)
-            )
-            .AddValidatorsFromAssemblyContaining<FileNameValidator>(ServiceLifetime.Transient);
+            .Services
+            .AddInjectables()
+            .AddValidatorsFromAssemblyContaining<FileNameValidator>(ServiceLifetime.Transient)
+            .AddSingleton<Solution>(x => x.GetRequiredService<DirectoryService>().GetSolution())
+            .AddSingleton<ReleaseProject>(p =>
+                {
+                    var solution = p.GetRequiredService<Solution>();
+                    var projectName = p.GetAppConfigurationOrThrow(x => x.ProjectName);
+                    var project = solution.GetProjectWithValidation(projectName);
+                    return new ReleaseProject { Project = project };
+                }
+            );
         return builder;
     }
 

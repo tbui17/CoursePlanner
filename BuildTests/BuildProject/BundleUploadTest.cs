@@ -1,6 +1,9 @@
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using BuildLib.CloudServices.GooglePlay;
+using BuildLib.Utils;
 using BuildTests.Utils;
+using Nuke.Common.ProjectModel;
 using Serilog;
 using Xunit.Abstractions;
 using Container = BuildLib.Utils.Container;
@@ -25,15 +28,13 @@ public sealed class BundleUploadTest : IAsyncDisposable
     }
 
     [Fact(Skip = "This test is for manual testing only")]
+    [Category("Manual")]
     [SuppressMessage("Usage", "xUnit1004:Test methods should not be skipped")]
     public async Task UploadBundle_Succeeds()
     {
         var client = _container.Resolve<AndroidPublisherClient>();
-
-
-        const string path =
-            "C:\\Users\\PCS\\Documents\\repos\\CoursePlanner\\output\\com.tbui17.courseplanner-Signed.aab";
-
+        var solution = _container.Resolve<Solution>();
+        var path = solution.GetSignedAabFile();
 
         await using var stream = File.Open(path, FileMode.Open);
         var cts = new CancellationTokenSource(TimeSpan.FromMinutes(3));

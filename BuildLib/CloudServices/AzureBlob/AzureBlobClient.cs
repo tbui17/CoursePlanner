@@ -1,107 +1,96 @@
 using Azure;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
-using BuildLib.Exceptions;
+using Azure.Storage.Blobs.Specialized;
+using BuildLib.Globals;
 using BuildLib.Utils;
 using Microsoft.Extensions.Logging;
 
 namespace BuildLib.CloudServices.AzureBlob;
 
-[Inject]
-public class AzureBlobClient(BlobContainerClient client, ILogger<AzureBlobClient> logger)
+public interface IBlobClient
 {
-    private const string AabExtension = ".aab";
-    private const string VersionTag = "version";
+    Task<List<string>> GetBlobNames();
+    Task DownloadBlob(IDownloadBlobOptions options);
+    public IAsyncEnumerable<BlobItem> GetBlobs(CancellationToken token = default);
+    Task UploadBlob(IUploadBlobOptions options);
+}
+
+[Inject(typeof(IBlobClient))]
+public class AzureBlobClient : IBlobClient
+{
+    private readonly BlobContainerClient _client;
+    private readonly ILogger<AzureBlobClient> _logger;
+    private readonly Progress<long> _progressHandler;
+    private readonly Action<long> _progressHandlerImpl;
+
+    public AzureBlobClient(BlobContainerClient client, ILogger<AzureBlobClient> logger)
+    {
+        _client = client;
+        _logger = logger;
+        _progressHandlerImpl = x => logger.LogInformation("Downloaded {Bytes} bytes", x);
+        _progressHandler = new Progress<long>(_progressHandlerImpl);
+    }
 
     public async Task<List<string>> GetBlobNames()
     {
-        logger.LogInformation("Fetching blob names");
-        var res = await client
+        _logger.LogInformation("Fetching blob names");
+        var res = await _client
             .GetBlobsAsync()
             .Select(x => x.Name)
             .Take(10)
             .ToListAsync();
 
-        logger.LogInformation("Fetched blob names: {@BlobNames}", res);
+        _logger.LogInformation("Fetched blob names: {@BlobNames}", res);
 
         return res;
     }
 
-    private AsyncPageable<BlobItem> GetBlobs()
+    public IAsyncEnumerable<BlobItem> GetBlobs(CancellationToken token = default)
     {
-        logger.LogInformation("Fetching blob names");
-        var res = client
-            .GetBlobsAsync(BlobTraits.Tags);
-
-        return res;
+        _logger.LogInformation("Fetching blobs");
+        return _client.GetBlobsAsync(BlobTraits.Tags | BlobTraits.Metadata, cancellationToken: token);
     }
-
-    public IAsyncEnumerable<Aabblob> GetAabFiles()
-    {
-        return GetBlobs()
-            .Where(x => x.Name.EndsWith(AabExtension))
-            .Select(x =>
-                {
-                    if (!x.Tags.TryGetValue(VersionTag, out var str))
-                    {
-                        return null;
-                    }
-
-                    var version = Version.Parse(str);
-
-                    return new Aabblob
-                    {
-                        Blob = x,
-                        Version = version
-                    };
-                }
-            )
-            .OfType<Aabblob>()
-            .Take(10000);
-    }
-
-    public async Task<Aabblob?> GetLatestAabFileGlob()
-    {
-        var res = await GetAabFiles()
-            .MaxByAsync(x => x.Version);
-
-        if (res.Count <= 1) return res.SingleOrDefault();
-        throw DuplicateVersionException.Create(res);
-    }
-
-    public async Task<IDownloadBlobOptions> DownloadLatestAabFile()
-    {
-        var res = await GetLatestAabFileGlob();
-        if (res is null)
-        {
-            throw new InvalidOperationException("No files found");
-        }
-
-        var opts = res.ToDownloadBlobOptions();
-
-        await DownloadBlob(opts);
-        return opts;
-    }
-
 
     public async Task DownloadBlob(IDownloadBlobOptions options)
     {
-        var handler = options.ProgressHandler + (x => logger.LogInformation("Downloaded {Bytes} bytes", x));
+        var handler = options.ProgressHandler + _progressHandlerImpl;
         var opts = new BlobDownloadToOptions
         {
             ProgressHandler = new Progress<long>(handler)
         };
 
         var cts = new CancellationTokenSource(options.Timeout);
-        logger.LogInformation("Beginning download with arguments: {@Options}", options);
+        _logger.LogInformation("Beginning download with arguments: {@Options}", options);
         try
         {
-            await client.GetBlobClient(options.BlobName).DownloadToAsync(options.Path, opts, cts.Token);
-            logger.LogInformation("Download complete. Saved to {Path}", options.Path);
+            await _client.GetBlobClient(options.BlobName).DownloadToAsync(options.Path, opts, cts.Token);
+            _logger.LogInformation("Download complete. Saved to {Path}", options.Path);
         }
         catch (RequestFailedException e) when (e.InnerException is TaskCanceledException)
         {
             throw new TimeoutException($"Download timed out after {options.Timeout} milliseconds", e);
         }
+    }
+
+    public async Task UploadBlob(IUploadBlobOptions options)
+    {
+        using var _ = _logger.MethodScope();
+        _logger.LogInformation("Uploading blob with arguments: {@Options}", options);
+        var opts = new BlobUploadOptions // do not set tags on opts directly, NRE
+        {
+            ProgressHandler = _progressHandler,
+        };
+        var tags = new Dictionary<string, string>
+        {
+            { Constants.VersionTag, options.Blob.Version }
+        };
+        var client = _client.GetBlockBlobClient(options.Blob.Path);
+
+        var res = await client.UploadAsync(options.Stream, opts, cancellationToken: options.Token);
+
+        _logger.LogInformation("Upload complete for {BlobPath} {@Data}", client.Name, res.Value);
+        var res2 = await client.SetTagsAsync(tags);
+        _logger.LogInformation("Tags set for {BlobPath} {@Tags} {Response}", client.Name, tags, res2);
     }
 }

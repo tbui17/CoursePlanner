@@ -1,7 +1,9 @@
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace BuildLib.Utils;
 
@@ -124,4 +126,21 @@ public static class UtilExtensions
 
     public static bool EqualsIgnoreCase(this string text, string value) =>
         text.Equals(value, StringComparison.OrdinalIgnoreCase);
+
+    public static IEnumerable<T> WhereNotNull<T>(this IEnumerable<T?> collection) where T : class =>
+        collection.OfType<T>();
+
+    public static IAsyncEnumerable<T> WhereNotNull<T>(this IAsyncEnumerable<T?> collection) where T : class =>
+        collection.OfType<T>();
+
+    public static T[] InArray<T>(this T item) => new[] { item };
+
+    public static IDisposable? MethodScope<T>(this ILogger<T> logger, [CallerMemberName] string? methodName = null)
+    {
+        return logger.BeginScope(new Dictionary<string, object>
+            {
+                ["Method"] = methodName ?? ""
+            }
+        );
+    }
 }

@@ -5,10 +5,10 @@ namespace BuildLib.Exceptions;
 
 public class DuplicateVersionException(string message) : DataException(message)
 {
-    public static DuplicateVersionException Create(IList<Aabblob> data)
+    public static DuplicateVersionException Create(IEnumerable<IBlob> data)
     {
         return new DuplicateVersionException(
-            $"Found multiple files with the same version: {data.Select(x => new { x.Blob.Name, x.Version }).ToArray()}"
+            $"Found multiple files with the same version: {data.Select(x => new { x.Name, x.Version }).ToArray()}"
         )
         {
             Data = { ["Data"] = data }

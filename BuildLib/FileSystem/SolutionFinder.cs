@@ -1,11 +1,12 @@
 ﻿using BuildLib.Utils;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileSystemGlobbing;
 using Microsoft.Extensions.Logging;
 using Nuke.Common.ProjectModel;
 
 namespace BuildLib.FileSystem;
 
-[Inject]
+[Inject(Lifetime = ServiceLifetime.Singleton)]
 public class DirectoryService(ILogger<DirectoryService> logger)
 {
     public IEnumerable<FileInfo> GetFilesInAncestorDirectories(
@@ -31,6 +32,7 @@ public class DirectoryService(ILogger<DirectoryService> logger)
             throw new FileNotFoundException("No solution file found");
 
         var solution = SolutionModelTasks.ParseSolution(solutionFile.FullName);
+        logger.LogInformation("Found solution {Solution}", solution);
 
         return solution;
     }

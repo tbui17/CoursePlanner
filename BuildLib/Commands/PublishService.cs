@@ -1,9 +1,10 @@
 using System.Diagnostics;
 using BuildLib.AndroidPublish;
-using BuildLib.FileSystem;
 using BuildLib.Logging;
+using BuildLib.Secrets;
 using BuildLib.Utils;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Nuke.Common;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
@@ -15,17 +16,14 @@ namespace BuildLib.Commands;
 public class PublishService(
     ILogger<PublishService> logger,
     ProcessLogger<PublishService> processLogger,
-    FileArgFactory fileArgFactory,
-    DirectoryService directoryService
+    Solution solution,
+    IOptions<AppConfiguration> configs
 )
 {
-    public DotNetPublishSettings CreateDotNetPublishSettings(string solutionName, string projectName)
+    public DotNetPublishSettings CreateDotNetPublishSettings()
     {
-        if (!solutionName.EndsWith(".sln"))
-        {
-            logger.LogInformation("Appending .sln to solution name");
-            solutionName += ".sln";
-        }
+        var projectName = configs.Value.ProjectName;
+
 
         if (projectName.EndsWith(".csproj"))
         {
@@ -33,10 +31,6 @@ public class PublishService(
             projectName = projectName.Replace(".csproj", "");
         }
 
-
-        var solutionArgs = fileArgFactory.CreateSolution(solutionName);
-        var solutionFile = directoryService.GetOrThrowSolutionFile(solutionArgs);
-        var solution = SolutionModelTasks.ParseSolution(solutionFile.FullName);
         logger.LogInformation("Parsed solution: {Solution}", solution);
         var project = solution.GetProject(projectName).NotNull();
         var projectFile = new FileInfo(project.Path);
@@ -51,7 +45,7 @@ public class PublishService(
     }
 
 
-    public DotNetPublishSettings CreateDotNetPublishSettings(
+    private DotNetPublishSettings CreateDotNetPublishSettings(
         FileInfo projectFile,
         AndroidSigningKeyStoreOptions properties
     )
@@ -90,7 +84,7 @@ public class PublishService(
         return settings;
     }
 
-    public AndroidSigningKeyStoreOptions CreateAndroidSigningKeyStoreOptions()
+    private AndroidSigningKeyStoreOptions CreateAndroidSigningKeyStoreOptions()
     {
         logger.LogInformation("Retrieving Android properties from environment variables");
         var opts = new AppBuildOptions
