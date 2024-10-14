@@ -1,3 +1,4 @@
+using BuildLib.SolutionBuild;
 using BuildLib.Utils;
 using BuildTests.TestSetup;
 using FluentAssertions;
@@ -12,5 +13,19 @@ public class SolutionTest(ITestOutputHelper helper) : BaseContainerSetup(helper)
     {
         var act = Resolve<ReleaseProject>;
         act.Should().NotThrow();
+    }
+
+
+    [Fact]
+    public void Build()
+    {
+        var act = Resolve<MsBuildProject>;
+        var msProj = act.Should().NotThrow().Subject;
+        var act2 = msProj.GetAppVersion;
+        var version = act2.Should().NotThrow().Subject;
+        new[] { version.Major, version.Minor, version.Patch }
+            .Should()
+            .AllSatisfy(x => x.Should().BeGreaterThanOrEqualTo(0))
+            .And.Contain(x => x > 0);
     }
 }

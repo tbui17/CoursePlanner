@@ -5,35 +5,27 @@ using BuildLib.Secrets;
 using BuildLib.Utils;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Nuke.Common;
-using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
 
-namespace BuildLib.Commands;
+namespace BuildLib.SolutionBuild;
 
 [Inject]
 public class PublishService(
     ILogger<PublishService> logger,
     ProcessLogger<PublishService> processLogger,
-    Solution solution,
-    IOptions<AppConfiguration> configs
+    ReleaseProject project,
+    IOptions<AppConfiguration> configs,
+    MsBuildProject msBuildProject
 )
 {
+    public void UpdateAppVersion()
+    {
+    }
+
     public DotNetPublishSettings CreateDotNetPublishSettings()
     {
-        var projectName = configs.Value.ProjectName;
-
-
-        if (projectName.EndsWith(".csproj"))
-        {
-            logger.LogDebug("Removing .csproj to project name");
-            projectName = projectName.Replace(".csproj", "");
-        }
-
-        logger.LogDebug("Parsed solution: {Solution}", solution);
-        var project = solution.GetProject(projectName).NotNull();
-        var projectFile = new FileInfo(project.Path);
+        var projectFile = new FileInfo(project.Value.Path);
         if (!projectFile.Exists)
         {
             throw new InvalidDataException($"Unexpected missing file {projectFile.FullName}");
@@ -63,9 +55,9 @@ public class PublishService(
         var settings = new DotNetPublishSettings()
             .EnableNoLogo()
             .SetProject(projectFile.FullName)
-            .SetConfiguration("Release")
+            .SetConfiguration(configs.Value.PublishConfiguration)
             .SetProcessLogger(processLogger.Log)
-            .SetFramework("net8.0-android");
+            .SetFramework(configs.Value.AndroidFramework);
 
         logger.LogDebug("Created publish settings: {@Data}", settings.ClearProcessEnvironmentVariables());
         settings = settings.SetProperties(properties.ToPropertyDictionary());

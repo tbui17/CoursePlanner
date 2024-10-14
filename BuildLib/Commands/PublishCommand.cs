@@ -1,4 +1,5 @@
 using BuildLib.Secrets;
+using BuildLib.SolutionBuild;
 using BuildLib.Utils;
 using ByteSizeLib;
 using Microsoft.Extensions.Logging;

@@ -20,6 +20,10 @@ public record AppConfiguration
     public string BundlePath { get; set; } = null!;
     public string ProjectName { get; set; } = null!;
     public string SolutionName { get; set; } = null!;
+    public string AppVersion { get; set; } = null!;
+    public string PublishConfiguration { get; set; } = null!;
+    public string AndroidFramework { get; set; } = null!;
+    public string AndroidSigningKeyPass { get; set; } = null!;
 
 
     public NullDiffRecord GetNullDiff()

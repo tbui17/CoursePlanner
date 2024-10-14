@@ -4,6 +4,7 @@ using Azure.Storage.Blobs;
 using BuildLib.CloudServices;
 using BuildLib.FileSystem;
 using BuildLib.Secrets;
+using BuildLib.SolutionBuild;
 using CaseConverter;
 using FluentValidation;
 using Google.Apis.Services;
@@ -11,12 +12,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Nuke.Common.ProjectModel;
+using Version = BuildLib.CloudServices.AzureBlob.Version;
 
 namespace BuildLib.Utils;
 
 public class ReleaseProject
 {
-    public required Project Project { get; init; }
+    public required Project Value { get; init; }
 }
 
 public static class HostApplicationBuilderExtensions
@@ -33,9 +35,17 @@ public static class HostApplicationBuilderExtensions
                     var solution = p.GetRequiredService<Solution>();
                     var projectName = p.GetAppConfigurationOrThrow(x => x.ProjectName);
                     var project = solution.GetProjectWithValidation(projectName);
-                    return new ReleaseProject { Project = project };
+                    return new ReleaseProject { Value = project };
                 }
-            );
+            )
+            .AddKeyedSingleton<Version>(nameof(AppConfiguration.AppVersion),
+                (p, _) =>
+                {
+                    var versionStr = p.GetAppConfigurationOrThrow(x => x.AppVersion);
+                    return Version.Parse(versionStr);
+                }
+            )
+            .AddSingleton<MsBuildProject>(p => p.GetRequiredService<MsBuildService>().GetMsBuildProject());
         return builder;
     }
 
@@ -84,8 +94,9 @@ public static class HostApplicationBuilderExtensions
 
     public static HostApplicationBuilder BindConfiguration(this HostApplicationBuilder builder)
     {
-        builder
-            .Services
+        var services = builder.Services;
+
+        services
             .AddOptions<AppConfiguration>()
             .Bind(builder.Configuration)
             .Validate(conf =>
@@ -96,8 +107,8 @@ public static class HostApplicationBuilderExtensions
             )
             .ValidateOnStart();
 
-        builder
-            .Services
+
+        services
             .AddOptions<GoogleServiceAccount>()
             .Bind(builder.Configuration.GetSection(nameof(AppConfiguration.GoogleServiceAccount)) ??
                   throw new NullReferenceException($"{nameof(GoogleServiceAccount)} was null")

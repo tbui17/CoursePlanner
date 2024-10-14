@@ -62,6 +62,16 @@ variable project_name {
   type        = string
 }
 
+variable app_version {
+  description = "The version of the app"
+  type        = string
+}
+
+variable publish_configuration {
+  description = "The configuration mode for dotnet publish when building the project"
+  type        = string
+}
+
 locals {
   variables = {
     repository_owner          = var.repository_owner
@@ -75,9 +85,11 @@ locals {
     android_signing_key_alias = var.android_signing_key_alias
     android_framework         = var.android_framework
     user_identifier           = var.user_identifier
-    blob_container_name = var.blob_container_name
-    devops_org_url      = var.devops_org_url
-    solution_name       = var.solution_name
-    project_name        = var.project_name
+    blob_container_name   = var.blob_container_name
+    devops_org_url        = var.devops_org_url
+    solution_name         = var.solution_name
+    project_name          = var.project_name
+    app_version           = var.app_version
+    publish_configuration = var.publish_configuration
   }
 }

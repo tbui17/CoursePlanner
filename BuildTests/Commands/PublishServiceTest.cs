@@ -1,5 +1,5 @@
 using BuildLib.AndroidPublish;
-using BuildLib.Commands;
+using BuildLib.SolutionBuild;
 using BuildTests.Attributes;
 using BuildTests.TestSetup;
 using BuildTests.Utils;

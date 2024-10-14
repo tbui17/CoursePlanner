@@ -1,3 +1,4 @@
+using BuildLib.SolutionBuild;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
@@ -24,7 +25,9 @@ public class Container(IHost host)
 
     public static HostApplicationBuilder CreateBuilder<T>() where T : class
     {
+        MsBuildService.Initialize();
         var builder = Host.CreateApplicationBuilder();
+
         builder
             .AddServices()
             .AddCloudServices()

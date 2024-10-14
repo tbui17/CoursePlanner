@@ -67,8 +67,8 @@ public class BlobClientTest : BaseContainerSetup
         res.BlobName.Should().EndWith(".aab");
     }
 
-    [Fact]
-    public async Task UploadApbFile_Succeeds()
+    [SkipIfDev]
+    public async Task UploadAabFile_Succeeds()
     {
         var client = Resolve<AabCacheClient>();
         var solution = Resolve<Solution>();
