@@ -1,3 +1,4 @@
+using BuildLib.CloudServices.GooglePlay;
 using BuildLib.Secrets;
 using BuildLib.Utils;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,12 +14,14 @@ public class PublishService(
     ILogger<PublishService> logger,
     [FromKeyedServices(nameof(AppConfiguration.AppVersion))]
     SemVersion appVersion,
+    AndroidPublisherClient androidPublisherClient,
     IMsBuildProject msBuildProject,
     DotNetPublishOptionsFactory optionsFactory
 )
 {
     public DotNetPublishSettings CreateDotNetPublishSettings()
     {
+        ValidateAppVersion().Wait();
         var settings = optionsFactory.Create().ToDotNetPublishSettings();
         // immutable; produces copy
         var logData = settings.ClearProcessEnvironmentVariables().ClearProperties();
@@ -31,40 +34,56 @@ public class PublishService(
         return settings;
     }
 
-    public void UpdateAppVersion()
+    public async Task UpdateAppVersion()
     {
-        var currentVersion = msBuildProject.GetAppVersion();
-        if (currentVersion == appVersion)
-        {
-            logger.LogInformation("Current version {CurrentVersion} matches app version {AppVersion}, skipping update",
-                currentVersion,
-                appVersion
-            );
-            return;
-        }
-
-        logger.LogInformation("Updating current version {CurrentVersion} to app version {AppVersion}",
-            currentVersion,
-            appVersion
-        );
-
-        msBuildProject.ChangeAppVersion(appVersion);
-        logger.LogInformation("Updated current version to app version");
+        var latestVersionCode = await androidPublisherClient.GetLatestVersionCode();
+        UpdateAppVersion(latestVersionCode);
     }
 
-    public DotNetPublishSettings ExecuteDotNetPublish()
+    public void UpdateAppVersion(int versionCode)
+    {
+        msBuildProject.ChangeAppDisplayVersion(appVersion);
+        msBuildProject.ChangeAppVersionCode(versionCode);
+    }
+
+    public async Task ValidateAppVersion()
+    {
+        var latestVersionCode = await androidPublisherClient.GetLatestVersionCode();
+        ValidateAppVersion(latestVersionCode);
+    }
+
+    public void ValidateAppVersion(int versionCode)
+    {
+        var data = msBuildProject.GetProjectVersionData();
+        if (data.VersionCode - 1 != versionCode)
+        {
+            throw new InvalidDataException(
+                $"Version code mismatch: expected {versionCode + 1} but found {data.VersionCode}"
+            );
+        }
+
+        if (data.AppVersion != appVersion)
+        {
+            throw new InvalidDataException(
+                $"App version mismatch: expected {appVersion} but found {data.AppVersion}"
+            );
+        }
+    }
+
+    public async Task ExecuteDotNetPublish()
     {
         var settings = CreateDotNetPublishSettings();
-        UpdateAppVersion();
+        var latestVersionCode = await androidPublisherClient.GetLatestVersionCode();
+        ValidateAppVersion(latestVersionCode);
         logger.LogInformation("Publishing project {ProjectPath} with configuration {Configuration}",
             settings.Project,
             settings.Configuration
         );
+
         DotNetTasks.DotNetPublish(settings);
         logger.LogInformation("Published project {ProjectPath} with configuration {Configuration}",
             settings.Project,
             settings.Configuration
         );
-        return settings;
     }
 }

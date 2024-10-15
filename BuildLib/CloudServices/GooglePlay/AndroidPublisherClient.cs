@@ -49,6 +49,12 @@ public class AndroidPublisherClient(
         return await _service.Edits.Bundles.List(secrets.Value.ApplicationId, resp.Id).ExecuteAsync();
     }
 
+    public async Task<int> GetLatestVersionCode()
+    {
+        var resp = await GetBundles();
+        return resp.Bundles.Max(x => x.VersionCode) ?? throw new InvalidDataException("No version code found");
+    }
+
     public async Task UploadBundle(Stream stream, CancellationToken token)
     {
         var resp = await InsertEdit();

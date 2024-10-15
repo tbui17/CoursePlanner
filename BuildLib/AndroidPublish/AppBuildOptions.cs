@@ -35,7 +35,7 @@ public class AppBuildOptions : IAndroidSigningKeyStoreOptions
     /// <summary>
     /// Gets or sets a value indicating whether the app should be signed. Default is false.
     /// </summary>
-    public bool AndroidKeyStore { get; set; } // Corresponds to -p:AndroidKeyStore, default false
+    public bool? AndroidKeyStore { get; set; } // Corresponds to -p:AndroidKeyStore, default false
 
     /// <summary>
     /// Gets or sets a semi-colon delimited property indicating if you want to package the app as an APK file or AAB.
@@ -46,7 +46,7 @@ public class AppBuildOptions : IAndroidSigningKeyStoreOptions
     /// <summary>
     /// Gets or sets a value indicating whether the app should be trimmed. Default is true for release builds.
     /// </summary>
-    public bool PublishTrimmed { get; set; } // Corresponds to -p:PublishTrimmed, default true for release builds
+    public bool? PublishTrimmed { get; set; } // Corresponds to -p:PublishTrimmed, default true for release builds
 
     /// <summary>
     /// Gets or sets the alias for the key in the keystore. This is the keytool -alias value used when creating the keystore.

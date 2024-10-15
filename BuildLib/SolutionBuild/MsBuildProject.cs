@@ -6,15 +6,42 @@ namespace BuildLib.SolutionBuild;
 
 public interface IMsBuildProject
 {
-    SemVersion GetAppVersion();
-    void ChangeAppVersion(SemVersion version);
+    SemVersion GetAppDisplayVersion();
+    void ChangeAppDisplayVersion(SemVersion version);
+    int GetAppVersionCode();
+    void ChangeAppVersionCode(int versionCode);
+    ProjectVersionData GetProjectVersionData();
 }
 
 public class MsBuildProject(Project project, ILogger<MsBuildProject> logger) : IMsBuildProject
 {
+    private const string ApplicationDisplayVersion = "ApplicationDisplayVersion";
     private const string ApplicationVersion = "ApplicationVersion";
 
-    public SemVersion GetAppVersion()
+    public SemVersion GetAppDisplayVersion()
+    {
+        var property = project.GetProperty(ApplicationDisplayVersion);
+        if (property is null)
+        {
+            throw new InvalidDataException(
+                $"Missing {ApplicationDisplayVersion} property in project file {project.FullPath}"
+            );
+        }
+
+
+        if (!SemVersion.TryParse(property.EvaluatedValue, SemVersionStyles.Strict, out var version))
+        {
+            throw new InvalidDataException(
+                $"Invalid {ApplicationDisplayVersion} property value {property.EvaluatedValue} could not be parsed into {typeof(Version)} in project file {project.FullPath}"
+            );
+        }
+
+        logger.LogDebug("Found {ApplicationVersion} property with value {Version}", ApplicationDisplayVersion, version);
+
+        return version;
+    }
+
+    public int GetAppVersionCode()
     {
         var property = project.GetProperty(ApplicationVersion);
         if (property is null)
@@ -22,22 +49,41 @@ public class MsBuildProject(Project project, ILogger<MsBuildProject> logger) : I
             throw new InvalidDataException($"Missing {ApplicationVersion} property in project file {project.FullPath}");
         }
 
-
-        if (!SemVersion.TryParse(property.EvaluatedValue, SemVersionStyles.Strict, out var version))
-        {
-            throw new InvalidDataException(
-                $"Invalid {ApplicationVersion} property value {property.EvaluatedValue} could not be parsed into {typeof(Version)} in project file {project.FullPath}"
-            );
-        }
-
-        logger.LogDebug("Found {ApplicationVersion} property with value {Version}", ApplicationVersion, version);
-
-        return version;
+        return int.Parse(property.EvaluatedValue);
     }
 
-    public void ChangeAppVersion(SemVersion version)
+    public void ChangeAppVersionCode(int versionCode)
     {
-        project.SetProperty(ApplicationVersion, version.ToString());
-        project.Save();
+        var prev = GetAppVersionCode();
+        logger.LogInformation("Changing {ApplicationVersion} from {PreviousVersion} to {NewVersion}",
+            ApplicationVersion,
+            prev,
+            versionCode
+        );
+        project.SetProperty(ApplicationVersion, versionCode.ToString()).Project.Save();
     }
+
+    public ProjectVersionData GetProjectVersionData() =>
+        new()
+        {
+            AppVersion = GetAppDisplayVersion(),
+            VersionCode = GetAppVersionCode()
+        };
+
+    public void ChangeAppDisplayVersion(SemVersion version)
+    {
+        var prev = GetAppDisplayVersion();
+        logger.LogInformation("Changing {ApplicationDisplayVersion} from {PreviousVersion} to {NewVersion}",
+            ApplicationDisplayVersion,
+            prev,
+            version
+        );
+        project.SetProperty(ApplicationDisplayVersion, version.ToString()).Project.Save();
+    }
+}
+
+public record ProjectVersionData
+{
+    public required SemVersion AppVersion { get; init; }
+    public required int VersionCode { get; init; }
 }

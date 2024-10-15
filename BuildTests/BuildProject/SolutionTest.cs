@@ -21,7 +21,7 @@ public class SolutionTest(ITestOutputHelper helper) : BaseContainerSetup(helper)
     {
         var act = Resolve<MsBuildProject>;
         var msProj = act.Should().NotThrow().Subject;
-        var act2 = msProj.GetAppVersion;
+        var act2 = msProj.GetAppDisplayVersion;
         var version = act2.Should().NotThrow().Subject;
         new[] { version.Major, version.Minor, version.Patch }
             .Should()
