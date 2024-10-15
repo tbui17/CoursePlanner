@@ -12,13 +12,13 @@ public interface IAndroidSigningKeyStoreOptions
     string? AndroidSigningStorePass { get; }
 }
 
-public record AndroidSigningKeyStoreOptions
+public record AndroidSigningKeyStoreOptions : IAndroidSigningKeyStoreOptions
 {
+    public bool AndroidKeyStore => true;
     public required string AndroidSigningKeyStore { get; init; }
     public required string AndroidSigningKeyAlias { get; init; }
     public required string AndroidSigningKeyPass { get; init; }
     public required string AndroidSigningStorePass { get; init; }
-    public bool AndroidKeyStore => true;
 }
 
 public static class AndroidSigningKeyStoreOptionsExtensions

@@ -1,92 +1,70 @@
-using System.Diagnostics;
-using BuildLib.AndroidPublish;
-using BuildLib.Logging;
 using BuildLib.Secrets;
 using BuildLib.Utils;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
+using Semver;
 
 namespace BuildLib.SolutionBuild;
 
 [Inject]
 public class PublishService(
     ILogger<PublishService> logger,
-    ProcessLogger<PublishService> processLogger,
-    ReleaseProject project,
-    IOptions<AppConfiguration> configs,
-    MsBuildProject msBuildProject
+    [FromKeyedServices(nameof(AppConfiguration.AppVersion))]
+    SemVersion appVersion,
+    IMsBuildProject msBuildProject,
+    DotNetPublishOptionsFactory optionsFactory
 )
 {
-    public void UpdateAppVersion()
-    {
-    }
-
     public DotNetPublishSettings CreateDotNetPublishSettings()
     {
-        var projectFile = new FileInfo(project.Value.Path);
-        if (!projectFile.Exists)
-        {
-            throw new InvalidDataException($"Unexpected missing file {projectFile.FullName}");
-        }
-
-        var androidOptions = CreateAndroidSigningKeyStoreOptions();
-        var settings = CreateDotNetPublishSettings(projectFile, androidOptions);
+        var settings = optionsFactory.Create().ToDotNetPublishSettings();
+        // immutable; produces copy
+        var logData = settings.ClearProcessEnvironmentVariables().ClearProperties();
+        logger.LogInformation(
+            "Created publish settings: {@PartialData} {PropertyKeys} {ProcessEnvironmentVariableCount}",
+            logData,
+            settings.Properties.Keys,
+            settings.ProcessEnvironmentVariables.Count
+        );
         return settings;
     }
 
-
-    private DotNetPublishSettings CreateDotNetPublishSettings(
-        FileInfo projectFile,
-        AndroidSigningKeyStoreOptions properties
-    )
+    public void UpdateAppVersion()
     {
-        if (!projectFile.Exists)
+        var currentVersion = msBuildProject.GetAppVersion();
+        if (currentVersion == appVersion)
         {
-            throw new InvalidDataException($"Unexpected missing file {projectFile.FullName}");
+            logger.LogInformation("Current version {CurrentVersion} matches app version {AppVersion}, skipping update",
+                currentVersion,
+                appVersion
+            );
+            return;
         }
 
-        if (projectFile.Directory is null)
-        {
-            throw new InvalidDataException($"Unexpected missing directory for {projectFile.FullName}");
-        }
-
-        var settings = new DotNetPublishSettings()
-            .EnableNoLogo()
-            .SetProject(projectFile.FullName)
-            .SetConfiguration(configs.Value.PublishConfiguration)
-            .SetProcessLogger(processLogger.Log)
-            .SetFramework(configs.Value.AndroidFramework);
-
-        logger.LogDebug("Created publish settings: {@Data}", settings.ClearProcessEnvironmentVariables());
-        settings = settings.SetProperties(properties.ToPropertyDictionary());
-        logger.LogDebug("Set {Count} Android properties: {PropertyKeys}",
-            settings.Properties.Count,
-            settings.Properties.Keys
+        logger.LogInformation("Updating current version {CurrentVersion} to app version {AppVersion}",
+            currentVersion,
+            appVersion
         );
 
-        var value = settings.Properties[nameof(AndroidSigningKeyStoreOptions.AndroidKeyStore)];
-        if (value is not bool v)
-        {
-            throw new UnreachableException($"Unexpected value type for AndroidKeyStore: ${value.GetType()}");
-        }
-
-        logger.LogDebug("AndroidKeyStore value: {AndroidKeyStore}", v);
-        return settings;
+        msBuildProject.ChangeAppVersion(appVersion);
+        logger.LogInformation("Updated current version to app version");
     }
 
-    private AndroidSigningKeyStoreOptions CreateAndroidSigningKeyStoreOptions()
+    public DotNetPublishSettings ExecuteDotNetPublish()
     {
-        logger.LogDebug("Retrieving Android properties from environment variables");
-        var opts = new AppBuildOptions
-        {
-            AndroidSigningKeyAlias = Environment.GetEnvironmentVariable("COURSEPLANNER_ANDROID_SIGNING_KEY_ALIAS"),
-            AndroidSigningKeyPass = Environment.GetEnvironmentVariable("COURSEPLANNER_KEY"),
-            AndroidSigningKeyStore = Environment.GetEnvironmentVariable("COURSEPLANNER_ANDROID_SIGNING_KEY_STORE"),
-            AndroidSigningStorePass = Environment.GetEnvironmentVariable("COURSEPLANNER_KEY"),
-        }.ToValidatedAndroidSigningKeyStoreOptions();
-        logger.LogDebug("Validated Android properties");
-        return opts;
+        var settings = CreateDotNetPublishSettings();
+        UpdateAppVersion();
+        logger.LogInformation("Publishing project {ProjectPath} with configuration {Configuration}",
+            settings.Project,
+            settings.Configuration
+        );
+        DotNetTasks.DotNetPublish(settings);
+        logger.LogInformation("Published project {ProjectPath} with configuration {Configuration}",
+            settings.Project,
+            settings.Configuration
+        );
+        return settings;
     }
 }

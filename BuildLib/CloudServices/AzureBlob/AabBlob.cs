@@ -1,4 +1,5 @@
 using Azure.Storage.Blobs.Models;
+using Semver;
 
 namespace BuildLib.CloudServices.AzureBlob;
 
@@ -6,16 +7,16 @@ public interface IBlob
 {
     string Name { get; }
     string Path { get; }
-    Version Version { get; }
-    IBlob WithVersion(Func<Version, Version> versionFunc);
+    SemVersion Version { get; }
+    IBlob WithVersion(Func<SemVersion, SemVersion> versionFunc);
 }
 
 public record AzureBlob : IBlob
 {
     public required BlobItem Blob { get; init; }
-    public required Version Version { get; init; }
+    public required SemVersion Version { get; init; }
 
-    public IBlob WithVersion(Func<Version, Version> versionFunc)
+    public IBlob WithVersion(Func<SemVersion, SemVersion> versionFunc)
     {
         return this with { Version = versionFunc(Version) };
     }

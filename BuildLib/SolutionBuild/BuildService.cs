@@ -3,9 +3,7 @@ using Microsoft.Build.Locator;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Nuke.Common.ProjectModel;
-using Semver;
 using Serilog;
-using Project = Microsoft.Build.Evaluation.Project;
 
 namespace BuildLib.SolutionBuild;
 
@@ -33,36 +31,4 @@ public class MsBuildService(ReleaseProject project, ILogger<MsBuildProject> logg
     }
 
     public MsBuildProject GetMsBuildProject() => new(project: project.Value.GetMSBuildProject(), logger: logger);
-}
-
-public class MsBuildProject(Project project, ILogger<MsBuildProject> logger)
-{
-    private const string ApplicationVersion = "ApplicationVersion";
-
-    public SemVersion GetAppVersion()
-    {
-        var property = project.GetProperty(ApplicationVersion);
-        if (property is null)
-        {
-            throw new InvalidDataException($"Missing {ApplicationVersion} property in project file {project.FullPath}");
-        }
-
-
-        if (!SemVersion.TryParse(property.EvaluatedValue, SemVersionStyles.Strict, out var version))
-        {
-            throw new InvalidDataException(
-                $"Invalid {ApplicationVersion} property value {property.EvaluatedValue} could not be parsed into {typeof(Version)} in project file {project.FullPath}"
-            );
-        }
-
-        logger.LogDebug("Found {ApplicationVersion} property with value {Version}", ApplicationVersion, version);
-
-        return version;
-    }
-
-    public void SetAppVersion(Version version)
-    {
-        project.SetProperty(ApplicationVersion, version.ToString());
-        project.Save();
-    }
 }

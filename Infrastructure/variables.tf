@@ -65,10 +65,21 @@ variable project_name {
 variable app_version {
   description = "The version of the app"
   type        = string
+  validation {
+    condition = can(regex(
+      "^(?P<major>0|[1-9]\\d*)\\.(?P<minor>0|[1-9]\\d*)\\.(?P<patch>0|[1-9]\\d*)(?:-(?P<prerelease>(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$",
+      var.app_version))
+    error_message = "App version must comply with semantic versioning format i.e. 1.0.0"
+  }
 }
 
 variable publish_configuration {
   description = "The configuration mode for dotnet publish when building the project"
+  type        = string
+}
+
+variable workspace_name {
+  description = "The name of the workspace"
   type        = string
 }
 

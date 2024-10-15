@@ -5,8 +5,8 @@ using BuildTests.TestSetup;
 using FluentAssertions;
 using JetBrains.Annotations;
 using Nuke.Common.ProjectModel;
+using Semver;
 using Xunit.Abstractions;
-using Version = BuildLib.CloudServices.AzureBlob.Version;
 
 namespace BuildTests.Clients;
 
@@ -46,7 +46,7 @@ public class BlobClientTest : BaseContainerSetup
         file.Exists.Should().Be(true);
     }
 
-    [SkipIfDev]
+    [Fact]
     public async Task GetLatestApbFile_ReturnsLatestApbFile()
     {
         var client = Resolve<AabCacheClient>();
@@ -55,7 +55,7 @@ public class BlobClientTest : BaseContainerSetup
 
         res.Should().NotBeNull();
 
-        res.Version.Should().Be(new Version { Major = 0, Minor = 0, Patch = 5 });
+        res.Version.Should().Be(new SemVersion(0, 0, 2));
     }
 
     [SkipIfDev]

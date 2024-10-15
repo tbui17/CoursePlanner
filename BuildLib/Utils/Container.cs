@@ -8,13 +8,14 @@ namespace BuildLib.Utils;
 
 public class Container(IHost host)
 {
+    public IServiceProvider Services => host.Services;
     public T Resolve<T>() where T : notnull => host.Services.GetRequiredService<T>();
 
     public T GetConfiguration<T>() => host.Services.GetConfigurationOrThrow<T>();
 
-    public static Container Init<T>() where T : class
+    public static Container Init()
     {
-        var builder = CreateBuilder<T>();
+        var builder = CreateBuilder();
 
         var host = builder.Build();
 
@@ -23,7 +24,7 @@ public class Container(IHost host)
         return container;
     }
 
-    public static HostApplicationBuilder CreateBuilder<T>() where T : class
+    public static HostApplicationBuilder CreateBuilder()
     {
         MsBuildService.Initialize();
         var builder = Host.CreateApplicationBuilder();

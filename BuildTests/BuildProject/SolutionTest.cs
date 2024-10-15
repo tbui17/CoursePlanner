@@ -17,7 +17,7 @@ public class SolutionTest(ITestOutputHelper helper) : BaseContainerSetup(helper)
 
 
     [Fact]
-    public void Build()
+    public void GetAppVersion_ShouldReturnValidSemVersion()
     {
         var act = Resolve<MsBuildProject>;
         var msProj = act.Should().NotThrow().Subject;

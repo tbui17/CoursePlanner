@@ -27,6 +27,7 @@ provider "google" {
   project = var.project_id
   region  = var.project_region
   zone    = var.project_zone
+  # credentials = jsonencode(var.google_service_account)
 }
 
 provider "github" {
@@ -38,6 +39,9 @@ provider "azurerm" {
   features {}
   resource_provider_registrations = "none"
   subscription_id                 = var.subscription_id
+  # tenant_id                       = var.tenant_id
+  # client_id                       = var.service_principal_id
+  # client_secret                   = var.service_principal_secret
 }
 
 provider "azuredevops" {

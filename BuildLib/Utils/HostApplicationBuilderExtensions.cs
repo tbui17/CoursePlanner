@@ -1,6 +1,7 @@
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using Azure.Storage.Blobs;
+using BuildLib.AndroidPublish;
 using BuildLib.CloudServices;
 using BuildLib.FileSystem;
 using BuildLib.Secrets;
@@ -12,7 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Nuke.Common.ProjectModel;
-using Version = BuildLib.CloudServices.AzureBlob.Version;
+using Semver;
 
 namespace BuildLib.Utils;
 
@@ -38,14 +39,27 @@ public static class HostApplicationBuilderExtensions
                     return new ReleaseProject { Value = project };
                 }
             )
-            .AddKeyedSingleton<Version>(nameof(AppConfiguration.AppVersion),
+            .AddKeyedSingleton<SemVersion>(nameof(AppConfiguration.AppVersion),
                 (p, _) =>
                 {
                     var versionStr = p.GetAppConfigurationOrThrow(x => x.AppVersion);
-                    return Version.Parse(versionStr);
+                    return SemVersion.Parse(versionStr, SemVersionStyles.AllowV);
                 }
             )
-            .AddSingleton<MsBuildProject>(p => p.GetRequiredService<MsBuildService>().GetMsBuildProject());
+            .AddSingleton<IMsBuildProject>(p => p.GetRequiredService<MsBuildService>().GetMsBuildProject())
+            .AddSingleton<AndroidSigningKeyStoreOptions>(p =>
+                {
+                    var c = p.GetAppConfigurationOrThrow();
+                    return new AndroidSigningKeyStoreOptions
+                    {
+                        AndroidSigningKeyAlias = c.AndroidSigningKeyAlias,
+                        AndroidSigningKeyStore = c.AndroidSigningKeyStore,
+                        AndroidSigningKeyPass = c.Key,
+                        AndroidSigningStorePass = c.Key
+                    }.ToValidatedAndroidSigningKeyStoreOptions();
+                }
+            )
+            .AddSingleton<DotnetPublishOptions>(x => x.GetRequiredService<DotNetPublishOptionsFactory>().Create());
         return builder;
     }
 
@@ -98,14 +112,11 @@ public static class HostApplicationBuilderExtensions
 
         services
             .AddOptions<AppConfiguration>()
-            .Bind(builder.Configuration)
-            .Validate(conf =>
-                {
-                    conf.ValidateOrThrow();
-                    return true;
-                }
-            )
-            .ValidateOnStart();
+            .Bind(builder.Configuration);
+
+        builder
+            .Configuration.GetConfigurationOrThrow<AppConfiguration>()
+            .ValidateOrThrow();
 
 
         services

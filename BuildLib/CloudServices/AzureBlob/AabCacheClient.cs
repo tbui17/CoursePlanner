@@ -2,6 +2,7 @@ using BuildLib.Exceptions;
 using BuildLib.Globals;
 using BuildLib.Utils;
 using Microsoft.Extensions.Logging;
+using Semver;
 
 namespace BuildLib.CloudServices.AzureBlob;
 
@@ -48,7 +49,8 @@ public class AabCacheClient(IBlobClient blobClient, ILogger<AabCacheClient> logg
             .Where(x => x.Name.EndsWith(Constants.AabExtension))
             .Select(x =>
                 {
-                    if (x.VersionId is not null && Version.TryParse(x.VersionId, out var version))
+                    if (x.VersionId is not null &&
+                        SemVersion.TryParse(x.VersionId, SemVersionStyles.AllowV, out var version))
                     {
                         return new AzureBlob
                         {
@@ -62,7 +64,7 @@ public class AabCacheClient(IBlobClient blobClient, ILogger<AabCacheClient> logg
                         return new AzureBlob
                         {
                             Blob = x,
-                            Version = Version.Parse(versionStr)
+                            Version = SemVersion.Parse(versionStr, SemVersionStyles.AllowV),
                         };
                     }
 

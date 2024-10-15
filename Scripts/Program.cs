@@ -4,7 +4,7 @@ using Cocona;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-var builder = Container.CreateBuilder<Container>();
+var builder = Container.CreateBuilder();
 var host = builder.Build();
 
 var app = CoconaApp.CreateBuilder().Build();

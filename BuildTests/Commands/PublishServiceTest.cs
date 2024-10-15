@@ -1,8 +1,6 @@
 using BuildLib.AndroidPublish;
 using BuildLib.SolutionBuild;
-using BuildTests.Attributes;
 using BuildTests.TestSetup;
-using BuildTests.Utils;
 using FluentAssertions;
 using JetBrains.Annotations;
 using Xunit.Abstractions;
@@ -10,13 +8,18 @@ using Xunit.Abstractions;
 namespace BuildTests.Commands;
 
 [TestSubject(typeof(PublishService))]
-public class PublishServiceTest(ITestOutputHelper testOutputHelper) : BaseContainerSetup(testOutputHelper)
+public class PublishServiceTest : BaseContainerSetup
 {
-    [SkipIfDev]
+    public PublishServiceTest(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+    {
+    }
+
+    [Fact]
     public void CreateDotNetPublishSettings_ShouldInitializeWithRequiredProperties()
     {
-        var service = new ContainerInitializer().GetContainer().Resolve<PublishService>();
-        var settings = service.CreateDotNetPublishSettings();
+        var service = Resolve<PublishService>();
+        var act = service.CreateDotNetPublishSettings;
+        var settings = act.Should().NotThrow().Subject;
         settings.Framework.Should().Contain("android");
         settings.Properties.Should().ContainKey(nameof(AndroidSigningKeyStoreOptions.AndroidSigningKeyPass));
         settings.Project.Should().Contain("CoursePlanner.csproj").And.NotContain("/bin/");

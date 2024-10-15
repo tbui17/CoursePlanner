@@ -83,7 +83,7 @@ public class AzureBlobClient : IBlobClient
         };
         var tags = new Dictionary<string, string>
         {
-            { Constants.VersionTag, options.Blob.Version }
+            { Constants.VersionTag, options.Blob.Version.ToString() }
         };
         var client = _client.GetBlockBlobClient(options.Blob.Path);
 
