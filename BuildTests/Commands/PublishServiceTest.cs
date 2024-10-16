@@ -17,8 +17,8 @@ public class PublishServiceTest : BaseContainerSetup
     [Fact]
     public void CreateDotNetPublishSettings_ShouldInitializeWithRequiredProperties()
     {
-        var service = Resolve<PublishService>();
-        var act = service.CreateDotNetPublishSettings;
+        var service = Resolve<DotNetPublishSettingsFactory>();
+        var act = service.Create;
         var settings = act.Should().NotThrow().Subject;
         settings.Framework.Should().Contain("android");
         settings.Properties.Should().ContainKey(nameof(AndroidSigningKeyStoreOptions.AndroidSigningKeyPass));

@@ -1,80 +1,26 @@
-using BuildLib.CloudServices.GooglePlay;
-using BuildLib.Secrets;
+using BuildLib.SolutionBuild.Versioning;
 using BuildLib.Utils;
-using Microsoft.Extensions.DependencyInjection;
+using ByteSizeLib;
 using Microsoft.Extensions.Logging;
-using Nuke.Common.Tooling;
+using Nuke.Common.IO;
+using Nuke.Common.ProjectModel;
 using Nuke.Common.Tools.DotNet;
-using Semver;
 
 namespace BuildLib.SolutionBuild;
 
 [Inject]
 public class PublishService(
     ILogger<PublishService> logger,
-    [FromKeyedServices(nameof(AppConfiguration.AppVersion))]
-    SemVersion appVersion,
-    AndroidPublisherClient androidPublisherClient,
-    IMsBuildProject msBuildProject,
-    DotNetPublishOptionsFactory optionsFactory
+    DotNetPublishSettings settings,
+    Solution solution,
+    ReleaseProject releaseProject,
+    VersionService versionService
 )
 {
-    public DotNetPublishSettings CreateDotNetPublishSettings()
-    {
-        ValidateAppVersion().Wait();
-        var settings = optionsFactory.Create().ToDotNetPublishSettings();
-        // immutable; produces copy
-        var logData = settings.ClearProcessEnvironmentVariables().ClearProperties();
-        logger.LogInformation(
-            "Created publish settings: {@PartialData} {PropertyKeys} {ProcessEnvironmentVariableCount}",
-            logData,
-            settings.Properties.Keys,
-            settings.ProcessEnvironmentVariables.Count
-        );
-        return settings;
-    }
-
-    public async Task UpdateAppVersion()
-    {
-        var latestVersionCode = await androidPublisherClient.GetLatestVersionCode();
-        UpdateAppVersion(latestVersionCode);
-    }
-
-    public void UpdateAppVersion(int versionCode)
-    {
-        msBuildProject.ChangeAppDisplayVersion(appVersion);
-        msBuildProject.ChangeAppVersionCode(versionCode);
-    }
-
-    public async Task ValidateAppVersion()
-    {
-        var latestVersionCode = await androidPublisherClient.GetLatestVersionCode();
-        ValidateAppVersion(latestVersionCode);
-    }
-
-    public void ValidateAppVersion(int versionCode)
-    {
-        var data = msBuildProject.GetProjectVersionData();
-        if (data.VersionCode - 1 != versionCode)
-        {
-            throw new InvalidDataException(
-                $"Version code mismatch: expected {versionCode + 1} but found {data.VersionCode}"
-            );
-        }
-
-        if (data.AppVersion != appVersion)
-        {
-            throw new InvalidDataException(
-                $"App version mismatch: expected {appVersion} but found {data.AppVersion}"
-            );
-        }
-    }
-
     public async Task ExecuteDotNetPublish()
     {
-        var settings = CreateDotNetPublishSettings();
-        var latestVersionCode = await androidPublisherClient.GetLatestVersionCode();
-        ValidateAppVersion(latestVersionCode);
+        await versionService.ValidateAppVersion();
+
         logger.LogInformation("Publishing project {ProjectPath} with configuration {Configuration}",
             settings.Project,
             settings.Configuration
@@ -85,5 +31,31 @@ public class PublishService(
             settings.Project,
             settings.Configuration
         );
+        MoveFiles();
+    }
+
+    private void MoveFiles()
+    {
+        var file = releaseProject
+            .Value.Directory
+            .GlobFiles("bin/**/publish/*Signed.aab")
+            .Single();
+
+        var outputFolder = solution.Directory / "output";
+        if (outputFolder.Exists())
+        {
+            logger.LogDebug("Deleting output folder");
+        }
+
+        outputFolder.CreateOrCleanDirectory();
+
+        logger.LogDebug("Copying {File} to {OutputFolder}", file, outputFolder);
+        file.CopyToDirectory(outputFolder, ExistsPolicy.FileOverwriteIfNewer);
+
+        var byteSize = ByteSize
+            .FromBytes(new FileInfo(file).Length)
+            .ToString(ByteSize.MegaByteSymbol);
+
+        logger.LogDebug("Created {File} with size {Mb}", file, byteSize);
     }
 }

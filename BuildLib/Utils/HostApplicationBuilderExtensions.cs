@@ -13,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Nuke.Common.ProjectModel;
+using Nuke.Common.Tools.DotNet;
 using Semver;
 
 namespace BuildLib.Utils;
@@ -59,7 +60,7 @@ public static class HostApplicationBuilderExtensions
                     }.ToValidatedAndroidSigningKeyStoreOptions();
                 }
             )
-            .AddSingleton<DotnetPublishOptions>(x => x.GetRequiredService<DotNetPublishOptionsFactory>().Create());
+            .AddSingleton<DotNetPublishSettings>(x => x.GetRequiredService<DotNetPublishSettingsFactory>().Create());
         return builder;
     }
 

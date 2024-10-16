@@ -8,39 +8,20 @@ using Nuke.Common.Tools.DotNet;
 
 namespace BuildLib.SolutionBuild;
 
-public record DotnetPublishOptions
-{
-    public bool NoLogo { get; init; } = true;
-    public required Action<OutputType, string> ProcessLogger { get; init; }
-    public required string PublishConfiguration { get; init; }
-    public required AndroidSigningKeyStoreOptions AndroidSigningKeyStoreOptions { get; init; }
-    public required string ProjectPath { get; init; }
-    public required string AndroidFramework { get; init; }
-
-    public DotNetPublishSettings ToDotNetPublishSettings() =>
-        new DotNetPublishSettings()
-            .SetNoLogo(NoLogo)
-            .SetProject(ProjectPath)
-            .SetConfiguration(PublishConfiguration)
-            .SetProcessLogger(ProcessLogger)
-            .SetFramework(AndroidFramework)
-            .SetProperties(AndroidSigningKeyStoreOptions.ToPropertyDictionary());
-}
-
 [Inject]
-public class DotNetPublishOptionsFactory(
-    ProcessLogger<DotNetPublishOptionsFactory> processLogger,
+public class DotNetPublishSettingsFactory(
+    ProcessLogger<DotNetPublishSettingsFactory> processLogger,
     IOptions<AppConfiguration> configs,
     ReleaseProject project,
-    AndroidSigningKeyStoreOptions androidSigningKeyStoreOptions)
+    AndroidSigningKeyStoreOptions androidSigningKeyStoreOptions
+)
 {
-    public DotnetPublishOptions Create() =>
-        new()
-        {
-            AndroidFramework = configs.Value.AndroidFramework,
-            ProcessLogger = processLogger.Log,
-            ProjectPath = project.Value.Path,
-            PublishConfiguration = configs.Value.PublishConfiguration,
-            AndroidSigningKeyStoreOptions = androidSigningKeyStoreOptions
-        };
+    public DotNetPublishSettings Create() =>
+        new DotNetPublishSettings()
+            .EnableNoLogo()
+            .SetProject(project.Value.Path)
+            .SetConfiguration(configs.Value.PublishConfiguration)
+            .SetProcessLogger(processLogger.Log)
+            .SetFramework(configs.Value.AndroidFramework)
+            .SetProperties(androidSigningKeyStoreOptions.ToPropertyDictionary());
 }

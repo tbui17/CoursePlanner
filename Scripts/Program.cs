@@ -3,7 +3,12 @@ using BuildLib.Utils;
 using Cocona;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Serilog;
 
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .WriteTo.Console()
+    .CreateLogger();
 var builder = Container.CreateBuilder();
 var host = builder.Build();
 

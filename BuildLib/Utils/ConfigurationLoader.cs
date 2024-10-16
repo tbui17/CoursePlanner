@@ -2,7 +2,6 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using Azure.Data.AppConfiguration;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
-using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using BuildLib.Secrets;
 using Microsoft.Extensions.Configuration;
@@ -109,6 +108,13 @@ public class ConfigurationLoader(HostApplicationBuilder builder) : IDisposable
             builder.Configuration.Bind(courseConfiguration);
             if (courseConfiguration.Validate() is not { } exc)
             {
+                var file = GetSecretJsonFile();
+                if (IsStale(file))
+                {
+                    Log.Information("Secrets are valid but json file is stale, attempting to refresh secrets json");
+                    return true;
+                }
+
                 Log.Information("Secrets are valid, skipping secrets json load");
                 return false;
             }
@@ -152,23 +158,8 @@ public class ConfigurationLoader(HostApplicationBuilder builder) : IDisposable
         }
     }
 
-    private static SecretClient GetSecretClient(string keyUri)
+    private static bool IsStale(FileInfo file)
     {
-        var secretClient = new SecretClient(new(new(keyUri)),
-            new DefaultAzureCredential(new DefaultAzureCredentialOptions
-                {
-                    ExcludeVisualStudioCredential = true,
-                    ExcludeEnvironmentCredential = true,
-                    ExcludeVisualStudioCodeCredential = true,
-                    ExcludeSharedTokenCacheCredential = true,
-                    ExcludeAzurePowerShellCredential = true,
-                    ExcludeInteractiveBrowserCredential = true,
-                    ExcludeManagedIdentityCredential = true,
-                    ExcludeWorkloadIdentityCredential = true,
-                    ExcludeAzureDeveloperCliCredential = true,
-                }
-            )
-        );
-        return secretClient;
+        return file.LastWriteTime < DateTime.Now.AddMinutes(-15);
     }
 }

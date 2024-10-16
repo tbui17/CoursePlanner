@@ -1,3 +1,4 @@
+using BuildLib.SolutionBuild.Versioning;
 using Microsoft.Build.Evaluation;
 using Microsoft.Extensions.Logging;
 using Semver;
@@ -80,10 +81,4 @@ public class MsBuildProject(Project project, ILogger<MsBuildProject> logger) : I
         );
         project.SetProperty(ApplicationDisplayVersion, version.ToString()).Project.Save();
     }
-}
-
-public record ProjectVersionData
-{
-    public required SemVersion AppVersion { get; init; }
-    public required int VersionCode { get; init; }
 }
