@@ -26,9 +26,28 @@ public class MsBuildService(ReleaseProject project, ILogger<MsBuildProject> logg
         var instance = MSBuildLocator.QueryVisualStudioInstances().MaxBy(x => x.Version) ??
                        throw new InvalidDataException("No MSBuild instances found");
         log.Information("Found MSBuild instance {@Instance}, registering instance", instance);
-        MSBuildLocator.RegisterInstance(instance);
+        try
+        {
+            MSBuildLocator.RegisterInstance(instance);
+        }
+        catch (InvalidOperationException e) when (e.IsAlreadyLoadedError())
+        {
+            log.Information("MSBuild assemblies were already loaded, skipping initialization");
+        }
+
         Initialized = true;
     }
 
     public MsBuildProject GetMsBuildProject() => new(project: project.Value.GetMSBuildProject(), logger: logger);
+}
+
+file static class InvalidOperationExtensions
+{
+    public static bool IsAlreadyLoadedError(this InvalidOperationException e)
+    {
+        const string message =
+            "Microsoft.Build.Locator.MSBuildLocator.RegisterInstance was called, but MSBuild assemblies were already loaded.";
+
+        return e.Message.ContainsIgnoreCase(message);
+    }
 }

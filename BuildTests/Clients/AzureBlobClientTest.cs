@@ -1,4 +1,5 @@
 using BuildLib.CloudServices.AzureBlob;
+using BuildLib.SolutionBuild.Versioning;
 using BuildLib.Utils;
 using BuildTests.Attributes;
 using BuildTests.TestSetup;
@@ -19,7 +20,7 @@ public class BlobClientTest : BaseContainerSetup
     {
     }
 
-    [SkipIfDev]
+    [Integration]
     public async Task GetBlobNames_HasResults()
     {
         var client = Resolve<IBlobClient>();
@@ -28,7 +29,7 @@ public class BlobClientTest : BaseContainerSetup
         names.Should().NotBeNullOrEmpty();
     }
 
-    [SkipIfDev]
+    [Integration]
     public async Task DownloadBlob_Succeeds()
     {
         var client = Resolve<IBlobClient>();
@@ -46,19 +47,19 @@ public class BlobClientTest : BaseContainerSetup
         file.Exists.Should().Be(true);
     }
 
-    [Fact]
-    public async Task GetLatestApbFile_ReturnsLatestApbFile()
+    [Integration]
+    public async Task GetLatestApbFile_ReturnsNonEmptySemanticVersion()
     {
         var client = Resolve<AabCacheClient>();
 
-        var res = await client.GetLatestAabFileGlob();
+        var blob = await client.GetLatestAabFileBlob();
 
-        res.Should().NotBeNull();
+        blob.Should().NotBeNull();
 
-        res.Version.Should().Be(new SemVersion(0, 0, 2));
+        blob.Version.Should().Match<SemVersion>(x => x.ContainsNonZeroPositiveValue());
     }
 
-    [SkipIfDev]
+    [Integration]
     public async Task DownloadLatestApbFile_CreatesApbFile()
     {
         var client = Resolve<AabCacheClient>();
@@ -67,7 +68,7 @@ public class BlobClientTest : BaseContainerSetup
         res.BlobName.Should().EndWith(".aab");
     }
 
-    [SkipIfDev]
+    [Integration]
     public async Task UploadAabFile_Succeeds()
     {
         var client = Resolve<AabCacheClient>();

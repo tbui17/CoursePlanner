@@ -7,8 +7,10 @@ using Nuke.Common.ProjectModel;
 namespace BuildLib.FileSystem;
 
 [Inject(Lifetime = ServiceLifetime.Singleton)]
-public class DirectoryService(ILogger<DirectoryService> logger)
+public class DirectoryService(ILogger<DirectoryService> logger, IFileArgFactory fileArgFactory)
 {
+    public IFileArgFactory FileArgFactory => fileArgFactory;
+
     public IEnumerable<FileInfo> GetFilesInAncestorDirectories(
         FindFileArgs args
     )

@@ -27,7 +27,7 @@ public class PublishCommandTest
             .CreateLogger();
     }
 
-    [SkipIfDev(Timeout = 1000 * 3600)]
+    [Integration(Timeout = 1000 * 3600)]
     public async Task DotNetPublish_ShouldCreateReleaseFile()
     {
         var solution = _container.Resolve<Solution>();

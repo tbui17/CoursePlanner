@@ -1,7 +1,7 @@
-using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using BuildLib.CloudServices.GooglePlay;
 using BuildLib.Utils;
+using BuildTests.Attributes;
 using BuildTests.Utils;
 using Nuke.Common.ProjectModel;
 using Serilog;
@@ -27,8 +27,7 @@ public sealed class BundleUploadTest : IAsyncDisposable
         await Log.CloseAndFlushAsync();
     }
 
-    [Fact(Skip = "This test is for manual testing only")]
-    [Category("Manual")]
+    [ManualTest]
     [SuppressMessage("Usage", "xUnit1004:Test methods should not be skipped")]
     public async Task UploadBundle_Succeeds()
     {

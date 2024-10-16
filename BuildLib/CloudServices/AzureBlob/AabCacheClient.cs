@@ -8,14 +8,14 @@ namespace BuildLib.CloudServices.AzureBlob;
 
 public interface IAabCacheClient
 {
-    Task<IBlob?> GetLatestAabFileGlob();
+    Task<IBlob?> GetLatestAabFileBlob();
     Task<IDownloadBlobOptions> DownloadLatestAabFile();
 }
 
 [Inject]
 public class AabCacheClient(IBlobClient blobClient, ILogger<AabCacheClient> logger) : IAabCacheClient
 {
-    public async Task<IBlob?> GetLatestAabFileGlob()
+    public async Task<IBlob?> GetLatestAabFileBlob()
     {
         var res = await GetAabFiles()
             .MaxByAsync(x => x.Version);
@@ -30,7 +30,7 @@ public class AabCacheClient(IBlobClient blobClient, ILogger<AabCacheClient> logg
 
     public async Task<IDownloadBlobOptions> DownloadLatestAabFile()
     {
-        var res = await GetLatestAabFileGlob();
+        var res = await GetLatestAabFileBlob();
         if (res is null)
         {
             throw new InvalidOperationException("No files found");
@@ -77,7 +77,7 @@ public class AabCacheClient(IBlobClient blobClient, ILogger<AabCacheClient> logg
 
     public async Task UploadAabFile(Stream stream, CancellationToken cancellationToken)
     {
-        var blob = await GetLatestAabFileGlob() ?? throw new InvalidOperationException("No files found");
+        var blob = await GetLatestAabFileBlob() ?? throw new InvalidOperationException("No files found");
 
         var opts = new UploadBlobOptions
         {

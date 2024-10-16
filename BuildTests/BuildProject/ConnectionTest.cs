@@ -12,7 +12,7 @@ public class ConnectionTest
     private readonly Container _container = new ContainerInitializer().GetContainer();
 
 
-    [SkipIfDev]
+    [Integration]
     public void SecretClient_CanConnect()
     {
         var config = _container.GetConfiguration<AppConfiguration>();
@@ -23,7 +23,7 @@ public class ConnectionTest
         keyIsNull.Should().NotBe(true);
     }
 
-    [SkipIfDev]
+    [Integration]
     public async Task AndroidPublisherClient_CanConnect()
     {
         var client = _container.Resolve<AndroidPublisherClient>();
@@ -37,7 +37,7 @@ public class ConnectionTest
         res.Which.Id.Should().NotBeNullOrWhiteSpace();
     }
 
-    [SkipIfDev]
+    [Integration]
     public async Task GetBundles_HasResult()
     {
         var secrets = _container.GetConfiguration<AppConfiguration>();
