@@ -1,3 +1,4 @@
+using BuildLib.Secrets;
 using BuildLib.Utils;
 using BuildTests.Utils;
 using Serilog;
@@ -19,8 +20,9 @@ public abstract class BaseContainerSetup
         Container = GetContainer();
     }
 
-    protected virtual Container GetContainer() => new ContainerInitializer().GetContainer();
+    private static Container GetContainer() => new ContainerInitializer().GetContainer();
 
     public T Resolve<T>() where T : notnull => Container.Resolve<T>();
     public T GetConfiguration<T>() => Container.GetConfiguration<T>();
+    public AppConfiguration GetConfiguration() => GetConfiguration<AppConfiguration>();
 }

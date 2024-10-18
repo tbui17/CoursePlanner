@@ -17,11 +17,12 @@ public class PublishServiceTest : BaseContainerSetup
     [Fact]
     public void CreateDotNetPublishSettings_ShouldInitializeWithRequiredProperties()
     {
+        var config = GetConfiguration();
         var service = Resolve<DotNetPublishSettingsFactory>();
         var act = service.Create;
         var settings = act.Should().NotThrow().Subject;
         settings.Framework.Should().Contain("android");
         settings.Properties.Should().ContainKey(nameof(AndroidSigningKeyStoreOptions.AndroidSigningKeyPass));
-        settings.Project.Should().Contain("CoursePlanner.csproj").And.NotContain("/bin/");
+        settings.Project.Should().Contain($"{config.ProjectName}").And.NotContain("/bin/");
     }
 }
