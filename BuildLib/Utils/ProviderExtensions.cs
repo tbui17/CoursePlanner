@@ -50,8 +50,17 @@ public static class ProviderExtensions
     public static T GetAppConfigurationOrThrow<T>(
         this IServiceProvider provider,
         Func<AppConfiguration, T> selector
-    ) =>
-        selector(provider.GetAppConfigurationOrThrow());
+    )
+    {
+        var res = selector(provider.GetAppConfigurationOrThrow());
+        if (res is string s)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(s);
+        }
+
+        ArgumentNullException.ThrowIfNull(res);
+        return res;
+    }
 
     public static AppConfiguration GetAppConfigurationOrThrow(
         this IServiceProvider provider

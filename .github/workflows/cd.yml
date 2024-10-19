@@ -9,6 +9,7 @@ jobs:
     permissions: write-all
     env:
       GH_TOKEN: ${{ github.token }}
+      KEY_URI: ${{ secrets.KEY_URI }}
     steps:
       - uses: actions/checkout@v4
       - name: Azure login
@@ -28,11 +29,11 @@ jobs:
           dotnet run -v n --project Scripts/Scripts.csproj -- example_command
 
 
-      - id: auth
-        uses: google-github-actions/auth@v2
-        with:
-          workload_identity_provider: ${{vars.WORKLOAD_IDENTITY_PROVIDER}}
-          service_account: ${{vars.SERVICE_ACCOUNT}}
+#      - id: auth
+#        uses: google-github-actions/auth@v2
+#        with:
+#          workload_identity_provider: ${{vars.WORKLOAD_IDENTITY_PROVIDER}}
+#          service_account: ${{vars.SERVICE_ACCOUNT}}
 #      - uses: r0adkll/upload-google-play@v1
 #        with:
 #          serviceAccountJson: ${{ steps.auth.outputs.credentials_file_path }}
