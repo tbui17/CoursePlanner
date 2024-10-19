@@ -16,24 +16,16 @@ public class AndroidPublisherClient(
     IServiceProvider provider
 )
 {
-    private static AppEdit CreateEdit(ExpiryTime? time = default)
-    {
-        time ??= new();
-        return new AppEdit
-        {
-        };
-    }
-
     public Task<AppEdit> Probe()
     {
-        var appEdit = CreateEdit(60);
+        var appEdit = new AppEdit();
 
         return service.Edits.Insert(appEdit, configs.Value.ApplicationId).ExecuteAsync();
     }
 
     public async Task<AppEdit> InsertEdit(ExpiryTime? time = default)
     {
-        var appEdit = CreateEdit(time);
+        var appEdit = new AppEdit();
         var res = await service
             .Edits
             .Insert(appEdit, configs.Value.ApplicationId)

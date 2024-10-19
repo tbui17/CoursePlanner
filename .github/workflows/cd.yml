@@ -10,12 +10,22 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
     steps:
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Install .NET MAUI
+        run: dotnet workload install maui-android
+
+      - name: Release Build
+        run: dotnet run -v n --project Scripts -- publish
       - uses: actions/checkout@v4
-      - name: Download artifact from build job
-        run: |
-          gh run download --name app-artifact --dir ${{vars.OUTPUT_FOLDER}}
-          echo "Finding files in ${{vars.OUTPUT_FOLDER}}"
-          pwsh -Command "Get-ChildItem ${{vars.OUTPUT_FOLDER}} | Select-Object Name"
       - id: auth
         uses: google-github-actions/auth@v2
         with:
