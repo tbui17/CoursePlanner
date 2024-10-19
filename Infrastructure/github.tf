@@ -33,9 +33,12 @@ resource "github_actions_variable" "action_var" {
     "PROJECT_ZONE" : var.project_zone,
     "RELEASE_FILES" : local.release_files,
     "OUTPUT_FOLDER" : local.output_folder,
-    "AZURE_CLIENT_ID" : var.service_principal_id,
-    "AZURE_CLIENT_SECRET" : var.service_principal_secret,
-    "AZURE_TENANT_ID" : var.tenant_id,
+    "AZURE_CREDENTIALS" : jsonencode({
+      "clientSecret" : var.subscription_id,
+      "tenantId" : var.tenant_id,
+      "clientId" : var.service_principal_id,
+      "clientSecret" : var.service_principal_secret
+    })
   })
   repository    = var.repository_name
   variable_name = each.key
