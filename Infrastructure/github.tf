@@ -9,6 +9,7 @@ resource "github_actions_secret" "action_secret" {
     "KEYSTORE_CONTENTS" : var.keystore_contents,
     "GOOGLE_SERVICE_ACCOUNT_BASE64" : var.google_service_account_base64,
     "KEY_URI" : var.key_uri
+    "AZURE_CREDENTIALS" : local.AZURE_CREDENTIALS,
   })
   repository      = var.repository_name
   secret_name     = each.key
@@ -32,15 +33,18 @@ resource "github_actions_variable" "action_var" {
     "PROJECT_REGION" : var.project_region,
     "PROJECT_ZONE" : var.project_zone,
     "RELEASE_FILES" : local.release_files,
-    "OUTPUT_FOLDER" : local.output_folder,
-    "AZURE_CREDENTIALS" : jsonencode({
-      "clientSecret" : var.subscription_id,
-      "tenantId" : var.tenant_id,
-      "clientId" : var.service_principal_id,
-      "clientSecret" : var.service_principal_secret
-    })
+    "OUTPUT_FOLDER" : local.output_folder
   })
   repository    = var.repository_name
   variable_name = each.key
   value         = each.value
+}
+
+locals {
+  AZURE_CREDENTIALS = jsonencode({
+    subscriptionId = var.subscription_id,
+    tenantId       = var.tenant_id,
+    clientId       = var.service_principal_id,
+    clientSecret   = var.service_principal_secret
+  })
 }
