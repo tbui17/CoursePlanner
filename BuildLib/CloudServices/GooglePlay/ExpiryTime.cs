@@ -1,15 +1,15 @@
 namespace BuildLib.CloudServices.GooglePlay;
 
-public class ExpiryTime(int seconds = 3600)
+public class ExpiryTime(long seconds = 3600)
 {
-    public int GetValue()
+    public long GetValue()
     {
         if (seconds <= 0)
         {
             throw new ArgumentException("Expiry time must be greater than 0");
         }
 
-        return seconds;
+        return DateTimeOffset.UtcNow.ToUnixTimeSeconds() + seconds;
     }
 
     public static implicit operator string(ExpiryTime expiryTime) => expiryTime.GetValue().ToString();

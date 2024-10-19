@@ -30,6 +30,22 @@ app.AddCommand("publish",
     }
 );
 
+app.AddCommand("upload",
+    async () =>
+    {
+        var cmd = Resolve<PublishCommand>();
+        await cmd.ExecuteUploadAsync();
+    }
+);
+
+app.AddCommand("publish_upload",
+    async () =>
+    {
+        var cmd = Resolve<PublishCommand>();
+        await cmd.ExecutePublishAndUploadAsync();
+    }
+);
+
 app.Run();
 
 return;

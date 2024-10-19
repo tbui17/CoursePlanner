@@ -8,7 +8,7 @@ using Serilog;
 using Xunit.Abstractions;
 using Container = BuildLib.Utils.Container;
 
-namespace BuildTests.BuildProject;
+namespace BuildTests.AndroidServices;
 
 public sealed class BundleUploadTest : IAsyncDisposable
 {

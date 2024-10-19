@@ -1,6 +1,0 @@
-﻿services:
-  targets:
-    image: targets
-    build:
-      context: .
-      dockerfile: Targets/Dockerfile

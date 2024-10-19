@@ -8,6 +8,7 @@ using BuildLib.Secrets;
 using BuildLib.SolutionBuild;
 using CaseConverter;
 using FluentValidation;
+using Google.Apis.AndroidPublisher.v3;
 using Google.Apis.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -54,13 +55,19 @@ public static class HostApplicationBuilderExtensions
                     return new AndroidSigningKeyStoreOptions
                     {
                         AndroidSigningKeyAlias = c.AndroidSigningKeyAlias,
-                        AndroidSigningKeyStore = c.AndroidSigningKeyStore,
+                        AndroidSigningKeyStore = Path.GetFullPath(c.AndroidSigningKeyStore),
                         AndroidSigningKeyPass = c.Key,
                         AndroidSigningStorePass = c.Key
                     }.ToValidatedAndroidSigningKeyStoreOptions();
                 }
             )
-            .AddSingleton<DotNetPublishSettings>(x => x.GetRequiredService<DotNetPublishSettingsFactory>().Create());
+            .AddSingleton<DotNetPublishSettings>(x => x.GetRequiredService<DotNetPublishSettingsFactory>().Create())
+            .AddSingleton<AndroidPublisherService>(p =>
+                {
+                    var initializer = p.GetRequiredService<BaseClientService.Initializer>();
+                    return new AndroidPublisherService(initializer);
+                }
+            );
         return builder;
     }
 

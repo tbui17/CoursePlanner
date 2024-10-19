@@ -1,7 +1,11 @@
+using BuildLib.AndroidPublish;
+using BuildLib.CloudServices.GooglePlay;
+using BuildLib.Secrets;
 using BuildLib.SolutionBuild.Versioning;
 using BuildLib.Utils;
 using ByteSizeLib;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tools.DotNet;
@@ -14,12 +18,18 @@ public class PublishService(
     DotNetPublishSettings settings,
     Solution solution,
     ReleaseProject releaseProject,
-    VersionService versionService
+    VersionService versionService,
+    AndroidPublisherClient androidPublisherClient,
+    AndroidSigningKeyStoreOptions opts,
+    IOptions<AppConfiguration> configs
 )
 {
     public async Task ExecuteDotNetPublish()
     {
         await versionService.ValidateAppVersion();
+        var contents = Convert.FromBase64String(configs.Value.KeystoreContents);
+        await File.WriteAllBytesAsync(opts.AndroidSigningKeyStore, contents);
+
 
         logger.LogInformation("Publishing project {ProjectPath} with configuration {Configuration}",
             settings.Project,
@@ -32,6 +42,15 @@ public class PublishService(
             settings.Configuration
         );
         MoveFiles();
+    }
+
+    public async Task UploadToGooglePlay()
+    {
+        var file = solution.GetSignedAabFile();
+        await using var stream = File.OpenRead(file);
+
+        var cts = new CancellationTokenSource(1000 * 60 * 30);
+        await androidPublisherClient.UploadBundle(stream, cts.Token);
     }
 
     private void MoveFiles()

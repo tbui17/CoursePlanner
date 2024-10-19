@@ -2,7 +2,7 @@ using BuildLib.Secrets;
 using BuildLib.Utils;
 using Google.Apis.AndroidPublisher.v3;
 using Google.Apis.AndroidPublisher.v3.Data;
-using Google.Apis.Services;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -10,18 +10,17 @@ namespace BuildLib.CloudServices.GooglePlay;
 
 [Inject]
 public class AndroidPublisherClient(
-    BaseClientService.Initializer initializer,
-    IOptions<AppConfiguration> secrets,
-    ILogger<AndroidPublisherClient> logger)
+    AndroidPublisherService service,
+    IOptions<AppConfiguration> configs,
+    ILogger<AndroidPublisherClient> logger,
+    IServiceProvider provider
+)
 {
-    private readonly AndroidPublisherService _service = new(initializer);
-
     private static AppEdit CreateEdit(ExpiryTime? time = default)
     {
         time ??= new();
         return new AppEdit
         {
-            ExpiryTimeSeconds = time,
         };
     }
 
@@ -29,15 +28,15 @@ public class AndroidPublisherClient(
     {
         var appEdit = CreateEdit(60);
 
-        return _service.Edits.Insert(appEdit, secrets.Value.ApplicationId).ExecuteAsync();
+        return service.Edits.Insert(appEdit, configs.Value.ApplicationId).ExecuteAsync();
     }
 
-    private async Task<AppEdit> InsertEdit(ExpiryTime? time = default)
+    public async Task<AppEdit> InsertEdit(ExpiryTime? time = default)
     {
         var appEdit = CreateEdit(time);
-        var res = await _service
+        var res = await service
             .Edits
-            .Insert(appEdit, secrets.Value.ApplicationId)
+            .Insert(appEdit, configs.Value.ApplicationId)
             .ExecuteAsync();
         logger.LogDebug("Created edit {Id} {ETag} {ExpiryTimeSeconds}", res.Id, res.ETag, res.ExpiryTimeSeconds);
         return res;
@@ -46,7 +45,7 @@ public class AndroidPublisherClient(
     public async Task<BundlesListResponse> GetBundles()
     {
         var resp = await InsertEdit();
-        return await _service.Edits.Bundles.List(secrets.Value.ApplicationId, resp.Id).ExecuteAsync();
+        return await service.Edits.Bundles.List(configs.Value.ApplicationId, resp.Id).ExecuteAsync();
     }
 
     public async Task<int> GetLatestVersionCode()
@@ -55,37 +54,36 @@ public class AndroidPublisherClient(
         return resp.Bundles.Max(x => x.VersionCode) ?? throw new InvalidDataException("No version code found");
     }
 
-    public async Task UploadBundle(Stream stream, CancellationToken token)
+    public async Task<AppEdit> UploadBundleEdit(Stream stream, CancellationToken token)
     {
-        var resp = await InsertEdit();
+        var edit = await InsertEdit(9000);
 
-        var req = _service.Edits.Bundles.Upload(secrets.Value.ApplicationId,
-            resp.Id,
+
+        var req = service.Edits.Bundles.Upload(configs.Value.ApplicationId,
+            edit.Id,
             stream,
             "application/octet-stream"
         );
 
+
         AddProgressLogger();
 
-        logger.LogDebug("Starting upload for {Id}", resp.Id);
+        logger.LogDebug("Starting upload for {Id}", edit.Id);
         var res = await req.UploadAsync(token);
         if (res.Exception is { } e)
         {
             throw e;
         }
 
+
         logger.LogDebug("Upload completed for {Id} {Exception} {BytesSent} {Status}",
-            resp.Id,
+            edit.Id,
             res.Exception,
             res.BytesSent,
             res.Status
         );
 
-        logger.LogDebug("Committing edit for {Id}", resp.Id);
-        var res2 = await _service.Edits.Commit(secrets.Value.ApplicationId, resp.Id).ExecuteAsync(token);
-        logger.LogDebug("Edit committed for {Id} {@Response}", resp.Id, res2);
-
-        return;
+        return edit;
 
         void AddProgressLogger()
         {
@@ -108,5 +106,17 @@ public class AndroidPublisherClient(
             };
             req.UploadSessionData += session => { logger.LogDebug("Session details: {UploadUri}", session.UploadUri); };
         }
+    }
+
+    public async Task UploadBundle(Stream stream, CancellationToken token)
+    {
+        var edit = await UploadBundleEdit(stream, token);
+        // TODO: Refactor cyclic dependencies, break up classes
+        var trackClient = provider.GetRequiredService<TrackClient>();
+        await trackClient.UpdateTrack(edit.Id);
+
+        logger.LogDebug("Committing edit for {Id}", edit.Id);
+        var res2 = await service.Edits.Commit(configs.Value.ApplicationId, edit.Id).ExecuteAsync(token);
+        logger.LogDebug("Edit committed for {Id} {@Response}", edit.Id, res2);
     }
 }

@@ -1,37 +1,29 @@
 using BuildLib.Commands;
 using BuildLib.Utils;
-using BuildTests.Attributes;
-using BuildTests.Utils;
+using BuildTests.TestSetup;
 using FluentAssertions;
 using JetBrains.Annotations;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
-using Serilog;
 using Xunit.Abstractions;
 
 namespace BuildTests.Commands;
 
 [TestSubject(typeof(PublishCommand))]
-public class PublishCommandTest
+public class PublishCommandTest : BaseContainerSetup
 {
-    private readonly Container _container;
-
-    public PublishCommandTest(ITestOutputHelper testOutputHelper)
+    public PublishCommandTest(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
     {
-        _container = new ContainerInitializer().GetContainer();
-        var solution = _container.Resolve<Solution>();
-        solution.GetOutputDirectory().DeleteDirectory();
-
-        Log.Logger = new LoggerConfiguration()
-            .WriteTo.TestOutput(testOutputHelper)
-            .CreateLogger();
+        var solution = Container.Resolve<Solution>();
+        solution.CleanOutputDirectory();
     }
 
-    [ManualTest(Timeout = 1000 * 3600)]
+
+    [Fact(Timeout = 1000 * 3600)]
     public async Task DotNetPublish_ShouldCreateReleaseFile()
     {
-        var solution = _container.Resolve<Solution>();
-        var command = _container.Resolve<PublishCommand>();
+        var solution = Container.Resolve<Solution>();
+        var command = Container.Resolve<PublishCommand>();
         await command.ExecuteAsync();
 
         solution

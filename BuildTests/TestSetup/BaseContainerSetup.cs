@@ -14,8 +14,7 @@ public abstract class BaseContainerSetup
     {
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Debug()
-            .WriteTo
-            .TestOutput(testOutputHelper)
+            .WriteTo.TestOutput(testOutputHelper)
             .CreateLogger();
         Container = GetContainer();
     }

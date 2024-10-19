@@ -3,7 +3,6 @@ using BuildLib.SolutionBuild;
 using BuildLib.Utils;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Nuke.Common.ProjectModel;
 
 namespace BuildLib.Commands;
 
@@ -11,8 +10,7 @@ namespace BuildLib.Commands;
 public class PublishCommand(
     ILogger<PublishCommand> logger,
     PublishService publishService,
-    IOptions<AppConfiguration> options,
-    Solution solution
+    IOptions<AppConfiguration> options
 )
 {
     public async Task ExecuteAsync()
@@ -21,5 +19,16 @@ public class PublishCommand(
 
 
         await publishService.ExecuteDotNetPublish();
+    }
+
+    public async Task ExecuteUploadAsync()
+    {
+        await publishService.UploadToGooglePlay();
+    }
+
+    public async Task ExecutePublishAndUploadAsync()
+    {
+        await ExecuteAsync();
+        await publishService.UploadToGooglePlay();
     }
 }

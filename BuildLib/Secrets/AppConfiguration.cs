@@ -23,6 +23,8 @@ public record AppConfiguration
     public string AppVersion { get; set; } = null!;
     public string PublishConfiguration { get; set; } = null!;
     public string AndroidFramework { get; set; } = null!;
+    public string ReleaseTrack { get; set; } = null!;
+    public string ReleaseStatus { get; set; } = null!;
 
 
     public NullDiffRecord GetNullDiff()

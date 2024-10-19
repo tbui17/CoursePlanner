@@ -87,7 +87,7 @@ public class ConfigurationLoader(HostApplicationBuilder builder) : IDisposable
             return;
         }
 
-        builder.Configuration.AddUserSecrets<Container>();
+        builder.Configuration.AddUserSecrets(typeof(Container).Assembly, false, true);
 
         if (!NeedsRemoteSecrets())
         {
@@ -108,13 +108,6 @@ public class ConfigurationLoader(HostApplicationBuilder builder) : IDisposable
             builder.Configuration.Bind(courseConfiguration);
             if (courseConfiguration.Validate() is not { } exc)
             {
-                var file = GetSecretJsonFile();
-                if (IsStale(file))
-                {
-                    Log.Information("Secrets are valid but json file is stale, attempting to refresh secrets json");
-                    return true;
-                }
-
                 Log.Information("Secrets are valid, skipping secrets json load");
                 return false;
             }
@@ -156,10 +149,5 @@ public class ConfigurationLoader(HostApplicationBuilder builder) : IDisposable
             );
             Log.Information("Wrote secrets json to {Path}", jsonFile.FullName);
         }
-    }
-
-    private static bool IsStale(FileInfo file)
-    {
-        return file.LastWriteTime < DateTime.Now.AddMinutes(-15);
     }
 }

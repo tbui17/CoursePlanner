@@ -5,7 +5,7 @@ using FluentAssertions;
 using JetBrains.Annotations;
 using Xunit.Abstractions;
 
-namespace BuildTests.Commands;
+namespace BuildTests.Publishing;
 
 [TestSubject(typeof(PublishService))]
 public class PublishServiceTest : BaseContainerSetup

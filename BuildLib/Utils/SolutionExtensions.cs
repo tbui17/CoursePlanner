@@ -7,18 +7,42 @@ namespace BuildLib.Utils;
 
 public static class SolutionExtensions
 {
-    public static AbsolutePath GetOutputDirectory(this Solution solution)
+    public static AbsolutePath GetOrCreateOutputDirectory(this Solution solution)
     {
-        return solution
+        var dir = solution
             .Directory
             .GetDirectories()
-            .Single(x => x.Name.EqualsIgnoreCase("output"));
+            .SingleOrDefault(x => x.Name.EqualsIgnoreCase("output"));
+
+        if (dir is not null)
+        {
+            return dir;
+        }
+
+        var outputDir = solution.Directory / "output";
+        return outputDir.CreateDirectory();
+    }
+
+    public static AbsolutePath CleanOutputDirectory(this Solution solution)
+    {
+        var dir = solution
+            .Directory
+            .GetDirectories()
+            .SingleOrDefault(x => x.Name.EqualsIgnoreCase("output"));
+
+        if (dir is not null)
+        {
+            return dir;
+        }
+
+        var outputDir = solution.Directory / "output";
+        return outputDir.CreateOrCleanDirectory();
     }
 
     public static AbsolutePath GetSignedAabFile(this Solution solution)
     {
         return solution
-            .GetOutputDirectory()
+            .GetOrCreateOutputDirectory()
             .GetFiles("*.aab")
             .Single(x => x.Name.ContainsIgnoreCase("signed"));
     }

@@ -83,6 +83,16 @@ variable workspace_name {
   type        = string
 }
 
+variable "release_track" {
+  description = "The track for the release"
+  type        = string
+}
+
+variable "release_status" {
+  description = "The status for the release"
+  type        = string
+}
+
 locals {
   variables = {
     repository_owner          = var.repository_owner
@@ -102,5 +112,7 @@ locals {
     project_name          = var.project_name
     app_version           = var.app_version
     publish_configuration = var.publish_configuration
+    release_track  = var.release_track
+    release_status = var.release_status
   }
 }

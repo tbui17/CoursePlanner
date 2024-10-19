@@ -1,13 +1,14 @@
 using BuildLib.FileSystem;
-using BuildTests.Attributes;
+using BuildTests.TestSetup;
 using BuildTests.Utils;
 using FluentAssertions;
+using Xunit.Abstractions;
 
 namespace BuildTests.Utilities;
 
-public class SolutionFinderTest
+public class SolutionFinderTest(ITestOutputHelper testOutputHelper) : BaseContainerSetup(testOutputHelper)
 {
-    [Integration]
+    [Fact]
     public void FindSolutionFile_GetsSolution()
     {
         var container = new ContainerInitializer().GetContainer();
