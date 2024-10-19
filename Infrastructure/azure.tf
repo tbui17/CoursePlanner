@@ -86,6 +86,16 @@ resource "azurerm_role_assignment" "appconf_dataowner" {
 }
 
 
+data "azurerm_subscription" "current" {}
+
+
+resource "azurerm_role_assignment" "terraform_contributor_role" {
+  scope                = data.azurerm_subscription.current.id
+  role_definition_name = "Contributor"
+  principal_id         = azuread_service_principal.terraform.object_id
+}
+
+
 data "azuread_client_config" "current" {}
 
 
