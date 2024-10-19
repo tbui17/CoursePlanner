@@ -95,6 +95,14 @@ resource "azurerm_role_assignment" "terraform_contributor_role" {
   principal_id         = azuread_service_principal.terraform.object_id
 }
 
+resource "azurerm_role_assignment" "terraform_key_vault_administrator_role" {
+  scope                = data.azurerm_subscription.current.id
+  role_definition_name = "Key Vault Administrator"
+  principal_id         = azuread_service_principal.terraform.object_id
+}
+
+
+
 
 data "azuread_client_config" "current" {}
 
