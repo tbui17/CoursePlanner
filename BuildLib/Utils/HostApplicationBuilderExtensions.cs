@@ -15,7 +15,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tools.DotNet;
-using Semver;
 
 namespace BuildLib.Utils;
 
@@ -39,13 +38,6 @@ public static class HostApplicationBuilderExtensions
                     var projectName = p.GetAppConfigurationOrThrow(x => x.ProjectName);
                     var project = solution.GetProjectWithValidation(projectName);
                     return new ReleaseProject { Value = project };
-                }
-            )
-            .AddKeyedSingleton<SemVersion>(nameof(AppConfiguration.AppVersion),
-                (p, _) =>
-                {
-                    var versionStr = p.GetAppConfigurationOrThrow(x => x.AppVersion);
-                    return SemVersion.Parse(versionStr, SemVersionStyles.AllowV);
                 }
             )
             .AddSingleton<IMsBuildProject>(p => p.GetRequiredService<MsBuildService>().GetMsBuildProject())

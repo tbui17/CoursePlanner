@@ -31,7 +31,7 @@ public sealed class BundleUploadTest : IAsyncDisposable
     [SuppressMessage("Usage", "xUnit1004:Test methods should not be skipped")]
     public async Task UploadBundle_Succeeds()
     {
-        var client = _container.Resolve<AndroidPublisherClient>();
+        var client = _container.Resolve<IAndroidPublisherClient>();
         var solution = _container.Resolve<Solution>();
         var path = solution.GetSignedAabFile();
 

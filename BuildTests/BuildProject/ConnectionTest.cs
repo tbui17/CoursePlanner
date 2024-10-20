@@ -26,7 +26,7 @@ public class ConnectionTest
     [Integration]
     public async Task AndroidPublisherClient_CanConnect()
     {
-        var client = _container.Resolve<AndroidPublisherClient>();
+        var client = _container.Resolve<IAndroidPublisherClient>();
 
 
         var res = await client
@@ -42,7 +42,7 @@ public class ConnectionTest
     {
         var secrets = _container.GetConfiguration<AppConfiguration>();
         secrets.ValidateOrThrow();
-        var client = _container.Resolve<AndroidPublisherClient>();
+        var client = _container.Resolve<IAndroidPublisherClient>();
 
 
         var res = await client

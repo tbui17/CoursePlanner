@@ -14,13 +14,17 @@ public record AppConfiguration
     public string ConnectionString { get; set; } = null!;
     public string BlobConnectionString { get; set; } = null!;
     public string KeystoreContents { get; set; } = null!;
+
     public string ApplicationId { get; set; } = null!;
-    public string GoogleServiceAccountBase64 { get; set; } = null!;
+
+    // public string GoogleServiceAccountBase64 { get; set; } = null!;
     public string KeyUri { get; set; } = null!;
-    public string BundlePath { get; set; } = null!;
+
+    // public string BundlePath { get; set; } = null!;
     public string ProjectName { get; set; } = null!;
-    public string SolutionName { get; set; } = null!;
-    public string AppVersion { get; set; } = null!;
+
+    // public string SolutionName { get; set; } = null!;
+    // public string AppVersion { get; set; } = null!;
     public string PublishConfiguration { get; set; } = null!;
     public string AndroidFramework { get; set; } = null!;
     public string ReleaseTrack { get; set; } = null!;

@@ -19,6 +19,7 @@ public abstract class BaseContainerSetup
         Container = GetContainer();
     }
 
+
     private static Container GetContainer() => new ContainerInitializer().GetContainer();
 
     public T Resolve<T>() where T : notnull => Container.Resolve<T>();

@@ -8,12 +8,19 @@ using Microsoft.Extensions.Options;
 
 namespace BuildLib.CloudServices.GooglePlay;
 
-[Inject]
-public class TrackClient(
+public interface ITrackService
+{
+    Task<Track> GetTrack(string editId);
+    Task<Track> UpdateTrack(string editId, CancellationToken token = default);
+}
+
+[Inject(typeof(ITrackService))]
+public class TrackService(
     IOptions<AppConfiguration> configs,
     AndroidPublisherService service,
-    ILogger<TrackClient> logger,
-    VersionService versionService)
+    ILogger<ITrackService> logger,
+    IVersionService versionService
+) : ITrackService
 {
     public async Task<Track> GetTrack(string editId)
     {
@@ -26,23 +33,27 @@ public class TrackClient(
         return res;
     }
 
-    public async Task<Track> UpdateTrack(string editId)
+    public async Task<Track> UpdateTrack(string editId, CancellationToken token = default)
     {
         var track = await GetTrack(editId);
         logger.LogDebug("Updating track: {@Track}", track);
         var versionData = await versionService.GetValidatedProjectVersionData();
-
-        var release = track.Releases[0];
-        release.Name = configs.Value.AppVersion;
-        release.Status = configs.Value.ReleaseStatus;
-        release.VersionCodes = [versionData.VersionCode];
+        track.Releases =
+        [
+            new()
+            {
+                Name = versionData.AppVersion.ToString(),
+                Status = configs.Value.ReleaseStatus,
+                VersionCodes = [versionData.VersionCode]
+            }
+        ];
 
         logger.LogDebug("Updated track: {@Track}", track);
 
         var res = await service
             .Edits.Tracks
             .Update(track, configs.Value.ApplicationId, editId, configs.Value.ReleaseTrack)
-            .ExecuteAsync();
+            .ExecuteAsync(token);
 
         logger.LogDebug("Saved changes to track: {@Track}", res);
         return res;

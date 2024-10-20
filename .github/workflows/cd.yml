@@ -4,7 +4,7 @@ on:
     branches:
       - publish-ci
 jobs:
-  cd:
+  build:
     runs-on: ubuntu-latest
     permissions: write-all
     env:
@@ -20,25 +20,14 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
-      #      - name: Install .NET MAUI
-      #        run: dotnet workload install maui-android
+                            - name: Install .NET MAUI
+                            run: dotnet workload install maui-android
+      - name: 'Cache nuget'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.nuget/packages
+          key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj', '**/Directory.Packages.props') }}
 
-      - name: Release Build
-        run: |
-          ls
-          dotnet run -v n --project Scripts/Scripts.csproj -- example_command
-
-
-#      - id: auth
-#        uses: google-github-actions/auth@v2
-#        with:
-#          workload_identity_provider: ${{vars.WORKLOAD_IDENTITY_PROVIDER}}
-#          service_account: ${{vars.SERVICE_ACCOUNT}}
-#      - uses: r0adkll/upload-google-play@v1
-#        with:
-#          serviceAccountJson: ${{ steps.auth.outputs.credentials_file_path }}
-#          packageName: ${{vars.APPLICATION_ID}}
-#          releaseFiles: ${{vars.RELEASE_FILES}}
-#          track: internal
-#          status: draft
-#          inAppUpdatePriority: 2
+      - name: Publish and upload
+        run: dotnet run -v n --project Scripts/Scripts.csproj -- publish_upload

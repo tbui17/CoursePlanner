@@ -18,8 +18,8 @@ public class PublishService(
     DotNetPublishSettings settings,
     Solution solution,
     ReleaseProject releaseProject,
-    VersionService versionService,
-    AndroidPublisherClient androidPublisherClient,
+    IVersionService versionService,
+    IAndroidPublisherClient androidPublisherClient,
     AndroidSigningKeyStoreOptions opts,
     IOptions<AppConfiguration> configs
 )

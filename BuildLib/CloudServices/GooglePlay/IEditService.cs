@@ -8,29 +8,26 @@ using Microsoft.Extensions.Options;
 
 namespace BuildLib.CloudServices.GooglePlay;
 
-[Inject]
-public class AndroidPublisherClient(
+public interface IEditService
+{
+    Task<AppEdit> InsertEdit();
+    Task<BundlesListResponse> GetBundles();
+    Task<AppEdit> UploadBundle(Stream stream, CancellationToken token);
+}
+
+[Inject(typeof(IEditService), Lifetime = ServiceLifetime.Singleton)]
+public class EditService(
     AndroidPublisherService service,
     IOptions<AppConfiguration> configs,
-    ILogger<AndroidPublisherClient> logger,
-    IServiceProvider provider
-)
+    ILogger<IEditService> logger) : IEditService
 {
-    public Task<AppEdit> Probe()
+    public async Task<AppEdit> InsertEdit()
     {
-        var appEdit = new AppEdit();
-
-        return service.Edits.Insert(appEdit, configs.Value.ApplicationId).ExecuteAsync();
-    }
-
-    public async Task<AppEdit> InsertEdit(ExpiryTime? time = default)
-    {
-        var appEdit = new AppEdit();
         var res = await service
             .Edits
-            .Insert(appEdit, configs.Value.ApplicationId)
+            .Insert(new AppEdit(), configs.Value.ApplicationId)
             .ExecuteAsync();
-        logger.LogDebug("Created edit {Id} {ETag} {ExpiryTimeSeconds}", res.Id, res.ETag, res.ExpiryTimeSeconds);
+
         return res;
     }
 
@@ -40,15 +37,9 @@ public class AndroidPublisherClient(
         return await service.Edits.Bundles.List(configs.Value.ApplicationId, resp.Id).ExecuteAsync();
     }
 
-    public async Task<int> GetLatestVersionCode()
+    public async Task<AppEdit> UploadBundle(Stream stream, CancellationToken token)
     {
-        var resp = await GetBundles();
-        return resp.Bundles.Max(x => x.VersionCode) ?? throw new InvalidDataException("No version code found");
-    }
-
-    public async Task<AppEdit> UploadBundleEdit(Stream stream, CancellationToken token)
-    {
-        var edit = await InsertEdit(9000);
+        var edit = await InsertEdit();
 
 
         var req = service.Edits.Bundles.Upload(configs.Value.ApplicationId,
@@ -98,17 +89,5 @@ public class AndroidPublisherClient(
             };
             req.UploadSessionData += session => { logger.LogDebug("Session details: {UploadUri}", session.UploadUri); };
         }
-    }
-
-    public async Task UploadBundle(Stream stream, CancellationToken token)
-    {
-        var edit = await UploadBundleEdit(stream, token);
-        // TODO: Refactor cyclic dependencies, break up classes
-        var trackClient = provider.GetRequiredService<TrackClient>();
-        await trackClient.UpdateTrack(edit.Id);
-
-        logger.LogDebug("Committing edit for {Id}", edit.Id);
-        var res2 = await service.Edits.Commit(configs.Value.ApplicationId, edit.Id).ExecuteAsync(token);
-        logger.LogDebug("Edit committed for {Id} {@Response}", edit.Id, res2);
     }
 }

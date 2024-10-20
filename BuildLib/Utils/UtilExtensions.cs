@@ -143,4 +143,16 @@ public static class UtilExtensions
             }
         );
     }
+
+    public static T SetData<T>(this T exception, string key, object data) where T : Exception
+    {
+        exception.Data[key] = data;
+        return exception;
+    }
+
+    public static T SetData<T>(this T exception, object data) where T : Exception
+    {
+        exception.Data[nameof(Exception.Data)] = data;
+        return exception;
+    }
 }
