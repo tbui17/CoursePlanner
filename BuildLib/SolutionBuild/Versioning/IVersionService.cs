@@ -16,27 +16,26 @@ public class VersionService(
 {
     public async Task<ValidatedProjectVersionData> GetValidatedProjectVersionData()
     {
-        var latestVersionCode = await provider.GetLatestVersionCode();
-        ValidateAppVersion(latestVersionCode);
-        return msBuildProject
-            .GetProjectVersionData()
-            .Thru(mapper.ToValidatedProjectVersionData);
+        var data = msBuildProject.GetProjectVersionData();
+        await ValidateAppVersion(data.VersionCode);
+        return mapper.ToValidatedProjectVersionData(data);
     }
 
     public async Task ValidateAppVersion()
     {
-        var latestVersionCode = await provider.GetLatestVersionCode();
-        ValidateAppVersion(latestVersionCode);
+        var projectCurrentVersionCode = msBuildProject.GetProjectVersionData().VersionCode;
+        await ValidateAppVersion(projectCurrentVersionCode);
     }
 
-    private void ValidateAppVersion(int versionCode)
+    private async Task ValidateAppVersion(int projectCurrentVersionCode)
     {
-        var data = msBuildProject.GetProjectVersionData();
-        var nextVersion = data.VersionCode + 1;
-        if (versionCode != nextVersion)
+        var latestVersionCode = await provider.GetLatestVersionCode();
+        var expectedVersionCode = latestVersionCode + 1;
+
+        if (projectCurrentVersionCode != expectedVersionCode)
         {
             throw new InvalidDataException(
-                $"Version code mismatch: expected {versionCode + 1} but found {data.VersionCode}"
+                $"Version code mismatch: expected {expectedVersionCode} but found {projectCurrentVersionCode}"
             );
         }
     }
