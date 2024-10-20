@@ -88,21 +88,21 @@ resource "azurerm_role_assignment" "appconf_dataowner" {
 
 data "azurerm_subscription" "current" {}
 
-
 resource "azurerm_role_assignment" "terraform_contributor_role" {
-  scope                = data.azurerm_subscription.current.id
+  scope                = azurerm_key_vault.key_vault.id
   role_definition_name = "Contributor"
-  principal_id         = azuread_service_principal.terraform.object_id
+  principal_id         = data.azuread_service_principal.terraform2.object_id
 }
 
 resource "azurerm_role_assignment" "terraform_key_vault_administrator_role" {
-  scope                = data.azurerm_subscription.current.id
+  scope        = azurerm_key_vault.key_vault.id
   role_definition_name = "Key Vault Administrator"
-  principal_id         = azuread_service_principal.terraform.object_id
+  principal_id = data.azuread_service_principal.terraform2.object_id
 }
 
-
-
+data "azuread_service_principal" "terraform2" {
+  client_id = var.service_principal_id
+}
 
 data "azuread_client_config" "current" {}
 
