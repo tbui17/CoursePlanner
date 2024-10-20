@@ -109,8 +109,7 @@ public static class HostApplicationBuilderExtensions
                         )
                     );
                 }
-            )
-            .AddSingleton<RemoteConfigurationClient>();
+            );
         return builder;
     }
 

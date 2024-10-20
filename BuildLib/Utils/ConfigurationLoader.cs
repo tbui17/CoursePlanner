@@ -13,6 +13,7 @@ using Serilog;
 
 namespace BuildLib.Utils;
 
+[Inject(Lifetime = ServiceLifetime.Singleton)]
 public class RemoteConfigurationClient(SecretClient client)
 {
     public Dictionary<string, string> GetRemoteConfigurations()
