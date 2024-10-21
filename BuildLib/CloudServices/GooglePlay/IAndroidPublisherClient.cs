@@ -41,6 +41,7 @@ public class AndroidPublisherClient(
     public async Task UploadBundle(Stream stream, CancellationToken token)
     {
         var edit = await editService.UploadBundle(stream, token);
+
         await trackService.UpdateTrack(edit.Id, token);
 
         logger.LogDebug("Committing edit for {Id}", edit.Id);

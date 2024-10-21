@@ -1,8 +1,12 @@
 using BuildLib.SolutionBuild;
+using Google;
+using Google.Apis.Logging;
+using Google.Apis.Util;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Host = Microsoft.Extensions.Hosting.Host;
+using ILogger = Google.Apis.Logging.ILogger;
 
 namespace BuildLib.Utils;
 
@@ -37,7 +41,29 @@ public class Container(IHost host)
             .BindConfiguration();
 
         builder.Logging.AddSerilog();
+        ApplicationContext.RegisterLogger(new GoogleLogger(LogLevel.Debug,
+                SystemClock.Default,
+                typeof(HostApplicationBuilder)
+            )
+        );
 
         return builder;
+    }
+}
+
+public class GoogleLogger : BaseLogger
+{
+    public GoogleLogger(LogLevel minimumLogLevel, IClock clock, Type forType) : base(minimumLogLevel, clock, forType)
+    {
+    }
+
+
+    protected override ILogger BuildNewLogger(Type type) =>
+        new GoogleLogger(MinimumLogLevel, Clock, type);
+
+
+    protected override void Log(LogLevel logLevel, string formattedMessage)
+    {
+        Serilog.Log.Logger.Write(logLevel.ToLogEventLevel(), "Google log: {FormattedMessage}", formattedMessage);
     }
 }

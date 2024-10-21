@@ -8,22 +8,23 @@ using Microsoft.Extensions.Options;
 namespace BuildLib.CloudServices;
 
 [Inject]
-public class InitializerFactory(IOptions<GoogleServiceAccount> configs)
+public class InitializerFactory(IOptions<AppConfiguration> configs)
 {
     public BaseClientService.Initializer Create()
     {
-        var secrets = configs.Value;
+        var secrets = configs.Value.GoogleServiceAccount;
 
         var serviceCredInitializer =
             new ServiceAccountCredential.Initializer(secrets.ClientEmail)
             {
-                Scopes = [AndroidPublisherService.Scope.Androidpublisher]
+                Scopes = [AndroidPublisherService.Scope.Androidpublisher],
             }.FromPrivateKey(secrets.PrivateKey);
         var serviceCred = new ServiceAccountCredential(serviceCredInitializer);
 
         var initializer = new BaseClientService.Initializer
         {
             HttpClientInitializer = serviceCred,
+            ApplicationName = configs.Value.ApplicationId
         };
 
         return initializer;

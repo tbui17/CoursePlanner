@@ -1,14 +1,16 @@
 using BuildLib.Utils;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BuildLib.SolutionBuild.Versioning;
 
 public interface IVersionService
 {
     Task<ValidatedProjectVersionData> GetValidatedProjectVersionData();
+    Task<ProjectVersionData> GetProjectVersionData();
     Task ValidateAppVersion();
 }
 
-[Inject(typeof(IVersionService))]
+[Inject(typeof(IVersionService), Lifetime = ServiceLifetime.Singleton)]
 public class VersionService(
     IMsBuildProject msBuildProject,
     LatestAndroidServiceVersionProvider provider,
@@ -21,9 +23,15 @@ public class VersionService(
         return mapper.ToValidatedProjectVersionData(data);
     }
 
+    public Task<ProjectVersionData> GetProjectVersionData()
+    {
+        return Task.FromResult(msBuildProject.GetProjectVersionData());
+    }
+
     public async Task ValidateAppVersion()
     {
-        var projectCurrentVersionCode = msBuildProject.GetProjectVersionData().VersionCode;
+        var versionData = await GetValidatedProjectVersionData();
+        var projectCurrentVersionCode = versionData.VersionCode;
         await ValidateAppVersion(projectCurrentVersionCode);
     }
 

@@ -28,6 +28,8 @@ public class EditService(
             .Insert(new AppEdit(), configs.Value.ApplicationId)
             .ExecuteAsync();
 
+        logger.LogDebug("Inserted edit: {@Edit}", res);
+
         return res;
     }
 

@@ -3,6 +3,7 @@ using BuildLib.SolutionBuild.Versioning;
 using BuildLib.Utils;
 using Google.Apis.AndroidPublisher.v3;
 using Google.Apis.AndroidPublisher.v3.Data;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -14,7 +15,7 @@ public interface ITrackService
     Task<Track> UpdateTrack(string editId, CancellationToken token = default);
 }
 
-[Inject(typeof(ITrackService))]
+[Inject(typeof(ITrackService), Lifetime = ServiceLifetime.Singleton)]
 public class TrackService(
     IOptions<AppConfiguration> configs,
     AndroidPublisherService service,
@@ -35,25 +36,33 @@ public class TrackService(
 
     public async Task<Track> UpdateTrack(string editId, CancellationToken token = default)
     {
-        var track = await GetTrack(editId);
-        logger.LogDebug("Updating track: {@Track}", track);
-        var versionData = await versionService.GetValidatedProjectVersionData();
-        track.Releases =
-        [
-            new()
-            {
-                Name = versionData.AppVersion.ToString(),
-                Status = configs.Value.ReleaseStatus,
-                VersionCodes = [versionData.VersionCode]
-            }
-        ];
+        var versionData = await versionService.GetProjectVersionData();
 
-        logger.LogDebug("Updated track: {@Track}", track);
+
+        var release = new TrackRelease
+        {
+            Name = versionData.AppVersion.ToString(),
+            Status = configs.Value.ReleaseStatus,
+            VersionCodes = [versionData.VersionCode],
+        };
+
+        var track = new Track
+        {
+            Releases = [release]
+        };
+
+        logger.LogDebug("Created track update data: {@Track}", track);
 
         var res = await service
             .Edits.Tracks
-            .Update(track, configs.Value.ApplicationId, editId, configs.Value.ReleaseTrack)
+            .Update(
+                track,
+                configs.Value.ApplicationId,
+                editId,
+                configs.Value.ReleaseTrack
+            )
             .ExecuteAsync(token);
+
 
         logger.LogDebug("Saved changes to track: {@Track}", res);
         return res;

@@ -4,6 +4,8 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Serilog.Events;
+using LogLevel = Google.Apis.Logging.LogLevel;
 
 namespace BuildLib.Utils;
 
@@ -155,4 +157,15 @@ public static class UtilExtensions
         exception.Data[nameof(Exception.Data)] = data;
         return exception;
     }
+
+    public static LogEventLevel ToLogEventLevel(this LogLevel logLevel) => logLevel switch
+    {
+        LogLevel.Debug => LogEventLevel.Debug,
+        LogLevel.Error => LogEventLevel.Error,
+        LogLevel.Info => LogEventLevel.Information,
+        LogLevel.Warning => LogEventLevel.Warning,
+        LogLevel.All => LogEventLevel.Verbose,
+        LogLevel.None => LogEventLevel.Fatal,
+        _ => throw new ArgumentOutOfRangeException(nameof(logLevel), logLevel, null)
+    };
 }
