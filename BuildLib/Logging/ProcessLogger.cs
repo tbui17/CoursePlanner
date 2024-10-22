@@ -22,7 +22,7 @@ public partial class ProcessLogger<T>(ILogger<T> logger)
             return;
         }
 
-        logger.LogDebug("{Text}", output.Text);
+        logger.LogInformation("{Text}", output.Text);
     }
 
     public void Log(OutputType type, string text)

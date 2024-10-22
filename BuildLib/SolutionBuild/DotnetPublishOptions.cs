@@ -5,6 +5,7 @@ using BuildLib.Utils;
 using Microsoft.Extensions.Options;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
+using Nuke.Common.Utilities;
 
 namespace BuildLib.SolutionBuild;
 
@@ -16,12 +17,45 @@ public class DotNetPublishSettingsFactory(
     AndroidSigningKeyStoreOptions androidSigningKeyStoreOptions
 )
 {
-    public DotNetPublishSettings Create() =>
-        new DotNetPublishSettings()
+    public DotNetPublishSettings Create()
+    {
+        return new DotNetPublishSettings()
             .EnableNoLogo()
             .SetProject(project.Value.Path)
             .SetConfiguration(configs.Value.PublishConfiguration)
             .SetProcessLogger(processLogger.Log)
             .SetFramework(configs.Value.AndroidFramework)
-            .SetProperties(androidSigningKeyStoreOptions.ToPropertyDictionary());
+            .SetProperties(androidSigningKeyStoreOptions.ToPropertyDictionary())
+            .SetProcessExitHandler(ExitHandler);
+    }
+
+    private void ExitHandler(IProcess p)
+    {
+        if (p.ExitCode is not 0)
+        {
+            var msg = new
+            {
+                p.ExitCode,
+                p.Output,
+                p.Arguments,
+                p.Id,
+                p.FileName,
+                p.HasExited,
+                p.WorkingDirectory
+            };
+            var jsonMsg = msg.ToJson();
+            processLogger.Log(OutputType.Err, "Dotnet publish failed");
+            processLogger.Log(OutputType.Err, jsonMsg);
+            try
+            {
+                p.AssertZeroExitCode();
+            }
+            catch (ProcessException e)
+            {
+                throw new ApplicationException(jsonMsg, e);
+            }
+        }
+
+        processLogger.Log(OutputType.Std, "Dotnet publish succeeded");
+    }
 }

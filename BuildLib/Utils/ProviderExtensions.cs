@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using BuildLib.Secrets;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -49,16 +50,20 @@ public static class ProviderExtensions
 
     public static T GetAppConfigurationOrThrow<T>(
         this IServiceProvider provider,
-        Func<AppConfiguration, T> selector
+        Expression<Func<AppConfiguration, T>> selector
     )
     {
-        var res = selector(provider.GetAppConfigurationOrThrow());
+        var func = selector.Compile();
+        var res = func(provider.GetAppConfigurationOrThrow());
+        //
+
         if (res is string s)
         {
-            ArgumentException.ThrowIfNullOrWhiteSpace(s);
+            ArgumentException.ThrowIfNullOrWhiteSpace(s, selector.ToString());
         }
 
-        ArgumentNullException.ThrowIfNull(res);
+        ArgumentNullException.ThrowIfNull(res, selector.ToString());
+
         return res;
     }
 

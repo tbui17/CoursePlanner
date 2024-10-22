@@ -89,7 +89,7 @@ public class ConfigurationLoader(HostApplicationBuilder builder) : IDisposable
             return;
         }
 
-        builder.Configuration.AddUserSecrets(typeof(Container).Assembly, false, true);
+        builder.Configuration.AddUserSecrets<Container>(true, true);
 
         if (!NeedsRemoteSecrets())
         {
@@ -101,7 +101,7 @@ public class ConfigurationLoader(HostApplicationBuilder builder) : IDisposable
         var jsonFile = GetSecretJsonFile();
         WriteJsonFile();
         // add a second time to load new secrets
-        builder.Configuration.AddUserSecrets<Container>();
+        builder.Configuration.AddUserSecrets<Container>(true, true);
         return;
 
         bool NeedsRemoteSecrets()
