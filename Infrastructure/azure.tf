@@ -85,9 +85,6 @@ resource "azurerm_role_assignment" "appconf_dataowner" {
   principal_id         = data.azurerm_client_config.current.object_id
 }
 
-
-data "azurerm_subscription" "current" {}
-
 resource "azurerm_role_assignment" "terraform_contributor_role" {
   scope                = azurerm_key_vault.key_vault.id
   role_definition_name = "Contributor"

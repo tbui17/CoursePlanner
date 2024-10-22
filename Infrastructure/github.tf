@@ -1,7 +1,3 @@
-data "github_actions_public_key" "github_public_key" {
-  repository = var.repository_name
-}
-
 resource "github_actions_secret" "action_secret" {
   for_each = tomap({
     "KEY" : var.key,
@@ -17,24 +13,7 @@ resource "github_actions_secret" "action_secret" {
 }
 
 resource "github_actions_variable" "action_var" {
-  for_each = tomap({
-    "PROJECT_NUMBER" : var.project_number,
-    "POOL_ID" : google_iam_workload_identity_pool.main.workload_identity_pool_id,
-    "PROVIDER_ID" : google_iam_workload_identity_pool_provider.main.workload_identity_pool_provider_id,
-    "APPLICATION_ID" : var.application_id,
-    "ANDROID_SIGNING_KEY_STORE" : var.android_signing_key_store,
-    "ANDROID_SIGNING_KEY_ALIAS" : var.android_signing_key_alias,
-    "ANDROID_FRAMEWORK" : var.android_framework,
-    "USER_IDENTIFIER" : var.user_identifier,
-    "WORKLOAD_IDENTITY_PROVIDER" : google_iam_workload_identity_pool_provider.main.name,
-    "REPOSITORY_OWNER" : var.repository_owner,
-    "REPOSITORY_NAME" : var.repository_name,
-    "PROJECT_ID" : var.project_id,
-    "PROJECT_REGION" : var.project_region,
-    "PROJECT_ZONE" : var.project_zone,
-    "RELEASE_FILES" : local.release_files,
-    "OUTPUT_FOLDER" : local.output_folder
-  })
+  for_each = local.github_action_variables
   repository    = var.repository_name
   variable_name = each.key
   value         = each.value
@@ -47,4 +26,14 @@ locals {
     clientId       = var.service_principal_id,
     clientSecret   = var.service_principal_secret
   })
+  _github_action_variables1 = {for k, v in local.variables : upper(k) => v}
+  _github_action_variables2 = {
+
+    "POOL_ID" : google_iam_workload_identity_pool.main.workload_identity_pool_id,
+    "PROVIDER_ID" : google_iam_workload_identity_pool_provider.main.workload_identity_pool_provider_id,
+    "WORKLOAD_IDENTITY_PROVIDER" : google_iam_workload_identity_pool_provider.main.name,
+    "RELEASE_FILES" : local.release_files,
+    "OUTPUT_FOLDER" : local.output_folder
+  }
+  github_action_variables = merge(local._github_action_variables1, local._github_action_variables2)
 }

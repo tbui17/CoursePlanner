@@ -49,7 +49,6 @@ variable "blob_container_name" {
 variable "devops_org_url" {
   description = "The Azure DevOps organization URL"
   type        = string
-  sensitive   = true
 }
 
 variable solution_name {
