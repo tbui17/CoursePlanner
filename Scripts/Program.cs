@@ -2,7 +2,6 @@
 using BuildLib.Logging;
 using BuildLib.SolutionBuild;
 using BuildLib.Utils;
-using CliWrap.Builders;
 using Cocona;
 using Microsoft.Extensions.Logging;
 using Nuke.Common.ProjectModel;
@@ -110,30 +109,4 @@ void ConfigLogging()
     }
 
     Log.Logger = config.CreateLogger();
-}
-
-public static class ArgumentsBuilderExtensions
-{
-    public static ArgumentsBuilder Add(this ArgumentsBuilder builder, IDictionary<string, string> args)
-    {
-        var args2 = args
-            .SelectKeys(x =>
-                {
-                    if (x.Key.StartsWith('-'))
-                    {
-                        return x.Key;
-                    }
-
-                    return "--" + x.Key;
-                }
-            );
-        foreach (var (key, value) in args2)
-        {
-            builder
-                .Add(key)
-                .Add(value);
-        }
-
-        return builder;
-    }
 }
