@@ -181,4 +181,7 @@ public static class UtilExtensions
     };
 
     public static bool IsTrueString(this string? value) => value?.EqualsIgnoreCase("true") ?? false;
+
+    public static IEnumerable<T> InterleaveWith<T>(this IEnumerable<T> items, T item) =>
+        items.SelectMany(x => new[] { item, x });
 }
