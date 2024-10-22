@@ -1,12 +1,13 @@
+using BuildLib.Logging;
 using BuildLib.SolutionBuild;
 using Google;
-using Google.Apis.Logging;
 using Google.Apis.Util;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Serilog;
-using Host = Microsoft.Extensions.Hosting.Host;
-using ILogger = Google.Apis.Logging.ILogger;
+using LogLevel = Google.Apis.Logging.LogLevel;
+
 
 namespace BuildLib.Utils;
 
@@ -17,18 +18,47 @@ public class Container(IHost host)
 
     public T GetConfiguration<T>() => host.Services.GetConfigurationOrThrow<T>();
 
-    public static Container Init()
+    public static Container Init() => Init(_ => { });
+
+    public static Container Init(Action<HostApplicationBuilder> configure)
     {
         var builder = CreateBuilder();
-
+        configure(builder);
         var host = builder.Build();
-
         var container = new Container(host);
+        InitGoogleLogger();
 
         return container;
+
+        void InitGoogleLogger()
+        {
+            var initLogger = container.Resolve<ILogger<Container>>();
+            using var _ = initLogger.MethodScope();
+            var fac = container.Resolve<ILoggerFactory>();
+            var googleLogger = new GoogleLogger(LogLevel.Debug, SystemClock.Default, typeof(Container))
+            {
+                LogImplementation = (level, fmt, contextType) =>
+                {
+                    fac
+                        .CreateLogger(contextType)
+                        .Log(level.ToLogLevel(), "Google log: {FormattedMessage}", fmt);
+                }
+            };
+
+
+            try
+            {
+                ApplicationContext.RegisterLogger(googleLogger);
+            }
+            catch (InvalidOperationException e) when (
+                e.Message.Contains("A logger was already registered with this context"))
+            {
+                initLogger.LogInformation(e, "Google Logger already registered");
+            }
+        }
     }
 
-    public static HostApplicationBuilder CreateBuilder()
+    private static HostApplicationBuilder CreateBuilder()
     {
         MsBuildService.Initialize();
         var builder = Host.CreateApplicationBuilder();
@@ -41,29 +71,8 @@ public class Container(IHost host)
             .BindConfiguration();
 
         builder.Logging.AddSerilog();
-        ApplicationContext.RegisterLogger(new GoogleLogger(LogLevel.Debug,
-                SystemClock.Default,
-                typeof(HostApplicationBuilder)
-            )
-        );
+
 
         return builder;
-    }
-}
-
-public class GoogleLogger : BaseLogger
-{
-    public GoogleLogger(LogLevel minimumLogLevel, IClock clock, Type forType) : base(minimumLogLevel, clock, forType)
-    {
-    }
-
-
-    protected override ILogger BuildNewLogger(Type type) =>
-        new GoogleLogger(MinimumLogLevel, Clock, type);
-
-
-    protected override void Log(LogLevel logLevel, string formattedMessage)
-    {
-        Serilog.Log.Logger.Write(logLevel.ToLogEventLevel(), "Google log: {FormattedMessage}", formattedMessage);
     }
 }

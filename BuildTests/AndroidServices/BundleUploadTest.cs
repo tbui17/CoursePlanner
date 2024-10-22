@@ -1,43 +1,16 @@
-using System.Diagnostics.CodeAnalysis;
-using BuildLib.CloudServices.GooglePlay;
-using BuildLib.Utils;
+using BuildLib.SolutionBuild;
 using BuildTests.Attributes;
-using BuildTests.Utils;
-using Nuke.Common.ProjectModel;
-using Serilog;
+using BuildTests.TestSetup;
 using Xunit.Abstractions;
-using Container = BuildLib.Utils.Container;
 
 namespace BuildTests.AndroidServices;
 
-public sealed class BundleUploadTest : IAsyncDisposable
+public sealed class BundleUploadTest(ITestOutputHelper testOutputHelper) : BaseContainerSetup(testOutputHelper)
 {
-    private readonly Container _container;
-
-    public BundleUploadTest(ITestOutputHelper testOutputHelper)
-    {
-        _container = new ContainerInitializer().GetContainer();
-        Log.Logger = new LoggerConfiguration()
-            .WriteTo.TestOutput(testOutputHelper)
-            .CreateLogger();
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        await Log.CloseAndFlushAsync();
-    }
-
     [ManualTest]
-    [SuppressMessage("Usage", "xUnit1004:Test methods should not be skipped")]
     public async Task UploadBundle_Succeeds()
     {
-        var client = _container.Resolve<IAndroidPublisherClient>();
-        var solution = _container.Resolve<Solution>();
-        var path = solution.GetSignedAabFile();
-
-        await using var stream = File.Open(path, FileMode.Open);
-        var cts = new CancellationTokenSource(TimeSpan.FromMinutes(3));
-
-        await client.UploadBundle(stream, cts.Token);
+        var service = Resolve<PublishService>();
+        await service.UploadToGooglePlay();
     }
 }

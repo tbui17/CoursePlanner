@@ -1,4 +1,5 @@
 using BuildLib.SolutionBuild.Versioning;
+using BuildLib.Utils;
 using Microsoft.Build.Evaluation;
 using Microsoft.Extensions.Logging;
 using Semver;
@@ -8,10 +9,11 @@ namespace BuildLib.SolutionBuild;
 public interface IMsBuildProject
 {
     SemVersion GetAppDisplayVersion();
-    void ChangeAppDisplayVersion(SemVersion version);
-    int GetAppVersionCode();
-    void ChangeAppVersionCode(int versionCode);
     ProjectVersionData GetProjectVersionData();
+    void SetVersion(ProjectVersionData versionData);
+    void IncrementPatch();
+    void IncrementMinor();
+    void IncrementMajor();
 }
 
 public class MsBuildProject(Project project, ILogger<MsBuildProject> logger) : IMsBuildProject
@@ -42,6 +44,72 @@ public class MsBuildProject(Project project, ILogger<MsBuildProject> logger) : I
         return version;
     }
 
+    public ProjectVersionData GetProjectVersionData() =>
+        new()
+        {
+            AppVersion = GetAppDisplayVersion(),
+            VersionCode = GetAppVersionCode()
+        };
+
+    public void SetVersion(ProjectVersionData versionData)
+    {
+        var current = GetProjectVersionData();
+        logger.LogInformation("Changing version data from {CurrentVersion} to {NewVersion}",
+            current,
+            versionData
+        );
+        if (versionData < current)
+        {
+            var message = new
+            {
+                Message = "Cannot change version to a lower version",
+                CurrentVersion = current,
+                NewVersion = versionData
+            };
+            throw new InvalidOperationException(message.ToString());
+        }
+
+        project.SetProperty(ApplicationDisplayVersion, versionData.AppVersion.ToString());
+        project.SetProperty(ApplicationVersion, versionData.VersionCode.ToString());
+        project.Save();
+    }
+
+    public void IncrementPatch()
+    {
+        var current = GetProjectVersionData();
+        var newVersion = new ProjectVersionData
+        {
+            AppVersion = current.AppVersion.IncrementPatch(),
+            VersionCode = current.VersionCode + 1
+        };
+
+        SetVersion(newVersion);
+    }
+
+    public void IncrementMinor()
+    {
+        var current = GetProjectVersionData();
+        var newVersion = new ProjectVersionData
+        {
+            AppVersion = current.AppVersion.IncrementMinor(),
+            VersionCode = current.VersionCode + 1
+        };
+
+        SetVersion(newVersion);
+    }
+
+    public void IncrementMajor()
+    {
+        var current = GetProjectVersionData();
+        var newVersion = new ProjectVersionData
+        {
+            AppVersion = current.AppVersion.IncrementMajor(),
+            VersionCode = current.VersionCode + 1
+        };
+
+        SetVersion(newVersion);
+    }
+
     public int GetAppVersionCode()
     {
         var property = project.GetProperty(ApplicationVersion);
@@ -63,13 +131,6 @@ public class MsBuildProject(Project project, ILogger<MsBuildProject> logger) : I
         );
         project.SetProperty(ApplicationVersion, versionCode.ToString()).Project.Save();
     }
-
-    public ProjectVersionData GetProjectVersionData() =>
-        new()
-        {
-            AppVersion = GetAppDisplayVersion(),
-            VersionCode = GetAppVersionCode()
-        };
 
     public void ChangeAppDisplayVersion(SemVersion version)
     {

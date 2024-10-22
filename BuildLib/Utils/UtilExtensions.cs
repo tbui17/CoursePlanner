@@ -168,4 +168,17 @@ public static class UtilExtensions
         LogLevel.None => LogEventLevel.Fatal,
         _ => throw new ArgumentOutOfRangeException(nameof(logLevel), logLevel, null)
     };
+
+    public static Microsoft.Extensions.Logging.LogLevel ToLogLevel(this LogLevel logLevel) => logLevel switch
+    {
+        LogLevel.Debug => Microsoft.Extensions.Logging.LogLevel.Debug,
+        LogLevel.Error => Microsoft.Extensions.Logging.LogLevel.Error,
+        LogLevel.Info => Microsoft.Extensions.Logging.LogLevel.Information,
+        LogLevel.Warning => Microsoft.Extensions.Logging.LogLevel.Warning,
+        LogLevel.All => Microsoft.Extensions.Logging.LogLevel.Trace,
+        LogLevel.None => Microsoft.Extensions.Logging.LogLevel.None,
+        _ => throw new ArgumentOutOfRangeException(nameof(logLevel), logLevel, null)
+    };
+
+    public static bool IsTrueString(this string? value) => value?.EqualsIgnoreCase("true") ?? false;
 }

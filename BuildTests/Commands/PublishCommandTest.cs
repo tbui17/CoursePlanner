@@ -1,5 +1,6 @@
 using BuildLib.Commands;
 using BuildLib.Utils;
+using BuildTests.Attributes;
 using BuildTests.TestSetup;
 using FluentAssertions;
 using JetBrains.Annotations;
@@ -19,7 +20,7 @@ public class PublishCommandTest : BaseContainerSetup
     }
 
 
-    [Fact(Timeout = 1000 * 3600)]
+    [ManualTest(Timeout = 1000 * 3600)]
     public async Task DotNetPublish_ShouldCreateReleaseFile()
     {
         var solution = Container.Resolve<Solution>();

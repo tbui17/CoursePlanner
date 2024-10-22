@@ -1,5 +1,5 @@
 using BuildLib.Secrets;
-using BuildLib.SolutionBuild.Versioning;
+using BuildLib.SolutionBuild;
 using BuildLib.Utils;
 using Google.Apis.AndroidPublisher.v3;
 using Google.Apis.AndroidPublisher.v3.Data;
@@ -11,7 +11,7 @@ namespace BuildLib.CloudServices.GooglePlay;
 
 public interface ITrackService
 {
-    Task<Track> GetTrack(string editId);
+    public Task<Track> GetTrack();
     Task<Track> UpdateTrack(string editId, CancellationToken token = default);
 }
 
@@ -20,14 +20,15 @@ public class TrackService(
     IOptions<AppConfiguration> configs,
     AndroidPublisherService service,
     ILogger<ITrackService> logger,
-    IVersionService versionService
+    IEditProvider editProvider,
+    IMsBuildProject msBuildProject
 ) : ITrackService
 {
-    public async Task<Track> GetTrack(string editId)
+    public async Task<Track> GetTrack()
     {
         var res = await service
             .Edits.Tracks
-            .Get(configs.Value.ApplicationId, editId, configs.Value.ReleaseTrack)
+            .Get(configs.Value.ApplicationId, editProvider.EditId, configs.Value.ReleaseTrack)
             .ExecuteAsync();
 
         logger.LogDebug("Received track: {@Track}", res);
@@ -36,7 +37,7 @@ public class TrackService(
 
     public async Task<Track> UpdateTrack(string editId, CancellationToken token = default)
     {
-        var versionData = await versionService.GetProjectVersionData();
+        var versionData = msBuildProject.GetProjectVersionData();
 
 
         var release = new TrackRelease

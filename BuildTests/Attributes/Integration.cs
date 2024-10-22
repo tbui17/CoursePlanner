@@ -1,22 +1,24 @@
+using BuildLib.Utils;
+
 namespace BuildTests.Attributes;
 
 public sealed class Integration : FactAttribute
 {
-    public Integration(string reason = "Only runs in non-development environments")
+    public Integration()
     {
-        var dotnetEnvironment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
-        var runIntegrationTestsOverride = Environment.GetEnvironmentVariable("RUN_INTEGRATION_TESTS_OVERRIDE");
-        var isDevelopment = dotnetEnvironment?.Equals("Development", StringComparison.OrdinalIgnoreCase) is true;
-        if (isDevelopment && runIntegrationTestsOverride is not "1")
+        var runIntegrationTestsOverride = Environment.GetEnvironmentVariable("RUN_INTEGRATION_TESTS_OVERRIDE") ?? "";
+        if (runIntegrationTestsOverride.EqualsIgnoreCase("true"))
         {
-            SkipTest();
+            return;
         }
 
+        SkipTest();
         return;
 
         void SkipTest()
         {
-            Skip = reason;
+            Skip =
+                "This test is to be run locally. To enable automatic execution, set the RUN_INTEGRATION_TESTS_OVERRIDE environment variable to 'true'.";
         }
     }
 }

@@ -77,10 +77,11 @@ public class ConfigurationLoader(HostApplicationBuilder builder) : IDisposable
 
     public void LoadAppConfigs()
     {
+        var log = Log.ForContext<ConfigurationLoader>();
         var environment = builder.Configuration.GetValue<string>("DOTNET_ENVIRONMENT");
         if (environment is not "Development")
         {
-            Log.Information(
+            log.Information(
                 "Environment is not Development, skipping secrets json load. Loading from azure credentials {Environment}",
                 environment
             );
@@ -109,11 +110,11 @@ public class ConfigurationLoader(HostApplicationBuilder builder) : IDisposable
             builder.Configuration.Bind(courseConfiguration);
             if (courseConfiguration.Validate() is not { } exc)
             {
-                Log.Information("Secrets are valid, skipping secrets json load");
+                log.Information("Secrets are valid, skipping secrets json load");
                 return false;
             }
 
-            Log.Information("Missing secrets, attempting to populate secrets json: {Message}", exc.Message);
+            log.Information("Missing secrets, attempting to populate secrets json: {Message}", exc.Message);
             return true;
         }
 
@@ -148,7 +149,7 @@ public class ConfigurationLoader(HostApplicationBuilder builder) : IDisposable
             File.WriteAllText(jsonFile.FullName,
                 JsonConvert.SerializeObject(dict, Formatting.Indented)
             );
-            Log.Information("Wrote secrets json to {Path}", jsonFile.FullName);
+            log.Information("Wrote secrets json to {Path}", jsonFile.FullName);
         }
     }
 }

@@ -15,7 +15,6 @@ public class SolutionTest(ITestOutputHelper helper) : BaseContainerSetup(helper)
         act.Should().NotThrow();
     }
 
-
     [Fact]
     public void GetAppVersion_ShouldReturnValidSemVersion()
     {

@@ -38,7 +38,23 @@ public class MsBuildService(ReleaseProject project, ILogger<MsBuildProject> logg
         Initialized = true;
     }
 
-    public MsBuildProject GetMsBuildProject() => new(project: project.Value.GetMSBuildProject(), logger: logger);
+    public MsBuildProject GetMsBuildProject()
+    {
+        var tries = 0;
+        while (true)
+        {
+            try
+            {
+                tries++;
+                var buildProj = project.Value.GetMSBuildProject();
+                return new MsBuildProject(project: buildProj, logger: logger);
+            }
+            catch (FileLoadException e) when (e.Message.Contains("Could not load file or assembly") && tries < 3)
+            {
+                logger.LogWarning(e, "Failed to load MSBuild project, retrying. Attempt: {Tries}", tries);
+            }
+        }
+    }
 }
 
 file static class InvalidOperationExtensions

@@ -1,3 +1,4 @@
+using BuildLib.Logging;
 using BuildLib.Secrets;
 using BuildLib.Utils;
 using BuildTests.Utils;
@@ -6,17 +7,23 @@ using Xunit.Abstractions;
 
 namespace BuildTests.TestSetup;
 
-public abstract class BaseContainerSetup
+public abstract class BaseContainerSetup : IAsyncDisposable
 {
     protected readonly Container Container;
 
-    public BaseContainerSetup(ITestOutputHelper testOutputHelper)
+    protected BaseContainerSetup(ITestOutputHelper testOutputHelper)
     {
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Debug()
-            .WriteTo.TestOutput(testOutputHelper)
+            .Enrich.FromLogContext()
+            .WriteTo.TestOutput(testOutputHelper, LogUtil.DefaultExpressionTemplate)
             .CreateLogger();
         Container = GetContainer();
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        return Log.CloseAndFlushAsync();
     }
 
 

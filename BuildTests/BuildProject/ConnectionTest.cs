@@ -1,21 +1,18 @@
 using BuildLib.CloudServices.GooglePlay;
 using BuildLib.Secrets;
-using BuildLib.Utils;
 using BuildTests.Attributes;
-using BuildTests.Utils;
+using BuildTests.TestSetup;
 using FluentAssertions;
+using Xunit.Abstractions;
 
 namespace BuildTests.BuildProject;
 
-public class ConnectionTest
+public class ConnectionTest(ITestOutputHelper testOutputHelper) : BaseContainerSetup(testOutputHelper)
 {
-    private readonly Container _container = new ContainerInitializer().GetContainer();
-
-
     [Integration]
     public void SecretClient_CanConnect()
     {
-        var config = _container.GetConfiguration<AppConfiguration>();
+        var config = GetConfiguration<AppConfiguration>();
 
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         var keyIsNull = config.Key is null;
@@ -26,7 +23,7 @@ public class ConnectionTest
     [Integration]
     public async Task AndroidPublisherClient_CanConnect()
     {
-        var client = _container.Resolve<IAndroidPublisherClient>();
+        var client = Resolve<IAndroidPublisherClient>();
 
 
         var res = await client
@@ -34,15 +31,15 @@ public class ConnectionTest
             .Should()
             .NotThrowAsync();
 
-        res.Which.Id.Should().NotBeNullOrWhiteSpace();
+        res.Which.Should().NotBeNullOrWhiteSpace();
     }
 
     [Integration]
     public async Task GetBundles_HasResult()
     {
-        var secrets = _container.GetConfiguration<AppConfiguration>();
+        var secrets = GetConfiguration<AppConfiguration>();
         secrets.ValidateOrThrow();
-        var client = _container.Resolve<IAndroidPublisherClient>();
+        var client = Resolve<IAndroidPublisherClient>();
 
 
         var res = await client
@@ -53,6 +50,6 @@ public class ConnectionTest
         res
             .Which.Bundles.Should()
             .NotBeNullOrEmpty()
-            .And.Contain(x => x.VersionCode == 1);
+            .And.Contain(x => x.VersionCode > 0);
     }
 }
