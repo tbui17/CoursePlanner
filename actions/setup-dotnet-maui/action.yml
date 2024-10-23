@@ -1,0 +1,12 @@
+name: Setup Dotnet MAUI
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.x
+    - name: Install maui-android workload
+      shell: bash
+      run: dotnet workload install maui-android
