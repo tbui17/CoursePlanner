@@ -5,7 +5,6 @@ using BuildLib.Utils;
 using Cocona;
 using Microsoft.Extensions.Logging;
 using Nuke.Common.ProjectModel;
-using Nuke.Common.Tools.Docker;
 using Nuke.Common.Tools.DotNet;
 using Serilog;
 
@@ -110,65 +109,4 @@ void ConfigLogging()
     }
 
     Log.Logger = config.CreateLogger();
-}
-
-class P2
-{
-    private static void Build()
-    {
-        var buildArgs = new Dictionary<string, string>
-        {
-            { "KEY_URI", Environment.GetEnvironmentVariable("KeyUri") }
-        };
-
-        var secrets = new Dictionary<string, string>
-        {
-            { "TENANT_ID", Environment.GetEnvironmentVariable("TENANT_ID") },
-            { "SERVICE_PRINCIPAL_ID", Environment.GetEnvironmentVariable("SERVICE_PRINCIPAL_ID") },
-            { "SERVICE_PRINCIPAL_SECRET", Environment.GetEnvironmentVariable("SERVICE_PRINCIPAL_SECRET") }
-        };
-
-        string buildStr = string.Join(" ", buildArgs.Select(kv => $"--build-arg '{kv.Key}={kv.Value}'"));
-        string secretStr = string.Join(" ", secrets.Keys.Select(k => $"--secret id={k},env={k}"));
-
-        var additionalArgs = $"{buildStr} {secretStr}";
-        var args = new List<string>
-        {
-            "docker build .",
-            $"--file Scripts/Dockerfile",
-            "--tag build_image",
-            "--progress=plain",
-            additionalArgs
-        };
-
-
-        new DockerBuildSettings()
-            .SetFile("Scripts/Dockerfile")
-            .SetTag("build_image")
-            .SetProgress(ProgressType.plain)
-            .SetBuildArg(buildArgs.Select(x => $"{x.Key}={x.Value}").ToArray())
-            .SetSecret(secretStr);
-
-        var expr = string.Join(" ", args);
-        Console.WriteLine($"Executing {expr}");
-    }
-
-    private static void Auth()
-    {
-        var keys = new List<string> { "TENANT_ID", "SERVICE_PRINCIPAL_ID", "SERVICE_PRINCIPAL_SECRET" };
-        var vars = new Dictionary<string, string>();
-
-        foreach (var key in keys)
-        {
-            vars[key] = File.ReadAllText($"/run/secrets/{key}");
-        }
-
-        var command =
-            $"az login --service-principal --username {vars["SERVICE_PRINCIPAL_ID"]} --password {vars["SERVICE_PRINCIPAL_SECRET"]} --tenant {vars["TENANT_ID"]}";
-    }
-
-    private static void StartApp()
-    {
-        var command = $"dotnet run --verbosity normal --project Scripts -- example_command ";
-    }
 }
