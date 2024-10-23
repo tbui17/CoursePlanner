@@ -6,13 +6,23 @@ RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
 
 FROM base as final
 
+ARG BUILD_SCRIPT_PATH="./build.ps1"
+ARG COMMAND_NAME="Auth"
+
+
+COPY $BUILD_SCRIPT_PATH .
+
 # Auth
 ARG KEY_URI
-ARG USERNAME
-ARG PASSWORD
-ARG TENANT
 ENV KeyUri=$KEY_URI
-RUN az login --service-principal --username "$USERNAME" --password "$PASSWORD" --tenant "$TENANT"
+
+
+
+RUN --mount=type=secret,id=TENANT_ID \
+    --mount=type=secret,id=SERVICE_PRINCIPAL_ID \
+    --mount=type=secret,id=SERVICE_PRINCIPAL_SECRET \
+    pwsh $BUILD_SCRIPT_PATH $COMMAND_NAME
+
 
 # Build
 ARG ProjectName=Scripts
@@ -21,4 +31,5 @@ WORKDIR /app
 COPY . .
 WORKDIR "/app/${ProjectName}"
 RUN dotnet build "${ProjectName}.csproj" -c $BUILD_CONFIGURATION
-ENTRYPOINT ["dotnet", "run", "--verbosity", "normal", "--project", "Scripts.csproj", "--", "publish_upload"]
+WORKDIR ../
+ENTRYPOINT ["pwsh","./build.ps1", "StartApp","publish_upload"]
