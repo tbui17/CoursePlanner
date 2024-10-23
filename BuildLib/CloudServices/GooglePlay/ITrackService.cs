@@ -41,7 +41,7 @@ public class TrackService(
     {
         var track = CreateTrackFromConfiguration();
 
-        logger.LogDebug("Created track update data: {@Track}", track);
+        logger.LogInformation("Created track update data: {@Track}", track);
 
         return await UpdateTrack(track, token);
     }
@@ -97,7 +97,7 @@ public class TrackService(
             .ExecuteAsync(token);
 
 
-        logger.LogDebug("Saved changes to track: {@Track}", res);
+        logger.LogInformation("Saved changes to track: {@Track}", res);
         return res;
     }
 }
