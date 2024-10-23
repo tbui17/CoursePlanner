@@ -37,11 +37,14 @@ public class AndroidPublisherClient(
 
     public async Task UploadBundle(Stream stream, CancellationToken token)
     {
-        var edit = editProvider.EditId;
         await bundleService.UploadBundle(stream, token);
+        await trackService.UpdateTrackFromConfiguration(token);
+        await Commit(token);
+    }
 
-        await trackService.UpdateTrack(edit, token);
-
+    private async Task Commit(CancellationToken token)
+    {
+        var edit = editProvider.EditId;
         logger.LogDebug("Committing edit for {Id}", edit);
         var res = await service
             .Edits.Commit(configs.Value.ApplicationId, edit)

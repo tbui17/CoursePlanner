@@ -184,4 +184,11 @@ public static class UtilExtensions
 
     public static IEnumerable<T> InterleaveWith<T>(this IEnumerable<T> items, T item) =>
         items.SelectMany(x => new[] { item, x });
+
+    public static (List<T> True, List<T> False) ToLists<T>(
+        this (IEnumerable<T> True, IEnumerable<T> False) partitions
+    )
+    {
+        return (partitions.True.ToList(), partitions.False.ToList());
+    }
 }
