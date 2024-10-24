@@ -1,0 +1,16 @@
+#file: noinspection UndefinedAction
+name: Full Setup Dotnet Maui
+runs:
+  using: composite
+  steps:
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+    - name: Setup .NET
+      uses: ./actions/setup-dotnet-maui
+    - name: Cache Nuget
+      uses: ./actions/cache_nuget

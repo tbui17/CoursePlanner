@@ -3,17 +3,18 @@ inputs:
   test_result_name:
     description: ""
     default: test_results
+  configuration:
+    description: ""
+    default: Release
 
 runs:
   using: composite
   steps:
-    - name: Setup
-      uses: ./actions/setup-dotnet-maui
 
     - name: "Restore/Build/Test"
       shell: bash
       continue-on-error: true
-      run: dotnet test --filter FullyQualifiedName\!~BuildTests --logger trx --collect:"XPlat Code Coverage"
+      run: dotnet test -c ${{inputs.configuration}} --filter FullyQualifiedName\!~BuildTests --logger trx --collect:"XPlat Code Coverage"
 
     - name: Upload Test Result Files
       uses: actions/upload-artifact@v4

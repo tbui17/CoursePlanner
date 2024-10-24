@@ -1,8 +1,9 @@
+#file: noinspection UndefinedAction,UndefinedParamsPresent
+
 on:
   workflow_dispatch:
   pull_request:
-    branches: 
-      - main
+    branches:
       - current
 
 jobs:
@@ -12,7 +13,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: ""
-        uses: ./actions/ci-action
-
-
+      - name: Setup
+        uses: ./actions/setup-dotnet-maui
+      - name: Cache Nuget
+        uses: ./actions/cache_nuget
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+#      - name: Test
+#        uses: ./actions/testing
+#        with:
+#          configuration: Debug

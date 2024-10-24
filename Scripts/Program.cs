@@ -6,6 +6,7 @@ using Cocona;
 using Microsoft.Extensions.Logging;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tools.DotNet;
+using Scripts.Commands;
 using Serilog;
 
 ConfigLogging();
@@ -77,6 +78,13 @@ app.AddCommand("migrate",
     }
 );
 
+app.AddCommand("create_action",
+    async ([Argument] string actionName) =>
+    {
+        var cmd = Resolve<CreateActionCommand>();
+        await cmd.ExecuteAsync(actionName);
+    }
+);
 
 try
 {

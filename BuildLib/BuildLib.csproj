@@ -21,6 +21,7 @@
         <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.10.0"/>
         <PackageReference Include="Google.Apis" Version="1.68.0"/>
         <PackageReference Include="Google.Apis.AndroidPublisher.v3" Version="1.68.0.3547"/>
+        <PackageReference Include="Humanizer.Core" Version="2.14.1"/>
         <PackageReference Include="Microsoft.Extensions.Azure" Version="1.7.5"/>
         <PackageReference Include="Microsoft.Extensions.Configuration.AzureAppConfiguration" Version="7.3.0"/>
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0"/>
