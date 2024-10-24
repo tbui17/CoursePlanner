@@ -16,7 +16,7 @@ jobs:
       - name: Setup
         uses: ./actions/setup-dotnet-maui
       - name: Cache Nuget
-        uses: ./actions/cache_nuget
+        uses: ./actions/cache-nuget
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
 #      - name: Test
