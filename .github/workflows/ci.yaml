@@ -25,10 +25,9 @@ jobs:
           path: /usr/share/dotnet
           key: ${{runner.os}}-${{env.DOTNET_VERSION}}
       - name: Setup
-        if: steps.cache-dotnet.outputs.cache-hit != 'true'
         uses: ./actions/setup-dotnet-maui
 
-#      - name: Test
-#        uses: ./actions/testing
-#        with:
-#          configuration: Debug
+      - name: Test
+        uses: ./actions/testing
+        with:
+          configuration: Debug
