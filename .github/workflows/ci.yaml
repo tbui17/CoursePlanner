@@ -16,15 +16,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Setup
-        uses: ./actions/setup-dotnet-maui
       - name: Cache Nuget
         uses: ./actions/cache-nuget
       - name: Cache Dotnet
+        id: cache-dotnet
         uses: actions/cache@v4
         with:
           path: /usr/share/dotnet
           key: ${{runner.os}}-${{env.DOTNET_VERSION}}
+      - name: Setup
+        if: steps.cache-dotnet.outputs.cache-hit != 'true'
+        uses: ./actions/setup-dotnet-maui
 
 #      - name: Test
 #        uses: ./actions/testing
