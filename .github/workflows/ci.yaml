@@ -18,15 +18,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Cache Nuget
         uses: ./actions/cache-nuget
-      - name: Cache Dotnet
-        id: cache-dotnet
-        uses: actions/cache@v4
-        with:
-          path: /usr/share/dotnet
-          key: ${{runner.os}}-${{env.DOTNET_VERSION}}
       - name: Setup
         uses: ./actions/setup-dotnet-maui
-
       - name: Test
         uses: ./actions/testing
         with:
