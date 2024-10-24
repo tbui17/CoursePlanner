@@ -6,6 +6,9 @@ on:
     branches:
       - current
 
+env:
+  DOTNET_VERSION: 8.0
+
 jobs:
   build_test:
     name: Build And Test
@@ -17,8 +20,12 @@ jobs:
         uses: ./actions/setup-dotnet-maui
       - name: Cache Nuget
         uses: ./actions/cache-nuget
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
+      - name: Cache Dotnet
+        uses: actions/cache@v4
+        with:
+          path: /usr/share/dotnet
+          key: ${{runner.os}}-${{env.DOTNET_VERSION}}
+
 #      - name: Test
 #        uses: ./actions/testing
 #        with:
