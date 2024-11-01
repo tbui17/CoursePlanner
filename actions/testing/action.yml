@@ -1,4 +1,5 @@
 name: CI Action
+description: ""
 inputs:
   test_result_name:
     description: ""

@@ -1,5 +1,6 @@
 #file: noinspection UndefinedAction
 name: Full Setup Dotnet Maui
+description: ""
 runs:
   using: composite
   steps:
