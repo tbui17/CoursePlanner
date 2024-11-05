@@ -18,7 +18,7 @@ public interface IAndroidPublisherClient
 [Inject(typeof(IAndroidPublisherClient), Lifetime = ServiceLifetime.Singleton)]
 public class AndroidPublisherClient(
     AndroidPublisherService service,
-    IOptions<AppConfiguration> configs,
+    IOptions<GooglePlayDeveloperApiConfiguration> configs,
     ILogger<IAndroidPublisherClient> logger,
     IEditProvider editProvider,
     IBundleService bundleService,
@@ -47,7 +47,7 @@ public class AndroidPublisherClient(
         var edit = editProvider.EditId;
         logger.LogDebug("Committing edit for {Id}", edit);
         var res = await service
-            .Edits.Commit(configs.Value.ApplicationId, edit)
+            .Edits.Commit(configs.Value.ProjectName, edit)
             .ExecuteAsync(token);
         logger.LogDebug("Edit committed for {Id} {@Response}", edit, res);
     }

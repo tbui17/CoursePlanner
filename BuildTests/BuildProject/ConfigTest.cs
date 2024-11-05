@@ -13,6 +13,6 @@ public class ConfigTest
     public void CanResolveConfig()
     {
         var config = _container.GetConfiguration<AppConfiguration>();
-        config.KeyUri.Should().NotBeNullOrWhiteSpace();
+        config.AzureKeyVaultConfiguration.Uri.Should().NotBeNullOrWhiteSpace();
     }
 }

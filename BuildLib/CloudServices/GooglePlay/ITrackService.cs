@@ -19,7 +19,7 @@ public interface ITrackService
 
 [Inject(typeof(ITrackService), Lifetime = ServiceLifetime.Singleton)]
 public class TrackService(
-    IOptions<AppConfiguration> configs,
+    IOptions<GooglePlayDeveloperApiConfiguration> configs,
     AndroidPublisherService service,
     ILogger<ITrackService> logger,
     IEditProvider editProvider,
@@ -30,7 +30,7 @@ public class TrackService(
     {
         var res = await service
             .Edits.Tracks
-            .Get(configs.Value.ApplicationId, editProvider.EditId, configs.Value.ReleaseTrack)
+            .Get(configs.Value.ProjectName, editProvider.EditId, configs.Value.ReleaseTrack)
             .ExecuteAsync(token);
 
         logger.LogDebug("Received track: {@Track}", res);
@@ -90,7 +90,7 @@ public class TrackService(
             .Edits.Tracks
             .Update(
                 track,
-                configs.Value.ApplicationId,
+                configs.Value.ProjectName,
                 editProvider.EditId,
                 configs.Value.ReleaseTrack
             )

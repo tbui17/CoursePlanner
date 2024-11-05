@@ -12,7 +12,7 @@ namespace BuildLib.SolutionBuild;
 [Inject]
 public class DotNetPublishSettingsFactory(
     ProcessLogger<DotNetPublishSettingsFactory> processLogger,
-    IOptions<AppConfiguration> configs,
+    IOptions<DotnetPublishAndroidConfiguration> configs,
     ReleaseProject project,
     AndroidSigningKeyStoreOptions androidSigningKeyStoreOptions
 )
@@ -22,7 +22,7 @@ public class DotNetPublishSettingsFactory(
         return new DotNetPublishSettings()
             .EnableNoLogo()
             .SetProject(project.Value.Path)
-            .SetConfiguration(configs.Value.PublishConfiguration)
+            .SetConfiguration(configs.Value.Configuration)
             .SetProcessLogger(processLogger.Log)
             .SetFramework(configs.Value.AndroidFramework)
             .SetProperties(androidSigningKeyStoreOptions.ToPropertyDictionary())

@@ -8,11 +8,12 @@ using Microsoft.Extensions.Options;
 namespace BuildLib.CloudServices;
 
 [Inject]
-public class InitializerFactory(IOptions<AppConfiguration> configs)
+public class InitializerFactory(
+    IOptions<GooglePlayDeveloperApiConfiguration> googlePlayDeveloperApiConfigurationConfigs)
 {
     public BaseClientService.Initializer Create()
     {
-        var secrets = configs.Value.GoogleServiceAccount;
+        var secrets = googlePlayDeveloperApiConfigurationConfigs.Value.GoogleClientKey;
 
         var serviceCredInitializer =
             new ServiceAccountCredential.Initializer(secrets.ClientEmail)
@@ -24,7 +25,7 @@ public class InitializerFactory(IOptions<AppConfiguration> configs)
         var initializer = new BaseClientService.Initializer
         {
             HttpClientInitializer = serviceCred,
-            ApplicationName = configs.Value.ApplicationId
+            ApplicationName = googlePlayDeveloperApiConfigurationConfigs.Value.ProjectName
         };
 
         return initializer;

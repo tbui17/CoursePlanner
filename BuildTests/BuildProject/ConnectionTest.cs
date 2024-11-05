@@ -12,12 +12,10 @@ public class ConnectionTest(ITestOutputHelper testOutputHelper) : BaseContainerS
     [Integration]
     public void SecretClient_CanConnect()
     {
-        var config = GetConfiguration<AppConfiguration>();
+        var config = GetConfiguration<AppConfiguration>().GooglePlayDeveloperApiConfiguration;
 
-        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-        var keyIsNull = config.Key is null;
 
-        keyIsNull.Should().NotBe(true);
+        config.GoogleClientKey.Should().NotBeNull();
     }
 
     [Integration]

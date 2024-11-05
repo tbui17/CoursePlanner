@@ -1,7 +1,5 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
-using Azure.Data.AppConfiguration;
-using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Azure.Security.KeyVault.Secrets;
 using BuildLib.Secrets;
 using Microsoft.Extensions.Configuration;
@@ -23,18 +21,27 @@ public class RemoteConfigurationClient(SecretClient client)
             .Select(x => client.GetSecret(x.Name))
             .ToDictionary(x => x.Value.Name, x => x.Value.Value);
 
-        var configs = new ConfigurationClient(secrets[nameof(AppConfiguration.ConnectionString)])
-            .GetConfigurationSettings(new SettingSelector
-                { Fields = SettingFields.Key | SettingFields.Value }
-            );
 
+        // var configs =
+        //     new ConfigurationClient(Constants.ConnectionStringKey)
+        //         .GetConfigurationSettings(new SettingSelector
+        //             { Fields = SettingFields.Key | SettingFields.Value }
+        //         );
 
-        foreach (var config in configs)
+        var mergedConfigs = new Dictionary<string, string>();
+
+        foreach (var secret in secrets)
         {
-            secrets[config.Key] = config.Value;
+            mergedConfigs[secret.Key] = secret.Value;
         }
 
-        return secrets.ToDictionary(x => x.Key.Replace("--", ":"), x => x.Value);
+
+        // foreach (var config in configs)
+        // {
+        //     mergedConfigs[config.Key] = config.Value;
+        // }
+
+        return mergedConfigs.ToDictionary(x => x.Key.Replace("--", ":"), x => x.Value);
     }
 }
 
@@ -50,16 +57,18 @@ public class ConfigurationLoader(HostApplicationBuilder builder) : IDisposable
 
     public void LoadAppConfigsStandard()
     {
-        var secretClient = Provider.GetRequiredService<SecretClient>();
-        var connString = secretClient.GetSecret(nameof(AppConfiguration.ConnectionString)).Value.Value;
-
-
-        builder
-            .Configuration
-            .AddAzureKeyVault(secretClient, new KeyVaultSecretManager())
-            .AddAzureAppConfiguration(options =>
-                options.Connect(connString).ConfigureKeyVault(s => s.Register(secretClient))
-            );
+        // var secretClient = Provider.GetRequiredService<SecretClient>();
+        // var connString = secretClient.GetSecret(Constants.ConnectionStringKey).Value.Value;
+        //
+        //
+        //
+        //
+        // builder
+        //     .Configuration
+        //     .AddAzureKeyVault(secretClient, new KeyVaultSecretManager())
+        //     .AddAzureAppConfiguration(options =>
+        //         options.Connect(connString).ConfigureKeyVault(s => s.Register(secretClient))
+        //     );
     }
 
     private static string GetUserSecretsId()

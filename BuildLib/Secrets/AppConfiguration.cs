@@ -4,23 +4,43 @@ using Newtonsoft.Json;
 
 namespace BuildLib.Secrets;
 
-public record AppConfiguration
+public record DotnetPublishAndroidConfiguration
 {
+    // public string ApplicationId { get; set; } = null!;
     public string AndroidSigningKeyStore { get; set; } = null!;
     public string AndroidSigningKeyAlias { get; set; } = null!;
-    public string Key { get; set; } = null!;
-    public GoogleServiceAccount GoogleServiceAccount { get; set; } = null!;
-    public string BlobContainerName { get; set; } = null!;
-    public string ConnectionString { get; set; } = null!;
-    public string BlobConnectionString { get; set; } = null!;
-    public string KeystoreContents { get; set; } = null!;
-    public string ApplicationId { get; set; } = null!;
-    public string KeyUri { get; set; } = null!;
-    public string ProjectName { get; set; } = null!;
-    public string PublishConfiguration { get; set; } = null!;
+    public string AndroidSigningKeyPass { get; set; } = null!;
+    public string KeystoreFile { get; set; } = null!;
     public string AndroidFramework { get; set; } = null!;
+    public string Configuration { get; set; } = null!;
+}
+
+public record GooglePlayDeveloperApiConfiguration
+{
+    public string ProjectName { get; set; } = null!;
     public string ReleaseTrack { get; set; } = null!;
     public string ReleaseStatus { get; set; } = null!;
+    public GoogleClientKey GoogleClientKey { get; set; } = null!;
+}
+
+public record AzureBlobStorageConfiguration
+{
+    public string ContainerName { get; set; } = null!;
+    public string ConnectionString { get; set; } = null!;
+}
+
+public record AzureKeyVaultConfiguration
+{
+    public string ConnectionString { get; set; } = null!;
+    public string Uri { get; set; } = null!;
+}
+
+public record AppConfiguration
+{
+    public DotnetPublishAndroidConfiguration DotnetPublishAndroidConfiguration { get; set; } = null!;
+    public GooglePlayDeveloperApiConfiguration GooglePlayDeveloperApiConfiguration { get; set; } = null!;
+    public AzureBlobStorageConfiguration AzureBlobStorageConfiguration { get; set; } = null!;
+    public AzureKeyVaultConfiguration AzureKeyVaultConfiguration { get; set; } = null!;
 
 
     public NullDiffRecord GetNullDiff()

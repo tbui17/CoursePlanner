@@ -35,7 +35,8 @@ public static class HostApplicationBuilderExtensions
             .AddSingleton<ReleaseProject>(p =>
                 {
                     var solution = p.GetRequiredService<Solution>();
-                    var projectName = p.GetAppConfigurationOrThrow(x => x.ProjectName);
+                    var projectName =
+                        p.GetAppConfigurationOrThrow(x => x.GooglePlayDeveloperApiConfiguration.ProjectName);
                     var project = solution.GetProjectWithValidation(projectName);
                     return new ReleaseProject { Value = project };
                 }
@@ -43,13 +44,13 @@ public static class HostApplicationBuilderExtensions
             .AddSingleton<IMsBuildProject>(p => p.GetRequiredService<MsBuildService>().GetMsBuildProject())
             .AddSingleton<AndroidSigningKeyStoreOptions>(p =>
                 {
-                    var c = p.GetAppConfigurationOrThrow();
+                    var c = p.GetAppConfigurationOrThrow(x => x.DotnetPublishAndroidConfiguration);
                     return new AndroidSigningKeyStoreOptions
                     {
                         AndroidSigningKeyAlias = c.AndroidSigningKeyAlias,
                         AndroidSigningKeyStore = Path.GetFullPath(c.AndroidSigningKeyStore),
-                        AndroidSigningKeyPass = c.Key,
-                        AndroidSigningStorePass = c.Key
+                        AndroidSigningKeyPass = c.AndroidSigningKeyPass,
+                        AndroidSigningStorePass = c.AndroidSigningKeyPass
                     }.ToValidatedAndroidSigningKeyStoreOptions();
                 }
             )
@@ -84,16 +85,20 @@ public static class HostApplicationBuilderExtensions
                 c.GetRequiredService<InitializerFactory>().Create()
             )
             .AddSingleton<BlobServiceClient>(p =>
-                new BlobServiceClient(p.GetAppConfigurationOrThrow(x => x.BlobConnectionString))
+                new BlobServiceClient(p.GetAppConfigurationOrThrow(x => x.AzureBlobStorageConfiguration.ConnectionString
+                    )
+                )
             )
             .AddSingleton<BlobContainerClient>(p =>
                 p
                     .GetRequiredService<BlobServiceClient>()
-                    .GetBlobContainerClient(p.GetAppConfigurationOrThrow(x => x.BlobContainerName))
+                    .GetBlobContainerClient(
+                        p.GetAppConfigurationOrThrow(x => x.AzureBlobStorageConfiguration.ContainerName)
+                    )
             )
             .AddSingleton<SecretClient>(p =>
                 {
-                    var keyUri = p.GetAppConfigurationOrThrow(x => x.KeyUri);
+                    var keyUri = p.GetAppConfigurationOrThrow(x => x.AzureKeyVaultConfiguration.Uri);
                     return new SecretClient(
                         new(keyUri),
                         new AzureCliCredential(new AzureCliCredentialOptions
@@ -117,12 +122,31 @@ public static class HostApplicationBuilderExtensions
             .Configuration.GetConfigurationOrThrow<AppConfiguration>()
             .ValidateOrThrow();
 
+        var googleClientSectionKey = NamespaceData
+            .FromNameofExpression(nameof(AppConfiguration.GooglePlayDeveloperApiConfiguration.GoogleClientKey))
+            .ConfigKey;
 
         services
-            .AddOptions<GoogleServiceAccount>()
-            .Bind(builder.Configuration.GetSection(nameof(AppConfiguration.GoogleServiceAccount)) ??
-                  throw new NullReferenceException($"{nameof(GoogleServiceAccount)} was null")
+            .AddOptions<GoogleClientKey>()
+            .Bind(builder.Configuration.GetSection(googleClientSectionKey) ??
+                  throw new NullReferenceException($"{nameof(GoogleClientKey)} was null")
             );
+
+        services
+            .AddOptions<DotnetPublishAndroidConfiguration>()
+            .Bind(builder.Configuration.GetSection(nameof(AppConfiguration.DotnetPublishAndroidConfiguration)));
+
+        services
+            .AddOptions<AzureBlobStorageConfiguration>()
+            .Bind(builder.Configuration.GetSection(nameof(AppConfiguration.AzureBlobStorageConfiguration)));
+
+        services
+            .AddOptions<AzureKeyVaultConfiguration>()
+            .Bind(builder.Configuration.GetSection(nameof(AppConfiguration.AzureKeyVaultConfiguration)));
+
+        services
+            .AddOptions<GooglePlayDeveloperApiConfiguration>()
+            .Bind(builder.Configuration.GetSection(nameof(AppConfiguration.GooglePlayDeveloperApiConfiguration)));
 
         return builder;
     }

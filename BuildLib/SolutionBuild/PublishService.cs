@@ -21,13 +21,13 @@ public class PublishService(
     IVersionService versionService,
     IAndroidPublisherClient androidPublisherClient,
     AndroidSigningKeyStoreOptions opts,
-    IOptions<AppConfiguration> configs
+    IOptions<DotnetPublishAndroidConfiguration> configs
 )
 {
     public async Task ExecuteDotNetPublish()
     {
         await versionService.ValidateAppVersion();
-        var contents = Convert.FromBase64String(configs.Value.KeystoreContents);
+        var contents = Convert.FromBase64String(configs.Value.KeystoreFile);
         await File.WriteAllBytesAsync(opts.AndroidSigningKeyStore, contents);
 
 

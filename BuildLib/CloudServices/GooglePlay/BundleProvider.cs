@@ -13,11 +13,14 @@ public interface IBundleProvider
 }
 
 [Inject(typeof(IBundleProvider), Lifetime = ServiceLifetime.Singleton)]
-public class BundleProvider(IEditProvider provider, AndroidPublisherService service, IOptions<AppConfiguration> configs)
+public class BundleProvider(
+    IEditProvider provider,
+    AndroidPublisherService service,
+    IOptions<GooglePlayDeveloperApiConfiguration> configs)
     : IBundleProvider
 {
     public async Task<BundlesListResponse> Get(CancellationToken token = default)
     {
-        return await service.Edits.Bundles.List(configs.Value.ApplicationId, provider.EditId).ExecuteAsync(token);
+        return await service.Edits.Bundles.List(configs.Value.ProjectName, provider.EditId).ExecuteAsync(token);
     }
 }

@@ -1,6 +1,6 @@
 namespace BuildLib.Secrets;
 
-public record GoogleServiceAccount
+public record GoogleClientKey
 {
     public string Type { get; set; } = null!;
     public string ProjectId { get; set; } = null!;

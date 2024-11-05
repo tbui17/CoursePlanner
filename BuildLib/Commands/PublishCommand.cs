@@ -10,7 +10,7 @@ namespace BuildLib.Commands;
 public class PublishCommand(
     ILogger<PublishCommand> logger,
     PublishService publishService,
-    IOptions<AppConfiguration> options
+    IOptions<GooglePlayDeveloperApiConfiguration> options
 )
 {
     public async Task ExecuteAsync()

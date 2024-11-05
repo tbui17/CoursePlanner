@@ -17,7 +17,7 @@ public class PublishServiceTest : BaseContainerSetup
     [Fact]
     public void CreateDotNetPublishSettings_ShouldInitializeWithRequiredProperties()
     {
-        var config = GetConfiguration();
+        var config = GetConfiguration().GooglePlayDeveloperApiConfiguration;
         var service = Resolve<DotNetPublishSettingsFactory>();
         var act = service.Create;
         var settings = act.Should().NotThrow().Subject;
