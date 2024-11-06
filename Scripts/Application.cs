@@ -121,8 +121,7 @@ public class Application
     {
         try
         {
-            var app = CoconaApp.CreateBuilder().Build();
-            await app.RunAsync();
+            await App.RunAsync();
         }
         finally
         {
