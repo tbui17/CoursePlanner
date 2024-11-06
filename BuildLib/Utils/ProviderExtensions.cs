@@ -54,8 +54,19 @@ public static class ProviderExtensions
     )
     {
         var func = selector.Compile();
-        var res = func(provider.GetAppConfigurationOrThrow());
-        //
+        T res;
+        try
+        {
+            res = func(provider.GetAppConfigurationOrThrow());
+        }
+        catch (NullReferenceException e)
+        {
+            throw new NullReferenceException(
+                $"A null reference exception occurred while accessing the value using the selector: {selector}.",
+                e
+            );
+        }
+
 
         if (res is string s)
         {
