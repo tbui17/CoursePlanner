@@ -24,13 +24,18 @@ public class PublishService(
     IOptions<DotnetPublishAndroidConfiguration> configs
 )
 {
+    private async Task WriteKeystoreFile()
+    {
+        var contents = Convert.FromBase64String(configs.Value.KeystoreFile);
+        logger.LogInformation("Writing keystore file to {KeystorePath}", opts.AndroidSigningKeyStore);
+        await File.WriteAllBytesAsync(opts.AndroidSigningKeyStore, contents);
+    }
+
     public async Task ExecuteDotNetPublish()
     {
         await versionService.ValidateAppVersion();
-        var contents = Convert.FromBase64String(configs.Value.KeystoreFile);
-        await File.WriteAllBytesAsync(opts.AndroidSigningKeyStore, contents);
 
-
+        await WriteKeystoreFile();
         logger.LogInformation("Publishing project {ProjectPath} with configuration {Configuration}",
             settings.Project,
             settings.Configuration

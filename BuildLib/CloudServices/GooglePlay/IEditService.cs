@@ -11,6 +11,7 @@ namespace BuildLib.CloudServices.GooglePlay;
 public interface IEditProvider
 {
     public string EditId { get; }
+    public Task SetNewEditAsync();
 }
 
 [Inject(typeof(IEditProvider), Lifetime = ServiceLifetime.Singleton)]
@@ -20,17 +21,16 @@ public class EditService(
     ILogger<EditService> logger) : IEditProvider
 {
     private AppEdit? _edit;
-    private AppEdit Edit => _edit ?? InsertEdit().Result;
+    private AppEdit Edit => _edit ?? CreateNewEditOrThrowAsync().Result;
     public string EditId => Edit.Id;
 
-
-    private async Task<AppEdit> InsertEdit()
+    public async Task SetNewEditAsync()
     {
-        if (_edit is not null)
-        {
-            throw new InvalidOperationException("Edit already initialized");
-        }
+        await CreateNewEditAsync();
+    }
 
+    private async Task<AppEdit> CreateNewEditAsync()
+    {
         var res = await service
             .Edits
             .Insert(new AppEdit(), configs.Value.PackageName)
@@ -42,5 +42,15 @@ public class EditService(
         _edit = res;
 
         return res;
+    }
+
+    private async Task<AppEdit> CreateNewEditOrThrowAsync()
+    {
+        if (_edit is not null)
+        {
+            throw new InvalidOperationException("Edit already initialized");
+        }
+
+        return await CreateNewEditAsync();
     }
 }

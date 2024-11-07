@@ -7,7 +7,8 @@
 /Data/obj/Debug/net8.0/Data.GlobalUsings.g.cs
 obj/
 bin/
-.keystore
+*.keystore*
+*.keystore.*
 *.secrets
 .*
 !.nuke

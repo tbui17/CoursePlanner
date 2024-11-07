@@ -1,3 +1,4 @@
+using BuildLib.Commands;
 using BuildLib.SolutionBuild;
 using BuildTests.Attributes;
 using BuildTests.TestSetup;
@@ -12,5 +13,12 @@ public sealed class BundleUploadTest(ITestOutputHelper testOutputHelper) : BaseC
     {
         var service = Resolve<PublishService>();
         await service.UploadToGooglePlay();
+    }
+
+    [ManualTest]
+    public async Task PublishUpload_Succeeds()
+    {
+        var cmd = Resolve<PublishCommand>();
+        await cmd.ExecutePublishAndUploadAsync();
     }
 }
