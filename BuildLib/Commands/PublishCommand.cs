@@ -1,23 +1,15 @@
-using BuildLib.Secrets;
 using BuildLib.SolutionBuild;
 using BuildLib.Utils;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace BuildLib.Commands;
 
 [Inject]
 public class PublishCommand(
-    ILogger<PublishCommand> logger,
-    PublishService publishService,
-    IOptions<GooglePlayDeveloperApiConfiguration> options
+    PublishService publishService
 )
 {
     public async Task ExecuteAsync()
     {
-        logger.LogDebug("Publishing {ProjectName}", options.Value.ProjectName);
-
-
         await publishService.ExecuteDotNetPublish();
     }
 

@@ -1,3 +1,5 @@
+using System.Diagnostics.Tracing;
+using Azure.Core.Diagnostics;
 using BuildLib.Commands;
 using BuildLib.Logging;
 using BuildLib.SolutionBuild;
@@ -17,6 +19,7 @@ public class Application
 
     public Application()
     {
+        Console.CancelKeyPress += (_, _) => Environment.Exit(0);
         App.AddCommand("example_command",
             () =>
             {
@@ -91,6 +94,10 @@ public class Application
             }
         );
 
+        App.AddCommand("populate_key_uri",
+            async () => { await new PopulateKeyUriCommand().ExecuteAsync(); }
+        );
+
         ConfigLogging();
     }
 
@@ -119,8 +126,13 @@ public class Application
 
     public async Task ExecuteAsync()
     {
+        var log = Log.ForContext<Application>();
         try
         {
+            using var listener =
+                new AzureEventSourceListener((_, message) => log.Debug("Azure event: {Message}", message),
+                    EventLevel.LogAlways
+                );
             await App.RunAsync();
         }
         finally

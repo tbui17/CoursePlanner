@@ -1,4 +1,3 @@
-using BuildLib.Secrets;
 using BuildLib.Utils;
 using BuildTests.Utils;
 using FluentAssertions;
@@ -12,7 +11,7 @@ public class ConfigTest
     [Fact]
     public void CanResolveConfig()
     {
-        var config = _container.GetConfiguration<AppConfiguration>();
-        config.AzureKeyVaultConfiguration.Uri.Should().NotBeNullOrWhiteSpace();
+        var config = _container.Services.GetAppConfigurationOrThrow(x => x.AzureKeyVaultConfiguration);
+        config.Uri.Should().NotBeNullOrWhiteSpace();
     }
 }

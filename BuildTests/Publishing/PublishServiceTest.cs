@@ -1,5 +1,6 @@
 using BuildLib.AndroidPublish;
 using BuildLib.SolutionBuild;
+using BuildLib.Utils;
 using BuildTests.TestSetup;
 using FluentAssertions;
 using JetBrains.Annotations;
@@ -17,7 +18,7 @@ public class PublishServiceTest : BaseContainerSetup
     [Fact]
     public void CreateDotNetPublishSettings_ShouldInitializeWithRequiredProperties()
     {
-        var config = GetConfiguration().GooglePlayDeveloperApiConfiguration;
+        var config = Container.Services.GetAppConfigurationOrThrow(x => x.DotnetPublishAndroidConfiguration);
         var service = Resolve<DotNetPublishSettingsFactory>();
         var act = service.Create;
         var settings = act.Should().NotThrow().Subject;

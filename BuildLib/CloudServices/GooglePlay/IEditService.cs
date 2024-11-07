@@ -16,7 +16,7 @@ public interface IEditProvider
 [Inject(typeof(IEditProvider), Lifetime = ServiceLifetime.Singleton)]
 public class EditService(
     AndroidPublisherService service,
-    IOptions<GooglePlayDeveloperApiConfiguration> configs,
+    IOptions<IGooglePlayDeveloperApiConfigurationProxy> configs,
     ILogger<EditService> logger) : IEditProvider
 {
     private AppEdit? _edit;
@@ -33,7 +33,7 @@ public class EditService(
 
         var res = await service
             .Edits
-            .Insert(new AppEdit(), configs.Value.ProjectName)
+            .Insert(new AppEdit(), configs.Value.PackageName)
             .ExecuteAsync()
             .ConfigureAwait(false);
 

@@ -7,6 +7,7 @@ namespace BuildLib.Secrets;
 public record DotnetPublishAndroidConfiguration
 {
     // public string ApplicationId { get; set; } = null!;
+    public string ProjectName { get; set; } = null!;
     public string AndroidSigningKeyStore { get; set; } = null!;
     public string AndroidSigningKeyAlias { get; set; } = null!;
     public string AndroidSigningKeyPass { get; set; } = null!;
@@ -17,7 +18,23 @@ public record DotnetPublishAndroidConfiguration
 
 public record GooglePlayDeveloperApiConfiguration
 {
-    public string ProjectName { get; set; } = null!;
+    // public string ProjectName { get; set; } = null!;
+    public string ReleaseTrack { get; set; } = null!;
+    public string ReleaseStatus { get; set; } = null!;
+    public GoogleClientKey GoogleClientKey { get; set; } = null!;
+}
+
+public interface IGooglePlayDeveloperApiConfigurationProxy
+{
+    public string PackageName { get; }
+    public string ReleaseTrack { get; }
+    public string ReleaseStatus { get; }
+    public GoogleClientKey GoogleClientKey { get; }
+}
+
+public class GooglePlayDeveloperApiConfigurationProxy : IGooglePlayDeveloperApiConfigurationProxy
+{
+    public string PackageName { get; set; } = null!;
     public string ReleaseTrack { get; set; } = null!;
     public string ReleaseStatus { get; set; } = null!;
     public GoogleClientKey GoogleClientKey { get; set; } = null!;
@@ -31,7 +48,6 @@ public record AzureBlobStorageConfiguration
 
 public record AzureKeyVaultConfiguration
 {
-    public string ConnectionString { get; set; } = null!;
     public string Uri { get; set; } = null!;
 }
 

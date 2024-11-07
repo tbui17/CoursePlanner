@@ -10,8 +10,6 @@ public class Container(IHost host)
     public IServiceProvider Services => host.Services;
     public T Resolve<T>() where T : notnull => host.Services.GetRequiredService<T>();
 
-    public T GetConfiguration<T>() => host.Services.GetConfigurationOrThrow<T>();
-
     public static Container Init() => Init(_ => { });
 
     public static Container Init(Action<HostApplicationBuilder> configure)

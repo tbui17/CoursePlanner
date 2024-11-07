@@ -9,6 +9,7 @@ namespace BuildLib.SolutionBuild;
 public interface IMsBuildProject
 {
     SemVersion GetAppDisplayVersion();
+    string GetAppId();
     ProjectVersionData GetProjectVersionData();
     void SetVersion(ProjectVersionData versionData);
     void IncrementPatch();
@@ -20,6 +21,7 @@ public class MsBuildProject(Project project, ILogger<MsBuildProject> logger) : I
 {
     private const string ApplicationDisplayVersion = "ApplicationDisplayVersion";
     private const string ApplicationVersion = "ApplicationVersion";
+
 
     public SemVersion GetAppDisplayVersion()
     {
@@ -42,6 +44,12 @@ public class MsBuildProject(Project project, ILogger<MsBuildProject> logger) : I
         logger.LogDebug("Found {ApplicationVersion} property with value {Version}", ApplicationDisplayVersion, version);
 
         return version;
+    }
+
+    public string GetAppId()
+    {
+        return project.GetPropertyValue("ApplicationId") ??
+               throw new InvalidDataException("Missing ApplicationId property in project file");
     }
 
     public ProjectVersionData GetProjectVersionData() =>

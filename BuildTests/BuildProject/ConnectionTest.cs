@@ -1,8 +1,9 @@
+using Azure.Security.KeyVault.Secrets;
 using BuildLib.CloudServices.GooglePlay;
-using BuildLib.Secrets;
 using BuildTests.Attributes;
 using BuildTests.TestSetup;
 using FluentAssertions;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit.Abstractions;
 
 namespace BuildTests.BuildProject;
@@ -12,10 +13,8 @@ public class ConnectionTest(ITestOutputHelper testOutputHelper) : BaseContainerS
     [Integration]
     public void SecretClient_CanConnect()
     {
-        var config = GetConfiguration<AppConfiguration>().GooglePlayDeveloperApiConfiguration;
-
-
-        config.GoogleClientKey.Should().NotBeNull();
+        var client = Container.Services.GetRequiredService<SecretClient>();
+        client.GetPropertiesOfSecrets().First().Should().NotBeNull();
     }
 
     [Integration]
@@ -35,8 +34,6 @@ public class ConnectionTest(ITestOutputHelper testOutputHelper) : BaseContainerS
     [Integration]
     public async Task GetBundles_HasResult()
     {
-        var secrets = GetConfiguration<AppConfiguration>();
-        secrets.ValidateOrThrow();
         var client = Resolve<IAndroidPublisherClient>();
 
 

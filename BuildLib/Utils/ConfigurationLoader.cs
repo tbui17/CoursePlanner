@@ -1,49 +1,49 @@
-using System.Reflection;
-using System.Runtime.InteropServices;
+using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Azure.Security.KeyVault.Secrets;
 using BuildLib.Secrets;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration.UserSecrets;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Newtonsoft.Json;
 using Serilog;
 
 namespace BuildLib.Utils;
 
-[Inject(Lifetime = ServiceLifetime.Singleton)]
-public class RemoteConfigurationClient(SecretClient client)
-{
-    public Dictionary<string, string> GetRemoteConfigurations()
-    {
-        var secrets = client
-            .GetPropertiesOfSecrets()
-            .Select(x => client.GetSecret(x.Name))
-            .ToDictionary(x => x.Value.Name, x => x.Value.Value);
-
-
-        // var configs =
-        //     new ConfigurationClient(Constants.ConnectionStringKey)
-        //         .GetConfigurationSettings(new SettingSelector
-        //             { Fields = SettingFields.Key | SettingFields.Value }
-        //         );
-
-        var mergedConfigs = new Dictionary<string, string>();
-
-        foreach (var secret in secrets)
-        {
-            mergedConfigs[secret.Key] = secret.Value;
-        }
-
-
-        // foreach (var config in configs)
-        // {
-        //     mergedConfigs[config.Key] = config.Value;
-        // }
-
-        return mergedConfigs.ToDictionary(x => x.Key.Replace("--", ":"), x => x.Value);
-    }
-}
+// [Inject(Lifetime = ServiceLifetime.Singleton)]
+// public class RemoteConfigurationClient(SecretClient client)
+// {
+//     public Dictionary<string, string> GetRemoteConfigurations()
+//     {
+//         var secrets = client
+//             .GetPropertiesOfSecrets()
+//             .Select(x => client.GetSecret(x.Name))
+//             .ToDictionary(x => x.Value.Name, x => x.Value.Value);
+//
+//         var configs = new ConfigurationClient(secrets[nameof(AppConfiguration.ConnectionString)])
+//             .GetConfigurationSettings(new SettingSelector
+//                 { Fields = SettingFields.Key | SettingFields.Value }
+//             );
+//
+//         // var configs =
+//         //     new ConfigurationClient(Constants.ConnectionStringKey)
+//         //         .GetConfigurationSettings(new SettingSelector
+//         //             { Fields = SettingFields.Key | SettingFields.Value }
+//         //         );
+//
+//         var mergedConfigs = new Dictionary<string, string>();
+//
+//         foreach (var config in configs)
+//         foreach (var secret in secrets)
+//         {
+//             secrets[config.Key] = config.Value;
+//             mergedConfigs[secret.Key] = secret.Value;
+//         }
+//
+//         return secrets.ToDictionary(x => x.Key.Replace("--", ":"), x => x.Value);
+//
+//
+//
+//     }
+// }
 
 public class ConfigurationLoader(HostApplicationBuilder builder) : IDisposable
 {
@@ -57,32 +57,18 @@ public class ConfigurationLoader(HostApplicationBuilder builder) : IDisposable
 
     public void LoadAppConfigsStandard()
     {
-        // var secretClient = Provider.GetRequiredService<SecretClient>();
+        var secretClient = Provider.GetRequiredService<SecretClient>();
         // var connString = secretClient.GetSecret(Constants.ConnectionStringKey).Value.Value;
-        //
-        //
-        //
-        //
-        // builder
-        //     .Configuration
-        //     .AddAzureKeyVault(secretClient, new KeyVaultSecretManager())
-        //     .AddAzureAppConfiguration(options =>
-        //         options.Connect(connString).ConfigureKeyVault(s => s.Register(secretClient))
-        //     );
+
+
+        builder
+            .Configuration
+            .AddAzureKeyVault(secretClient, new KeyVaultSecretManager());
+        // .AddAzureAppConfiguration(options =>
+        //     options.Connect(connString).ConfigureKeyVault(s => s.Register(secretClient))
+        // );
     }
 
-    private static string GetUserSecretsId()
-    {
-        var assembly = Assembly.GetAssembly(typeof(Container));
-        if (assembly is null)
-        {
-            throw new InvalidOperationException("Assembly was null");
-        }
-
-        var attribute = assembly.GetCustomAttribute<UserSecretsIdAttribute>() ??
-                        throw new InvalidOperationException("UserSecretsIdAttribute was null");
-        return attribute.UserSecretsId;
-    }
 
     public void LoadAppConfigs()
     {
@@ -105,11 +91,15 @@ public class ConfigurationLoader(HostApplicationBuilder builder) : IDisposable
             return;
         }
 
-        var remoteClient = Provider.GetRequiredService<RemoteConfigurationClient>();
-        var dict = remoteClient.GetRemoteConfigurations();
-        var jsonFile = GetSecretJsonFile();
-        WriteJsonFile();
-        // add a second time to load new secrets
+        LoadAppConfigsStandard();
+
+        var config = builder.Configuration.Get<AppConfiguration>() ??
+                     throw new InvalidOperationException("AppConfiguration is null");
+        config.ValidateOrThrow();
+        var manager = Provider.GetRequiredService<UserSecretManager<Container>>();
+        manager.Save(config);
+
+
         builder.Configuration.AddUserSecrets<Container>(true, true);
         return;
 
@@ -125,40 +115,6 @@ public class ConfigurationLoader(HostApplicationBuilder builder) : IDisposable
 
             log.Information("Missing secrets, attempting to populate secrets json: {Message}", exc.Message);
             return true;
-        }
-
-        FileInfo GetSecretJsonFile()
-        {
-            var jsonPath = GetJsonPath();
-
-
-            var jsonPathResolved = Environment.ExpandEnvironmentVariables(jsonPath);
-            var jsonPathResolvedInfo = new FileInfo(jsonPathResolved);
-            return jsonPathResolvedInfo;
-
-            string GetJsonPath()
-            {
-                var secretsId = GetUserSecretsId();
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                {
-                    return $"~/.microsoft/usersecrets/{secretsId}/secrets.json";
-                }
-
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    return $@"%APPDATA%\Microsoft\UserSecrets\{secretsId}\secrets.json";
-                }
-
-                throw new PlatformNotSupportedException($"Platform not supported {RuntimeInformation.OSDescription}");
-            }
-        }
-
-        void WriteJsonFile()
-        {
-            File.WriteAllText(jsonFile.FullName,
-                JsonConvert.SerializeObject(dict, Formatting.Indented)
-            );
-            log.Information("Wrote secrets json to {Path}", jsonFile.FullName);
         }
     }
 }

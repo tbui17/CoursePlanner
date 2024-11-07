@@ -13,6 +13,7 @@ using Google.Apis.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tools.DotNet;
 
@@ -36,7 +37,7 @@ public static class HostApplicationBuilderExtensions
                 {
                     var solution = p.GetRequiredService<Solution>();
                     var projectName =
-                        p.GetAppConfigurationOrThrow(x => x.GooglePlayDeveloperApiConfiguration.ProjectName);
+                        p.GetAppConfigurationOrThrow(x => x.DotnetPublishAndroidConfiguration.ProjectName);
                     var project = solution.GetProjectWithValidation(projectName);
                     return new ReleaseProject { Value = project };
                 }
@@ -119,7 +120,7 @@ public static class HostApplicationBuilderExtensions
             .Bind(builder.Configuration);
 
         builder
-            .Configuration.GetConfigurationOrThrow<AppConfiguration>()
+            .Configuration.Get<AppConfiguration>()!
             .ValidateOrThrow();
 
         var googleClientSectionKey = NamespaceData
@@ -127,26 +128,33 @@ public static class HostApplicationBuilderExtensions
             .ConfigKey;
 
         services
-            .AddOptions<GoogleClientKey>()
-            .Bind(builder.Configuration.GetSection(googleClientSectionKey) ??
-                  throw new NullReferenceException($"{nameof(GoogleClientKey)} was null")
+            .Configure<GoogleClientKey>(builder.Configuration.GetSection(googleClientSectionKey))
+            .Configure<DotnetPublishAndroidConfiguration>(
+                builder.Configuration.GetSection(nameof(AppConfiguration.DotnetPublishAndroidConfiguration))
+            )
+            .Configure<AzureBlobStorageConfiguration>(
+                builder.Configuration.GetSection(nameof(AppConfiguration.AzureBlobStorageConfiguration))
+            )
+            .Configure<AzureKeyVaultConfiguration>(
+                builder.Configuration.GetSection(nameof(AppConfiguration.AzureKeyVaultConfiguration))
             );
 
         services
-            .AddOptions<DotnetPublishAndroidConfiguration>()
-            .Bind(builder.Configuration.GetSection(nameof(AppConfiguration.DotnetPublishAndroidConfiguration)));
+            .AddSingleton<IOptions<IGooglePlayDeveloperApiConfigurationProxy>>(p =>
+                {
+                    var config = p.GetAppConfigurationOrThrow(x => x.GooglePlayDeveloperApiConfiguration);
+                    var project = p.GetRequiredService<IMsBuildProject>();
+                    return Options.Create(new GooglePlayDeveloperApiConfigurationProxy
+                        {
+                            PackageName = project.GetAppId(),
+                            ReleaseTrack = config.ReleaseTrack,
+                            ReleaseStatus = config.ReleaseStatus,
+                            GoogleClientKey = config.GoogleClientKey,
+                        }
+                    );
+                }
+            );
 
-        services
-            .AddOptions<AzureBlobStorageConfiguration>()
-            .Bind(builder.Configuration.GetSection(nameof(AppConfiguration.AzureBlobStorageConfiguration)));
-
-        services
-            .AddOptions<AzureKeyVaultConfiguration>()
-            .Bind(builder.Configuration.GetSection(nameof(AppConfiguration.AzureKeyVaultConfiguration)));
-
-        services
-            .AddOptions<GooglePlayDeveloperApiConfiguration>()
-            .Bind(builder.Configuration.GetSection(nameof(AppConfiguration.GooglePlayDeveloperApiConfiguration)));
 
         return builder;
     }

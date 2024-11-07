@@ -9,7 +9,7 @@ namespace BuildLib.CloudServices;
 
 [Inject]
 public class InitializerFactory(
-    IOptions<GooglePlayDeveloperApiConfiguration> googlePlayDeveloperApiConfigurationConfigs)
+    IOptions<IGooglePlayDeveloperApiConfigurationProxy> googlePlayDeveloperApiConfigurationConfigs)
 {
     public BaseClientService.Initializer Create()
     {
@@ -25,7 +25,7 @@ public class InitializerFactory(
         var initializer = new BaseClientService.Initializer
         {
             HttpClientInitializer = serviceCred,
-            ApplicationName = googlePlayDeveloperApiConfigurationConfigs.Value.ProjectName
+            ApplicationName = googlePlayDeveloperApiConfigurationConfigs.Value.PackageName
         };
 
         return initializer;

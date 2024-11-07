@@ -1,4 +1,3 @@
-using System.Globalization;
 using Serilog.Templates;
 using Serilog.Templates.Themes;
 
@@ -8,8 +7,7 @@ public static class LogUtil
 {
     public static readonly ExpressionTemplate DefaultExpressionTemplate =
         new(
-            "{ {@t, @l, SourceContext, @mt, @r, @x, @p} }\n",
-            theme: TemplateTheme.Code,
-            formatProvider: CultureInfo.InvariantCulture
+            template: "{ {@t, @l, SourceContext, @mt, @r, @x, @p} }\n",
+            theme: TemplateTheme.Code
         );
 }

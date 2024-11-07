@@ -18,7 +18,7 @@ public interface IBundleService
 [Inject(typeof(IBundleService), Lifetime = ServiceLifetime.Singleton)]
 public class BundleService(
     AndroidPublisherService service,
-    IOptions<GooglePlayDeveloperApiConfiguration> configs,
+    IOptions<IGooglePlayDeveloperApiConfigurationProxy> configs,
     ILogger<BundleService> logger,
     IVersionService versionService,
     IBundleProvider bundleProvider,
@@ -43,7 +43,7 @@ public class BundleService(
         }
 
 
-        var req = service.Edits.Bundles.Upload(configs.Value.ProjectName,
+        var req = service.Edits.Bundles.Upload(configs.Value.PackageName,
             edit,
             stream,
             ContentType

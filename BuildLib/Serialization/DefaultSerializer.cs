@@ -11,6 +11,7 @@ public class DefaultSerializer : ISerializer
         MaxDepth = 100,
         ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
         Formatting = Formatting.Indented,
+        NullValueHandling = NullValueHandling.Ignore
     };
 
     public string Serialize(object obj)
