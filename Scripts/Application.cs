@@ -2,6 +2,7 @@ using System.Diagnostics.Tracing;
 using Azure.Core.Diagnostics;
 using BuildLib.Commands;
 using BuildLib.Logging;
+using BuildLib.Serialization;
 using BuildLib.SolutionBuild;
 using BuildLib.Utils;
 using Cocona;
@@ -98,6 +99,47 @@ public class Application
             async () => { await new PopulateKeyUriCommand().ExecuteAsync(); }
         );
 
+        App.AddCommand("encode_file",
+            // ReSharper disable once AsyncVoidLambda
+            async (string inputPath, string? outputPath = null) =>
+            {
+                var log = Log.ForContext<Application>();
+                var file = new FileInfo(inputPath);
+                var outputFile = outputPath is not null
+                    ? new FileInfo(outputPath)
+                    : file
+                        .FullName
+                        .Thru(Path.GetFileNameWithoutExtension)
+                        .Thru(x => $"output/{x}.txt")
+                        .Thru(x => new FileInfo(x));
+
+                Log.Information("Encoding file {InputPath} and writing to {OutputPath}",
+                    file.FullName,
+                    outputFile.FullName
+                );
+                var b64 = await File
+                    .ReadAllBytesAsync(file.FullName)
+                    .ContinueWith(x => Convert.ToBase64String(x.Result));
+                log.Information("Produced base64 string with length {Length}", b64.Length);
+                await File.WriteAllTextAsync(outputFile.FullName, b64);
+            }
+        );
+
+        App.AddCommand("decode",
+            async (string base64, string outputPath, bool useOutputFolder) =>
+            {
+                await EncoderFactory.Create().CreateBase64Decoder(base64, outputPath, useOutputFolder).WriteAsync();
+            }
+        );
+
+        App.AddCommand("CreateKeystoreFile",
+            async () =>
+            {
+                var fac = Resolve<KeyFileContextFactory>();
+                var ctx = fac.Create();
+                await ctx.WriteAsync();
+            }
+        );
         ConfigLogging();
     }
 

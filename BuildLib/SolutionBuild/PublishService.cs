@@ -1,11 +1,8 @@
-using BuildLib.AndroidPublish;
 using BuildLib.CloudServices.GooglePlay;
-using BuildLib.Secrets;
 using BuildLib.SolutionBuild.Versioning;
 using BuildLib.Utils;
 using ByteSizeLib;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tools.DotNet;
@@ -20,22 +17,16 @@ public class PublishService(
     ReleaseProject releaseProject,
     IVersionService versionService,
     IAndroidPublisherClient androidPublisherClient,
-    AndroidSigningKeyStoreOptions opts,
-    IOptions<DotnetPublishAndroidConfiguration> configs
+    KeyFileContextFactory keyFileContextFactory
 )
 {
-    private async Task WriteKeystoreFile()
-    {
-        var contents = Convert.FromBase64String(configs.Value.KeystoreFile);
-        logger.LogInformation("Writing keystore file to {KeystorePath}", opts.AndroidSigningKeyStore);
-        await File.WriteAllBytesAsync(opts.AndroidSigningKeyStore, contents);
-    }
-
     public async Task ExecuteDotNetPublish()
     {
         await versionService.ValidateAppVersion();
+        using var keyFileContext = keyFileContextFactory.Create();
+        await keyFileContext.WriteAsync();
 
-        await WriteKeystoreFile();
+
         logger.LogInformation("Publishing project {ProjectPath} with configuration {Configuration}",
             settings.Project,
             settings.Configuration

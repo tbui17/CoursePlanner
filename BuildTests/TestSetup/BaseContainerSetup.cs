@@ -20,9 +20,15 @@ public abstract class BaseContainerSetup : IAsyncDisposable
         Container = GetContainer();
     }
 
-    public ValueTask DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
-        return Log.CloseAndFlushAsync();
+        await OnDisposeAsync();
+        await Log.CloseAndFlushAsync();
+    }
+
+    protected virtual ValueTask OnDisposeAsync()
+    {
+        return ValueTask.CompletedTask;
     }
 
 

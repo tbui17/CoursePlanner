@@ -32,14 +32,14 @@ public static class TypeExtensions
             .Any();
     }
 
+    public static bool IsPrimitiveOrString(this Type type)
+    {
+        return type.IsPrimitive || type == typeof(string);
+    }
+
     public static bool IsSimpleType(this Type type)
     {
-        if (type.IsPrimitive)
-        {
-            return true;
-        }
-
-        if (type == typeof(string))
+        if (type.IsPrimitiveOrString())
         {
             return true;
         }

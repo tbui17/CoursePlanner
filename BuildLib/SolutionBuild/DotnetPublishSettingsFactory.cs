@@ -26,11 +26,13 @@ public class DotNetPublishSettingsFactory(
             .SetProcessLogger(processLogger.Log)
             .SetFramework(configs.Value.AndroidFramework)
             .SetProperties(androidSigningKeyStoreOptions.ToPropertyDictionary())
+            .SetProcessWorkingDirectory(project.Value.Solution.Directory)
             .SetProcessExitHandler(ExitHandler);
     }
 
     private void ExitHandler(IProcess p)
     {
+        // ! can potentially log secrets
         if (p.ExitCode is not 0)
         {
             var msg = new

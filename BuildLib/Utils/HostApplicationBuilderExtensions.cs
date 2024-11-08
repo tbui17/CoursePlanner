@@ -46,10 +46,11 @@ public static class HostApplicationBuilderExtensions
             .AddSingleton<AndroidSigningKeyStoreOptions>(p =>
                 {
                     var c = p.GetAppConfigurationOrThrow(x => x.DotnetPublishAndroidConfiguration);
+                    var solution = p.GetRequiredService<Solution>();
                     return new AndroidSigningKeyStoreOptions
                     {
                         AndroidSigningKeyAlias = c.AndroidSigningKeyAlias,
-                        AndroidSigningKeyStore = Path.GetFullPath(c.AndroidSigningKeyStore),
+                        AndroidSigningKeyStore = solution.Directory / c.AndroidSigningKeyStore,
                         AndroidSigningKeyPass = c.AndroidSigningKeyPass,
                         AndroidSigningStorePass = c.AndroidSigningKeyPass
                     }.ToValidatedAndroidSigningKeyStoreOptions();

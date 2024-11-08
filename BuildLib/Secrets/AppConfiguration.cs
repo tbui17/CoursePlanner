@@ -6,7 +6,6 @@ namespace BuildLib.Secrets;
 
 public record DotnetPublishAndroidConfiguration
 {
-    // public string ApplicationId { get; set; } = null!;
     public string ProjectName { get; set; } = null!;
     public string AndroidSigningKeyStore { get; set; } = null!;
     public string AndroidSigningKeyAlias { get; set; } = null!;
@@ -18,7 +17,6 @@ public record DotnetPublishAndroidConfiguration
 
 public record GooglePlayDeveloperApiConfiguration
 {
-    // public string ProjectName { get; set; } = null!;
     public string ReleaseTrack { get; set; } = null!;
     public string ReleaseStatus { get; set; } = null!;
     public GoogleClientKey GoogleClientKey { get; set; } = null!;

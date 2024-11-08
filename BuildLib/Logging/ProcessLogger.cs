@@ -1,11 +1,12 @@
 using System.Text.RegularExpressions;
 using BuildLib.Utils;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Nuke.Common.Tooling;
 
 namespace BuildLib.Logging;
 
-[Inject]
+[Inject(Lifetime = ServiceLifetime.Singleton)]
 public partial class ProcessLogger<T>(ILogger<T> logger)
 {
     public void Log(Output output)
@@ -22,7 +23,7 @@ public partial class ProcessLogger<T>(ILogger<T> logger)
             return;
         }
 
-        logger.LogInformation("{Text}", output.Text);
+        logger.LogDebug("{Text}", output.Text);
     }
 
     public void Log(OutputType type, string text)
