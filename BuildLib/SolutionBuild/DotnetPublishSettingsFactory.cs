@@ -32,18 +32,17 @@ public class DotNetPublishSettingsFactory(
 
     private void ExitHandler(IProcess p)
     {
-        // ! can potentially log secrets
         if (p.ExitCode is not 0)
         {
             var msg = new
             {
                 p.ExitCode,
                 p.Output,
-                p.Arguments,
+                // p.Arguments, // ! can potentially log secrets
                 p.Id,
                 p.FileName,
                 p.HasExited,
-                p.WorkingDirectory
+                p.WorkingDirectory,
             };
             var jsonMsg = msg.ToJson();
             processLogger.Log(OutputType.Err, "Dotnet publish failed");
