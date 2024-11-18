@@ -14,4 +14,4 @@ runs:
     - name: Setup .NET
       uses: ./actions/setup-dotnet-maui
     - name: Cache Nuget
-      uses: ./actions/cache_nuget
+      uses: ./actions/cache-nuget
