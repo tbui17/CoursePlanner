@@ -11,6 +11,7 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       KEY_URI: ${{ secrets.KEY_URI }}
+      AzureKeyVaultConfiguration--Uri: ${{ secrets.KEY_URI }}
     steps:
       - uses: actions/checkout@v4
       - name: Azure login

@@ -8,43 +8,6 @@ using Serilog;
 
 namespace BuildLib.Utils;
 
-// [Inject(Lifetime = ServiceLifetime.Singleton)]
-// public class RemoteConfigurationClient(SecretClient client)
-// {
-//     public Dictionary<string, string> GetRemoteConfigurations()
-//     {
-//         var secrets = client
-//             .GetPropertiesOfSecrets()
-//             .Select(x => client.GetSecret(x.Name))
-//             .ToDictionary(x => x.Value.Name, x => x.Value.Value);
-//
-//         var configs = new ConfigurationClient(secrets[nameof(AppConfiguration.ConnectionString)])
-//             .GetConfigurationSettings(new SettingSelector
-//                 { Fields = SettingFields.Key | SettingFields.Value }
-//             );
-//
-//         // var configs =
-//         //     new ConfigurationClient(Constants.ConnectionStringKey)
-//         //         .GetConfigurationSettings(new SettingSelector
-//         //             { Fields = SettingFields.Key | SettingFields.Value }
-//         //         );
-//
-//         var mergedConfigs = new Dictionary<string, string>();
-//
-//         foreach (var config in configs)
-//         foreach (var secret in secrets)
-//         {
-//             secrets[config.Key] = config.Value;
-//             mergedConfigs[secret.Key] = secret.Value;
-//         }
-//
-//         return secrets.ToDictionary(x => x.Key.Replace("--", ":"), x => x.Value);
-//
-//
-//
-//     }
-// }
-
 public class ConfigurationLoader(HostApplicationBuilder builder) : IDisposable
 {
     private ServiceProvider? _serviceProviderInstance;

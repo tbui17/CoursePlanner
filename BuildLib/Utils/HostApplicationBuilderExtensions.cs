@@ -4,6 +4,7 @@ using Azure.Storage.Blobs;
 using BuildLib.AndroidPublish;
 using BuildLib.CloudServices;
 using BuildLib.FileSystem;
+using BuildLib.Globals;
 using BuildLib.Secrets;
 using BuildLib.SolutionBuild;
 using CaseConverter;
@@ -100,7 +101,7 @@ public static class HostApplicationBuilderExtensions
             )
             .AddSingleton<SecretClient>(p =>
                 {
-                    var keyUri = p.GetAppConfigurationOrThrow(x => x.AzureKeyVaultConfiguration.Uri);
+                    var keyUri = p.GetAppConfigurationOrThrow(x => RootEnvironment.KeyUri);
                     return new SecretClient(
                         new(keyUri),
                         new AzureCliCredential(new AzureCliCredentialOptions
