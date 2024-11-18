@@ -23,7 +23,7 @@ public class DotNetPublishSettingsFactory(
             .EnableNoLogo()
             .SetProject(project.Value.Path)
             .SetConfiguration(configs.Value.Configuration)
-            .SetProcessLogger(processLogger.Log)
+            // .SetProcessLogger(processLogger.Log)
             .SetFramework(configs.Value.AndroidFramework)
             .SetProperties(androidSigningKeyStoreOptions.ToPropertyDictionary())
             .SetProcessWorkingDirectory(project.Value.Solution.Directory)
