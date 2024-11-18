@@ -20,6 +20,6 @@ jobs:
       - name: Full Setup
         uses: ./actions/full-setup-dotnet-maui
       - name: Cache Nuget
-        uses: ./actions/cache_nuget
+        uses: ./actions/cache-nuget
       - name: Publish and upload
         run: dotnet run --project Scripts/Scripts.csproj -- publish_upload

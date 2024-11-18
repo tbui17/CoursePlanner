@@ -15,7 +15,7 @@ jobs:
       - name: Full Setup
         uses: ./actions/full-setup-dotnet-maui
       - name: Cache Nuget
-        uses: ./actions/cache_nuget
+        uses: ./actions/cache-nuget
       - name: Release Build
         run: dotnet build CoursePlanner/CoursePlanner.csproj -c Release -f net8.0-android
       - name: Test
