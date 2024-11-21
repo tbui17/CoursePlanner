@@ -12,10 +12,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Full Setup
-        uses: ./actions/full-setup-dotnet-maui
       - name: Cache Nuget
         uses: ./actions/cache-nuget
+      - name: Full Setup
+        uses: ./actions/full-setup-dotnet-maui
       - name: Release Build
         run: dotnet build CoursePlanner/CoursePlanner.csproj -c Release -f net8.0-android
       - name: Test

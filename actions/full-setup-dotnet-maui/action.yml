@@ -13,5 +13,3 @@ runs:
       uses: android-actions/setup-android@v3
     - name: Setup .NET
       uses: ./actions/setup-dotnet-maui
-    - name: Cache Nuget
-      uses: ./actions/cache-nuget
