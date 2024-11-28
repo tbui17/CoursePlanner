@@ -15,4 +15,10 @@ public class UserSetting : IUserSetting, IUserSettingForm
     public static IUserSetting DefaultUserSettingValue => DefaultUserSetting;
     public TimeSpan NotificationRange { get; set; }
     public int UserId { get; set; }
+
+    public static UserSetting CreateDefaultUserSetting(int userId) => new()
+    {
+        UserId = userId,
+        NotificationRange = DefaultUserSetting.NotificationRange
+    };
 }
