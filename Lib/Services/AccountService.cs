@@ -61,6 +61,7 @@ public class AccountService(
                     }
 
                     var returnedUser = new User { Id = dbUser.Id, Username = dbUser.Username };
+                    logger.LogInformation("Login success for {Id} {Username}", returnedUser.Id, returnedUser.Username);
                     return returnedUser.ToResult();
                 }
             );

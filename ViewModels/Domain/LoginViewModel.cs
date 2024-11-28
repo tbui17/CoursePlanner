@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Lib.Attributes;
+using Lib.Interfaces;
 using Lib.Models;
 using Lib.Utils;
 using ViewModels.Interfaces;
@@ -15,10 +16,20 @@ public partial class LoginViewModel(
     ISessionService sessionService) : ObservableObject, ILogin, IRefreshId
 {
     [ObservableProperty]
-    private string _username = "";
+    private string _password = "";
 
     [ObservableProperty]
-    private string _password = "";
+    private string _username = "";
+
+    public async Task RefreshAsync()
+    {
+        Username = "";
+        Password = "";
+        await sessionService.LogoutAsync();
+        await Task.CompletedTask;
+    }
+
+    public Task Init(int _) => RefreshAsync();
 
 
     [RelayCommand]
@@ -42,20 +53,11 @@ public partial class LoginViewModel(
     [RelayCommand]
     public async Task RegisterAsync()
     {
-        await sessionService.RegisterAsync(new LoginDetails(this))
+        await sessionService
+            .RegisterAsync(new LoginDetails(this))
             .MatchAsync(
                 _ => navService.GoToMainPageAsync(),
                 e => appService.ShowErrorAsync(e.Message)
             );
     }
-
-    public async Task RefreshAsync()
-    {
-        Username = "";
-        Password = "";
-        await sessionService.LogoutAsync();
-        await Task.CompletedTask;
-    }
-
-    public Task Init(int _) => RefreshAsync();
 }
