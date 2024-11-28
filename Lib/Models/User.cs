@@ -18,4 +18,16 @@ public class User : ILogin, IEntity, IUserDetail
 
     public string Username { get; set; } = "";
     public string Password { get; set; } = "";
+
+    public void SetUserSetting(UserSetting setting)
+    {
+        UserSetting = setting;
+        setting.User = this;
+        setting.UserId = Id;
+    }
+
+    public void SetDefaultUserSetting()
+    {
+        SetUserSetting(UserSetting.DefaultUserSetting());
+    }
 }

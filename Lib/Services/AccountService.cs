@@ -104,20 +104,13 @@ public class AccountService(
             Username = hashedLogin.Username,
             Password = hashedLogin.Password,
             Salt = hashedLogin.Salt,
-            UserSetting = UserSetting.DefaultUserSetting
         };
-        logger.LogInformation("Creating user {Username} with settings {@Settings}",
-            login.Username,
-            account.UserSetting
-        );
+        account.SetDefaultUserSetting();
 
         db.Accounts.Add(account);
+
         await db.SaveChangesAsync();
-        var created = await db
-            .Accounts.Where(x => x.Username == hashedLogin.Username)
-            .Select(x => new User { Id = x.Id, Username = x.Username })
-            .AsNoTracking()
-            .SingleAsync();
+        var created = new User { Id = account.Id, Username = account.Username };
         await tx.CommitAsync();
         logger.LogInformation("Created user {Id} {Username}", created.Id, created.Username);
         return created;
