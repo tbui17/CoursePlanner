@@ -12,10 +12,10 @@ public interface ILogin
 [Index(nameof(Username), IsUnique = true)]
 public class User : ILogin, IEntity
 {
+    public byte[] Salt { get; set; } = [];
+    public int UserSettingId { get; set; }
+    public UserSetting UserSetting { get; set; } = null!;
     public int Id { get; set; }
-
-    public string Username { get; set; } = "";
-    public string Password { get; set; } = "";
 
     string IEntity.Name
     {
@@ -23,12 +23,6 @@ public class User : ILogin, IEntity
         set => Username = value;
     }
 
-    public UserSetting CreateUserSetting()
-    {
-        return new UserSetting()
-        {
-            UserId = Id,
-            User = this,
-        };
-    }
+    public string Username { get; set; } = "";
+    public string Password { get; set; } = "";
 }

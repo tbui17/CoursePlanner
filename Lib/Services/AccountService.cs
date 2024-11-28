@@ -1,7 +1,5 @@
 ﻿using System.Data;
-using System.Diagnostics;
 using System.Security.Cryptography;
-using System.Text;
 using FluentValidation;
 using Lib.Attributes;
 using Lib.Exceptions;
@@ -9,6 +7,7 @@ using Lib.Interfaces;
 using Lib.Models;
 using Lib.Utils;
 using Lib.Validators;
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -34,39 +33,42 @@ public class AccountService(
     {
         using var _ = logger.MethodScope();
         logger.LogInformation("Login attempt for {Username}", login.Username);
-        return await fieldValidator.Check(login)
-            .Map(HashedLogin.Create)
-            .FlatMapAsync(async hashedLogin =>
-            {
-                await using var db = await factory.CreateDbContextAsync();
-                var res = await db.Accounts
-                    .Where(x => x.Username == hashedLogin.Username && x.Password == hashedLogin.Password)
-                    .Select(x => new User { Id = x.Id, Username = x.Username })
-                    .AsNoTracking()
-                    .ToListAsync();
-
-                logger.LogInformation("Login attempt for {Username} resulted in {Result}", login.Username, res);
-
-                return res switch
+        return await fieldValidator
+            .Check(login)
+            .FlatMapAsync(async validatedLogin =>
                 {
-                    [var user] => user.ToResult(),
-                    [] => new DomainException("Invalid username or password"),
-                    var entries => throw new UnreachableException($"Unexpected duplicate entries: {entries}")
+                    await using var db = await factory.CreateDbContextAsync();
+                    logger.LogInformation("Login attempt for {Username}", login.Username);
+                    var dbUser = await db
+                        .Accounts
+                        .AsNoTracking()
+                        .SingleOrDefaultAsync(x => x.Username == validatedLogin.Username);
+
+
+                    if (dbUser is null)
                     {
-                        Data =
-                        {
-                            [nameof(entries)] = entries
-                        }
+                        logger.LogInformation("Failed to find user {Username}", login.Username);
+                        return new DomainException($"The username {login.Username} does not exist");
                     }
-                };
-            });
+
+                    var pass = HashedLogin.Create(login, dbUser.Salt).Password;
+                    if (pass != dbUser.Password)
+                    {
+                        logger.LogInformation("Failed login attempt for user {Username}", login.Username);
+                        return new DomainException("Invalid password");
+                    }
+
+                    var returnedUser = new User { Id = dbUser.Id, Username = dbUser.Username };
+                    return returnedUser.ToResult();
+                }
+            );
     }
 
     public async Task<Result<User>> CreateAsync(ILogin login)
     {
         using var _ = logger.BeginScope("{Method}", nameof(CreateAsync));
         logger.LogInformation("Create attempt for {Username}", login.Username);
-        if (fieldValidator.GetError(login) is {} exc)
+        if (fieldValidator.GetError(login) is { } exc)
         {
             return exc;
         }
@@ -76,7 +78,8 @@ public class AccountService(
         await using var db = await factory.CreateDbContextAsync();
         await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
 
-        var username = await db.Accounts.Where(x => x.Username == hashedLogin.Username)
+        var username = await db
+            .Accounts.Where(x => x.Username == hashedLogin.Username)
             .Select(x => x.Username)
             .FirstOrDefaultAsync();
 
@@ -88,14 +91,14 @@ public class AccountService(
         var account = new User
         {
             Username = hashedLogin.Username,
-            Password = hashedLogin.Password
+            Password = hashedLogin.Password,
+            Salt = hashedLogin.Salt
         };
-        var setting = account.CreateUserSetting();
-        db.Add(setting);
 
-        await db.Accounts.AddAsync(account);
+        db.Accounts.Add(account);
         await db.SaveChangesAsync();
-        var created = await db.Accounts.Where(x => x.Username == hashedLogin.Username)
+        var created = await db
+            .Accounts.Where(x => x.Username == hashedLogin.Username)
             .Select(x => new User { Id = x.Id, Username = x.Username })
             .AsNoTracking()
             .SingleAsync();
@@ -107,28 +110,57 @@ public class AccountService(
     {
         throw new NotImplementedException();
     }
+}
 
-    private record HashedLogin
+file record HashedLogin
+{
+    private HashedLogin()
     {
-        private HashedLogin()
-        {
-        }
+    }
 
-        public string Username { get; private init; } = "";
-        public string Password { get; private init; } = "";
+    public string Username { get; private init; } = "";
+    public string Password { get; private init; } = "";
+    public byte[] Salt { get; private init; } = [];
 
 
-        public static HashedLogin Create(ILogin login) => new()
+    public static HashedLogin Create(ILogin login)
+    {
+        var salt = CreateSalt();
+        return Create(login, salt);
+    }
+
+
+    public static HashedLogin Create(ILogin login, byte[] salt)
+    {
+        return new HashedLogin
         {
             Username = login.Username,
-            Password = Hash(login.Password)
+            Password = Hash(login.Password, salt),
+            Salt = salt
         };
+    }
 
-        private static string Hash(string password)
-        {
-            var bytes = Encoding.UTF8.GetBytes(password);
-            var hash = SHA512.HashData(bytes);
-            return Convert.ToBase64String(hash);
-        }
-    };
+    private static byte[] CreateSalt()
+    {
+        // Generate a 16 byte salt using a sequence of
+        // cryptographically strong random bytes.
+        return RandomNumberGenerator.GetBytes(16);
+    }
+
+    private static string Hash(string password, byte[] salt)
+    {
+        // https://learn.microsoft.com/en-us/aspnet/core/security/data-protection/consumer-apis/password-hashing?view=aspnetcore-9.0
+
+        // derive a 32 byte subkey (use HMACSHA512 with 100,000 iterations)
+        var hashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+                password: password,
+                salt: salt,
+                prf: KeyDerivationPrf.HMACSHA512,
+                iterationCount: 100000,
+                numBytesRequested: 32
+            )
+        );
+
+        return hashed;
+    }
 }
