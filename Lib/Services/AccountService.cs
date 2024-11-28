@@ -17,8 +17,8 @@ namespace Lib.Services;
 
 public interface IAccountService
 {
-    Task<Result<User>> LoginAsync(ILogin login);
-    Task<Result<User>> CreateAsync(ILogin login);
+    Task<Result<IUserDetail>> LoginAsync(ILogin login);
+    Task<Result<IUserDetail>> CreateAsync(ILogin login);
     Task<IUserSetting> GetUserSettingsAsync(int userId);
     Task UpdateUserSettingsAsync(IUserSettingForm settings);
 }
@@ -31,7 +31,7 @@ public class AccountService(
     ILogger<AccountService> logger
 ) : IAccountService
 {
-    public async Task<Result<User>> LoginAsync(ILogin login)
+    public async Task<Result<IUserDetail>> LoginAsync(ILogin login)
     {
         using var _ = logger.MethodScope();
         logger.LogInformation("Login attempt for {Username}", login.Username);
@@ -62,14 +62,14 @@ public class AccountService(
                         return new DomainException("Invalid password");
                     }
 
-                    var returnedUser = new User { Id = dbUser.Id, Username = dbUser.Username };
+                    IUserDetail returnedUser = new User { Id = dbUser.Id, Username = dbUser.Username };
                     logger.LogInformation("Login success for {Id} {Username}", returnedUser.Id, returnedUser.Username);
                     return returnedUser.ToResult();
                 }
             );
     }
 
-    public async Task<Result<User>> CreateAsync(ILogin login)
+    public async Task<Result<IUserDetail>> CreateAsync(ILogin login)
     {
         using var _ = logger.BeginScope("{Method}", nameof(CreateAsync));
         logger.LogInformation("Create attempt for {Username}", login.Username);

@@ -1,7 +1,6 @@
 using Lib.Attributes;
 using Lib.Exceptions;
 using Lib.Interfaces;
-using Lib.Models;
 using Lib.Services;
 using Lib.Utils;
 using Microsoft.Extensions.Logging;
@@ -12,32 +11,28 @@ namespace ViewModels.Services;
 public interface ISessionService
 {
     bool IsLoggedIn { get; }
-    User? User { get; }
-    User GetOrThrowUser();
-    Task<Result<User>> LoginAsync(ILogin loginDetails);
+    IUserDetail? User { get; }
+    IUserDetail GetOrThrowUser();
+    Task<Result<IUserDetail>> LoginAsync(ILogin loginDetails);
     Task LogoutAsync();
-    Task<Result<User>> RegisterAsync(ILogin loginDetails);
+    Task<Result<IUserDetail>> RegisterAsync(ILogin loginDetails);
     Task<Result<IUserSetting>> GetUserSettingsAsync();
 }
 
 [Inject(typeof(ISessionService), ServiceLifetime.Singleton)]
 public class SessionService(IAccountService accountService, ILogger<ISessionService> logger) : ISessionService
 {
-    private User? _user;
+    private IUserDetail? _user;
 
-    public User? User
+    public IUserDetail? User
     {
         get => _user;
-        private set
-        {
-            new LoginEvent(value).Publish();
-            _user = value;
-        }
+        private set => _user = value;
     }
 
     public bool IsLoggedIn => User is not null;
 
-    public User GetOrThrowUser()
+    public IUserDetail GetOrThrowUser()
     {
         if (User is null)
         {
@@ -47,7 +42,7 @@ public class SessionService(IAccountService accountService, ILogger<ISessionServ
         return User;
     }
 
-    public async Task<Result<User>> LoginAsync(ILogin loginDetails)
+    public async Task<Result<IUserDetail>> LoginAsync(ILogin loginDetails)
     {
         logger.LogInformation("Login attempt: {Username}", loginDetails.Username);
         var res = await accountService.LoginAsync(loginDetails);
@@ -56,7 +51,9 @@ public class SessionService(IAccountService accountService, ILogger<ISessionServ
             .IfOk(u =>
                 {
                     logger.LogInformation("Login success: {Username}", u.Username);
-                    User = u;
+                    var user = u;
+                    new LoginEvent(user).Publish();
+                    User = user;
                 }
             )
             .IfError(e =>
@@ -69,7 +66,7 @@ public class SessionService(IAccountService accountService, ILogger<ISessionServ
         return res;
     }
 
-    public async Task<Result<User>> RegisterAsync(ILogin loginDetails)
+    public async Task<Result<IUserDetail>> RegisterAsync(ILogin loginDetails)
     {
         logger.LogInformation("Register attempt: {Username}", loginDetails.Username);
         var res = await accountService.CreateAsync(loginDetails);

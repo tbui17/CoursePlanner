@@ -44,13 +44,6 @@ public partial class LoginViewModel(
     }
 
     [RelayCommand]
-    public async Task DeleteAsync()
-    {
-        throw new NotImplementedException();
-    }
-
-
-    [RelayCommand]
     public async Task RegisterAsync()
     {
         await sessionService

@@ -1,12 +1,7 @@
 using FluentAssertions;
 using FluentAssertions.Execution;
-using FluentValidation;
-using Lib.Interfaces;
 using Lib.Models;
 using Lib.Services;
-using Lib.Utils;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging.Testing;
 
 namespace LibTests;
 
@@ -42,15 +37,11 @@ public class AccountServiceTest : BaseDbTest
 
     private async Task<AccountFixture> CreateAccountFixture()
     {
-        var accountService = new AccountService(
-            factory: Resolve<IDbContextFactory<LocalDbCtx>>(),
-            logger: new FakeLogger<AccountService>(),
-            fieldValidator: Resolve<IValidator<ILogin>>()
-        );
+        var accountService = Resolve<IAccountService>();
         var login = new LoginDetails("TestUser12345", "TestPass12345");
 
         var res = await accountService.CreateAsync(login);
-        return new AccountFixture { AccountService = accountService, Login = login, Result = res };
+        return new AccountFixture { AccountService = accountService, Login = login, User = res.Unwrap().As<User>() };
     }
 
 
@@ -71,12 +62,11 @@ public class AccountServiceTest : BaseDbTest
         var res = await f.AccountService.GetUserSettingsAsync(f.User.Id);
         res.NotificationRange.Should().Be(twoMonths);
     }
-}
 
-internal record AccountFixture
-{
-    public required AccountService AccountService { get; set; }
-    public required LoginDetails Login { get; set; }
-    public required Result<User> Result { get; set; }
-    public User User => Result.Unwrap();
+    private record AccountFixture
+    {
+        public required IAccountService AccountService { get; set; }
+        public required LoginDetails Login { get; set; }
+        public required User User { get; set; }
+    }
 }

@@ -1,6 +1,6 @@
 using CommunityToolkit.Mvvm.Messaging.Messages;
-using Lib.Models;
+using Lib.Interfaces;
 
 namespace ViewModels.Events;
 
-public class LoginEvent(User? value) : ValueChangedMessage<User?>(value);
+public class LoginEvent(IUserDetail? value) : ValueChangedMessage<IUserDetail?>(value);
