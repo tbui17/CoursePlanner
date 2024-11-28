@@ -20,7 +20,7 @@ public interface IAccountService
     Task<Result<User>> LoginAsync(ILogin login);
     Task<Result<User>> CreateAsync(ILogin login);
     Task<IUserSetting> GetUserSettingsAsync(int userId);
-    Task UpdateUserSettingsAsync(UserSetting settings);
+    Task UpdateUserSettingsAsync(IUserSettingForm settings);
 }
 
 [Inject(typeof(IAccountService))]
@@ -95,7 +95,8 @@ public class AccountService(
         {
             Username = hashedLogin.Username,
             Password = hashedLogin.Password,
-            Salt = hashedLogin.Salt
+            Salt = hashedLogin.Salt,
+            UserSetting = UserSetting.DefaultUserSetting
         };
 
         db.Accounts.Add(account);
@@ -118,7 +119,7 @@ public class AccountService(
         return userSetting;
     }
 
-    public async Task UpdateUserSettingsAsync(UserSetting settings)
+    public async Task UpdateUserSettingsAsync(IUserSettingForm settings)
     {
         await using var db = await factory.CreateDbContextAsync();
         var query = CreateGetUserSettingsQuery(db, settings.UserId);

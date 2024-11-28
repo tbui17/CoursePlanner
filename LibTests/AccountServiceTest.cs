@@ -13,7 +13,7 @@ namespace LibTests;
 public class AccountServiceTest : BaseDbTest
 {
     [Test]
-    public async Task CreateAsync_ExcludesRelationsAndSensitiveFields()
+    public async Task CreateAsync_ResultExcludesRelationsAndSensitiveFields()
     {
         var f = await CreateAccountFixture();
         var user = f.User;
@@ -23,6 +23,21 @@ public class AccountServiceTest : BaseDbTest
         user.Salt.Should().BeEmpty();
         user.UserSetting.Should().BeNull();
         user.Id.Should().BeGreaterThan(0);
+    }
+
+    [Test]
+    public async Task CreateAsync_CreatesRelatedEntities()
+    {
+        var f = await CreateAccountFixture();
+        await f.AccountService.Awaiting(x => x.GetUserSettingsAsync(f.User.Id)).Should().NotThrowAsync();
+    }
+
+    [Test]
+    public async Task CreateAsync_CreatesDefaultSettingValue()
+    {
+        var f = await CreateAccountFixture();
+        var settings = await f.AccountService.GetUserSettingsAsync(f.User.Id);
+        settings.Should().BeEquivalentTo(UserSetting.DefaultUserSettingValue);
     }
 
     private async Task<AccountFixture> CreateAccountFixture()
@@ -40,10 +55,9 @@ public class AccountServiceTest : BaseDbTest
 
 
     [Test]
-    public async Task AddNotificationRange_TwoMonths_PersistsValue()
+    public async Task UpdateUserSettingsAsync_NotDefault_PersistsValue()
     {
         var f = await CreateAccountFixture();
-        var res = await f.AccountService.GetUserSettingsAsync(f.User.Id);
 
         var twoMonths = TimeSpan.FromDays(60);
 
@@ -54,6 +68,8 @@ public class AccountServiceTest : BaseDbTest
         };
 
         await f.AccountService.UpdateUserSettingsAsync(setting);
+        var res = await f.AccountService.GetUserSettingsAsync(f.User.Id);
+        res.NotificationRange.Should().Be(twoMonths);
     }
 }
 
