@@ -73,6 +73,7 @@ public class AccountService(
         logger.LogInformation("Create attempt for {Username}", login.Username);
         if (fieldValidator.GetError(login) is { } exc)
         {
+            logger.LogInformation("Validation failed for {Username}: {Error}", login.Username, exc.Message);
             return exc;
         }
 
