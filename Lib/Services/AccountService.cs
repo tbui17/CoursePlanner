@@ -94,6 +94,7 @@ public class AccountService(
 
         if (username is not null)
         {
+            logger.LogInformation("Failed to create user {Username}: username already exists", login.Username);
             return new DomainException($"Username {login.Username} already exists");
         }
 
@@ -105,6 +106,10 @@ public class AccountService(
             Salt = hashedLogin.Salt,
             UserSetting = UserSetting.DefaultUserSetting
         };
+        logger.LogInformation("Creating user {Username} with settings {@Settings}",
+            login.Username,
+            account.UserSetting
+        );
 
         db.Accounts.Add(account);
         await db.SaveChangesAsync();
@@ -114,6 +119,7 @@ public class AccountService(
             .AsNoTracking()
             .SingleAsync();
         await tx.CommitAsync();
+        logger.LogInformation("Created user {Id} {Username}", created.Id, created.Username);
         return created;
     }
 
