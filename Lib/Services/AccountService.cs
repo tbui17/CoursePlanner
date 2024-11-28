@@ -39,6 +39,7 @@ public class AccountService(
             .Check(login)
             .FlatMapAsync(async validatedLogin =>
                 {
+                    // reject if username doesn't exist
                     await using var db = await factory.CreateDbContextAsync();
                     logger.LogInformation("Login attempt for {Username}", login.Username);
                     var dbUser = await db
@@ -53,6 +54,7 @@ public class AccountService(
                         return new DomainException($"The username {login.Username} does not exist");
                     }
 
+                    // reject if password is incorrect
                     var pass = HashedLogin.Create(login, dbUser.Salt).Password;
                     if (pass != dbUser.Password)
                     {
@@ -71,17 +73,20 @@ public class AccountService(
     {
         using var _ = logger.BeginScope("{Method}", nameof(CreateAsync));
         logger.LogInformation("Create attempt for {Username}", login.Username);
+        // validate input
         if (fieldValidator.GetError(login) is { } exc)
         {
             logger.LogInformation("Validation failed for {Username}: {Error}", login.Username, exc.Message);
             return exc;
         }
 
+        // create hash
         var hashedLogin = HashedLogin.Create(login);
 
         await using var db = await factory.CreateDbContextAsync();
         await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
 
+        // reject if username already exists
         var username = await db
             .Accounts.Where(x => x.Username == hashedLogin.Username)
             .Select(x => x.Username)
@@ -92,6 +97,7 @@ public class AccountService(
             return new DomainException($"Username {login.Username} already exists");
         }
 
+        // save new user
         var account = new User
         {
             Username = hashedLogin.Username,
