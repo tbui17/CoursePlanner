@@ -17,12 +17,15 @@ public interface IInstructorService
 }
 
 [Inject]
-public class InstructorService(ILocalDbCtxFactory factory, IValidator<IContactForm> formValidator, ILogger<InstructorService> logger) : IInstructorService
+public class InstructorService(
+    ILocalDbCtxFactory factory,
+    IValidator<IContactForm> formValidator,
+    ILogger<InstructorService> logger) : IInstructorService
 {
-
     public async Task<DomainException?> Add(IContactForm form)
     {
         using var _ = logger.MethodScope();
+        // validate hydrated model before saving
         var instructor = new Instructor().SetFromContactForm(form);
         if (formValidator.GetError(instructor) is { } e)
         {
@@ -32,7 +35,7 @@ public class InstructorService(ILocalDbCtxFactory factory, IValidator<IContactFo
 
         await using var db = await factory.CreateDbContextAsync();
 
-        var exc = await ValidateNoDuplicateEmail(db, form.Email);
+        var exc = await ValidateNoDuplicateEmailCreate(db, form.Email);
 
         if (exc != null)
         {
@@ -47,16 +50,16 @@ public class InstructorService(ILocalDbCtxFactory factory, IValidator<IContactFo
 
     public async Task<DomainException?> Update(IContact form)
     {
-
         using var _ = logger.MethodScope();
         await using var db = await factory.CreateDbContextAsync();
         var instructor = await db.Instructors.FirstOrDefaultAsync(x => x.Id == form.Id);
 
         if (instructor is null)
         {
-            logger.LogInformation("Instructor not found.");
+            logger.LogInformation("Instructor not found. {@Data}", form);
             return new DomainException("Instructor not found.");
         }
+
         instructor.SetFromContactForm(form);
         if (formValidator.GetError(instructor) is { } e)
         {
@@ -64,24 +67,20 @@ public class InstructorService(ILocalDbCtxFactory factory, IValidator<IContactFo
             return e;
         }
 
-        if (await ValidateNoDuplicateEmail(db, instructor.Email, instructor.Id) is { } exc)
+        if (await ValidateNoDuplicateEmailUpdate(db, instructor.Email, instructor.Id) is { } exc)
         {
             logger.LogInformation("Duplicate email: {Email}", instructor.Email);
             return exc;
         }
+
         await db.SaveChangesAsync();
         return null;
     }
 
-    private static async Task<DomainException?> ValidateNoDuplicateEmail(LocalDbCtx db, string email, int? id = null)
+    private static async Task<DomainException?> ValidateNoDuplicateEmailCreate(LocalDbCtx db, string email)
     {
         email = email.ToLower();
         var baseQuery = db.Instructors.Where(x => x.Email.ToLower() == email);
-
-        if (id is { } instructorId)
-        {
-            baseQuery = baseQuery.Where(x => x.Id != instructorId);
-        }
 
         return await baseQuery
                 .Select(x => x.Email)
@@ -92,4 +91,21 @@ public class InstructorService(ILocalDbCtxFactory factory, IValidator<IContactFo
             };
     }
 
+    private static async Task<DomainException?> ValidateNoDuplicateEmailUpdate(LocalDbCtx db, string email, int id)
+    {
+        email = email.ToLower();
+        var baseQuery = db.Instructors.Where(x => x.Email.ToLower() == email);
+
+
+        baseQuery = baseQuery.Where(x => x.Id != id);
+
+
+        return await baseQuery
+                .Select(x => x.Email)
+                .FirstOrDefaultAsync() switch
+            {
+                not null => new DomainException("Email already exists."),
+                _ => null
+            };
+    }
 }
