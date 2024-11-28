@@ -12,8 +12,8 @@ namespace ViewModels.Services;
 public interface ISessionService
 {
     bool IsLoggedIn { get; }
-    User GetOrThrowUser();
     User? User { get; }
+    User GetOrThrowUser();
     Task<Result<User>> LoginAsync(ILogin loginDetails);
     Task LogoutAsync();
     Task<Result<User>> RegisterAsync(ILogin loginDetails);
@@ -100,7 +100,8 @@ public class SessionService(IAccountService accountService, ILogger<ISessionServ
             return new DomainException("User is not logged in");
         }
 
-        return await accountService.GetUserSettingsAsync(User);
+        var res = await accountService.GetUserSettingsAsync(User.Id);
+        return res.ToResult();
     }
 
 

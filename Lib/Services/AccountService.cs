@@ -5,6 +5,7 @@ using Lib.Attributes;
 using Lib.Exceptions;
 using Lib.Interfaces;
 using Lib.Models;
+using Lib.Traits;
 using Lib.Utils;
 using Lib.Validators;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
@@ -18,7 +19,8 @@ public interface IAccountService
 {
     Task<Result<User>> LoginAsync(ILogin login);
     Task<Result<User>> CreateAsync(ILogin login);
-    Task<Result<IUserSetting>> GetUserSettingsAsync(ILogin login);
+    Task<IUserSetting> GetUserSettingsAsync(int userId);
+    Task UpdateUserSettingsAsync(UserSetting settings);
 }
 
 [Inject(typeof(IAccountService))]
@@ -106,9 +108,30 @@ public class AccountService(
         return created;
     }
 
-    public Task<Result<IUserSetting>> GetUserSettingsAsync(ILogin login)
+    public async Task<IUserSetting> GetUserSettingsAsync(int userId)
     {
-        throw new NotImplementedException();
+        await using var db = await factory.CreateDbContextAsync();
+        var query = CreateGetUserSettingsQuery(db, userId);
+
+        var userSetting = await query.AsNoTracking().SingleAsync();
+        return userSetting;
+    }
+
+    public async Task UpdateUserSettingsAsync(UserSetting settings)
+    {
+        await using var db = await factory.CreateDbContextAsync();
+        var query = CreateGetUserSettingsQuery(db, settings.UserId);
+
+        var userSetting = await query.SingleAsync();
+        userSetting.SetFromUserSetting(settings);
+        await db.SaveChangesAsync();
+    }
+
+    private IQueryable<UserSetting> CreateGetUserSettingsQuery(LocalDbCtx db, int userId)
+    {
+        var query = db.UserSettings.Where(x => x.UserId == userId);
+
+        return query;
     }
 }
 
