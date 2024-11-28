@@ -7,7 +7,7 @@ namespace Lib.Models;
 public class User : ILogin, IEntity, IUserDetail
 {
     public byte[] Salt { get; set; } = [];
-    public UserSetting UserSetting { get; set; } = null!;
+    public UserSetting? UserSetting { get; set; }
     public int Id { get; set; }
 
     string IEntity.Name
