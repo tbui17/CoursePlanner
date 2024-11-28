@@ -5,10 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LibTests;
 
-
 public class UserSettingTest : BaseDbTest
 {
-
     [Test]
     public async Task AddNotificationRange_TwoMonths_PersistsValue()
     {
@@ -28,19 +26,8 @@ public class UserSettingTest : BaseDbTest
 
         db.Accounts.Add(user);
         await db.SaveChangesAsync();
-
-        var setting = new UserSetting
-        {
-            UserId = userId,
-            NotificationRange = twoMonths,
-        };
-
-        db.UserSettings.Add(setting);
-        await db.SaveChangesAsync();
         var dbSetting = await db.UserSettings.SingleAsync(x => x.UserId == userId);
         dbSetting.NotificationRange.Should().Be(twoMonths);
         await tx.RollbackAsync();
-
     }
-
 }
