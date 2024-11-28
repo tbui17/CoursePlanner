@@ -280,8 +280,7 @@ namespace Lib.Migrations
 
             modelBuilder.Entity("Lib.Models.User", b =>
                 {
-                    b.Navigation("UserSetting")
-                        .IsRequired();
+                    b.Navigation("UserSetting");
                 });
 #pragma warning restore 612, 618
         }
