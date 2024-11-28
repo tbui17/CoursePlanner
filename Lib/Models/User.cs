@@ -13,7 +13,6 @@ public interface ILogin
 public class User : ILogin, IEntity
 {
     public byte[] Salt { get; set; } = [];
-    public int UserSettingId { get; set; }
     public UserSetting UserSetting { get; set; } = null!;
     public int Id { get; set; }
 
