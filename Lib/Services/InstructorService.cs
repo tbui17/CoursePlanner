@@ -61,7 +61,7 @@ public class InstructorService(
             return new DomainException("Instructor not found.");
         }
 
-        AssignmentTrait.Assign((IContactForm)instructor, form);
+        instructor.Assign(form);
         if (formValidator.GetError(instructor) is { } e)
         {
             logger.LogInformation("Instructor validation failed: {Message}", e.Message);
