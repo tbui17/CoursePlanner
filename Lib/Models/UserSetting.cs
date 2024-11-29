@@ -2,7 +2,7 @@ using Lib.Interfaces;
 
 namespace Lib.Models;
 
-public class UserSetting : IUserSetting, IUserSettingForm
+public class UserSetting : IUserSettingForm
 {
     public int Id { get; set; }
     public User User { get; set; } = null!;
