@@ -22,7 +22,7 @@ public class NotificationDataStreamService(
     {
         // we fetch and process data in a different thread to avoid blocking the UI thread
         // on push, starts a new subscription and switches subscribers to the new one
-        // on pull, replays the result of the latest fetch cached to a buffer of size 1
+        // on pull, replays the result of the latest fetch cached to a buffer of size 1 (because we only want the latest)
         // stays alive until ref count of subscribers is 0
         return dateFilter
             .ObserveOn(RxApp.TaskpoolScheduler)
