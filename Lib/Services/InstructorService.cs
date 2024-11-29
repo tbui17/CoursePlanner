@@ -26,7 +26,8 @@ public class InstructorService(
     {
         using var _ = logger.MethodScope();
         // validate hydrated model before saving
-        var instructor = new Instructor().SetFromContactForm(form);
+        var instructor = new Instructor();
+        instructor.Assign(form);
         if (formValidator.GetError(instructor) is { } e)
         {
             logger.LogInformation("Instructor validation failed: {Message}", e.Message);
@@ -60,7 +61,7 @@ public class InstructorService(
             return new DomainException("Instructor not found.");
         }
 
-        instructor.SetFromContactForm(form);
+        AssignmentTrait.Assign((IContactForm)instructor, form);
         if (formValidator.GetError(instructor) is { } e)
         {
             logger.LogInformation("Instructor validation failed: {Message}", e.Message);

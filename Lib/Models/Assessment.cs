@@ -49,7 +49,9 @@ public static class AssessmentExtensions
 
     public static Assessment ToAssessment(this IAssessmentForm form)
     {
-        return new Assessment().SetFromAssessmentForm(form);
+        var assessment = new Assessment();
+        assessment.Assign(form);
+        return assessment;
     }
 
     public static IEnumerable<DomainException> ValidateUnique(this IReadOnlyCollection<IAssessmentForm> assessments)

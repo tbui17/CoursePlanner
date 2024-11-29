@@ -4,8 +4,7 @@ namespace Lib.Traits;
 
 public static class AssignmentTrait
 {
-    public static T SetFromAssessmentForm<T, T2>(this T self, T2 other)
-        where T : IAssessmentForm where T2 : IAssessmentForm
+    public static IAssessmentForm Assign(this IAssessmentForm self, IAssessmentForm other)
     {
         self.Id = other.Id;
         self.Name = other.Name;
@@ -18,8 +17,7 @@ public static class AssignmentTrait
         return self;
     }
 
-    public static T SetFromCourseField<T, T2>(this T self, T2 other)
-        where T : ICourseField where T2 : ICourseField
+    public static ICourseField Assign(this ICourseField self, ICourseField other)
     {
         self.Status = other.Status;
         self.Start = other.Start;
@@ -31,17 +29,15 @@ public static class AssignmentTrait
         return self;
     }
 
-    public static T SetFromContact<T, T2>(this T self, T2 other)
-        where T : IContact where T2 : IContact
+    public static IContact Assign(this IContact self, IContact other)
     {
         self.Id = other.Id;
-        self.SetFromContactForm(other);
+        Assign((IContactForm)self, other);
 
         return self;
     }
 
-    public static T SetFromContactForm<T, T2>(this T self, T2 other)
-        where T : IContactForm where T2 : IContactForm
+    public static IContactForm Assign(this IContactForm self, IContactForm other)
     {
         self.Name = other.Name;
         self.Email = other.Email;
@@ -50,8 +46,7 @@ public static class AssignmentTrait
         return self;
     }
 
-    public static T SetFromNoteField<T, T2>(this T self, T2 other)
-        where T : INoteField where T2 : INoteField
+    public static INoteField Assign(this INoteField self, INoteField other)
     {
         self.Id = other.Id;
         self.Name = other.Name;
@@ -60,8 +55,7 @@ public static class AssignmentTrait
         return self;
     }
 
-    public static T SetFromDateTimeEntity<T, T2>(this T self, T2 other)
-        where T : IDateTimeEntity where T2 : IDateTimeEntity
+    public static IDateTimeEntity Assign(this IDateTimeEntity self, IDateTimeEntity other)
     {
         self.Id = other.Id;
         self.Name = other.Name;
@@ -71,8 +65,7 @@ public static class AssignmentTrait
         return self;
     }
 
-    public static T SetFromUserSetting<T, T2>(this T self, T2 other)
-        where T : IUserSetting where T2 : IUserSetting
+    public static IUserSetting Assign(this IUserSetting self, IUserSetting other)
     {
         self.NotificationRange = other.NotificationRange;
 

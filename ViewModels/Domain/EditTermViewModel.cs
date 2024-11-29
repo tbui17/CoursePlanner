@@ -17,6 +17,9 @@ public partial class EditTermViewModel(
     : ObservableObject, IDateTimeEntity, IRefreshId
 {
     [ObservableProperty]
+    private DateTime _end;
+
+    [ObservableProperty]
     private int _id;
 
     [ObservableProperty]
@@ -25,13 +28,26 @@ public partial class EditTermViewModel(
     [ObservableProperty]
     private DateTime _start;
 
-    [ObservableProperty]
-    private DateTime _end;
+    public async Task Init(int termId)
+    {
+        await using var db = await factory.CreateDbContextAsync();
+
+        var term = await db
+                       .Terms
+                       .FirstOrDefaultAsync(x => x.Id == termId) ??
+                   new();
+
+        this.Assign(term);
+    }
+
+    public async Task RefreshAsync()
+    {
+        await Init(Id);
+    }
 
     [RelayCommand]
     public async Task SaveAsync()
     {
-
         if (this.ValidateNameAndDates() is { } exc)
         {
             await appService.ShowErrorAsync(exc.Message);
@@ -40,11 +56,11 @@ public partial class EditTermViewModel(
 
         var db = await factory.CreateDbContextAsync();
         var term = await db
-           .Terms
-           .AsTracking()
-           .FirstAsync(x => x.Id == Id);
+            .Terms
+            .AsTracking()
+            .FirstAsync(x => x.Id == Id);
 
-        term.SetFromDateTimeEntity(this);
+        term.Assign(this);
 
         await db.SaveChangesAsync();
         await BackAsync();
@@ -54,23 +70,5 @@ public partial class EditTermViewModel(
     public async Task BackAsync()
     {
         await navService.PopAsync();
-    }
-
-    public async Task Init(int termId)
-    {
-
-        await using var db = await factory.CreateDbContextAsync();
-
-        var term = await db
-               .Terms
-               .FirstOrDefaultAsync(x => x.Id == termId) ??
-            new();
-
-        this.SetFromDateTimeEntity(term);
-    }
-
-    public async Task RefreshAsync()
-    {
-        await Init(Id);
     }
 }
