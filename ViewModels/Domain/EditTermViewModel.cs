@@ -48,7 +48,7 @@ public partial class EditTermViewModel(
     [RelayCommand]
     public async Task SaveAsync()
     {
-        if (this.ValidateNameAndDates() is { } exc)
+        if (this.Validate() is { } exc)
         {
             await appService.ShowErrorAsync(exc.Message);
             return;

@@ -58,7 +58,7 @@ public static class AssessmentExtensions
     {
         var exceptions = new List<string>();
         foreach (var assessment in assessments)
-            if (assessment.ValidateNameAndDates() is { } exc)
+            if (assessment.Validate() is { } exc)
                 exceptions.Add($"Type: '{assessment.Type}', Name: '{assessment.Name}', Message: {exc.Message}");
 
 

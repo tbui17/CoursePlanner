@@ -52,7 +52,7 @@ public partial class EditNoteViewModel(
     [RelayCommand]
     public async Task SaveAsync()
     {
-        if (this.ValidateName() is { } exc)
+        if (this.Validate() is { } exc)
         {
             await appService.ShowErrorAsync(exc.Message);
             return;
