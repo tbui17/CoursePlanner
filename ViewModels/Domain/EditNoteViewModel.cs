@@ -31,10 +31,28 @@ public partial class EditNoteViewModel(
         set => Text = value;
     }
 
+    public async Task Init(int noteId)
+    {
+        Id = noteId;
+        await using var db = await factory.CreateDbContextAsync();
+
+        var note = await db
+                       .Notes
+                       .FirstOrDefaultAsync(x => x.Id == noteId) ??
+                   new();
+
+        this.Assign(note);
+    }
+
+    public async Task RefreshAsync()
+    {
+        await Init(Id);
+    }
+
     [RelayCommand]
     public async Task SaveAsync()
     {
-        if (this.ValidateName() is { } exc)
+        if (this.Validate() is { } exc)
         {
             await appService.ShowErrorAsync(exc.Message);
             return;
@@ -42,11 +60,11 @@ public partial class EditNoteViewModel(
 
         await using var db = await factory.CreateDbContextAsync();
         var note = await db
-           .Notes
-           .AsTracking()
-           .FirstAsync(x => x.Id == Id);
+            .Notes
+            .AsTracking()
+            .FirstAsync(x => x.Id == Id);
 
-        note.SetFromNoteField(this);
+        note.Assign(this);
 
 
         await db.SaveChangesAsync();
@@ -57,23 +75,5 @@ public partial class EditNoteViewModel(
     public async Task BackAsync()
     {
         await navService.PopAsync();
-    }
-
-    public async Task Init(int noteId)
-    {
-        Id = noteId;
-        await using var db = await factory.CreateDbContextAsync();
-
-        var note = await db
-               .Notes
-               .FirstOrDefaultAsync(x => x.Id == noteId) ??
-            new();
-
-        this.SetFromNoteField(note);
-    }
-
-    public async Task RefreshAsync()
-    {
-        await Init(Id);
     }
 }

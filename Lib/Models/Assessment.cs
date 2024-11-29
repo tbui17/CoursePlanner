@@ -49,14 +49,16 @@ public static class AssessmentExtensions
 
     public static Assessment ToAssessment(this IAssessmentForm form)
     {
-        return new Assessment().SetFromAssessmentForm(form);
+        var assessment = new Assessment();
+        assessment.Assign(form);
+        return assessment;
     }
 
     public static IEnumerable<DomainException> ValidateUnique(this IReadOnlyCollection<IAssessmentForm> assessments)
     {
         var exceptions = new List<string>();
         foreach (var assessment in assessments)
-            if (assessment.ValidateNameAndDates() is { } exc)
+            if (assessment.Validate() is { } exc)
                 exceptions.Add($"Type: '{assessment.Type}', Name: '{assessment.Name}', Message: {exc.Message}");
 
 

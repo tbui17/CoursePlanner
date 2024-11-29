@@ -65,7 +65,7 @@ public class AssessmentService(ILocalDbCtxFactory factory, ILogger<AssessmentSer
 
         foreach (var (localModel, dbModel) in updateLog)
         {
-            dbModel.SetFromAssessmentForm(localModel);
+            dbModel.Assign(localModel);
         }
 
 

@@ -131,7 +131,7 @@ public class AccountService(
         var query = CreateGetUserSettingsQuery(db, settings.UserId);
 
         var userSetting = await query.SingleAsync();
-        userSetting.SetFromUserSetting(settings);
+        userSetting.Assign(settings);
         await db.SaveChangesAsync();
     }
 
