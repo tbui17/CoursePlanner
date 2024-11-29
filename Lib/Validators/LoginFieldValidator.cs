@@ -1,11 +1,10 @@
 ﻿using FluentValidation;
-using Lib.Models;
+using Lib.Interfaces;
 
 namespace Lib.Validators;
 
 public class LoginFieldValidator : AbstractValidator<ILogin>
 {
-
     public LoginFieldValidator()
     {
         RuleFor(x => x.Username)

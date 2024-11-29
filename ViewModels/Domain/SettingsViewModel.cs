@@ -9,7 +9,6 @@ using Microsoft.Extensions.Logging;
 using ViewModels.Interfaces;
 using ViewModels.Services;
 
-
 namespace ViewModels.Domain;
 
 [Inject]
@@ -17,27 +16,22 @@ public partial class SettingsViewModel(
     ILocalDbCtxFactory factory,
     ISessionService session,
     IValidator<IUserSetting> validator,
-    IAppService appService, ILogger<SettingsViewModel> logger) : ObservableObject, IRefresh, IUserSetting
+    IAppService appService,
+    ILogger<SettingsViewModel> logger) : ObservableObject, IRefresh, IUserSetting
 {
     [ObservableProperty]
     private int _notificationRange;
 
-    TimeSpan IUserSetting.NotificationRange
-    {
-        get => TimeSpan.FromDays(NotificationRange);
-        set => NotificationRange = (int)value.TotalDays;
-    }
-
 
     public async Task RefreshAsync()
     {
-
         var user = session.User;
-        if (session.User is not {} u)
+        if (user is not { } u)
         {
             NotificationRange = 1;
             return;
         }
+
         await using var db = await factory.CreateDbContextAsync();
         var settings = await db.UserSettings.Where(x => x.UserId == u.Id).FirstAsync();
         logger.LogDebug("Settings: {Settings}", settings);
@@ -45,10 +39,16 @@ public partial class SettingsViewModel(
         NotificationRange = (int)settings.NotificationRange.TotalDays;
     }
 
+    TimeSpan IUserSetting.NotificationRange
+    {
+        get => TimeSpan.FromDays(NotificationRange);
+        set => NotificationRange = (int)value.TotalDays;
+    }
+
     [RelayCommand]
     public async Task SaveAsync()
     {
-        if (validator.GetError(this) is {} e)
+        if (validator.GetError(this) is { } e)
         {
             logger.LogInformation("Validation failed: {Error}", e);
             await appService.ShowErrorAsync(e.Message);

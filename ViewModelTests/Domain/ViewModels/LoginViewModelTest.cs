@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using Lib.Interfaces;
 using Lib.Models;
 using Lib.Services;
 using Lib.Utils;
@@ -11,9 +12,11 @@ namespace ViewModelTests.Domain.ViewModels;
 
 public class LoginViewModelTest : BasePageViewModelTest
 {
+    private AppShellViewModel _appShellViewModel;
     private ILogin _loginInfo;
     private ISessionService _sessionService;
-    private AppShellViewModel _appShellViewModel;
+
+    private LoginViewModel Model { get; set; }
 
     [SetUp]
     public override async Task Setup()
@@ -33,8 +36,6 @@ public class LoginViewModelTest : BasePageViewModelTest
 
         res.IsError.Should().BeFalse();
     }
-
-    private LoginViewModel Model { get; set; }
 
 
     [Test]

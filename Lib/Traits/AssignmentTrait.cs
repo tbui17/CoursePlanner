@@ -71,4 +71,11 @@ public static class AssignmentTrait
         return self;
     }
 
+    public static T SetFromUserSetting<T, T2>(this T self, T2 other)
+        where T : IUserSetting where T2 : IUserSetting
+    {
+        self.NotificationRange = other.NotificationRange;
+
+        return self;
+    }
 }
