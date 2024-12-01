@@ -1,4 +1,3 @@
-using System.Collections.ObjectModel;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Windows.Input;
@@ -25,7 +24,7 @@ partial class NotificationDataViewModel
     public IObservable<DateTime> EndDateObservable { get; }
     public IPageResult PageResult => _pageResult.Value;
 
-    public ReadOnlyObservableCollection<string> Types { get; }
+    public IList<string> Types { get; }
 
     public ICommand ChangePageCommand { get; }
     public ICommand ClearCommand { get; }
@@ -73,7 +72,7 @@ public interface INotificationDataViewModel
     IObservable<DateTime> StartDateObservable { get; }
     IObservable<DateTime> EndDateObservable { get; }
     IPageResult PageResult { get; }
-    ReadOnlyObservableCollection<string> Types { get; }
+    IList<string> Types { get; }
     ICommand ChangePageCommand { get; }
     ICommand ClearCommand { get; }
     ICommand NextCommand { get; }
@@ -113,7 +112,7 @@ public partial class NotificationDataViewModel : ReactiveObject, INotificationFi
         Start = dateRange.Start;
         End = dateRange.End;
 
-        Types = autocompleteService.BindSubscribe();
+        Types = autocompleteService.GetNotificationTypes();
 
         #endregion
 
