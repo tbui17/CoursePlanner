@@ -13,7 +13,9 @@ public interface INotificationDataService
 {
     Task<IList<INotificationDataResult>> GetUpcomingNotifications(IUserSetting settings);
     Task<IList<INotification>> GetNotificationsForMonth(DateTime date);
+
     Task<IList<INotification>> GetNotificationsWithinDateRange(IDateTimeRange dateRange);
+
     // Task<INotification?> GetNextNotificationDate(DateTime date);
     // Task<INotification?> GetPreviousNotificationDate(DateTime date);
     Task<int> GetTotalItems();
@@ -21,7 +23,8 @@ public interface INotificationDataService
 }
 
 [Inject(typeof(INotificationDataService))]
-public class NotificationDataService(MultiLocalDbContextFactory dbFactory, ILogger<INotificationDataService> logger) : INotificationDataService
+public class NotificationDataService(MultiLocalDbContextFactory dbFactory, ILogger<INotificationDataService> logger)
+    : INotificationDataService
 {
     public async Task<IList<INotificationDataResult>> GetUpcomingNotifications(IUserSetting settings)
     {
@@ -36,17 +39,17 @@ public class NotificationDataService(MultiLocalDbContextFactory dbFactory, ILogg
             .Where(x => x.ShouldNotify)
             .Where(x => x.Start.Date >= today)
             .Where(x => x.End.Date <= timeAheadDate)
-
         );
 
 
-        return res.Select(entity => new NotificationResult
-            {
-                Entity = entity,
-                EndIsUpcoming = x => x.Date == today,
-                StartIsUpcoming = x => x.Date == today
-            })
-            .Cast<INotificationDataResult>()
+        return res
+            .Select(INotificationDataResult (entity) => new NotificationResult
+                {
+                    Entity = entity,
+                    EndIsUpcoming = x => x.Date == today,
+                    StartIsUpcoming = x => x.Date == today
+                }
+            )
             .ToList();
     }
 
@@ -67,13 +70,6 @@ public class NotificationDataService(MultiLocalDbContextFactory dbFactory, ILogg
         return await db.Query(q => q.AsExpandableEFCore().AsNoTracking().Where(sameMonthAndYear));
     }
 
-    private static Expression<Func<INotification, bool>> CreateDateRangePredicate(IDateTimeRange dateRange)
-    {
-        return Builder()
-            .Start(x => x.Start.Date >= dateRange.Start.Date)
-            .And(x => x.End.Date <= dateRange.End.Date);
-    }
-
     public async Task<IList<INotification>> GetNotificationsWithinDateRange(IDateTimeRange dateRange)
     {
         logger.LogInformation("GetNotificationsWithinDateRange: {DateRange}", dateRange);
@@ -82,6 +78,21 @@ public class NotificationDataService(MultiLocalDbContextFactory dbFactory, ILogg
 
         await using var db = await dbFactory.CreateAsync<INotification>();
         return await db.Query(q => q.AsExpandableEFCore().AsNoTracking().Where(inRange));
+    }
+
+    public async Task<int> GetTotalItems()
+    {
+        await using var db = await dbFactory.CreateAsync<INotification>();
+        var results = await db.Query(x => x.CountAsync());
+
+        return results.Sum();
+    }
+
+    private static Expression<Func<INotification, bool>> CreateDateRangePredicate(IDateTimeRange dateRange)
+    {
+        return Builder()
+            .Start(x => x.Start.Date >= dateRange.Start.Date)
+            .And(x => x.End.Date <= dateRange.End.Date);
     }
 
     public async Task<INotification?> GetNextNotificationDate(DateTime date)
@@ -110,14 +121,6 @@ public class NotificationDataService(MultiLocalDbContextFactory dbFactory, ILogg
 
     private static ExpressionStarter<INotification> Builder() => PredicateBuilder.New<INotification>();
 
-    public async Task<int> GetTotalItems()
-    {
-        await using var db = await dbFactory.CreateAsync<INotification>();
-        var results = await db.Query(x => x.CountAsync());
-
-        return results.Sum();
-    }
-
     public async Task<INotificationRatio> GetFutureNotifications()
     {
         var today = DateTime.Now.Date;
@@ -127,9 +130,11 @@ public class NotificationDataService(MultiLocalDbContextFactory dbFactory, ILogg
 
         await using var db = await dbFactory.CreateAsync<INotification>();
         var results = await db.Query(q =>
-            q.Where(gteToday)
+            q
+                .Where(gteToday)
                 .GroupBy(x => x.ShouldNotify)
-                .Select(x => new { ShouldNotify = x.Key, Count = x.Count() }));
+                .Select(x => new { ShouldNotify = x.Key, Count = x.Count() })
+        );
 
         var active = 0;
         var total = 0;
