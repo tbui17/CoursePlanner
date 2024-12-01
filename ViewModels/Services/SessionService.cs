@@ -48,18 +48,16 @@ public class SessionService(IAccountService accountService, ILogger<ISessionServ
         var res = await accountService.LoginAsync(loginDetails);
 
         res
-            .IfOk(u =>
-                {
-                    logger.LogInformation("Login success: {Username}", u.Username);
-                    var user = u;
-                    new LoginEvent(user).Publish();
-                    User = user;
-                }
-            )
             .IfError(e =>
                 {
                     logger.LogInformation("Login failed: {Error}", e.Message);
                     User = null;
+                }
+            )
+            .IfOk(u =>
+                {
+                    logger.LogInformation("Login success: {Username}", u.Username);
+                    OnLogin(u);
                 }
             );
 
@@ -82,7 +80,7 @@ public class SessionService(IAccountService accountService, ILogger<ISessionServ
             .IfOk(u =>
                 {
                     logger.LogInformation("Register success: {Id} {Username}", u.Id, u.Username);
-                    User = u;
+                    OnLogin(u);
                 }
             );
 
@@ -107,5 +105,11 @@ public class SessionService(IAccountService accountService, ILogger<ISessionServ
         logger.LogInformation("Logout: {Username}", User?.Username);
         User = null;
         await Task.CompletedTask;
+    }
+
+    private void OnLogin(IUserDetail user)
+    {
+        User = user;
+        new LoginEvent(user).Publish();
     }
 }
