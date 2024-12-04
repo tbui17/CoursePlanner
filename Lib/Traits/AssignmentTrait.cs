@@ -45,7 +45,7 @@ public static class AssignmentTrait
         self.Value = other.Value;
     }
 
-    public static void Assign(this IDateTimeEntity self, IDateTimeEntity other)
+    public static void Assign(this IDateTimeRangeEntity self, IDateTimeRangeEntity other)
     {
         self.Id = other.Id;
         self.Name = other.Name;

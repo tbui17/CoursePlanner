@@ -261,7 +261,7 @@ public record TestDataResult
         assessments = Assessments;
     }
 
-    public IEnumerable<IDateTimeEntity> GetDateTimeEntities()
+    public IEnumerable<IDateTimeRangeEntity> GetDateTimeEntities()
     {
         return GetType()
             .GetProperties()
@@ -274,7 +274,7 @@ public record TestDataResult
                         return null;
                     }
 
-                    if (!prop.GetGenericArguments().Any(arg => arg.IsAssignableTo(typeof(IDateTimeEntity))))
+                    if (!prop.GetGenericArguments().Any(arg => arg.IsAssignableTo(typeof(IDateTimeRangeEntity))))
                     {
                         return null;
                     }
@@ -285,9 +285,10 @@ public record TestDataResult
             )
             .WhereNotNull()
             .SelectMany(x =>
-            {
-                var value = x.GetValue(this)!;
-                return ((IList)value).Cast<IDateTimeEntity>().ToList();
-            });
+                {
+                    var value = x.GetValue(this)!;
+                    return ((IList)value).Cast<IDateTimeRangeEntity>().ToList();
+                }
+            );
     }
 }

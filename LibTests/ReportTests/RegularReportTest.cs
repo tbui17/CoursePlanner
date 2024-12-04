@@ -45,7 +45,7 @@ public class RegularReportTest
 
 
     [TestCaseSource(nameof(TestData))]
-    public void PropertyTest(List<IDateTimeEntity> entities, DateTime reference)
+    public void PropertyTest(List<IDateTimeRangeEntity> entities, DateTime reference)
     {
         var fac = new DurationReportFactory
         {
@@ -68,10 +68,11 @@ public class RegularReportTest
             .RuleFor(x => x.Name, f => f.Lorem.Sentences(3));
 
 
-        return Enumerable.Range(0, 10)
+        return Enumerable
+            .Range(0, 10)
             .Select(_ =>
                 {
-                    var courses = faker.Generate(100).Cast<IDateTimeEntity>().ToList();
+                    var courses = faker.Generate(100).Cast<IDateTimeRangeEntity>().ToList();
 
 
                     return new TestCaseData(courses, reference);

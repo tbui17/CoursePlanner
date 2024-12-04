@@ -20,9 +20,11 @@ public static class ValidationTrait
             : null;
     }
 
-    public static DomainException? Validate(this IDateTimeEntity entity)
+    public static DomainException? Validate(this IDateTimeRangeEntity rangeEntity)
     {
-        return AggregateValidationExceptions(((IEntity)entity).Validate(), ((IDateTimeRange)entity).Validate());
+        return AggregateValidationExceptions(((IEntity)rangeEntity).Validate(),
+            ((IDateTimeRange)rangeEntity).Validate()
+        );
     }
 
     public static DomainException? ValidateUnique<T, T2>(this IReadOnlyCollection<T> entities, Func<T, T2> selector)
