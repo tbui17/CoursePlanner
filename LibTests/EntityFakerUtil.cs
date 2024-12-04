@@ -1,6 +1,5 @@
 using Bogus;
 using Lib.Interfaces;
-using Lib.Models;
 using Lib.Services.ReportService;
 
 namespace LibTests;
@@ -9,7 +8,7 @@ public class EntityFakerUtil
 {
     public DateTime Reference = DateTime.Now.Date;
 
-    public Faker<T> CreateFaker<T>() where T : class, IDateTimeEntity
+    public Faker<T> CreateFaker<T>() where T : class, IDateTimeRangeEntity
     {
         var faker = new Faker<T>()
             .RuleFor(x => x.Start, f => f.Date.Past())
@@ -18,10 +17,10 @@ public class EntityFakerUtil
         return faker;
     }
 
-    public DurationReportFactory CreateReport<T>() where T : class, IDateTimeEntity
+    public DurationReportFactory CreateReport<T>() where T : class, IDateTimeRangeEntity
     {
         var faker = CreateFaker<T>();
-        var entities = faker.Generate(100).Cast<IDateTimeEntity>().ToList();
+        var entities = faker.Generate(100).Cast<IDateTimeRangeEntity>().ToList();
 
         var fac = new DurationReportFactory
         {
