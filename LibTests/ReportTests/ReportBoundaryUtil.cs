@@ -45,7 +45,10 @@ public class ReportBoundaryUtil(IDurationReport report)
 
         // we can have events that start and end on the same day
         _report.MaxDate.Should().BeOnOrAfter(_report.MinDate);
-        // new account, or user is completely done
+
+
+        // none done, no tasks: 100/0 or 0/0???
+        // none done, >=1 task, : 0/100
         // these values are complements of each other
         new[] { _report.PercentComplete, _report.PercentRemaining }.Sum().Should().BeOneOf(default, 100);
     }
