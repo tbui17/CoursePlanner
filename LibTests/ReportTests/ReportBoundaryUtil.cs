@@ -97,7 +97,8 @@ public class ReportBoundaryUtil(IDurationReport report)
         // date refers to what "today" is to determine whether an event has completed
         // the data structure is designed to be self sufficient for querying only one type of entity
         // when we involve an aggregate context, we need to make sure the input date is the same for all reports or else "today" is different for some of them
-        // the aggregate can contain only dtos (therefore 0 IDurationReportFactories) which don't have dates
+        // the aggregate can contain only dtos or other aggregate dto / factories in a recursive data structure (therefore 0 IDurationReportFactories) which don't have dates
+        // other aggregates don't implement IDurationReportFactory
         // this assertion doesn't apply when there's only dtos
         sub
             .OfType<IDurationReportFactory>()
