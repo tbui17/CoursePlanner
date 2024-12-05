@@ -71,6 +71,7 @@ public class RegularReportTest
             .RuleFor(x => x.Name, f => f.Lorem.Sentences(3));
 
 
+        // 100 tests with 100 items per run
         return Enumerable
             .Range(0, 100)
             .Select(_ =>
