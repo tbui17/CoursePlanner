@@ -126,10 +126,7 @@ public class ReportBoundaryUtil(IDurationReport report)
 
     public void AssertIDurationBoundaries()
     {
-        foreach (var method in GetType()
-                     .GetMethods()
-                     .Where(x => x.GetCustomAttribute<SubAssertionAttribute>() is not null)
-                )
+        foreach (var method in GetSubAssertions())
         {
             method.Invoke(this, null);
         }
