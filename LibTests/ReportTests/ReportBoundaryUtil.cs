@@ -61,22 +61,34 @@ public class ReportBoundaryUtil(IDurationReport report)
         // always true: min <= average >= max
         data
             .AverageDuration.Should()
-            .BeLessThanOrEqualTo(sub.Max(x => x.AverageDuration), nameof(data.AverageDuration))
-            .And.BeGreaterThanOrEqualTo(sub.Min(x => x.AverageDuration), nameof(data.AverageDuration));
+            .BeLessThanOrEqualTo(sub.Max(x => x.AverageDuration), "avg <= max")
+            .And.BeGreaterThanOrEqualTo(sub.Min(x => x.AverageDuration), "avg >= min");
 
         // we have fragments of one whole so they should all add up to the whole
         data
             .CompletedItems.Should()
-            .Be(sub.Sum(x => x.CompletedItems), nameof(data.CompletedItems));
+            .Be(sub.Sum(x => x.CompletedItems),
+                "sum of subreport values for completed items need to equal the aggregate's completed items"
+            );
         data
             .TotalItems.Should()
-            .Be(sub.Sum(x => x.TotalItems), nameof(data.TotalItems));
-        data.RemainingItems.Should().Be(sub.Sum(x => x.RemainingItems), nameof(data.RemainingItems));
+            .Be(sub.Sum(x => x.TotalItems),
+                "sum of subreport values for total items need to equal the aggregate's total items"
+            );
+        data
+            .RemainingItems.Should()
+            .Be(sub.Sum(x => x.RemainingItems),
+                "sum of subreport values for remaining items need to equal the aggregate's remaining items"
+            );
 
 
         // these are just the highest/lowest date values across all the items
-        data.MaxDate.Should().Be(sub.Max(x => x.MaxDate), nameof(data.MaxDate));
-        data.MinDate.Should().Be(sub.Min(x => x.MinDate), nameof(data.MinDate));
+        data
+            .MaxDate.Should()
+            .Be(sub.Max(x => x.MaxDate), "max of subreports' max dates should equal the aggregate's max date");
+        data
+            .MinDate.Should()
+            .Be(sub.Min(x => x.MinDate), "min of subreports' min dates should equal the aggregate's min date");
 
         // not related to report calculation logic
         // date refers to what "today" is to determine whether an event has completed
@@ -95,7 +107,7 @@ public class ReportBoundaryUtil(IDurationReport report)
         {
             scope.AppendTracing("PercentComplete is 100");
             // when 100% complete, the user is done. there is no end to wait for
-            data.RemainingTime.Should().Be(default, nameof(data.RemainingTime));
+            data.RemainingTime.Should().Be(default, "when 100% complete, there is no remaining time to wait");
         }
     }
 
