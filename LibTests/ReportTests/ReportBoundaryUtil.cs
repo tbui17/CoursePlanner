@@ -99,7 +99,7 @@ public class ReportBoundaryUtil(IDurationReport report)
         // when we involve an aggregate context, we need to make sure the input date is the same for all reports or else "today" is different for some of them
         // the aggregate can contain only dtos or other aggregate dto / factories in a recursive data structure (therefore 0 IDurationReportFactories) which don't have dates
         // other aggregates don't implement IDurationReportFactory
-        // this assertion doesn't apply when there's only dtos
+        // this assertion doesn't apply when there's no IDurationReportFactory
         sub
             .OfType<IDurationReportFactory>()
             .Select(x => x.Date)
