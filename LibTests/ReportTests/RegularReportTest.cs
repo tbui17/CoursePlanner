@@ -64,9 +64,8 @@ public class RegularReportTest
 
         var faker = new Faker<Course>()
             .RuleFor(x => x.Start, f => f.Date.Between(new DateTime(2000, 1, 1), new DateTime(2020, 1, 1)))
-            .RuleFor(x => x.End,
-                (f, x) => f.Date.Between(x.Start, new DateTime(2020, 12, 1))
-            ) // start date always <= end date
+            // start date always <= end date
+            .RuleFor(x => x.End, (f, x) => f.Date.Between(x.Start, new DateTime(2020, 12, 1)))
             // irrelevant but failed tests involving these will indicate unexpected interaction between the factory and these fields
             .RuleFor(x => x.ShouldNotify, f => f.Random.Bool())
             .RuleFor(x => x.Name, f => f.Lorem.Sentences(3));
