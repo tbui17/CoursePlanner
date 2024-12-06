@@ -1,9 +1,7 @@
 ﻿namespace Lib.Utils;
 
-public abstract record GridState
+public abstract class GridState(Func<int> childCount)
 {
-    public required Func<int> ChildCount { get; init; }
-
     private readonly int _columns = 2;
 
     public int Columns
@@ -12,14 +10,14 @@ public abstract record GridState
         init => _columns = Math.Max(value, 1);
     }
 
-    public int Index => Math.Max(0,Count - 1);
+    public int Index => Math.Max(0, Count - 1);
 
     public int Row =>
         Count <= Columns
             ? 0
             : Index / Columns;
 
-    public int Count => ChildCount();
+    public int Count => childCount();
 
     public int Column =>
         Columns <= 1 || Count <= 1
@@ -27,11 +25,9 @@ public abstract record GridState
             : Index % Columns;
 
     public int Rows =>
-        Count switch
-        {
-            <= 0 => 0,
-            _ => Row + 1
-        };
+        Count <= 0
+            ? 0
+            : Row + 1;
 }
 
 public interface IAutoGridState
@@ -44,7 +40,7 @@ public interface IAutoGridState
     bool ShouldAddRowDefinition { get; }
 }
 
-public record AutoGridState : GridState, IAutoGridState
+public class AutoGridState(Func<int> childCount) : GridState(childCount), IAutoGridState
 {
     public bool ShouldAddRowDefinition => Column is 0 && Count > 0;
 }

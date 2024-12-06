@@ -34,7 +34,7 @@ public class ReportBoundaryUtil(IDurationReport report)
     }
 
     [SubAssertion]
-    public void AssertRelationalBoundaries()
+    public void AssertOwnRelationalBoundaries()
     {
         using var _ = new AssertionScope();
         // related to subsets and fractions
