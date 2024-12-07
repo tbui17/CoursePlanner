@@ -20,8 +20,8 @@ public abstract class GridState(Func<int> childCount)
             : Index / Columns; // repeating sequence
 
     public int Column =>
-        Columns <= 1 ||
-        Count <= 1 // prevent division by 0; when consumer only wants 1 column max we're always at the first; when there's <=1 element we're always at the first
+        // prevent division by 0; when consumer only wants 1 column max we're always at the first; when there's <=1 element we're always at the first
+        Columns <= 1 || Count <= 1
             ? 0
             : Index % Columns; // repeating sequence
 
