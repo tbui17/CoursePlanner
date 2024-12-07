@@ -7,15 +7,18 @@ public abstract class GridState(Func<int> childCount)
     public int Columns
     {
         get => _columns;
-        init => _columns = Math.Max(value, 1); // avoid defining 0 column behavior
+        // avoid defining 0 column behavior
+        init => _columns = Math.Max(value, 1);
     }
 
     public int Count => childCount();
 
-    public int Index => Math.Max(0, Count - 1); // prevent index errors in unforeseen scenarios
+    // prevent index errors in unforeseen scenarios
+    public int Index => Math.Max(0, Count - 1);
 
     public int Row =>
-        Count <= Columns // prevent division by 0 and other reasons, don't remember
+        // prevent division by 0 and other reasons, don't remember
+        Count <= Columns
             ? 0
             : Index / Columns; // repeating sequence
 
@@ -26,16 +29,16 @@ public abstract class GridState(Func<int> childCount)
             : Index % Columns; // repeating sequence
 
     public int Rows =>
-        Count <= 0 // if we have no elements in the grid there is no structure of any kind
+        // if we have no elements in the grid there is no structure of any kind
+        Count <= 0
             ? 0
             : Row + 1;
 }
 
 public class AutoGridState(Func<int> childCount) : GridState(childCount), IAutoGridState
 {
-    public bool ShouldAddRowDefinition =>
-        Column is 0 &&
-        Count > 0; // when we arrive at a new row we're at the first column; we don't add if there is no structure in place (no elements)
+    // when we arrive at a new row we're at the first column; we don't add if there is no structure in place (no elements)
+    public bool ShouldAddRowDefinition => Column is 0 && Count > 0;
 }
 
 public interface IAutoGridState
