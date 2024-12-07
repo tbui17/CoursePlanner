@@ -10,14 +10,14 @@ public abstract class GridState(Func<int> childCount)
         init => _columns = Math.Max(value, 1);
     }
 
+    public int Count => childCount();
+
     public int Index => Math.Max(0, Count - 1);
 
     public int Row =>
         Count <= Columns
             ? 0
             : Index / Columns;
-
-    public int Count => childCount();
 
     public int Column =>
         Columns <= 1 || Count <= 1
