@@ -10,8 +10,7 @@ namespace ViewModelTests.Domain.ViewModels;
 public class EditNoteViewModelTest : BasePageViewModelTest
 {
     private const int NoteId = 1;
-
-    private EditNoteViewModel Model { get; set; }
+    private IEditNoteViewModel Model { get; set; }
 
     [SetUp]
     public override async Task Setup()
@@ -19,24 +18,6 @@ public class EditNoteViewModelTest : BasePageViewModelTest
         await base.Setup();
         Model = new EditNoteViewModel(factory: DbFactory, navService: NavMock.Object, appService: AppMock.Object);
         await Model.Init(NoteId);
-    }
-
-    [Test]
-    public async Task SaveAsync_Valid_SavesChangesToDatabase()
-    {
-        // Given a valid note
-        const string name = "Test 123";
-        const string text = "My Text 12345";
-        Model.Name = name;
-        Model.Text = text;
-
-        // When the user saves it
-        await Model.SaveCommand.ExecuteAsync();
-
-        // Then the updates are accepted
-        var notes = await Db.Notes.Where(x => x.Name == name && x.Value == text && x.Id == NoteId).ToListAsync();
-
-        notes.Should().ContainSingle();
     }
 
     [Test]
@@ -57,6 +38,24 @@ public class EditNoteViewModelTest : BasePageViewModelTest
         notes.Should().ContainSingle();
         AppMock.VerifyReceivedNoError();
         NavMock.Verify(x => x.PopAsync());
+    }
+
+    [Test]
+    public async Task SaveAsync_Valid_SavesChangesToDatabase()
+    {
+        // Given a valid note
+        const string name = "Test 123";
+        const string text = "My Text 12345";
+        Model.Name = name;
+        Model.Text = text;
+
+        // When the user saves it
+        await Model.SaveCommand.ExecuteAsync();
+
+        // Then the updates are accepted
+        var notes = await Db.Notes.Where(x => x.Name == name && x.Value == text && x.Id == NoteId).ToListAsync();
+
+        notes.Should().ContainSingle();
     }
 
     [TestCase("")]
