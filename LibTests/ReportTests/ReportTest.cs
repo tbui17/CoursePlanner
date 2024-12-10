@@ -17,8 +17,7 @@ public class ReportTest : BaseDbTest
         var res = await service.GetAggregateDurationReportData();
         using var scope = new AssertionScope();
         scope.AddReportable("data", res.Serialize);
-        new ReportBoundaryUtil(res).AssertIDurationBoundaries();
-
+        new ReportBoundaryUtil(res).AssertBoundaries();
     }
 
     [Test]
@@ -30,9 +29,10 @@ public class ReportTest : BaseDbTest
         var res = await service.GetAggregateDurationReportData();
 
         using var scope = new AssertionScope();
-        scope.AddReportable("data",res.Serialize);
+        scope.AddReportable("data", res.Serialize);
 
-        res.Should()
+        res
+            .Should()
             .BeAssignableTo<AggregateDurationReport>()
             .Which.SubReports.Should()
             .HaveCountGreaterThan(1)
@@ -40,7 +40,7 @@ public class ReportTest : BaseDbTest
             .Should()
             .AllBeAssignableTo<IDurationReport>()
             .Which.Should()
-            .AllSatisfy(x => new ReportBoundaryUtil(x).AssertIDurationBoundaries());
+            .AllSatisfy(x => new ReportBoundaryUtil(x).AssertBoundaries());
     }
 
     [Test]
@@ -52,15 +52,10 @@ public class ReportTest : BaseDbTest
 
 
         using var scope = new AssertionScope();
-        scope.AddReportable("data",rep.Serialize);
+        scope.AddReportable("data", rep.Serialize);
 
         var util = new ReportBoundaryUtil(rep);
-        util.AssertIDurationBoundaries();
+        util.AssertBoundaries();
         util.AssertSubReportRelationalBoundaries();
-
-
-
-
-
     }
 }

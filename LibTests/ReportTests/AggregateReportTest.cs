@@ -74,7 +74,7 @@ public class AggregateReportTest
 
         var res = fac.Create();
 
-        new ReportBoundaryUtil(res).AssertIDurationBoundaries();
+        new ReportBoundaryUtil(res).AssertBoundaries();
     }
 
     private static IEnumerable<TestCaseData> TestData()

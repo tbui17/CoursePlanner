@@ -9,12 +9,22 @@ using ViewModels.Services;
 
 namespace ViewModels.Domain;
 
+public interface IEditNoteViewModel
+{
+    string Name { get; set; }
+    string Text { get; set; }
+    IAsyncRelayCommand SaveCommand { get; }
+    IAsyncRelayCommand BackCommand { get; }
+    Task Init(int noteId);
+    Task RefreshAsync();
+}
+
 [Inject]
 public partial class EditNoteViewModel(
     ILocalDbCtxFactory factory,
     INavigationService navService,
     IAppService appService)
-    : ObservableObject, INoteField, IRefreshId
+    : ObservableObject, INoteField, IRefreshId, IEditNoteViewModel
 {
     [ObservableProperty]
     private int _id;
@@ -33,7 +43,6 @@ public partial class EditNoteViewModel(
 
     public async Task Init(int noteId)
     {
-        Id = noteId;
         await using var db = await factory.CreateDbContextAsync();
 
         var note = await db

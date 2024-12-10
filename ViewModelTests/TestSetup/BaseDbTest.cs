@@ -1,15 +1,11 @@
 ﻿using Lib.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Serilog.Context;
-using Serilog.Core.Enrichers;
-
 
 namespace ViewModelTests.TestSetup;
 
 public abstract class BaseDbTest : BaseTest
 {
-
     public override async Task Setup()
     {
         await base.Setup();

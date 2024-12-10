@@ -31,7 +31,6 @@ public class ReportFactoryTest
     [Test]
     public void Reports_Empty_ShouldBeWithinBounds()
     {
-
         var report = new DurationReportFactory();
 
         var aggReportEmpty = new AggregateDurationReportFactory().Create();
@@ -50,19 +49,19 @@ public class ReportFactoryTest
         using (var scope = new AssertionScope())
         {
             scope.AddReportable("variable", (nameof(report)));
-            new ReportBoundaryUtil(report.ToData()).AssertIDurationBoundaries();
+            new ReportBoundaryUtil(report.ToData()).AssertBoundaries();
         }
 
         using (var scope = new AssertionScope())
         {
             scope.AddReportable("variable", (nameof(aggReport)));
-            new ReportBoundaryUtil(aggReport).AssertIDurationBoundaries();
+            new ReportBoundaryUtil(aggReport).AssertBoundaries();
         }
 
         using (var scope = new AssertionScope())
         {
             scope.AddReportable("variable", (nameof(aggReportEmpty)));
-            new ReportBoundaryUtil(aggReportEmpty).AssertIDurationBoundaries();
+            new ReportBoundaryUtil(aggReportEmpty).AssertBoundaries();
         }
     }
 }
