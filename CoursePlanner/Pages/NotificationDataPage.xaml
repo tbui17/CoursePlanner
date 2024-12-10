@@ -13,37 +13,37 @@
     </ContentPage.Resources>
     <ContentPage.Content>
         <ScrollView>
-            <VerticalStackLayout x:Name="MainLayout" Margin="10,10,10,30" Spacing="10">
-                <VerticalStackLayout Margin="10" Spacing="10">
-                    <VerticalStackLayout Spacing="5">
-                        <material:TextField x:Name="NameTextField" Title="Name" />
-                        <material:AutoCompleteTextField x:Name="TypeAutoCompleteField" Title="Type" />
-                        <material:PickerField x:Name="NotificationOptionPickerField" Title="Notification Option" />
-                    </VerticalStackLayout>
-                    <HorizontalStackLayout Spacing="25">
+            <VerticalStackLayout x:Name="MainLayout">
+                <VerticalStackLayout Spacing="5">
+                    <HorizontalStackLayout Spacing="5">
+                        <material:AutoCompleteTextField x:Name="NameTextField" Title="Name" WidthRequest="180" />
+                        <material:AutoCompleteTextField x:Name="TypeAutoCompleteField" Title="Type" WidthRequest="180" />
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="5">
                         <material:DatePickerField x:Name="StartDatePickerField" AllowClear="False" Title="Start" />
                         <material:DatePickerField x:Name="EndDatePickerField" AllowClear="False" Title="End" />
+                        <material:PickerField x:Name="NotificationOptionPickerField" Title="Notifications"
+                                              WidthRequest="140" AllowClear="False" />
                     </HorizontalStackLayout>
                     <HorizontalStackLayout>
-                        <Button x:Name="ClearButton" Text="Clear" />
+
                     </HorizontalStackLayout>
                 </VerticalStackLayout>
 
 
-
                 <VerticalStackLayout HorizontalOptions="Center">
                     <Label x:Name="ItemCountLabel" HorizontalOptions="Center" />
-                    <HorizontalStackLayout HorizontalOptions="Center">
-                        <Button x:Name="PreviousButton" Text="Previous" />
-                        <Button x:Name="NextButton" Text="Next" />
+                    <HorizontalStackLayout Spacing="20">
+                        <Button x:Name="ClearButton" Text="Clear" WidthRequest="105" />
+                        <Button x:Name="PreviousButton" Text="Previous" WidthRequest="105" />
+                        <Button x:Name="NextButton" Text="Next" WidthRequest="105" />
                     </HorizontalStackLayout>
-
                 </VerticalStackLayout>
 
 
                 <CollectionView x:Name="NotificationItemInstance"
                                 SelectionMode="None"
-                                MaximumHeightRequest="300"/>
+                                MaximumHeightRequest="470" />
 
 
             </VerticalStackLayout>
