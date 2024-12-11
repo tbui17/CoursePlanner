@@ -9,18 +9,30 @@ using static Debug;
 
 public class AggregateDurationReportFactory : IDurationReport
 {
-    public IReadOnlyCollection<IDurationReportFactory> Reports { get; init; } = [];
+    private TimeSpan? _averageDuration;
+    private int? _completedItems;
+    private TimeSpan? _completedTime;
 
     private DateTime? _date;
-    private DateTime? _minDate;
     private DateTime? _maxDate;
-    private TimeSpan? _totalTime;
-    private TimeSpan? _completedTime;
+    private DateTime? _minDate;
+
+    private List<IDurationReportFactory>? _notEmptyReports;
     private TimeSpan? _remainingTime;
-    private TimeSpan? _averageDuration;
-    private int? _totalItems;
-    private int? _completedItems;
     private List<IGrouping<Type, IDurationReportFactory>>? _subReports;
+    private int? _totalItems;
+    private TimeSpan? _totalTime;
+    public IReadOnlyCollection<IDurationReportFactory> Reports { get; init; } = [];
+
+    private IReadOnlyCollection<IGrouping<Type, IDurationReportFactory>> SubReports
+    {
+        get
+        {
+            if (_subReports is { } s) return s;
+            _subReports = NotEmptyReports().GroupBy(x => x.Type).ToList();
+            return _subReports;
+        }
+    }
 
 
     public DateTime MinDate
@@ -28,7 +40,7 @@ public class AggregateDurationReportFactory : IDurationReport
         get
         {
             if (_minDate is { } d) return d;
-            var res = Reports.MinOrDefault(x => x.MinDate);
+            var res = NotEmptyReports().MinOrDefault(x => x.MinDate);
             Assert(res >= default(DateTime));
             _minDate = res;
             return res;
@@ -40,39 +52,14 @@ public class AggregateDurationReportFactory : IDurationReport
         get
         {
             if (_maxDate is { } d) return d;
-            var res = Reports.MaxOrDefault(x => x.MaxDate);
+            var res = NotEmptyReports().Select(x => x.MaxDate).ToList().MaxOrDefault(x => x);
             Assert(res >= default(DateTime));
             _maxDate = res;
             return res;
         }
     }
 
-
-    private DateTime GetDate()
-    {
-        if (_date is { } d) return d;
-
-        var res = Reports.Select(x => x.Date).Distinct().ToList();
-        if (res.Count > 1)
-        {
-            throw new ArgumentException("Reports must all have the same date.")
-            {
-                Data = { ["Reports"] = Reports }
-            };
-        }
-
-        var max = MaxDate;
-        var min = MinDate;
-        Assert(max >= min);
-
-        var date = res.FirstOrDefault().Clamp(min, max);
-        _date = date;
-        Assert(date >= min);
-        Assert(date <= max);
-        return date;
-    }
-
-      public TimeSpan TotalTime
+    public TimeSpan TotalTime
     {
         get
         {
@@ -124,7 +111,7 @@ public class AggregateDurationReportFactory : IDurationReport
         get
         {
             if (_averageDuration is { } d) return d;
-            var duration = Reports.AverageOrDefault(x => x.AverageDuration);
+            var duration = NotEmptyReports().AverageOrDefault(x => x.AverageDuration);
             Assert(duration >= default(TimeSpan));
             _averageDuration = duration;
             return duration;
@@ -137,7 +124,7 @@ public class AggregateDurationReportFactory : IDurationReport
         get
         {
             if (_totalItems is { } i) return i;
-            var sum = Reports.SumOrDefault(x => x.TotalItems);
+            var sum = NotEmptyReports().SumOrDefault(x => x.TotalItems);
             Assert(sum >= default(int));
             _totalItems = sum;
             return sum;
@@ -149,7 +136,7 @@ public class AggregateDurationReportFactory : IDurationReport
         get
         {
             if (_completedItems is { } i) return i;
-            var res = Reports.SumOrDefault(x => x.CompletedItems);
+            var res = NotEmptyReports().SumOrDefault(x => x.CompletedItems);
             Assert(res >= default(int));
             _completedItems = res;
             return res;
@@ -160,18 +147,41 @@ public class AggregateDurationReportFactory : IDurationReport
     public double PercentComplete => this.PercentComplete();
     public double PercentRemaining => this.PercentRemaining();
 
-    private IReadOnlyCollection<IGrouping<Type, IDurationReportFactory>> SubReports
+    private List<IDurationReportFactory> NotEmptyReports()
     {
-        get
-        {
-            if (_subReports is { } s) return s;
-            _subReports = Reports.GroupBy(x => x.Type).ToList();
-            return _subReports;
-        }
+        if (_notEmptyReports is { } n) return n;
+        var res = Reports.Where(x => x.TotalItems > 0).ToList();
+        _notEmptyReports = res;
+        return _notEmptyReports;
     }
 
 
-    public AggregateDurationReport Create() => Reports.Count is 0
+    private DateTime GetDate()
+    {
+        if (_date is { } d) return d;
+
+        var res = NotEmptyReports().Select(x => x.Date).Distinct().ToList();
+        if (res.Count > 1)
+        {
+            throw new ArgumentException("Reports must all have the same date.")
+            {
+                Data = { ["Reports"] = Reports }
+            };
+        }
+
+        var max = MaxDate;
+        var min = MinDate;
+        Assert(max >= min);
+
+        var date = res.FirstOrDefault().Clamp(min, max);
+        _date = date;
+        Assert(date >= min);
+        Assert(date <= max);
+        return date;
+    }
+
+
+    public AggregateDurationReport Create() => NotEmptyReports().Count is 0
         ? new()
         : new()
         {

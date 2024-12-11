@@ -46,7 +46,7 @@ partial class NotificationDataViewModel
 
     public IList<string> NotificationOptions { get; } = new List<string>
     {
-        "All", "Notifications Enabled", "Notifications Disabled"
+        "All", "True", "False"
     };
 
     [Reactive]
