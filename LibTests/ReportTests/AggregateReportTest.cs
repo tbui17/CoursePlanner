@@ -100,7 +100,7 @@ public class AggregateReportTest
     }
 }
 
-public class AggregateReportSubtypeTest
+public class AggregateReportIgnoreEmptyTypeTest
 {
     private AggregateReportStub _expectedAgg;
     private DateTime _reference;
@@ -171,8 +171,10 @@ public class AggregateReportSubtypeTest
         aggReports.Should().BeEquivalentTo(_expectedAgg);
     }
 
+    // prevents aggregate calculations from accepting defaulted values like 01/01/0001 on empty sub reports and give weird values like 50000 complete days/50001 total days
+    // occurs when only some types have data
     [Test]
-    public void Properties_TwoOfThreeTypesEmpty_IgnoresDataFromEmptyTypes()
+    public void Properties_TwoOfThreeTypesEmpty_CalculationIgnoresDataFromEmptyTypes()
     {
         var courseReports = new DurationReportFactory
         {
