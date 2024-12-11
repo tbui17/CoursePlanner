@@ -3,8 +3,6 @@ using Lib.Interfaces;
 
 namespace Lib.Models;
 
-
-
 public record DurationReportData
 {
     public string Title { get; init; } = "";
@@ -19,7 +17,8 @@ public record DurationReportData
     public string PercentItemsRemaining { get; init; } = "";
 
     public static IEnumerable<PropertyInfo> GetLabelProperties() =>
-        typeof(DurationReportData).GetProperties()
+        typeof(DurationReportData)
+            .GetProperties()
             .Where(x => x.Name is not nameof(Title));
 }
 
@@ -35,9 +34,9 @@ public static class DurationReportExtensions
                 DurationReport x when x.Type != typeof(DurationReport) => $"{x.Type.Name} Report",
                 _ => "Report"
             },
-            TimeProgress = $"{report.CompletedTime.TotalDays}/{report.TotalTime.TotalDays} days",
-            TimeRemaining = $"{report.RemainingTime.TotalDays} days",
-            AverageDuration = $"{report.AverageDuration.TotalDays} days",
+            TimeProgress = $"{(int)report.CompletedTime.TotalDays}/{(int)report.TotalTime.TotalDays} days",
+            TimeRemaining = $"{(int)report.RemainingTime.TotalDays} days",
+            AverageDuration = $"{(int)report.AverageDuration.TotalDays} days",
             MinDate = report.MinDate.ToString("MM/dd/yyyy"),
             MaxDate = report.MaxDate.ToString("MM/dd/yyyy"),
             ItemProgress = $"{report.CompletedItems}/{report.TotalItems}",
