@@ -1,4 +1,5 @@
 using FluentAssertions;
+using FluentAssertions.Execution;
 using FluentAssertions.Extensions;
 using Lib.Interfaces;
 using Lib.Models;
@@ -97,6 +98,98 @@ public class AggregateReportTest
                     ).SetName(i.ToString());
                 }
             );
+    }
+
+    [Test]
+    public void Properties_HalfProgressThen2Types_MatchesStub()
+    {
+        // 100/200 days for task 1 completed
+        // task 2 lasts 200 days and starts in 100 days after task 1
+        // 0/200 days for task 2 completed
+        // 100/400 total days completed
+
+        var reference = new DateTime(2010, 1, 1);
+        var daysBefore100 = reference.AddDays(-100);
+        var daysAfter100 = reference.AddDays(100);
+        var daysAfter200 = reference.AddDays(200);
+        var daysAfter400 = reference.AddDays(400);
+        var totalTimeSpan500 = daysAfter400 - daysBefore100;
+
+
+        var halfProgressType1 = new Term
+        {
+            Start = daysBefore100,
+            End = daysAfter100
+        };
+
+
+        var futureType2 = new Course
+        {
+            Start = daysAfter200,
+            End = daysAfter400
+        };
+
+        var type1Reports = new DurationReportFactory
+        {
+            Entities = [halfProgressType1],
+            Date = reference,
+            Type = typeof(Term)
+        };
+
+        var type2Reports = new DurationReportFactory
+        {
+            Entities = [futureType2],
+            Date = reference,
+            Type = typeof(Course)
+        };
+
+        // there is now more tasks to do
+        // aggregate report boundaries:
+        // Have a higher upper range on at least 1 value
+        // Have no decrease in extrema values like min date, max date. Can have something like 0 minimum CompletedTime since new task has no progress
+
+        var aggReports = new AggregateDurationReportFactory
+        {
+            Reports = [type1Reports, type2Reports]
+        };
+
+        var expectedAgg = new AggregateReportStub
+        {
+            RemainingTime = 400.Days(), // 2nd task: start is irrelevant, <= end. Ends in 400 days
+            CompletedTime = 100.Days(), // 1st task started 100 days ago, so 100 days of progress
+            MinDate = daysBefore100, // 1st task started 100 days ago
+            MaxDate = daysAfter400, // 2nd task ends in 400 days
+            TotalItems = 2, // 2 total tasks
+            RemainingItems = 2, // 1st task not complete
+            TotalTime = totalTimeSpan500, // span of all days between min and max
+            AverageDuration = 200.Days(), // both last the same amount of time, so average is 200 days
+
+            // No tasks are complete, so the following apply:
+            PercentRemaining = 100,
+            CompletedItems = 0,
+            PercentComplete = 0,
+        };
+
+        using var _ = new AssertionScope();
+        aggReports.Should().BeEquivalentTo(expectedAgg);
+        // if all tasks have the same average, the total average is the same as any of them
+        expectedAgg.AverageDuration.Should().Be(type1Reports.AverageDuration);
+    }
+
+    [Test]
+    public void Properties_2TypesSubTimeRange_MatchesStub()
+    {
+        // 200 total days
+        // 100/200 days for task 1 completed
+        // 10/50 days for task 2 completed
+        // task 2 spans days 100-150
+
+        var reference = new DateTime(2010, 1, 1);
+        var daysBefore100 = reference.AddDays(-100);
+        var daysAfter100 = reference.AddDays(100);
+        var daysAfter200 = reference.AddDays(200);
+        var daysAfter400 = reference.AddDays(400);
+        var totalTimeSpan500 = daysAfter400 - daysBefore100;
     }
 }
 
