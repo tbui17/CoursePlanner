@@ -175,22 +175,6 @@ public class AggregateReportTest
         // if all tasks have the same average, the total average is the same as any of them
         expectedAgg.AverageDuration.Should().Be(type1Reports.AverageDuration);
     }
-
-    [Test]
-    public void Properties_2TypesSubTimeRange_MatchesStub()
-    {
-        // 200 total days
-        // 100/200 days for task 1 completed
-        // 10/50 days for task 2 completed
-        // task 2 spans days 100-150
-
-        var reference = new DateTime(2010, 1, 1);
-        var daysBefore100 = reference.AddDays(-100);
-        var daysAfter100 = reference.AddDays(100);
-        var daysAfter200 = reference.AddDays(200);
-        var daysAfter400 = reference.AddDays(400);
-        var totalTimeSpan500 = daysAfter400 - daysBefore100;
-    }
 }
 
 public class AggregateReportIgnoreEmptyTypeTest
