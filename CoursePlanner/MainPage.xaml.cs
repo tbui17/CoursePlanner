@@ -8,15 +8,18 @@ namespace CoursePlanner;
 public partial class MainPage
 {
     private readonly ILocalNotificationService _localNotificationService;
-
-    public MainViewModel Model { get; set; }
+    private readonly ILogger<MainPage> _logger;
+    private readonly IServiceProvider _provider;
 
     private readonly ISessionService _sessionService;
-    private readonly IServiceProvider _provider;
-    private readonly ILogger<MainPage> _logger;
 
-    public MainPage(MainViewModel model, IServiceProvider provider, ILocalNotificationService localNotificationService,
-        ISessionService sessionService, ILogger<MainPage> logger)
+    public MainPage(
+        MainViewModel model,
+        IServiceProvider provider,
+        ILocalNotificationService localNotificationService,
+        ISessionService sessionService,
+        ILogger<MainPage> logger
+    )
     {
         _sessionService = sessionService;
         _logger = logger;
@@ -28,6 +31,8 @@ public partial class MainPage
         _logger.LogInformation("Initialized main page");
     }
 
+    public MainViewModel Model { get; set; }
+
     private void SetView(IView view)
     {
         _logger.LogInformation("Setting view {Type}", view);
@@ -35,26 +40,31 @@ public partial class MainPage
         MainLayout.Add(view);
     }
 
-    protected override async void OnAppearing()
+    private async Task SetViewForPage()
     {
-
-        _logger.LogInformation("User sign in status: {IsLoggedIn} {Is}", _sessionService.IsLoggedIn,_sessionService.User?.Username);
+        _logger.LogInformation("User sign in status: {IsLoggedIn} {Username}",
+            _sessionService.IsLoggedIn,
+            _sessionService.User?.Username
+        );
         if (_sessionService.IsLoggedIn)
         {
-
             var view = _provider.GetRequiredService<TermListView>();
             await view.Model.RefreshAsync();
             SetView(view);
-        }
-        else
-        {
-
-            SetView(_provider.GetRequiredService<LoginView>());
+            return;
         }
 
+        SetView(_provider.GetRequiredService<LoginView>());
+    }
+
+    protected override async void OnAppearing()
+    {
+        // sets the view for the page based on the current session state - Login or TermList
+        await SetViewForPage();
+        // render
         base.OnAppearing();
 
-        await _localNotificationService.RequestNotificationPermissions();
-
+        // run startup actions, services manage own state
+        await _localNotificationService.Startup();
     }
 }
