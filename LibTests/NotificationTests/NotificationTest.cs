@@ -4,7 +4,6 @@ using Lib.Interfaces;
 using Lib.Models;
 using Lib.Services.NotificationService;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace LibTests.NotificationTests;
 
@@ -16,7 +15,7 @@ public class NotificationUpcomingTest : BaseDbTest
     public override async Task Setup()
     {
         await base.Setup();
-        _notificationDataService = Provider.GetRequiredService<INotificationDataService>();
+        _notificationDataService = Resolve<INotificationDataService>();
     }
 
     [Test]
@@ -27,8 +26,8 @@ public class NotificationUpcomingTest : BaseDbTest
         {
             NotificationRange = TimeSpan.FromDays(5)
         };
-        var notificationService = Provider.GetRequiredService<INotificationDataService>();
-        var result = await notificationService.GetUpcomingNotifications(userSetting);
+
+        var result = await _notificationDataService.GetUpcomingNotifications(userSetting);
         result.Should().BeEmpty();
     }
 
@@ -59,8 +58,7 @@ public class NotificationUpcomingTest : BaseDbTest
         {
             NotificationRange = TimeSpan.FromDays(99999)
         };
-        var notificationService = Provider.GetRequiredService<INotificationDataService>();
-        var result = await notificationService.GetUpcomingNotifications(userSetting);
+        var result = await _notificationDataService.GetUpcomingNotifications(userSetting);
         result
             .Select(x => x.Entity)
             .Should()
@@ -72,7 +70,6 @@ public class NotificationUpcomingTest : BaseDbTest
 
     private async Task EnableNotifications(TimeSpan databaseStartTimesAheadBy, TimeSpan? databaseEndTimesAheadBy = null)
     {
-        await DisableNotifications();
         await using var db = await GetDb();
         var dbSets = db.GetDbSets<INotification>();
         var today = DateTime.Now.Date;
@@ -84,7 +81,7 @@ public class NotificationUpcomingTest : BaseDbTest
             ? today.Add(databaseEndTimesAheadBy.Value)
             : start.AddDays(1);
 
-        end.Should().BeOnOrAfter(start,"Invalid test setup");
+        end.Should().BeOnOrAfter(start, "Invalid test setup");
 
         foreach (var dbSet in dbSets)
         {
@@ -98,7 +95,7 @@ public class NotificationUpcomingTest : BaseDbTest
     }
 
     [Test]
-    public async Task GetNotifications_ShouldBeInclusive()
+    public async Task GetNotifications_5DaysInAdvance_ShouldBeInclusive()
     {
         await DisableNotifications();
         await EnableNotifications(0.Days());
@@ -120,18 +117,18 @@ public class NotificationUpcomingTest : BaseDbTest
 
         var userSetting = new UserSetting
         {
-            NotificationRange = 10.Days()
+            NotificationRange = 1.Days()
         };
 
         var result = await _notificationDataService.GetUpcomingNotifications(userSetting);
-        result.Should().NotBeEmpty();
+        result.Should().BeEmpty();
     }
 
     [Test]
     public async Task GetNotifications_AllDbNotificationsInThePast_ReturnsNothing()
     {
         await DisableNotifications();
-        await EnableNotifications(1.Days());
+        await EnableNotifications(-1.Days());
 
         var userSetting = new UserSetting
         {
@@ -139,6 +136,14 @@ public class NotificationUpcomingTest : BaseDbTest
         };
 
         var result = await _notificationDataService.GetUpcomingNotifications(userSetting);
-        result.Should().NotBeEmpty();
+        result.Should().BeEmpty();
+    }
+}
+
+public class TodayProvider20200110 : ITodayProvider
+{
+    public DateTime Today()
+    {
+        return new DateTime(2020, 1, 10);
     }
 }

@@ -23,14 +23,17 @@ public interface INotificationDataService
 }
 
 [Inject(typeof(INotificationDataService))]
-public class NotificationDataService(MultiLocalDbContextFactory dbFactory, ILogger<INotificationDataService> logger)
+public class NotificationDataService(
+    MultiLocalDbContextFactory dbFactory,
+    ILogger<INotificationDataService> logger,
+    ITodayProvider todayProvider)
     : INotificationDataService
 {
     public async Task<IList<INotificationDataResult>> GetUpcomingNotifications(IUserSetting settings)
     {
         logger.LogInformation("Received request for upcoming notifications. Settings: {Settings}", settings);
 
-        var today = DateTime.Now.Date;
+        var today = todayProvider.Today();
         var timeAheadDate = today.Add(settings.NotificationRange);
 
         await using var multiDb = await dbFactory.CreateAsync<INotification>();
@@ -38,7 +41,7 @@ public class NotificationDataService(MultiLocalDbContextFactory dbFactory, ILogg
         var res = await multiDb.Query(set => set
             .Where(x => x.ShouldNotify)
             .Where(x => x.Start.Date >= today)
-            .Where(x => x.End.Date <= timeAheadDate)
+            .Where(x => x.Start.Date <= timeAheadDate)
         );
 
 
@@ -123,7 +126,7 @@ public class NotificationDataService(MultiLocalDbContextFactory dbFactory, ILogg
 
     public async Task<INotificationRatio> GetFutureNotifications()
     {
-        var today = DateTime.Now.Date;
+        var today = todayProvider.Today();
         var gteToday = Builder()
             .Start(x => x.Start.Date >= today)
             .Or(x => x.End.Date >= today);
