@@ -11,10 +11,10 @@ public interface ILocalNotificationService
 {
     Task<int> SendUpcomingNotifications();
     Task Notify(NotificationRequest request);
-    void StartListening();
-    Task RequestNotificationPermissions();
+    Task Startup();
 }
-[Inject(typeof(ILocalNotificationService),ServiceLifetime.Singleton)]
+
+[Inject(typeof(ILocalNotificationService), ServiceLifetime.Singleton)]
 public class LocalNotificationService(
     INotificationDataService notificationDataService,
     ILogger<ILocalNotificationService> logger,
@@ -25,10 +25,11 @@ public class LocalNotificationService(
 {
     private Timer? _notificationJob;
 
+    private bool DidRequestPermissions { get; set; }
+
     public async Task<int> SendUpcomingNotifications()
     {
         logger.LogInformation("Retrieving notifications.");
-
 
 
         var res = await sessionService
@@ -38,6 +39,8 @@ public class LocalNotificationService(
 
         if (res.IsError)
         {
+            var err = res.UnwrapError();
+            logger.LogWarning(err, "Failed to retrieve notifications");
             return 0;
         }
 
@@ -53,7 +56,8 @@ public class LocalNotificationService(
         var notificationRequest = CreateNotificationRequest(notifications);
 
         logger.LogInformation("Showing notification {NotificationId}: {NotificationTitle}",
-            notificationRequest.NotificationId, notificationRequest.Title
+            notificationRequest.NotificationId,
+            notificationRequest.Title
         );
         await Notify(notificationRequest);
         logger.LogInformation("Successfully sent notification.");
@@ -95,6 +99,12 @@ public class LocalNotificationService(
         logger.LogInformation("Notification sent: {Notification}", msg);
     }
 
+    public async Task Startup()
+    {
+        await RequestNotificationPermissions();
+        StartListening();
+    }
+
 
     public void StartListening()
     {
@@ -118,6 +128,12 @@ public class LocalNotificationService(
 
     public async Task RequestNotificationPermissions()
     {
+        if (DidRequestPermissions)
+        {
+            logger.LogInformation("Permissions already requested.");
+            return;
+        }
+
         if (localNotificationServiceFactory() is not { } c)
         {
             logger.LogWarning("LocalNotificationCenter.Current is null. Cannot request permissions.");
@@ -131,6 +147,8 @@ public class LocalNotificationService(
         }
 
         logger.LogInformation("Requesting notification permissions.");
-        await c.RequestNotificationPermission();
+        var response = await c.RequestNotificationPermission();
+        logger.LogInformation("Notification permission response: {Response}", response);
+        DidRequestPermissions = true;
     }
 }
