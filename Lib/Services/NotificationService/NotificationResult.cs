@@ -1,22 +1,27 @@
 using Lib.Interfaces;
+using Lib.Traits;
 
 namespace Lib.Services.NotificationService;
-
-using DatePredicate = Func<DateTime, bool>;
 
 internal record NotificationResult : INotificationDataResult
 {
     public required INotification Entity { get; init; }
+    public string ToMessage() => NotificationData.From(Entity).ToFriendlyText();
+}
 
-    internal required DatePredicate StartIsUpcoming { get; init; }
-    internal required DatePredicate EndIsUpcoming { get; init; }
+file record NotificationData : IDateTimeRangeEntity, IFriendlyText
+{
+    public string Type { get; set; } = "";
+    public int Id { get; set; }
+    public string Name { get; set; } = "";
+    public DateTime Start { get; set; }
+    public DateTime End { get; set; }
 
-    public string ToMessage() =>
-        (StartIsUpcoming(Entity.Start), EndIsUpcoming(Entity.End)) switch
-        {
-            (true, true) => $"{Entity.Name} starts soon at {Entity.Start} and ends soon at {Entity.End}",
-            (true, false) => $"{Entity.Name} starts soon at {Entity.Start}",
-            (false, true) => $"{Entity.Name} ends soon at {Entity.End}",
-            _ => ""
-        };
+    public static NotificationData From(IDateTimeRangeEntity entity)
+    {
+        var data = new NotificationData();
+        data.Assign(entity);
+        data.Type = entity.GetFriendlyType();
+        return data;
+    }
 }

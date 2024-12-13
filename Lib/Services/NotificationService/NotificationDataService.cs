@@ -33,10 +33,8 @@ public class NotificationDataService(
     {
         logger.LogInformation("Received request for upcoming notifications. Settings: {Settings}", settings);
 
-        var today = todayProvider.Today();
-        var timeAheadDate = today.Add(settings.NotificationRange);
-        var dateRange = new DateTimeRange { Start = today, End = timeAheadDate };
-        var betweenTodayAndTimeAheadDatePredicate = CreateDateRangePredicate(dateRange);
+
+        var betweenTodayAndTimeAheadDatePredicate = CreateBetweenTodayAndTimeAheadDatePredicate(settings);
 
         await using var multiDb = await dbFactory.CreateAsync<INotification>();
 
@@ -47,15 +45,17 @@ public class NotificationDataService(
         );
 
 
-        return res
+        var results = res
             .Select(INotificationDataResult (entity) => new NotificationResult
                 {
-                    Entity = entity,
-                    EndIsUpcoming = x => x.Date == today,
-                    StartIsUpcoming = x => x.Date == today
+                    Entity = entity
                 }
             )
             .ToList();
+
+        logger.LogInformation("Found {ResultsCount} notifications: {@Notifications}", results.Count, results);
+
+        return results;
     }
 
     public async Task<IList<INotification>> GetNotificationsForMonth(DateTime date)
@@ -91,6 +91,14 @@ public class NotificationDataService(
         var results = await db.Query(x => x.CountAsync());
 
         return results.Sum();
+    }
+
+    private Expression<Func<INotification, bool>> CreateBetweenTodayAndTimeAheadDatePredicate(IUserSetting settings)
+    {
+        var today = todayProvider.Today();
+        var timeAheadDate = today.Add(settings.NotificationRange);
+        var dateRange = new DateTimeRange { Start = today, End = timeAheadDate };
+        return CreateDateRangePredicate(dateRange);
     }
 
     private static Expression<Func<INotification, bool>> CreateDateRangePredicate(IDateTimeRange dateRange)
