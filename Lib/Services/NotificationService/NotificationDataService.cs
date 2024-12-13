@@ -35,13 +35,16 @@ public class NotificationDataService(
 
         var today = todayProvider.Today();
         var timeAheadDate = today.Add(settings.NotificationRange);
+        var dateRange = new DateTimeRange { Start = today, End = timeAheadDate };
+        var betweenTodayAndTimeAheadDatePredicate = CreateDateRangePredicate(dateRange);
+        betweenTodayAndTimeAheadDatePredicate.And(x => x.ShouldNotify);
 
         await using var multiDb = await dbFactory.CreateAsync<INotification>();
 
         var res = await multiDb.Query(set => set
+            .AsExpandableEFCore()
             .Where(x => x.ShouldNotify)
-            .Where(x => x.Start.Date >= today)
-            .Where(x => x.Start.Date <= timeAheadDate)
+            .Where(betweenTodayAndTimeAheadDatePredicate)
         );
 
 
@@ -95,7 +98,7 @@ public class NotificationDataService(
     {
         return Builder()
             .Start(x => x.Start.Date >= dateRange.Start.Date)
-            .And(x => x.End.Date <= dateRange.End.Date);
+            .And(x => x.Start.Date <= dateRange.End.Date);
     }
 
     public async Task<INotification?> GetNextNotificationDate(DateTime date)
