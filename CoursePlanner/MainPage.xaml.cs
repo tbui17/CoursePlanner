@@ -51,6 +51,8 @@ public partial class MainPage
             var view = _provider.GetRequiredService<TermListView>();
             await view.Model.RefreshAsync();
             SetView(view);
+            // run startup actions, services manage own state
+            await _localNotificationService.Startup();
             return;
         }
 
@@ -63,8 +65,5 @@ public partial class MainPage
         await SetViewForPage();
         // render
         base.OnAppearing();
-
-        // run startup actions, services manage own state
-        await _localNotificationService.Startup();
     }
 }
