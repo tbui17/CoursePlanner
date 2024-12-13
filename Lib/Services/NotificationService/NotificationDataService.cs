@@ -37,7 +37,6 @@ public class NotificationDataService(
         var timeAheadDate = today.Add(settings.NotificationRange);
         var dateRange = new DateTimeRange { Start = today, End = timeAheadDate };
         var betweenTodayAndTimeAheadDatePredicate = CreateDateRangePredicate(dateRange);
-        betweenTodayAndTimeAheadDatePredicate.And(x => x.ShouldNotify);
 
         await using var multiDb = await dbFactory.CreateAsync<INotification>();
 
