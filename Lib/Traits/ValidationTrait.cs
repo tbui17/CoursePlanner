@@ -9,7 +9,7 @@ public static class ValidationTrait
     public static DomainException? Validate(this IEntity entity)
     {
         return string.IsNullOrWhiteSpace(entity.Name)
-            ? new DomainException("Name cannot be null or empty")
+            ? new DomainException("Name cannot be empty or whitespace")
             : null;
     }
 
