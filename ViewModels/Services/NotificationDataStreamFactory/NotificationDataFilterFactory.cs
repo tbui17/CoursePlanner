@@ -1,5 +1,4 @@
 using Lib.Interfaces;
-using Lib.Models;
 using Lib.Utils;
 using ViewModels.Domain.NotificationDataViewModel;
 
@@ -19,17 +18,7 @@ public class NotificationDataFilterFactory(IFilterData data)
     public IList<Func<INotification, bool>> CreateFilters() =>
     [
         n => n.Name.Contains(data.FilterText, StringComparison.CurrentCultureIgnoreCase),
-        n =>
-        {
-            if (n is Assessment assessment)
-            {
-                return $"{assessment.Type} {nameof(Assessment)}".Contains(data.TypeFilter,
-                    StringComparison.CurrentCultureIgnoreCase
-                );
-            }
-
-            return n.GetType().Name.Contains(data.TypeFilter, StringComparison.CurrentCultureIgnoreCase);
-        },
+        n => n.GetFriendlyType().Contains(data.TypeFilter, StringComparison.CurrentCultureIgnoreCase),
         CreateShouldNotifyFilter(data.NotificationSelectedIndex)
     ];
 

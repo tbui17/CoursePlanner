@@ -31,6 +31,8 @@ public class Assessment : IAssessmentForm
     public bool ShouldNotify { get; set; }
 
     public int CourseId { get; set; }
+
+    public string GetFriendlyType() => $"{Type} Assessment";
 }
 
 public static class AssessmentExtensions
