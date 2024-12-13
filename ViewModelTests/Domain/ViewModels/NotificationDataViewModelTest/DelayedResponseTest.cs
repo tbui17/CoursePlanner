@@ -1,5 +1,6 @@
 using System.Reactive.Linq;
 using FluentAssertions;
+using FluentAssertions.Extensions;
 using Lib.Interfaces;
 using Lib.Models;
 using Lib.Services.NotificationService;
@@ -28,16 +29,16 @@ public class DelayedResponseTest : BaseTest
     {
         var response1 = new Course();
         var response2 = new Assessment();
-        var fake = new DataServiceFake
+        var stub = new DataServiceStub
         {
             Response1 = response1,
             Response2 = response2
         };
 
         var model = new NotificationDataViewModel(
-            new NotificationFilterService(
-                new NotificationDataStreamService(
-                    notificationDataService: fake,
+            notificationFilterService: new NotificationFilterService(
+                service: new NotificationDataStreamService(
+                    notificationDataService: stub,
                     logger: Resolve<ILogger<NotificationDataStreamService>>(),
                     completeInputModelFactory: Resolve<PageResultFactory>()
                 )
@@ -48,30 +49,37 @@ public class DelayedResponseTest : BaseTest
         );
 
         // initial load
-        await fake.ShouldEventuallySatisfy(x => x.ModelHasInitialized.Should().BeTrue());
+        await stub.ShouldEventuallySatisfy(x => x.ModelReceivedOneResponse.Should().BeTrue());
 
         var pageResult = model
             .WhenAnyValue(x => x.PageResult);
 
-        // model should never have response1 in its data
-        pageResult
+        // listen for response1
+        var response1Data = pageResult
             .Where(x => x.CurrentPageData.Contains(response1))
-            .Subscribe(x => x.CurrentPageData.Should().NotContain(response1));
+            .FirstAsync();
 
-        // when response2 is set, flag that it happened
-        pageResult
+        // model should never have response1 in its data
+        response1Data.Subscribe(_ => throw new AssertionException("Response1 should not be in the data"));
+
+        // listen for response2
+        var response2Data = pageResult
             .Where(x => x.CurrentPageData.Contains(response2))
-            .Subscribe(_ => fake.DidSetResponse2 = true);
+            .FirstAsync();
 
         await SetEndDateTwice();
 
-        await fake.ShouldEventuallySatisfy(x => x.ModelReceivedMultipleRequests.Should().BeTrue());
-        await fake.ShouldEventuallySatisfy(x => x.DidSetResponse2.Should().BeTrue());
-        await fake.ShouldEventuallySatisfy(x => x.DidSetResponse1.Should().BeTrue());
+        // wait for response2 to be exposed in PageResult
+        await response2Data;
 
-        await Task.Delay(2000);
+        // wait for stub to return response1
+        await stub.ShouldEventuallySatisfy(x => x.DidSetResponse1.Should().BeTrue());
 
-        model.PageResult.CurrentPageData.Should().NotContain(response1);
+        // give 2 seconds for model to receive data from stub, it should reject the data and never expose it in PageResult
+        await response1Data
+            .Invoking(async x => await x.Timeout(2.Seconds()))
+            .Should()
+            .ThrowWithinAsync<TimeoutException>(3.Seconds());
 
         return;
 
@@ -90,7 +98,7 @@ public class DelayedResponseTest : BaseTest
     public async Task DateChange_Response1Delayed_DoesResolve()
     {
         var response1 = new Course();
-        var fake = new DataServiceFake
+        var stub = new DataServiceStub
         {
             Response1 = response1,
             Response2 = new()
@@ -99,7 +107,7 @@ public class DelayedResponseTest : BaseTest
         var model = new NotificationDataViewModel(
             new NotificationFilterService(
                 new NotificationDataStreamService(
-                    notificationDataService: fake,
+                    notificationDataService: stub,
                     logger: Resolve<ILogger<NotificationDataStreamService>>(),
                     completeInputModelFactory: Resolve<PageResultFactory>()
                 )
@@ -110,7 +118,7 @@ public class DelayedResponseTest : BaseTest
         );
 
         // initial load
-        await fake.ShouldEventuallySatisfy(x => x.ModelHasInitialized.Should().BeTrue());
+        await stub.ShouldEventuallySatisfy(x => x.ModelReceivedOneResponse.Should().BeTrue());
         var date1 = new DateTime(2030, 1, 1);
         model.End = date1;
 
@@ -118,17 +126,15 @@ public class DelayedResponseTest : BaseTest
     }
 }
 
-file class DataServiceFake : INotificationDataService
+file class DataServiceStub : INotificationDataService
 {
     public int Count { get; set; }
     public required Course Response1 { get; set; }
     public required Assessment Response2 { get; set; }
     public bool DidSetResponse1 { get; set; }
-    public bool DidSetResponse2 { get; set; }
 
-    public bool ModelHasInitialized => Count == 1;
+    public bool ModelReceivedOneResponse => Count == 1;
     public bool ModelHasNotInitialized => Count == 0;
-    public bool ModelReceivedMultipleRequests => Count > 1;
 
     public Task<IList<INotificationDataResult>> GetUpcomingNotifications(IUserSetting settings)
     {
@@ -148,7 +154,7 @@ file class DataServiceFake : INotificationDataService
             return [];
         }
 
-        if (ModelHasInitialized)
+        if (ModelReceivedOneResponse)
         {
             Count++;
             await Task.Delay(3000);
