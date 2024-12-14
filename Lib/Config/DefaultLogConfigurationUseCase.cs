@@ -7,10 +7,21 @@ namespace Lib.Config;
 
 public class DefaultLogConfigurationUseCase : ILoggingUseCase
 {
-    public LoggerConfiguration Configuration { get; set; } = new();
-
     public const string LogTemplate =
         "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}";
+
+    public static readonly FileSinkOptions FileSinkOptions = new()
+    {
+        Path = Path.Combine("logs", "logs.json"),
+        RestrictedToMinimumLevel = LogEventLevel.Information,
+        RollingInterval = RollingInterval.Infinite,
+        RetainedFileCountLimit = 3,
+        RollOnFileSizeLimit = true,
+        FlushToDiskInterval = TimeSpan.FromSeconds(60),
+        Buffered = false
+    };
+
+    public LoggerConfiguration Configuration { get; set; } = new();
 
 
     public void SetMinimumLogLevel()
@@ -24,11 +35,6 @@ public class DefaultLogConfigurationUseCase : ILoggingUseCase
         WriteConsole();
     }
 
-    public void WriteConsole()
-    {
-        Configuration.WriteTo.Console(new MessageTemplateTextFormatter(LogTemplate), LogEventLevel.Information);
-    }
-
     public void AddEnrichments()
     {
         Configuration
@@ -39,18 +45,12 @@ public class DefaultLogConfigurationUseCase : ILoggingUseCase
             .Enrich.With(new StackTraceEnricher());
     }
 
-    public static readonly FileSinkOptions FileSinkOptions = new()
-    {
-        Path = Path.Combine("logs", "logs.json"),
-        RestrictedToMinimumLevel = LogEventLevel.Information,
-        RollingInterval = RollingInterval.Infinite,
-        RetainedFileCountLimit = 3,
-        RollOnFileSizeLimit = true,
-        FlushToDiskInterval = TimeSpan.FromSeconds(1),
-        Buffered = false
-    };
-
     public void AddLogFilters()
     {
+    }
+
+    public void WriteConsole()
+    {
+        Configuration.WriteTo.Console(new MessageTemplateTextFormatter(LogTemplate), LogEventLevel.Information);
     }
 }

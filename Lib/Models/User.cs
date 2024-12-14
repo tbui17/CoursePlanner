@@ -3,19 +3,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Lib.Models;
 
-public interface ILogin
-{
-    public string Username { get; }
-    public string Password { get; }
-}
-
 [Index(nameof(Username), IsUnique = true)]
-public class User : ILogin, IEntity
+public class User : ILogin, IEntity, IUserDetail
 {
+    public byte[] Salt { get; set; } = [];
+    public UserSetting? UserSetting { get; set; }
     public int Id { get; set; }
-
-    public string Username { get; set; } = "";
-    public string Password { get; set; } = "";
 
     string IEntity.Name
     {
@@ -23,12 +16,18 @@ public class User : ILogin, IEntity
         set => Username = value;
     }
 
-    public UserSetting CreateUserSetting()
+    public string Username { get; set; } = "";
+    public string Password { get; set; } = "";
+
+    public void SetUserSetting(UserSetting setting)
     {
-        return new UserSetting()
-        {
-            UserId = Id,
-            User = this,
-        };
+        UserSetting = setting;
+        setting.User = this;
+        setting.UserId = Id;
+    }
+
+    public void SetDefaultUserSetting()
+    {
+        SetUserSetting(UserSetting.DefaultUserSetting());
     }
 }

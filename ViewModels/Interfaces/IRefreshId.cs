@@ -2,10 +2,10 @@ namespace ViewModels.Interfaces;
 
 public interface IRefresh
 {
-    Task RefreshAsync();
+    public Task RefreshAsync();
 }
 
 public interface IRefreshId : IRefresh
 {
-    Task Init(int id);
+    public Task Init(int id);
 }

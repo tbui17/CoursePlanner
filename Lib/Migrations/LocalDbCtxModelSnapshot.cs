@@ -175,6 +175,10 @@ namespace Lib.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<byte[]>("Salt")
+                        .IsRequired()
+                        .HasColumnType("BLOB");
+
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasColumnType("TEXT")
@@ -202,7 +206,8 @@ namespace Lib.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("UserSettings");
                 });
@@ -248,8 +253,8 @@ namespace Lib.Migrations
             modelBuilder.Entity("Lib.Models.UserSetting", b =>
                 {
                     b.HasOne("Lib.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
+                        .WithOne("UserSetting")
+                        .HasForeignKey("Lib.Models.UserSetting", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -271,6 +276,11 @@ namespace Lib.Migrations
             modelBuilder.Entity("Lib.Models.Term", b =>
                 {
                     b.Navigation("Courses");
+                });
+
+            modelBuilder.Entity("Lib.Models.User", b =>
+                {
+                    b.Navigation("UserSetting");
                 });
 #pragma warning restore 612, 618
         }

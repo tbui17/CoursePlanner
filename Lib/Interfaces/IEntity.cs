@@ -1,6 +1,6 @@
 ﻿namespace Lib.Interfaces;
 
-public interface IEntity : IDatabaseEntry
+public interface IEntity : IDatabaseEntry, IFriendlyType
 {
-    string Name { get; set; }
+    public string Name { get; set; }
 }

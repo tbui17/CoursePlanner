@@ -1,4 +1,3 @@
-using System.Collections.ObjectModel;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Windows.Input;
@@ -14,6 +13,24 @@ namespace ViewModels.Domain.NotificationDataViewModel;
 
 partial class NotificationDataViewModel
 {
+    private readonly Subject<DateTime> _endDateOverride = new();
+
+    private readonly ObservableAsPropertyHelper<IPageResult> _pageResult;
+
+    private readonly Subject<DateTime> _startDateOverride = new();
+
+
+    public IObservable<DateTime> StartDateObservable { get; }
+    public IObservable<DateTime> EndDateObservable { get; }
+    public IPageResult PageResult => _pageResult.Value;
+
+    public IList<string> Types { get; }
+
+    public ICommand ChangePageCommand { get; }
+    public ICommand ClearCommand { get; }
+    public ICommand NextCommand { get; }
+    public ICommand PreviousCommand { get; }
+
     [Reactive]
     public string FilterText { get; set; }
 
@@ -29,7 +46,7 @@ partial class NotificationDataViewModel
 
     public IList<string> NotificationOptions { get; } = new List<string>
     {
-        "All", "Notifications Enabled", "Notifications Disabled"
+        "All", "True", "False"
     };
 
     [Reactive]
@@ -40,27 +57,34 @@ partial class NotificationDataViewModel
 
     [Reactive]
     public int PageSize { get; set; }
+}
 
-    private readonly Subject<DateTime> _startDateOverride = new();
-    private readonly Subject<DateTime> _endDateOverride = new();
-
-
-    public IObservable<DateTime> StartDateObservable { get; }
-    public IObservable<DateTime> EndDateObservable { get; }
-
-    private readonly ObservableAsPropertyHelper<IPageResult> _pageResult;
-    public IPageResult PageResult => _pageResult.Value;
-
-    public ReadOnlyObservableCollection<string> Types { get; }
-
-    public ICommand ChangePageCommand { get; }
-    public ICommand ClearCommand { get; }
-    public ICommand NextCommand { get; }
-    public ICommand PreviousCommand { get; }
+public interface INotificationDataViewModel
+{
+    string FilterText { get; set; }
+    DateTime Start { get; }
+    DateTime End { get; }
+    string TypeFilter { get; set; }
+    IList<string> NotificationOptions { get; }
+    ShouldNotifyIndex SelectedNotificationOptionIndex { get; set; }
+    int CurrentPage { get; set; }
+    int PageSize { get; set; }
+    IObservable<DateTime> StartDateObservable { get; }
+    IObservable<DateTime> EndDateObservable { get; }
+    IPageResult PageResult { get; }
+    IList<string> Types { get; }
+    ICommand ChangePageCommand { get; }
+    ICommand ClearCommand { get; }
+    ICommand NextCommand { get; }
+    ICommand PreviousCommand { get; }
+    void ChangeEndDate(DateChangedEventArgs args);
+    void ChangeStartDate(DateChangedEventArgs dateChangedEventArgs);
+    Task RefreshAsync();
 }
 
 [Inject]
-public partial class NotificationDataViewModel : ReactiveObject, INotificationFilter, IRefresh
+public partial class NotificationDataViewModel : ReactiveObject, INotificationFilter, IRefresh,
+    INotificationDataViewModel
 {
     private readonly ILogger<NotificationDataViewModel> _logger;
     private readonly INotificationFilterService _notificationFilterService;
@@ -88,7 +112,7 @@ public partial class NotificationDataViewModel : ReactiveObject, INotificationFi
         Start = dateRange.Start;
         End = dateRange.End;
 
-        Types = autocompleteService.BindSubscribe();
+        Types = autocompleteService.GetNotificationTypes();
 
         #endregion
 
@@ -98,7 +122,7 @@ public partial class NotificationDataViewModel : ReactiveObject, INotificationFi
         _pageResult = notificationFilterService
             .Connect(this)
             .Do(x => _logger.LogInformation("Page result {PageResult}", x))
-            .ToProperty(this, x => x.PageResult, new EmptyPageResult(),scheduler:RxApp.MainThreadScheduler);
+            .ToProperty(this, x => x.PageResult, new EmptyPageResult(), scheduler: RxApp.MainThreadScheduler);
 
 
         notificationFilterService.CurrentPageOverridden.Subscribe(x => CurrentPage = x);
@@ -143,6 +167,35 @@ public partial class NotificationDataViewModel : ReactiveObject, INotificationFi
         #endregion
     }
 
+    public void ChangeEndDate(DateChangedEventArgs args)
+    {
+        if (args.OldDate == End && args.NewDate < Start)
+        {
+            _endDateOverride.OnNext(Start);
+            return;
+        }
+
+        ChangeEndDate(args.NewDate);
+    }
+
+    public void ChangeStartDate(DateChangedEventArgs dateChangedEventArgs)
+    {
+        if (dateChangedEventArgs.OldDate == Start && dateChangedEventArgs.NewDate > End)
+        {
+            _startDateOverride.OnNext(End);
+            return;
+        }
+
+        ChangeStartDate(dateChangedEventArgs.NewDate);
+    }
+
+    public Task RefreshAsync()
+    {
+        using var _ = _logger.MethodScope();
+        Refresh();
+        return Task.CompletedTask;
+    }
+
     private void ChangePage(int page)
     {
         _logger.LogDebug("Received {Page}", page);
@@ -169,17 +222,6 @@ public partial class NotificationDataViewModel : ReactiveObject, INotificationFi
         End = newEnd;
     }
 
-    public void ChangeEndDate(DateChangedEventArgs args)
-    {
-        if (args.OldDate == End && args.NewDate < Start)
-        {
-            _endDateOverride.OnNext(Start);
-            return;
-        }
-
-        ChangeEndDate(args.NewDate);
-    }
-
     internal void ChangeStartDate(DateTime newStart)
     {
         using var _ = _logger.MethodScope();
@@ -192,27 +234,9 @@ public partial class NotificationDataViewModel : ReactiveObject, INotificationFi
         Start = newStart;
     }
 
-    public void ChangeStartDate(DateChangedEventArgs dateChangedEventArgs)
-    {
-        if (dateChangedEventArgs.OldDate == Start && dateChangedEventArgs.NewDate > End)
-        {
-            _startDateOverride.OnNext(End);
-            return;
-        }
-
-        ChangeStartDate(dateChangedEventArgs.NewDate);
-    }
-
     private void Refresh()
     {
         _logger.LogDebug("Refreshing notification data");
         _notificationFilterService.Refresh();
-    }
-
-    public Task RefreshAsync()
-    {
-        using var _ = _logger.MethodScope();
-        Refresh();
-        return Task.CompletedTask;
     }
 }

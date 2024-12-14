@@ -7,7 +7,17 @@
 /Data/obj/Debug/net8.0/Data.GlobalUsings.g.cs
 obj/
 bin/
+*.keystore*
+*.keystore.*
+*.secrets
 .*
+!.nuke
+!.nuke/temp
+**/*.tfstate*
+output/*
+output*.xml
+Infrastructure/secrets.auto.tfvars
+**/planfile
 !.github
 CoursePlanner.sln.DotSettings.user
 /packages/

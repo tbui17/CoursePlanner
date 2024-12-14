@@ -2,7 +2,7 @@ namespace Lib.Interfaces;
 
 public interface IDatabaseEntry
 {
-    int Id { get; set; }
+    public int Id { get; set; }
 }
 
 public static class DatabaseEntryExtensions

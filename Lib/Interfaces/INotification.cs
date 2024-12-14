@@ -1,6 +1,6 @@
 ﻿namespace Lib.Interfaces;
 
-public interface INotification : IEntity, IDateTimeRange
+public interface INotification : IDateTimeRangeEntity
 {
     bool ShouldNotify { get; }
 }

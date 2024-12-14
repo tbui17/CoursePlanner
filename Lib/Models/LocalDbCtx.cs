@@ -43,11 +43,13 @@ public class LocalDbCtx : DbContext
             .HasForeignKey(x => x.InstructorId)
             .OnDelete(DeleteBehavior.SetNull);
 
-        modelBuilder.Entity<User>()
+        modelBuilder
+            .Entity<User>()
             .Property(x => x.Username)
             .UseCollation(Collation.CaseInsensitive);
 
-        modelBuilder.Entity<UserSetting>()
+        modelBuilder
+            .Entity<UserSetting>()
             .Property(x => x.NotificationRange)
             .HasConversion(
                 x => x.Ticks,
@@ -55,21 +57,23 @@ public class LocalDbCtx : DbContext
             );
 
 
-        var dateTimeEntities = modelBuilder.Model.GetEntityTypes()
-            .Where(x => typeof(IDateTimeEntity).IsAssignableFrom(x.ClrType));
+        var dateTimeEntities = modelBuilder
+            .Model.GetEntityTypes()
+            .Where(x => typeof(IDateTimeRangeEntity).IsAssignableFrom(x.ClrType));
 
 
         foreach (var entity in dateTimeEntities)
         {
             modelBuilder
                 .Entity(entity.ClrType)
-                .HasIndex(nameof(IDateTimeEntity.Start), nameof(IDateTimeEntity.End));
+                .HasIndex(nameof(IDateTimeRangeEntity.Start), nameof(IDateTimeRangeEntity.End));
         }
     }
 
 
     public IEnumerable<IQueryable<T>> GetDbSets<T>() where T : class =>
-        DbContextUtil.GetDbSets<LocalDbCtx, T>()
+        DbContextUtil
+            .GetDbSets<LocalDbCtx, T>()
             .Select(x => x.GetValue(this))
             .Cast<IQueryable<T>>();
 }

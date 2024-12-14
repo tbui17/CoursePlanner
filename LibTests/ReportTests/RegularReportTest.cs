@@ -45,7 +45,7 @@ public class RegularReportTest
 
 
     [TestCaseSource(nameof(TestData))]
-    public void PropertyTest(List<IDateTimeEntity> entities, DateTime reference)
+    public void Properties_Pbt_ShouldBeWithinConstraints(List<IDateTimeRangeEntity> entities, DateTime reference)
     {
         var fac = new DurationReportFactory
         {
@@ -54,24 +54,29 @@ public class RegularReportTest
         };
 
         var report = fac.ToData();
-        new ReportBoundaryUtil(report).AssertIDurationBoundaries();
+        new ReportBoundaryUtil(report).AssertBoundaries();
     }
 
     private static IEnumerable<TestCaseData> TestData()
     {
+        // "today" - 2010
         var reference = new DateTime(2010, 1, 1);
 
         var faker = new Faker<Course>()
             .RuleFor(x => x.Start, f => f.Date.Between(new DateTime(2000, 1, 1), new DateTime(2020, 1, 1)))
-            .RuleFor(x => x.End, (f, term) => f.Date.Between(term.Start, new DateTime(2020, 12, 1)))
+            // start date always <= end date
+            .RuleFor(x => x.End, (f, x) => f.Date.Between(x.Start, new DateTime(2020, 12, 1)))
+            // irrelevant but failed tests involving these will indicate unexpected interaction between the factory and these fields
             .RuleFor(x => x.ShouldNotify, f => f.Random.Bool())
             .RuleFor(x => x.Name, f => f.Lorem.Sentences(3));
 
 
-        return Enumerable.Range(0, 10)
+        // 100 tests with 100 items per run
+        return Enumerable
+            .Range(0, 100)
             .Select(_ =>
                 {
-                    var courses = faker.Generate(100).Cast<IDateTimeEntity>().ToList();
+                    var courses = faker.Generate(100).Cast<IDateTimeRangeEntity>().ToList();
 
 
                     return new TestCaseData(courses, reference);

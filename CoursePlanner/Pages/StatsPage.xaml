@@ -2,9 +2,7 @@
 
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:controls="clr-namespace:CoursePlanner.Controls"
              xmlns:domain="clr-namespace:ViewModels.Domain;assembly=ViewModels"
-             xmlns:interfaces="clr-namespace:Lib.Interfaces;assembly=Lib"
              x:DataType="domain:StatsViewModel"
              Title="Stats"
              x:Class="CoursePlanner.Pages.StatsPage">
@@ -19,11 +17,8 @@
                 </VerticalStackLayout.Resources>
 
 
-
                 <CollectionView x:Name="CollectionViewInstance"
-                                SelectionMode="None"
-                                MaximumHeightRequest="300"/>
-
+                                SelectionMode="None" />
 
 
             </VerticalStackLayout>

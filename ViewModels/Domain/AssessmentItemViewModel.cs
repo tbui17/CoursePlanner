@@ -12,15 +12,8 @@ namespace ViewModels.Domain;
 public partial class AssessmentItemViewModel
     : ObservableObject, IAssessmentForm
 {
-    public AssessmentItemViewModel()
-    {
-
-    }
-
-    public AssessmentItemViewModel(Assessment assessment)
-    {
-        this.SetFromAssessmentForm(assessment);
-    }
+    [ObservableProperty]
+    private DateTime _end;
 
     [ObservableProperty]
     private int _id;
@@ -29,16 +22,22 @@ public partial class AssessmentItemViewModel
     private string _name = "";
 
     [ObservableProperty]
-    private DateTime _start;
-
-    [ObservableProperty]
-    private DateTime _end;
+    private string _selectedAssessmentType = Assessment.DefaultType;
 
     [ObservableProperty]
     private bool _shouldNotify;
 
     [ObservableProperty]
-    private string _selectedAssessmentType = Assessment.DefaultType;
+    private DateTime _start;
+
+    public AssessmentItemViewModel()
+    {
+    }
+
+    public AssessmentItemViewModel(Assessment assessment)
+    {
+        this.Assign(assessment);
+    }
 
     public ObservableCollection<string> AssessmentTypes { get; } = Assessment.Types.ToObservableCollection();
 

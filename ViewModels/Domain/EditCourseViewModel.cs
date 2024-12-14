@@ -19,7 +19,8 @@ public partial class EditCourseViewModel(
     IAppService appService)
     : ObservableObject, ICourseField, IRefreshId
 {
-    public ObservableCollection<string> Statuses { get; } = Course.Statuses.ToObservableCollection();
+    [ObservableProperty]
+    private DateTime _end;
 
     [ObservableProperty]
     private int _id;
@@ -28,48 +29,20 @@ public partial class EditCourseViewModel(
     private string _name = "";
 
     [ObservableProperty]
-    private DateTime _start;
-
-    [ObservableProperty]
-    private DateTime _end;
+    private string _selectedStatus = Course.Statuses.First();
 
     [ObservableProperty]
     private bool _shouldNotify;
 
     [ObservableProperty]
-    private string _selectedStatus = Course.Statuses.First();
+    private DateTime _start;
+
+    public ObservableCollection<string> Statuses { get; } = Course.Statuses.ToObservableCollection();
 
     string ICourseField.Status
     {
         get => SelectedStatus;
         set => SelectedStatus = value;
-    }
-
-
-    [RelayCommand]
-    public async Task SaveAsync()
-    {
-        if (this.ValidateNameAndDates() is { } exc)
-        {
-            await appService.ShowErrorAsync(exc.Message);
-            return;
-        }
-
-        await using var db = await factory.CreateDbContextAsync();
-        var course = await db
-            .Courses
-            .AsTracking()
-            .FirstAsync(x => x.Id == Id);
-
-        course.SetFromCourseField(this);
-        await db.SaveChangesAsync();
-        await BackAsync();
-    }
-
-    [RelayCommand]
-    public async Task BackAsync()
-    {
-        await navService.PopAsync();
     }
 
     public async Task Init(int id)
@@ -81,11 +54,38 @@ public partial class EditCourseViewModel(
                          .FirstOrDefaultAsync(x => x.Id == id) ??
                      new();
 
-        this.SetFromCourseField(course);
+        this.Assign(course);
     }
 
     public async Task RefreshAsync()
     {
         await Init(Id);
+    }
+
+
+    [RelayCommand]
+    public async Task SaveAsync()
+    {
+        if (this.Validate() is { } exc)
+        {
+            await appService.ShowErrorAsync(exc.Message);
+            return;
+        }
+
+        await using var db = await factory.CreateDbContextAsync();
+        var course = await db
+            .Courses
+            .AsTracking()
+            .FirstAsync(x => x.Id == Id);
+
+        course.Assign(this);
+        await db.SaveChangesAsync();
+        await BackAsync();
+    }
+
+    [RelayCommand]
+    public async Task BackAsync()
+    {
+        await navService.PopAsync();
     }
 }

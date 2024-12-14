@@ -2,12 +2,17 @@ using Lib.Interfaces;
 
 namespace Lib.Models;
 
-
-public class UserSetting : IUserSetting
+public class UserSetting : IUserSettingForm
 {
     public int Id { get; set; }
-    public int UserId { get; set; }
     public User User { get; set; } = null!;
-    public TimeSpan NotificationRange { get; set; }
 
+    public static IUserSetting DefaultUserSettingValue => DefaultUserSetting();
+    public TimeSpan NotificationRange { get; set; }
+    public int UserId { get; set; }
+
+    public static UserSetting DefaultUserSetting() => new()
+    {
+        NotificationRange = TimeSpan.FromDays(60)
+    };
 }

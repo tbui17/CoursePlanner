@@ -6,23 +6,25 @@ namespace Lib.Traits;
 
 public static class ValidationTrait
 {
-    public static DomainException? ValidateName<T>(this T entity) where T : IEntity
+    public static DomainException? Validate(this IEntity entity)
     {
         return string.IsNullOrWhiteSpace(entity.Name)
-            ? new DomainException("Name cannot be null or empty")
+            ? new DomainException("Name cannot be empty or whitespace")
             : null;
     }
 
-    private static DomainException? ValidateDates<T>(this T dateTimeRange) where T : IDateTimeRange
+    private static DomainException? Validate(this IDateTimeRange dateTimeRange)
     {
         return dateTimeRange.Start >= dateTimeRange.End
             ? new DomainException("Start must be before end")
             : null;
     }
 
-    public static DomainException? ValidateNameAndDates<T>(this T entity) where T : IEntity, IDateTimeRange
+    public static DomainException? Validate(this IDateTimeRangeEntity rangeEntity)
     {
-        return AggregateValidation(entity.ValidateName(), entity.ValidateDates());
+        return AggregateValidationExceptions(((IEntity)rangeEntity).Validate(),
+            ((IDateTimeRange)rangeEntity).Validate()
+        );
     }
 
     public static DomainException? ValidateUnique<T, T2>(this IReadOnlyCollection<T> entities, Func<T, T2> selector)
@@ -32,7 +34,7 @@ public static class ValidationTrait
             : null;
     }
 
-    private static DomainException? AggregateValidation(params DomainException?[] exceptions)
+    private static DomainException? AggregateValidationExceptions(params DomainException?[] exceptions)
     {
         var res = exceptions
             .WhereNotNull()

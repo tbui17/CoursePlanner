@@ -9,7 +9,7 @@ public interface IAssessmentType
 
 public static class AssessmentTypeExtensions
 {
-    public static string OppositeType(this IAssessmentType item) => item.Type switch
+    public static string GetOppositeType(this IAssessmentType item) => item.Type switch
     {
         Assessment.Performance => Assessment.Objective,
         Assessment.Objective => Assessment.Performance,
@@ -18,14 +18,14 @@ public static class AssessmentTypeExtensions
 
     public static void SetOppositeType(this IAssessmentType item)
     {
-        item.Type = item.OppositeType();
+        item.Type = item.GetOppositeType();
     }
 
     public static void EnsureOppositeType(this IAssessmentType item, IAssessmentType other)
     {
         if (item.Type == other.Type)
         {
-            item.Type = item.OppositeType();
+            item.SetOppositeType();
         }
     }
 }

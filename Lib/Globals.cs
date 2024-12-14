@@ -2,6 +2,6 @@
 
 public static class Globals
 {
-    public static DateTime DefaultStart() => DateTime.Now;
-    public static DateTime DefaultEnd() => DateTime.Now.AddDays(1);
+    public static DateTime DefaultStart() => DateTime.Now.Date;
+    public static DateTime DefaultEnd() => DefaultStart().AddDays(1);
 }

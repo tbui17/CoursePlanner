@@ -15,9 +15,9 @@ namespace ViewModels.Domain;
 
 public interface IInstructorFormViewModel : IContact, IRefreshId
 {
-    Task SaveAsync();
     IAsyncRelayCommand SaveCommand { get; }
     IAsyncRelayCommand BackCommand { get; }
+    Task SaveAsync();
     event PropertyChangedEventHandler? PropertyChanged;
     event PropertyChangingEventHandler? PropertyChanging;
 }
@@ -30,7 +30,7 @@ public partial class InstructorFormViewModel(
     : ObservableObject, IInstructorFormViewModel
 {
     [ObservableProperty]
-    private string _title = "Instructor Form";
+    private string _email = "";
 
     [ObservableProperty]
     private int _id;
@@ -39,10 +39,10 @@ public partial class InstructorFormViewModel(
     private string _name = "";
 
     [ObservableProperty]
-    private string _email = "";
+    private string _phone = "";
 
     [ObservableProperty]
-    private string _phone = "";
+    private string _title = "Instructor Form";
 
     public Func<Instructor, Task<DomainException?>> InstructorPersistence { get; set; } =
         _ => Task.FromResult<DomainException?>(null);
@@ -50,8 +50,9 @@ public partial class InstructorFormViewModel(
     [RelayCommand]
     public async Task SaveAsync()
     {
-
-        var message = await InstructorPersistence(new Instructor().SetFromContact(this));
+        var instructor = new Instructor();
+        instructor.Assign(this);
+        var message = await InstructorPersistence(instructor);
 
         if (message is not null)
         {
@@ -60,12 +61,6 @@ public partial class InstructorFormViewModel(
         }
 
         await BackAsync();
-    }
-
-    [RelayCommand]
-    public async Task BackAsync()
-    {
-        await navService.PopAsync();
     }
 
     public async Task Init(int id)
@@ -77,11 +72,17 @@ public partial class InstructorFormViewModel(
                              .FirstOrDefaultAsync(x => x.Id == id) ??
                          new();
 
-        this.SetFromContact(instructor);
+        this.Assign(instructor);
     }
 
     public async Task RefreshAsync()
     {
         await Init(Id);
+    }
+
+    [RelayCommand]
+    public async Task BackAsync()
+    {
+        await navService.PopAsync();
     }
 }

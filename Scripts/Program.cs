@@ -1,3 +1,3 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿using Scripts;
 
-Console.WriteLine("Hello, World!");
+await new Application().ExecuteAsync();

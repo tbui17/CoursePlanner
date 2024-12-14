@@ -1,8 +1,7 @@
 ﻿namespace Lib.Interfaces;
 
-public interface IDateTimeEntity : IEntity, IDateTimeRange
+public interface IDateTimeRangeEntity : IEntity, IDateTimeRange
 {
     new DateTime Start { get; set; }
     new DateTime End { get; set; }
-
 }

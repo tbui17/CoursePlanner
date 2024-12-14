@@ -27,9 +27,13 @@ public class NotificationCardTemplate(INavigationService navigationService, IApp
                     Spacing = 5,
                     Children =
                     {
-                        new Label().Bind(nameof(INotification.Name), stringFormat: "Name: {0}"),
-                        new Label().Bind(nameof(INotification.Start), stringFormat: "Start: {0}"),
-                        new Label().Bind(nameof(INotification.End), stringFormat: "End: {0}"),
+                        new Label().Bind(nameof(INotification.Name),
+                            stringFormat: "Name: {0}"
+                        ),
+                        new Label().Bind(nameof(INotification.Start),
+                            stringFormat: "Start: {0:MM/dd/yyyy}"
+                        ),
+                        new Label().Bind(nameof(INotification.End), stringFormat: "End: {0:MM/dd/yyyy}"),
                         new Label().Bind(nameof(INotification.ShouldNotify), stringFormat: "Notifications: {0}"),
                         new Label().Bind(stringFormat: "Type: {0}", converter: new TypeToStringConverter()),
                         new Button { Command = command, Text = "Details" }.Bind(Button.CommandParameterProperty).Left(),
