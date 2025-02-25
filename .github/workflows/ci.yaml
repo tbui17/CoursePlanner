@@ -5,7 +5,7 @@ on:
   pull_request:
     branches:
       - current
-#
+
 env:
   DOTNET_VERSION: 8.0
 

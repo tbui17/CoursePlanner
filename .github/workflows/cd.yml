@@ -3,7 +3,7 @@ name: cd.yml
 on:
   push:
     branches:
-      - main
+      - "refactor-pipeline"
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -11,16 +11,18 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       KEY_URI: ${{ secrets.KEY_URI }}
-      AzureKeyVaultConfiguration--Uri: ${{ secrets.KEY_URI }}
     steps:
       - uses: actions/checkout@v4
-      - name: Azure login
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      # - name: Azure login
+      #   uses: azure/login@v2
+      #   with:
+      #     creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: Full Setup
         uses: ./actions/full-setup-dotnet-maui
       - name: Cache Nuget
         uses: ./actions/cache-nuget
+      # - name: Publish and upload
+      #   run: dotnet run --project Scripts/Scripts.csproj -- publish_upload
       - name: Publish and upload
-        run: dotnet run --project Scripts/Scripts.csproj -- publish_upload
+        shell: pwsh
+        run: "./publish.ps1"
