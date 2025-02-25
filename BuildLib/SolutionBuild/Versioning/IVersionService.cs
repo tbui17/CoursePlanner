@@ -64,10 +64,6 @@ public class VersionService(
 
         ctx.Validate();
     }
-
-    public async Task IncrementVersion()
-    {
-    }
 }
 
 file record struct AppVersionValidationContext(
