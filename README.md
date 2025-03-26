@@ -35,4 +35,4 @@ dotnet build
 
 - The `BuildLib` project contains modules to fetch configurations and keys from the organization's Azure Key Vault and
   build the project using them before uploading it to the organization's Google Play project
-- The infrastructure code (i.e. Terraform) is in a [different repository](https://www.github.com/tbui17/courseplanner_tf).
+- The infrastructure code (i.e. Terraform) is in a private repository.
